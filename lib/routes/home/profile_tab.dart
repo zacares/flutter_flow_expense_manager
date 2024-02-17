@@ -71,26 +71,6 @@ class _ProfileTabState extends State<ProfileTab> {
             leading: const Icon(SimpleIcons.github),
             onTap: () => openUrl(flowGitHubRepoLink),
           ),
-          if (flowDebugMode) ...[
-            const SizedBox(height: 32.0),
-            const ListHeader("Debug options"),
-            ListTile(
-              title: const Text("Populate objectbox"),
-              leading: const Icon(Symbols.adb_rounded),
-              onTap: () => ObjectBox().populateDummyData(),
-            ),
-            ListTile(
-              title:
-                  Text(_debugDbBusy ? "Clearing database" : "Clear objectbox"),
-              onTap: () => resetDatabase(),
-              leading: const Icon(Symbols.adb_rounded),
-            ),
-            ListTile(
-              title: const Text("Jump to setup page"),
-              onTap: () => context.pushReplacement("/setup"),
-              leading: const Icon(Symbols.settings_rounded),
-            ),
-          ],
           const SizedBox(height: 64.0),
           Center(
             child: Text(

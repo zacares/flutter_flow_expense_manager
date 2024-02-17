@@ -15,8 +15,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import 'dart:async';
 import 'dart:io';
 
+import 'package:device_frame/device_frame.dart';
 import 'package:flow/constants.dart';
 import 'package:flow/entity/profile.dart';
 import 'package:flow/l10n/flow_localizations.dart';
@@ -25,10 +27,14 @@ import 'package:flow/prefs.dart';
 import 'package:flow/routes.dart';
 import 'package:flow/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:moment_dart/moment_dart.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:pie_menu/pie_menu.dart';
+import 'package:screenshot/screenshot.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,6 +75,8 @@ class FlowState extends State<Flow> {
     return useDarkTheme ? pieThemeDark : pieThemeLight;
   }
 
+  final ScreenshotController screenshotController = ScreenshotController();
+
   @override
   void initState() {
     super.initState();
@@ -82,6 +90,10 @@ class FlowState extends State<Flow> {
     if (ObjectBox().box<Profile>().count(limit: 1) == 0) {
       Profile.createDefaultProfile();
     }
+
+    Timer.periodic(const Duration(seconds: 2), (timer) {
+      saveScreenshot();
+    });
   }
 
   @override
@@ -102,6 +114,15 @@ class FlowState extends State<Flow> {
         GlobalWidgetsLocalizations.delegate,
         FlowLocalizations.delegate,
       ],
+      builder: (context, child) => Screenshot(
+        controller: screenshotController,
+        child: DeviceFrame(
+          device: Devices.android.samsungGalaxyS20,
+          isFrameVisible: true,
+          orientation: Orientation.portrait,
+          screen: child ?? Container(),
+        ),
+      ),
       supportedLocales: FlowLocalizations.supportedLanguages,
       locale: LocalPreferences().localeOverride.value,
       routerConfig: router,
@@ -125,5 +146,19 @@ class FlowState extends State<Flow> {
     );
     Intl.defaultLocale = _locale.code;
     setState(() {});
+  }
+
+  Future<void> saveScreenshot() async {
+    final dir = await getDownloadsDirectory();
+
+    final f = File(path.join(dir!.path, "${DateTime.now()}.png"));
+
+    final bytes = await screenshotController.capture();
+
+    if (bytes == null) return;
+
+    f.create(recursive: true);
+
+    f.writeAsBytes(bytes);
   }
 }
