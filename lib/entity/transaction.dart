@@ -1,6 +1,7 @@
 import 'package:flow/entity/_base.dart';
 import 'package:flow/entity/account.dart';
 import 'package:flow/entity/category.dart';
+import 'package:flow/entity/transaction/debt.dart';
 import 'package:flow/entity/transaction/extensions/base.dart';
 import 'package:flow/entity/transaction/wrapper.dart';
 import 'package:flow/l10n/named_enum.dart';
@@ -35,28 +36,6 @@ class Transaction implements EntityBase {
 
   /// Currency code complying with [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)
   String currency;
-
-  // Later, we might need to reference the parent transaction in order to
-  // edit them as one. This can be useful, for example, in loan/savings with
-  // interest. Then again, showing the interest and the base as two separate
-  // transactions might not be good idea.
-  //
-  /// Subtype of transaction
-  @Property()
-  String? subtype;
-
-  @Transient()
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  TransactionSubtype? get transactionSubtype => subtype == null
-      ? null
-      : TransactionSubtype.values
-          .where((element) => element.value == (subtype!))
-          .firstOrNull;
-
-  @Transient()
-  set transactionSubtype(TransactionSubtype? value) {
-    subtype = value?.value;
-  }
 
   /// Extra information related to the transaction
   ///
@@ -134,10 +113,27 @@ class Transaction implements EntityBase {
     currency = newAccount?.currency ?? currency;
   }
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final debt = ToOne<Debt>();
+
+  @Transient()
+  String? _debtUuid;
+
+  String? get debtUuid => _debtUuid ?? debt.target?.uuid;
+
+  set debtUuid(String? value) {
+    _debtUuid = value;
+  }
+
+  /// This won't be saved until you call `Box.put()`
+  void setDebt(Debt? newAccount) {
+    debt.target = newAccount;
+    debtUuid = newAccount?.uuid;
+  }
+
   Transaction({
     this.id = 0,
     this.title,
-    this.subtype,
     required this.amount,
     required this.currency,
     DateTime? transactionDate,
@@ -145,7 +141,8 @@ class Transaction implements EntityBase {
     String? uuidOverride,
   })  : createdDate = createdDate ?? DateTime.now(),
         transactionDate = transactionDate ?? createdDate ?? DateTime.now(),
-        uuid = uuidOverride ?? const Uuid().v4();
+        uuid = uuidOverride ?? const Uuid().v4(),
+        assert(title == null || title.length <= maxTitleLength);
 
   factory Transaction.fromJson(Map<String, dynamic> json) =>
       _$TransactionFromJson(json);
@@ -173,20 +170,4 @@ enum TransactionType implements LocalizedEnum {
   }
 
   Map<String, dynamic> toJson() => {"value": value};
-}
-
-@JsonEnum(valueField: "value")
-enum TransactionSubtype implements LocalizedEnum {
-  transactionFee("transactionFee"),
-  givenLoan("loan.given"),
-  receivedLoan("loan.received");
-
-  final String value;
-
-  const TransactionSubtype(this.value);
-
-  @override
-  String get localizationEnumValue => name;
-  @override
-  String get localizationEnumName => "TransactionSubtype";
 }

@@ -7,16 +7,18 @@ import 'package:flow/entity/account.dart';
 import 'package:flow/entity/category.dart';
 import 'package:flow/entity/profile.dart';
 import 'package:flow/entity/transaction.dart';
+import 'package:flow/entity/transaction/debt.dart';
+import 'package:flow/entity/transaction/fee_preset.dart';
 import 'package:flow/l10n/named_enum.dart';
 import 'package:flow/objectbox.dart';
 import 'package:flow/objectbox/objectbox.g.dart';
-import 'package:flow/sync/export/headers/header_v1.dart';
-import 'package:flow/sync/model/model_v1.dart';
+import 'package:flow/sync/export/headers/header_v2.dart';
+import 'package:flow/sync/model/model_v2.dart';
 import 'package:intl/intl.dart';
 import 'package:moment_dart/moment_dart.dart';
 
-Future<String> generateBackupContentV1() async {
-  const int versionCode = 1;
+Future<String> generateBackupContentV2() async {
+  const int versionCode = 2;
   log("[Flow Sync] Initiating export, version code = $versionCode");
 
   final List<Transaction> transactions =
@@ -30,6 +32,13 @@ Future<String> generateBackupContentV1() async {
       await ObjectBox().box<Category>().getAllAsync();
   log("[Flow Sync] Finished fetching categories");
 
+  final List<Debt> debts = await ObjectBox().box<Debt>().getAllAsync();
+  log("[Flow Sync] Finished fetching debts");
+
+  final List<TransactionFeePreset> transactionFeePresets =
+      await ObjectBox().box<TransactionFeePreset>().getAllAsync();
+  log("[Flow Sync] Finished fetching transaction fee presets");
+
   final DateTime exportDate = DateTime.now().toUtc();
 
   final Query<Profile> firstProfileQuery =
@@ -40,7 +49,7 @@ Future<String> generateBackupContentV1() async {
 
   firstProfileQuery.close();
 
-  final SyncModelV1 obj = SyncModelV1(
+  final SyncModelV2 obj = SyncModelV2(
     versionCode: versionCode,
     exportDate: exportDate,
     username: username,
@@ -48,27 +57,30 @@ Future<String> generateBackupContentV1() async {
     transactions: transactions,
     accounts: accounts,
     categories: categories,
+    debts: debts,
+    transactionFeePresets: transactionFeePresets,
   );
 
   return jsonEncode(obj.toJson());
 }
 
-Future<String> generateCSVContentV1() async {
+Future<String> generateCSVContentV2() async {
   final transaction = await ObjectBox().box<Transaction>().getAllAsync();
 
   final headers = [
-    CSVHeadersV1.uuid.localizedName,
-    CSVHeadersV1.title.localizedName,
-    CSVHeadersV1.amount.localizedName,
-    CSVHeadersV1.currency.localizedName,
-    CSVHeadersV1.account.localizedName,
-    CSVHeadersV1.accountUuid.localizedName,
-    CSVHeadersV1.category.localizedName,
-    CSVHeadersV1.categoryUuid.localizedName,
-    CSVHeadersV1.subtype.localizedName,
-    CSVHeadersV1.createdDate.localizedName,
-    CSVHeadersV1.transactionDate.localizedName,
-    CSVHeadersV1.extra.localizedName,
+    CSVHeadersV2.uuid.localizedName,
+    CSVHeadersV2.title.localizedName,
+    CSVHeadersV2.amount.localizedName,
+    CSVHeadersV2.currency.localizedName,
+    CSVHeadersV2.account.localizedName,
+    CSVHeadersV2.accountUuid.localizedName,
+    CSVHeadersV2.category.localizedName,
+    CSVHeadersV2.categoryUuid.localizedName,
+    CSVHeadersV2.createdDate.localizedName,
+    CSVHeadersV2.transactionDate.localizedName,
+    CSVHeadersV2.relatedDebtUuid.localizedName,
+    CSVHeadersV2.relatedDebtParty.localizedName,
+    CSVHeadersV2.extra.localizedName,
   ];
 
   final Map<String, int> numberOfDecimalsToKeep = {};
@@ -87,7 +99,6 @@ Future<String> generateCSVContentV1() async {
           e.account.target?.uuid,
           e.category.target?.name,
           e.category.target?.uuid,
-          "",
           e.createdDate.format(
             payload: "LLL",
             forceLocal: true,
@@ -96,6 +107,8 @@ Future<String> generateCSVContentV1() async {
             payload: "LLL",
             forceLocal: true,
           ),
+          e.debtUuid,
+          e.debt.target?.otherParty ?? "",
           e.extra,
         ],
       )

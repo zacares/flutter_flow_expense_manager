@@ -8,7 +8,6 @@ part of 'transaction.dart';
 
 Transaction _$TransactionFromJson(Map<String, dynamic> json) => Transaction(
       title: json['title'] as String?,
-      subtype: json['subtype'] as String?,
       amount: (json['amount'] as num).toDouble(),
       currency: json['currency'] as String,
       transactionDate: json['transactionDate'] == null
@@ -21,7 +20,8 @@ Transaction _$TransactionFromJson(Map<String, dynamic> json) => Transaction(
       ..uuid = json['uuid'] as String
       ..extra = json['extra'] as String?
       ..categoryUuid = json['categoryUuid'] as String?
-      ..accountUuid = json['accountUuid'] as String?;
+      ..accountUuid = json['accountUuid'] as String?
+      ..debtUuid = json['debtUuid'] as String?;
 
 Map<String, dynamic> _$TransactionToJson(Transaction instance) =>
     <String, dynamic>{
@@ -31,8 +31,8 @@ Map<String, dynamic> _$TransactionToJson(Transaction instance) =>
       'title': instance.title,
       'amount': instance.amount,
       'currency': instance.currency,
-      'subtype': instance.subtype,
       'extra': instance.extra,
       'categoryUuid': instance.categoryUuid,
       'accountUuid': instance.accountUuid,
+      'debtUuid': instance.debtUuid,
     };

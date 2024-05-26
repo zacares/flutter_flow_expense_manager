@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:flow/entity/backup_entry.dart';
 import 'package:flow/objectbox.dart';
 import 'package:flow/sync/export/export_v1.dart';
+import 'package:flow/sync/export/export_v2.dart';
 import 'package:flow/sync/export/mode.dart';
 import 'package:flow/sync/sync.dart';
 import 'package:flow/utils/utils.dart';
@@ -34,6 +35,8 @@ Future<ExportStatus> export({
   final backupContent = switch ((mode, latestSyncModelVersion)) {
     (ExportMode.csv, 1) => await generateCSVContentV1(),
     (ExportMode.json, 1) => await generateBackupContentV1(),
+    (ExportMode.csv, 2) => await generateCSVContentV2(),
+    (ExportMode.json, 2) => await generateBackupContentV2(),
     _ => throw UnimplementedError(),
   };
   final savedFilePath = await saveBackupFile(

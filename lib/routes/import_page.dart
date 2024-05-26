@@ -50,7 +50,7 @@ class _ImportPageState extends State<ImportPage> {
     });
 
     try {
-      importer = await importBackupV1(
+      importer = await importBackup(
         backupFile: backupFile,
       );
 
