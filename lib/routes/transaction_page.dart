@@ -168,9 +168,6 @@ class _TransactionPageState extends State<TransactionPage> {
                 child: Column(
                   children: [
                     const SizedBox(height: 24.0),
-                    // Center(
-                    //     child: Text("Untitled transaction",
-                    //         style: context.textTheme.headlineMedium)),
                     Padding(
                       padding: contentPadding,
                       child: TypeAheadField<RelevanceScoredTitle>(
