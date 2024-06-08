@@ -38,8 +38,8 @@ class Navbar extends StatelessWidget {
           ),
           NavbarButton(
             index: 1,
-            tooltip: "tabs.stats".t(context),
-            icon: Symbols.bar_chart_rounded,
+            tooltip: "tabs.dashboard".t(context),
+            icon: Symbols.hub_rounded,
             onTap: onTap,
             activeIndex: activeIndex,
           ),
