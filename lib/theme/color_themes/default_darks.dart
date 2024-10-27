@@ -2,6 +2,12 @@ import "dart:ui";
 
 import "package:flow/theme/flow_color_scheme.dart";
 
+const FlowCustomColors defaultDarkCustomColors = FlowCustomColors(
+  income: Color(0xFF32CC70),
+  expense: Color(0xFFFF4040),
+  semi: Color(0xFF97919B),
+);
+
 final FlowColorScheme electricLavender = FlowColorScheme(
   name: "Electric Lavender",
   isDark: true,
@@ -11,11 +17,7 @@ final FlowColorScheme electricLavender = FlowColorScheme(
   onPrimary: const Color(0xff141414),
   secondary: const Color(0xff050505),
   onSecondary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF97919B),
-  ),
+  customColors: defaultDarkCustomColors,
 );
 
 final FlowColorScheme pinkQuartz = FlowColorScheme(
@@ -27,11 +29,7 @@ final FlowColorScheme pinkQuartz = FlowColorScheme(
   onPrimary: const Color(0xff141414),
   secondary: const Color(0xff050505),
   onSecondary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF97919B),
-  ),
+  customColors: defaultDarkCustomColors,
 );
 
 final FlowColorScheme cottonCandy = FlowColorScheme(
@@ -43,11 +41,7 @@ final FlowColorScheme cottonCandy = FlowColorScheme(
   onPrimary: const Color(0xff141414),
   secondary: const Color(0xff050505),
   onSecondary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF97919B),
-  ),
+  customColors: defaultDarkCustomColors,
 );
 
 final FlowColorScheme piglet = FlowColorScheme(
@@ -59,11 +53,7 @@ final FlowColorScheme piglet = FlowColorScheme(
   onPrimary: const Color(0xff141414),
   secondary: const Color(0xff050505),
   onSecondary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF97919B),
-  ),
+  customColors: defaultDarkCustomColors,
 );
 
 final FlowColorScheme simplyDelicious = FlowColorScheme(
@@ -75,11 +65,7 @@ final FlowColorScheme simplyDelicious = FlowColorScheme(
   onPrimary: const Color(0xff141414),
   secondary: const Color(0xff050505),
   onSecondary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF97919B),
-  ),
+  customColors: defaultDarkCustomColors,
 );
 
 final FlowColorScheme creamyApricot = FlowColorScheme(
@@ -91,11 +77,7 @@ final FlowColorScheme creamyApricot = FlowColorScheme(
   onPrimary: const Color(0xff141414),
   secondary: const Color(0xff050505),
   onSecondary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF97919B),
-  ),
+  customColors: defaultDarkCustomColors,
 );
 
 final FlowColorScheme yellYellow = FlowColorScheme(
@@ -107,11 +89,7 @@ final FlowColorScheme yellYellow = FlowColorScheme(
   onPrimary: const Color(0xff141414),
   secondary: const Color(0xff050505),
   onSecondary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF97919B),
-  ),
+  customColors: defaultDarkCustomColors,
 );
 
 final FlowColorScheme fallGreen = FlowColorScheme(
@@ -123,11 +101,7 @@ final FlowColorScheme fallGreen = FlowColorScheme(
   onPrimary: const Color(0xff141414),
   secondary: const Color(0xff050505),
   onSecondary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF97919B),
-  ),
+  customColors: defaultDarkCustomColors,
 );
 
 final FlowColorScheme frostedMintHills = FlowColorScheme(
@@ -139,11 +113,7 @@ final FlowColorScheme frostedMintHills = FlowColorScheme(
   onPrimary: const Color(0xff141414),
   secondary: const Color(0xff050505),
   onSecondary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF97919B),
-  ),
+  customColors: defaultDarkCustomColors,
 );
 
 final FlowColorScheme coastalTrim = FlowColorScheme(
@@ -155,11 +125,7 @@ final FlowColorScheme coastalTrim = FlowColorScheme(
   onPrimary: const Color(0xff141414),
   secondary: const Color(0xff050505),
   onSecondary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF97919B),
-  ),
+  customColors: defaultDarkCustomColors,
 );
 
 final FlowColorScheme seafairGreen = FlowColorScheme(
@@ -171,11 +137,7 @@ final FlowColorScheme seafairGreen = FlowColorScheme(
   onPrimary: const Color(0xff141414),
   secondary: const Color(0xff050505),
   onSecondary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF97919B),
-  ),
+  customColors: defaultDarkCustomColors,
 );
 
 final FlowColorScheme crushedIce = FlowColorScheme(
@@ -187,11 +149,7 @@ final FlowColorScheme crushedIce = FlowColorScheme(
   onPrimary: const Color(0xff141414),
   secondary: const Color(0xff050505),
   onSecondary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF97919B),
-  ),
+  customColors: defaultDarkCustomColors,
 );
 
 final FlowColorScheme iceEffect = FlowColorScheme(
@@ -203,11 +161,7 @@ final FlowColorScheme iceEffect = FlowColorScheme(
   onPrimary: const Color(0xff141414),
   secondary: const Color(0xff050505),
   onSecondary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF97919B),
-  ),
+  customColors: defaultDarkCustomColors,
 );
 
 final FlowColorScheme arcLight = FlowColorScheme(
@@ -219,11 +173,7 @@ final FlowColorScheme arcLight = FlowColorScheme(
   onPrimary: const Color(0xff141414),
   secondary: const Color(0xff050505),
   onSecondary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF97919B),
-  ),
+  customColors: defaultDarkCustomColors,
 );
 
 final FlowColorScheme driedLilac = FlowColorScheme(
@@ -235,11 +185,7 @@ final FlowColorScheme driedLilac = FlowColorScheme(
   onPrimary: const Color(0xff141414),
   secondary: const Color(0xff050505),
   onSecondary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF97919B),
-  ),
+  customColors: defaultDarkCustomColors,
 );
 
 final FlowColorScheme neonBoneyard = FlowColorScheme(
@@ -251,9 +197,5 @@ final FlowColorScheme neonBoneyard = FlowColorScheme(
   onPrimary: const Color(0xff141414),
   secondary: const Color(0xff050505),
   onSecondary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF97919B),
-  ),
+  customColors: defaultDarkCustomColors,
 );

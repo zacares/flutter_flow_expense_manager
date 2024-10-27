@@ -150,6 +150,7 @@
     "preferences.theme.choose": "Seleziona un tema",
     "preferences.theme.light": "Chiaro",
     "preferences.theme.dark": "Scuro",
+    "preferences.theme.dynamic": "Dinamico",
     "preferences.numpad": "Tastierino numerico",
     "preferences.numpad.layout": "Layout del tastierino numerico",
     "preferences.numpad.layout.classic": "Classico",

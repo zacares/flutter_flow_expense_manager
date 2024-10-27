@@ -150,6 +150,7 @@
     "preferences.theme.choose": "Select a theme",
     "preferences.theme.light": "Light",
     "preferences.theme.dark": "Dark",
+    "preferences.theme.dynamic": "Dynamic",
     "preferences.numpad": "Numpad",
     "preferences.numpad.layout": "Numpad layout",
     "preferences.numpad.layout.classic": "Classic",

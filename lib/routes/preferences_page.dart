@@ -29,6 +29,7 @@ class _PreferencesPageState extends State<PreferencesPage> {
   Widget build(BuildContext context) {
     final FlowColorScheme currentTheme =
         getTheme(LocalPreferences().themeName.get())?.scheme ?? shadeOfViolet;
+    final bool dynamicThemeEnabled = LocalPreferences().useDynamicTheme.get();
 
     final UpcomingTransactionsDuration homeTabPlannedTransactionsDuration =
         LocalPreferences().homeTabPlannedTransactionsDuration.get() ??
@@ -59,7 +60,11 @@ class _PreferencesPageState extends State<PreferencesPage> {
             leading: currentTheme.isDark
                 ? const Icon(Symbols.dark_mode_rounded)
                 : const Icon(Symbols.light_mode_rounded),
-            subtitle: Text(currentTheme.name),
+            subtitle: Text(
+              dynamicThemeEnabled
+                  ? "preferences.theme.dynamic".t(context)
+                  : currentTheme.name,
+            ),
             onTap: openTheme,
             trailing: const Icon(Symbols.chevron_right_rounded),
           ),

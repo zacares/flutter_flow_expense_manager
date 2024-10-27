@@ -3,6 +3,12 @@
 import "package:flutter/material.dart";
 import "package:flow/theme/flow_color_scheme.dart";
 
+const FlowCustomColors defaultLightCustomColors = FlowCustomColors(
+  income: Color(0xFF32CC70),
+  expense: Color(0xFFFF4040),
+  semi: Color(0xFF6A666D),
+);
+
 final FlowColorScheme shadeOfViolet = FlowColorScheme(
   name: "Shade of Violet",
   isDark: false,
@@ -12,11 +18,7 @@ final FlowColorScheme shadeOfViolet = FlowColorScheme(
   secondary: const Color(0xfff5ccff),
   onSecondary: const Color(0xff33004f),
   onPrimary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF6A666D),
-  ),
+  customColors: defaultLightCustomColors,
 ); // contrast: 5.82456471142964
 
 final FlowColorScheme blissfulBerry = FlowColorScheme(
@@ -28,11 +30,7 @@ final FlowColorScheme blissfulBerry = FlowColorScheme(
   secondary: const Color(0xffffccf5),
   onSecondary: const Color(0xff4f004c),
   onPrimary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF6A666D),
-  ),
+  customColors: defaultLightCustomColors,
 ); // contrast: 5.131551048194216
 
 final FlowColorScheme cherryPlum = FlowColorScheme(
@@ -44,11 +42,7 @@ final FlowColorScheme cherryPlum = FlowColorScheme(
   secondary: const Color(0xffffcce2),
   onSecondary: const Color(0xff4f002e),
   onPrimary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF6A666D),
-  ),
+  customColors: defaultLightCustomColors,
 ); // contrast: 5.529257614713291
 
 final FlowColorScheme crispChristmasCranberries = FlowColorScheme(
@@ -60,11 +54,7 @@ final FlowColorScheme crispChristmasCranberries = FlowColorScheme(
   secondary: const Color(0xffffcccf),
   onSecondary: const Color(0xff4f0011),
   onPrimary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF6A666D),
-  ),
+  customColors: defaultLightCustomColors,
 ); // contrast: 5.644652409710161
 
 final FlowColorScheme burntSienna = FlowColorScheme(
@@ -76,11 +66,7 @@ final FlowColorScheme burntSienna = FlowColorScheme(
   secondary: const Color(0xffffdbcc),
   onSecondary: const Color(0xff4f0c00),
   onPrimary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF6A666D),
-  ),
+  customColors: defaultLightCustomColors,
 ); // contrast: 5.272019425653915
 
 final FlowColorScheme soilOfAvagddu = FlowColorScheme(
@@ -92,11 +78,7 @@ final FlowColorScheme soilOfAvagddu = FlowColorScheme(
   secondary: const Color(0xffffefcc),
   onSecondary: const Color(0xff4f2900),
   onPrimary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF6A666D),
-  ),
+  customColors: defaultLightCustomColors,
 ); // contrast: 5.3249027529793045
 
 final FlowColorScheme flagGreen = FlowColorScheme(
@@ -108,11 +90,7 @@ final FlowColorScheme flagGreen = FlowColorScheme(
   secondary: const Color(0xfffbffcc),
   onSecondary: const Color(0xff4f4700),
   onPrimary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF6A666D),
-  ),
+  customColors: defaultLightCustomColors,
 ); // contrast: 4.4056160670194595
 
 final FlowColorScheme tropicana = FlowColorScheme(
@@ -124,11 +102,7 @@ final FlowColorScheme tropicana = FlowColorScheme(
   secondary: const Color(0xffe8ffcc),
   onSecondary: const Color(0xff384f00),
   onPrimary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF6A666D),
-  ),
+  customColors: defaultLightCustomColors,
 ); // contrast: 4.759500600587007
 
 final FlowColorScheme toyCamouflage = FlowColorScheme(
@@ -140,11 +114,7 @@ final FlowColorScheme toyCamouflage = FlowColorScheme(
   secondary: const Color(0xffd5ffcc),
   onSecondary: const Color(0xff1b4f00),
   onPrimary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF6A666D),
-  ),
+  customColors: defaultLightCustomColors,
 ); // contrast: 4.872864221074725
 
 final FlowColorScheme spreadsheetGreen = FlowColorScheme(
@@ -156,11 +126,7 @@ final FlowColorScheme spreadsheetGreen = FlowColorScheme(
   secondary: const Color(0xffccffd5),
   onSecondary: const Color(0xff004f02),
   onPrimary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF6A666D),
-  ),
+  customColors: defaultLightCustomColors,
 ); // contrast: 4.856003928836115
 
 final FlowColorScheme tokiwaGreen = FlowColorScheme(
@@ -172,11 +138,7 @@ final FlowColorScheme tokiwaGreen = FlowColorScheme(
   secondary: const Color(0xffccffe8),
   onSecondary: const Color(0xff004f20),
   onPrimary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF6A666D),
-  ),
+  customColors: defaultLightCustomColors,
 ); // contrast: 4.816518785663914
 
 final FlowColorScheme hydraTurquoise = FlowColorScheme(
@@ -188,11 +150,7 @@ final FlowColorScheme hydraTurquoise = FlowColorScheme(
   secondary: const Color(0xffccfffb),
   onSecondary: const Color(0xff004f3d),
   onPrimary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF6A666D),
-  ),
+  customColors: defaultLightCustomColors,
 ); // contrast: 4.6801442121694015
 
 final FlowColorScheme peacockBlue = FlowColorScheme(
@@ -204,11 +162,7 @@ final FlowColorScheme peacockBlue = FlowColorScheme(
   secondary: const Color(0xffccefff),
   onSecondary: const Color(0xff00424f),
   onPrimary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF6A666D),
-  ),
+  customColors: defaultLightCustomColors,
 ); // contrast: 5.179720075231227
 
 final FlowColorScheme egyptianBlue = FlowColorScheme(
@@ -220,11 +174,7 @@ final FlowColorScheme egyptianBlue = FlowColorScheme(
   secondary: const Color(0xffccdbff),
   onSecondary: const Color(0xff00254f),
   onPrimary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF6A666D),
-  ),
+  customColors: defaultLightCustomColors,
 ); // contrast: 7.478914206842744
 
 final FlowColorScheme bohemianBlue = FlowColorScheme(
@@ -236,11 +186,7 @@ final FlowColorScheme bohemianBlue = FlowColorScheme(
   secondary: const Color(0xffcfccff),
   onSecondary: const Color(0xff00074f),
   onPrimary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF6A666D),
-  ),
+  customColors: defaultLightCustomColors,
 ); // contrast: 8.795416386639062
 
 final FlowColorScheme spaceBattleBlue = FlowColorScheme(
@@ -252,10 +198,6 @@ final FlowColorScheme spaceBattleBlue = FlowColorScheme(
   secondary: const Color(0xffe2ccff),
   onSecondary: const Color(0xff16004f),
   onPrimary: const Color(0xfff5f6fa),
-  customColors: FlowCustomColors(
-    income: Color(0xFF32CC70),
-    expense: Color(0xFFFF4040),
-    semi: Color(0xFF6A666D),
-  ),
+  customColors: defaultLightCustomColors,
 ); // contrast: 7.838426705632426
 

@@ -76,6 +76,7 @@ class LocalPreferences {
   late final JsonSettingsEntry<LatLng> lastKnownGeo;
 
   late final PrimitiveSettingsEntry<String> themeName;
+  late final BoolSettingsEntry useDynamicTheme;
 
   LocalPreferences._internal(this._prefs) {
     primaryCurrency = PrimitiveSettingsEntry<String>(
@@ -175,6 +176,11 @@ class LocalPreferences {
       key: "flow.themeName",
       preferences: _prefs,
       initialValue: lightThemes.keys.first,
+    );
+    useDynamicTheme = BoolSettingsEntry(
+      key: "flow.useDynamicTheme",
+      preferences: _prefs,
+      initialValue: false,
     );
 
     updateTransitiveProperties();

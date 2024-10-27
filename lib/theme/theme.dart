@@ -160,4 +160,22 @@ class ThemeFactory {
 
     return ThemeFactory(resolved.scheme);
   }
+
+  factory ThemeFactory.fromDynamicColorScheme(ColorScheme scheme) {
+    final bool isDark = scheme.brightness == Brightness.dark;
+
+    return ThemeFactory(
+      FlowColorScheme(
+        primary: scheme.primary,
+        isDark: isDark,
+        surface: scheme.surface,
+        onSurface: scheme.onSurface,
+        secondary: scheme.secondary,
+        onSecondary: scheme.onSecondary,
+        customColors:
+            isDark ? defaultDarkCustomColors : defaultLightCustomColors,
+        name: "Dynamic",
+      ),
+    );
+  }
 }

@@ -25,14 +25,18 @@ class ThemeEntry extends StatelessWidget {
         child: Container(
           margin: EdgeInsets.all(4.0),
           decoration: BoxDecoration(
-            color: entry.value.colorScheme.secondary,
+            color: entry.value.isDark
+                ? entry.value.colorScheme.primary
+                : entry.value.colorScheme.secondary,
             borderRadius: BorderRadius.circular(8.0),
           ),
           alignment: Alignment.center,
           child: Text(
             "Aa",
             style: TextStyle(
-              color: entry.value.colorScheme.primary,
+              color: entry.value.isDark
+                  ? entry.value.colorScheme.secondary
+                  : entry.value.colorScheme.primary,
             ),
           ),
         ),

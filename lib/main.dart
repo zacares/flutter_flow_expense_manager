@@ -81,6 +81,7 @@ class Flow extends StatefulWidget {
 class FlowState extends State<Flow> {
   Locale _locale = FlowLocalizations.supportedLanguages.first;
   ThemeMode _themeMode = ThemeMode.system;
+  bool useDynamicTheme = false;
 
   ThemeFactory _themeFactory = ThemeFactory.fromThemeName(null);
 
@@ -90,6 +91,8 @@ class FlowState extends State<Flow> {
       ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark)
       : (_themeMode == ThemeMode.dark));
 
+  bool dynamicThemeSupported = false;
+
   @override
   void initState() {
     super.initState();
@@ -98,6 +101,7 @@ class FlowState extends State<Flow> {
     _reloadTheme();
 
     LocalPreferences().localeOverride.addListener(_reloadLocale);
+    LocalPreferences().useDynamicTheme.addListener(_reloadTheme);
     LocalPreferences().themeName.addListener(_reloadTheme);
 
     ObjectBox().box<Transaction>().query().watch().listen((event) {
@@ -107,11 +111,17 @@ class FlowState extends State<Flow> {
     if (ObjectBox().box<Profile>().count(limit: 1) == 0) {
       Profile.createDefaultProfile();
     }
+
+    // TODO @sadespresso It looks terrible since I supposedly didn't use the correct
+    // colors per Material Design specs. I may fix it later.
+    // dynamicThemeSupported =
+    //     Platform.isAndroid || Platform.isWindows || Platform.isLinux;
   }
 
   @override
   void dispose() {
     LocalPreferences().localeOverride.removeListener(_reloadLocale);
+    LocalPreferences().useDynamicTheme.removeListener(_reloadTheme);
     LocalPreferences().themeName.removeListener(_reloadTheme);
     super.dispose();
   }
@@ -120,6 +130,18 @@ class FlowState extends State<Flow> {
   Widget build(BuildContext context) {
     return DynamicColorBuilder(
       builder: (dynamicLight, dynamicDark) {
+        late final ThemeData theme;
+
+        if (!useDynamicTheme || dynamicLight == null || dynamicDark == null) {
+          theme = _themeFactory.materialTheme;
+        } else {
+          final ColorScheme dynamicColorScheme =
+              useDarkTheme ? dynamicDark : dynamicLight;
+
+          theme = ThemeFactory.fromDynamicColorScheme(dynamicColorScheme)
+              .materialTheme;
+        }
+
         return MaterialApp.router(
           onGenerateTitle: (context) => "appName".t(context),
           localizationsDelegates: [
@@ -132,8 +154,8 @@ class FlowState extends State<Flow> {
           supportedLocales: FlowLocalizations.supportedLanguages,
           locale: _locale,
           routerConfig: router,
-          theme: _themeFactory.materialTheme,
-          darkTheme: _themeFactory.materialTheme,
+          theme: theme,
+          darkTheme: theme,
           themeMode: _themeMode,
           debugShowCheckedModeBanner: false,
         );
@@ -143,8 +165,15 @@ class FlowState extends State<Flow> {
 
   void _reloadTheme() {
     final String? themeName = LocalPreferences().themeName.value;
+    final bool prefUseDynamicTheme =
+        dynamicThemeSupported && LocalPreferences().useDynamicTheme.get();
 
-    log("[Theme] Reloading theme $themeName");
+    log("[Theme] Reloading theme ${prefUseDynamicTheme ? "@dynamic" : themeName}");
+
+    if (prefUseDynamicTheme) {
+      setState(() => useDynamicTheme = prefUseDynamicTheme);
+      return;
+    }
 
     ({FlowColorScheme scheme, ThemeMode mode})? experimentalTheme =
         getTheme(themeName);
