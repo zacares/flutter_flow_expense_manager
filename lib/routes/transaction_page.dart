@@ -26,6 +26,7 @@ import "package:flow/routes/transaction_page/title_input.dart";
 import "package:flow/services/exchange_rates.dart";
 import "package:flow/services/recurring_transactions.dart";
 import "package:flow/services/transactions.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/general/button.dart";
@@ -1185,13 +1186,20 @@ class _TransactionPageState extends State<TransactionPage> {
     context.pop();
   }
 
-  String get fallbackTitle => switch (_transactionType) {
-    TransactionType.transfer
-        when _selectedAccount != null && _selectedAccountTransferTo != null =>
-      "transaction.transfer.fromToTitle".t(context, {
-        "from": _selectedAccount!.name,
-        "to": _selectedAccountTransferTo!.name,
-      }),
-    _ => "transaction.fallbackTitle".t(context),
-  };
+  String get fallbackTitle {
+    if (UserPreferencesService().useCategoryNameForUntitledTransactions &&
+        _selectedCategory?.name != null) {
+      return _selectedCategory!.name;
+    }
+
+    return switch (_transactionType) {
+      TransactionType.transfer
+          when _selectedAccount != null && _selectedAccountTransferTo != null =>
+        "transaction.transfer.fromToTitle".t(context, {
+          "from": _selectedAccount!.name,
+          "to": _selectedAccountTransferTo!.name,
+        }),
+      _ => "transaction.fallbackTitle".t(context),
+    };
+  }
 }
