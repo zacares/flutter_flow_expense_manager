@@ -57,7 +57,7 @@ class RecurringTransactionsService {
                   millisecond: recurringTransaction.timeRange.from.millisecond,
                   microsecond: 0,
                 ),
-                range: range,
+                subrange: range,
               )
               ?.startOfMillisecond();
 
