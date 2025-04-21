@@ -1,4 +1,5 @@
 import "package:flow/data/transaction_filter.dart";
+import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/recurring_transaction.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction/extensions/default/recurring.dart";
@@ -76,7 +77,44 @@ extension TransactionHelpers on Transaction {
         }
         break;
       case RecurringUpdateMode.thisAndFuture:
-        throw UnimplementedError();
+        try {
+          final List<Transaction> all = await TransactionsService().findMany(
+            TransactionFilter(
+              extraTag: recurringTransaction.extensionIdentifierTag,
+              range: TransactionFilterTimeRange.fromTimeRange(
+                transactionDate.rangeToMax(),
+              ),
+            ),
+          );
+          for (final Transaction transaction in all) {
+            try {
+              TransactionsService().moveToBinSync(transaction);
+            } catch (e, stackTrace) {
+              _log.severe(
+                "Failed to move transaction (${transaction.uuid}) to trash bin (part of $mode deletion initiated by $uuid)",
+                e,
+                stackTrace,
+              );
+            }
+          }
+          TransactionsService().moveToBinSync(this);
+          recurringTransaction.disabled = true;
+          recurringTransaction.timeRange = CustomTimeRange(
+            recurringTransaction.timeRange.from,
+            recurringTransaction.recurrence.previousAbsoluteOccurrence(
+                  transactionDate,
+                ) ??
+                DateTime.now(),
+          );
+          RecurringTransactionsService().updateSync(recurringTransaction);
+        } catch (e, stackTrace) {
+          _log.severe(
+            "Failed to move recurring transaction to trash bin ($mode)",
+            e,
+            stackTrace,
+          );
+        }
+        break;
       case null:
         return;
     }

@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:convert";
 
 import "package:flow/data/transaction_filter.dart";
@@ -26,7 +27,7 @@ class RecurringTransactionsService {
       _instance ??= RecurringTransactionsService._internal();
 
   RecurringTransactionsService._internal() {
-    synchronize();
+    _synchronizeAll();
   }
 
   Future<void> _synchronize(RecurringTransaction recurringTransaction) async {
@@ -204,7 +205,7 @@ class RecurringTransactionsService {
   /// be called over and over again.
   ///
   /// Current rule is one transaction in the future for the recurrence.
-  Future<void> synchronize() async {
+  Future<void> _synchronizeAll() async {
     _log.fine("Synchronizing recurring transactions");
 
     final Query<RecurringTransaction> query = activeRecurringsQb().build();
@@ -262,9 +263,32 @@ class RecurringTransactionsService {
 
     ObjectBox().box<RecurringTransaction>().put(recurringTransaction);
 
-    synchronize();
+    _synchronizeAll();
 
     return recurringTransaction;
+  }
+
+  Future<RecurringTransaction?> findOne(dynamic identifier) async {
+    if (identifier is int) {
+      return await ObjectBox().box<RecurringTransaction>().getAsync(identifier);
+    }
+
+    if (identifier case String uuid) {
+      final Query<RecurringTransaction> query =
+          ObjectBox()
+              .box<RecurringTransaction>()
+              .query(RecurringTransaction_.uuid.equals(uuid))
+              .build();
+
+      final RecurringTransaction? recurringTransaction =
+          await query.findFirstAsync();
+
+      query.close();
+
+      return recurringTransaction;
+    }
+
+    return null;
   }
 
   RecurringTransaction? findOneSync(dynamic identifier) {
@@ -287,5 +311,51 @@ class RecurringTransactionsService {
     }
 
     return null;
+  }
+
+  Future<void> update(RecurringTransaction recurringTransaction) async {
+    await ObjectBox().box<RecurringTransaction>().putAsync(
+      recurringTransaction,
+      mode: PutMode.update,
+    );
+
+    unawaited(_synchronize(recurringTransaction));
+  }
+
+  void updateSync(RecurringTransaction recurringTransaction) {
+    ObjectBox().box<RecurringTransaction>().put(
+      recurringTransaction,
+      mode: PutMode.update,
+    );
+
+    unawaited(_synchronize(recurringTransaction));
+  }
+
+  Future<bool> delete(dynamic identifier) async {
+    final RecurringTransaction? recurringTransaction = await findOne(
+      identifier,
+    );
+
+    if (recurringTransaction == null) {
+      _log.warning(
+        "Couldn't delete recurring transaction properly due to missing recurring data",
+      );
+      return false;
+    }
+
+    final List<Transaction> transactions = await TransactionsService().findMany(
+      TransactionFilter(extraTag: recurringTransaction.extensionIdentifierTag),
+    );
+
+    if (transactions.isNotEmpty) {
+      _log.warning(
+        "Recurring transaction (${recurringTransaction.uuid}) has ${transactions.length} transactions, cannot delete",
+      );
+      return false;
+    }
+
+    ObjectBox().box<RecurringTransaction>().remove(recurringTransaction.id);
+
+    return true;
   }
 }

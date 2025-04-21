@@ -76,7 +76,7 @@ class RecurringTransaction extends EntityBase {
   @Property(type: PropertyType.date)
   DateTime? lastGeneratedTransactionDate;
 
-  final bool disabled;
+  bool disabled;
 
   RecurringTransaction({
     this.id = 0,
