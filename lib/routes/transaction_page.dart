@@ -268,6 +268,7 @@ class _TransactionPageState extends State<TransactionPage> {
                     children: [
                       const SizedBox(height: 24.0),
                       TitleInput(
+                        key: ValueKey(_amount),
                         focusNode: _titleFocusNode,
                         controller: _titleController,
                         transactionType: _transactionType,
@@ -730,7 +731,11 @@ class _TransactionPageState extends State<TransactionPage> {
     if (!mounted) return;
 
     if (widget.isNewTransaction && result != null) {
-      FocusScope.of(context).requestFocus(_titleFocusNode);
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          FocusScope.of(context).requestFocus(_titleFocusNode);
+        }
+      });
     }
   }
 
