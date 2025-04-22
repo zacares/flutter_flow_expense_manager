@@ -1,13 +1,17 @@
+import "dart:async";
 import "dart:convert";
 
 import "package:flow/data/transaction_filter.dart";
+import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/account.dart";
+import "package:flow/entity/category.dart";
 import "package:flow/entity/recurring_transaction.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction/extensions/default/recurring.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/objectbox/objectbox.g.dart";
+import "package:flow/routes/transaction_page/select_recurring_update_mode_sheet.dart";
 import "package:flow/services/accounts.dart";
 import "package:flow/services/transactions.dart";
 import "package:flow/utils/extensions/recurring_transaction.dart";
@@ -25,7 +29,7 @@ class RecurringTransactionsService {
       _instance ??= RecurringTransactionsService._internal();
 
   RecurringTransactionsService._internal() {
-    synchronize();
+    _synchronizeAll();
   }
 
   Future<void> _synchronize(RecurringTransaction recurringTransaction) async {
@@ -42,19 +46,21 @@ class RecurringTransactionsService {
       final TimeRange? range =
           recurringTransaction.lastGeneratedTransactionDate?.rangeToMax();
 
-      final DateTime now = DateTime.now().date;
+      final DateTime anchor =
+          recurringTransaction.lastGeneratedTransactionDate?.date ??
+          DateTime.now().date;
 
       final DateTime? nextOccurence =
           recurringTransaction.recurrence
               .nextAbsoluteOccurrence(
-                now.copyWith(
+                anchor.copyWith(
                   hour: recurringTransaction.timeRange.from.hour,
                   minute: recurringTransaction.timeRange.from.minute,
                   second: recurringTransaction.timeRange.from.second,
                   millisecond: recurringTransaction.timeRange.from.millisecond,
                   microsecond: 0,
                 ),
-                range: range,
+                subrange: range,
               )
               ?.startOfMillisecond();
 
@@ -110,6 +116,22 @@ class RecurringTransactionsService {
               ? await AccountsService().findOne(transferToAccountUuid)
               : null;
 
+      late final Category? category;
+
+      if (template.categoryUuid != null) {
+        final categoryQuery =
+            ObjectBox()
+                .box<Category>()
+                .query(Category_.uuid.equals(template.categoryUuid!))
+                .build();
+
+        category = categoryQuery.findFirst();
+
+        categoryQuery.close();
+      } else {
+        category = null;
+      }
+
       if (from == null) {
         _log.severe(
           "$loggingPrefix Failed to find account for transaction template: ${template.accountUuid}",
@@ -122,8 +144,10 @@ class RecurringTransactionsService {
       if (to == null) {
         from.createAndSaveTransaction(
           amount: template.amount,
+          category: category,
           title: template.title,
           description: template.description,
+          subtype: template.transactionSubtype,
           transactionDate: nextOccurence,
           uuidOverride: generatedTransactionUuid,
           extensions: [
@@ -183,7 +207,7 @@ class RecurringTransactionsService {
   /// be called over and over again.
   ///
   /// Current rule is one transaction in the future for the recurrence.
-  Future<void> synchronize() async {
+  Future<void> _synchronizeAll() async {
     _log.fine("Synchronizing recurring transactions");
 
     final Query<RecurringTransaction> query = activeRecurringsQb().build();
@@ -241,9 +265,32 @@ class RecurringTransactionsService {
 
     ObjectBox().box<RecurringTransaction>().put(recurringTransaction);
 
-    synchronize();
+    _synchronizeAll();
 
     return recurringTransaction;
+  }
+
+  Future<RecurringTransaction?> findOne(dynamic identifier) async {
+    if (identifier is int) {
+      return await ObjectBox().box<RecurringTransaction>().getAsync(identifier);
+    }
+
+    if (identifier case String uuid) {
+      final Query<RecurringTransaction> query =
+          ObjectBox()
+              .box<RecurringTransaction>()
+              .query(RecurringTransaction_.uuid.equals(uuid))
+              .build();
+
+      final RecurringTransaction? recurringTransaction =
+          await query.findFirstAsync();
+
+      query.close();
+
+      return recurringTransaction;
+    }
+
+    return null;
   }
 
   RecurringTransaction? findOneSync(dynamic identifier) {
@@ -266,5 +313,97 @@ class RecurringTransactionsService {
     }
 
     return null;
+  }
+
+  Future<void> update(RecurringTransaction recurringTransaction) async {
+    await ObjectBox().box<RecurringTransaction>().putAsync(
+      recurringTransaction,
+      mode: PutMode.update,
+    );
+
+    unawaited(_synchronize(recurringTransaction));
+  }
+
+  void updateSync(RecurringTransaction recurringTransaction) {
+    ObjectBox().box<RecurringTransaction>().put(
+      recurringTransaction,
+      mode: PutMode.update,
+    );
+
+    unawaited(_synchronize(recurringTransaction));
+  }
+
+  Future<bool> delete(dynamic identifier) async {
+    final RecurringTransaction? recurringTransaction = await findOne(
+      identifier,
+    );
+
+    if (recurringTransaction == null) {
+      _log.warning(
+        "Couldn't delete recurring transaction properly due to missing recurring data",
+      );
+      return false;
+    }
+
+    final List<Transaction> transactions = await TransactionsService().findMany(
+      TransactionFilter(extraTag: recurringTransaction.extensionIdentifierTag),
+    );
+
+    if (transactions.isNotEmpty) {
+      _log.warning(
+        "Recurring transaction (${recurringTransaction.uuid}) has ${transactions.length} transactions, cannot delete",
+      );
+      return false;
+    }
+
+    ObjectBox().box<RecurringTransaction>().remove(recurringTransaction.id);
+
+    return true;
+  }
+
+  /// Throws [ArgumentError] if the transaction does not have a recurring
+  /// extension.
+  ///
+  /// Throws [StateError] if the recurring transaction is not found.
+  ///
+  /// Returns a list of transactions that are related to the given transaction
+  Future<(RecurringTransaction, List<Transaction>)>
+  findRelatedTransactionsByMode(
+    Transaction transaction,
+    RecurringUpdateMode mode,
+  ) async {
+    final Recurring? recurringExt = transaction.extensions.recurring;
+
+    if (recurringExt == null) {
+      throw ArgumentError("Transaction does not have a recurring extension");
+    }
+
+    final RecurringTransaction? recurringTransaction = await findOne(
+      recurringExt.uuid,
+    );
+
+    if (recurringTransaction == null) {
+      throw StateError(
+        "Recurring transaction not found for transaction: ${transaction.uuid}",
+      );
+    }
+
+    if (mode == RecurringUpdateMode.current) {
+      return (recurringTransaction, [transaction]);
+    }
+
+    final List<Transaction> transactions = await TransactionsService().findMany(
+      TransactionFilter(
+        extraTag: recurringTransaction.extensionIdentifierTag,
+        range:
+            mode == RecurringUpdateMode.all
+                ? null
+                : TransactionFilterTimeRange.fromTimeRange(
+                  transaction.transactionDate.rangeToMax(),
+                ),
+      ),
+    );
+
+    return (recurringTransaction, transactions);
   }
 }

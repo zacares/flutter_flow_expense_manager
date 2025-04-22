@@ -24,22 +24,21 @@ class SelectRecurrence extends StatefulWidget {
 
 class _SelectRecurrenceState extends State<SelectRecurrence> {
   late Recurrence _recurrence;
-  final RecurrenceMode _selectedMode = RecurrenceMode.everyMonth;
+  RecurrenceMode _selectedMode = RecurrenceMode.everyMonth;
 
   final GlobalKey _modeSelectorKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-    _recurrence = widget.initialValue ?? Recurrence.fromIndefinitely(rules: []);
+    _setRecurrence(widget.initialValue);
   }
 
   @override
   void didUpdateWidget(SelectRecurrence oldWidget) {
     if (oldWidget.initialValue != widget.initialValue) {
       setState(() {
-        _recurrence =
-            widget.initialValue ?? Recurrence.fromIndefinitely(rules: []);
+        _setRecurrence(widget.initialValue);
       });
     }
     super.didUpdateWidget(oldWidget);
@@ -147,7 +146,7 @@ class _SelectRecurrenceState extends State<SelectRecurrence> {
         throw UnimplementedError();
     }
 
-    _recurrence = _recurrence.copyWith(rules: rules);
+    _setRecurrence(_recurrence.copyWith(rules: rules));
 
     if (!mounted) return;
     setState(() {});
@@ -213,5 +212,40 @@ class _SelectRecurrenceState extends State<SelectRecurrence> {
         });
       }
     });
+  }
+
+  void _setRecurrence(Recurrence? recurrence) {
+    _recurrence =
+        (recurrence ??
+                Recurrence.fromIndefinitely(
+                  rules: [
+                    MonthlyRecurrenceRule(day: recurrence?.range.from.day ?? 1),
+                  ],
+                ))
+            .realign();
+
+    if (_recurrence.rules.length != 1) {
+      _selectedMode = RecurrenceMode.custom;
+    } else {
+      final RecurrenceRule rule = _recurrence.rules.single;
+
+      if (rule is IntervalRecurrenceRule) {
+        if (rule.data == const Duration(days: 1)) {
+          _selectedMode = RecurrenceMode.everyDay;
+        } else if (rule.data == const Duration(days: 7)) {
+          _selectedMode = RecurrenceMode.everyWeek;
+        } else if (rule.data == const Duration(days: 14)) {
+          _selectedMode = RecurrenceMode.every2Week;
+        }
+      } else if (rule is WeeklyRecurrenceRule) {
+        _selectedMode = RecurrenceMode.everyWeek;
+      } else if (rule is MonthlyRecurrenceRule) {
+        _selectedMode = RecurrenceMode.everyMonth;
+      } else if (rule is YearlyRecurrenceRule) {
+        _selectedMode = RecurrenceMode.everyYear;
+      } else {
+        _selectedMode = RecurrenceMode.custom;
+      }
+    }
   }
 }
