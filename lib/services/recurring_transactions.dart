@@ -48,7 +48,7 @@ class RecurringTransactionsService {
 
       final DateTime anchor =
           recurringTransaction.lastGeneratedTransactionDate?.date ??
-          DateTime.now().date;
+          recurringTransaction.recurrence.range.from.date;
 
       final DateTime? nextOccurence =
           recurringTransaction.recurrence

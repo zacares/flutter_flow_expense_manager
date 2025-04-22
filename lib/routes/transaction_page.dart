@@ -50,6 +50,7 @@ import "package:logging/logging.dart";
 import "package:material_symbols_icons/symbols.dart";
 import "package:moment_dart/moment_dart.dart";
 import "package:recurrence/recurrence.dart";
+import "package:uuid/uuid.dart";
 
 final Logger _log = Logger("TransactionPage");
 
@@ -121,6 +122,8 @@ class _TransactionPageState extends State<TransactionPage> {
 
   DateTime get transactionDate => _transactionDate ?? DateTime.now();
 
+  DateTime? _initialTransactionDate;
+
   late final bool enableGeo;
 
   late final MapController? _mapController;
@@ -158,6 +161,7 @@ class _TransactionPageState extends State<TransactionPage> {
       _selectedAccount = _currentlyEditing?.account.target;
       _selectedCategory = _currentlyEditing?.category.target;
       _transactionDate = _currentlyEditing?.transactionDate ?? DateTime.now();
+      _initialTransactionDate = _currentlyEditing?.transactionDate;
       _transactionType =
           _currentlyEditing?.type ??
           widget.initialTransactionType ??
@@ -665,6 +669,13 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void updateTransactionEditMode(TransactionDateEditMode? mode) {
+    if (mode == TransactionDateEditMode.recurring) {
+      _recurrence ??= Recurrence.fromIndefinitely(
+        rules: [MonthlyRecurrenceRule(day: transactionDate.day)],
+        start: transactionDate,
+      );
+    }
+
     if (_transactionDateEditMode != TransactionDateEditMode.normal &&
         mode == null) {
       _transactionDate = null;
@@ -972,19 +983,19 @@ class _TransactionPageState extends State<TransactionPage> {
 
     RecurringUpdateMode? mode;
 
-    final bool shouldPerformRecurringUpdate =
-        _currentlyEditing.isRecurring ||
-        _transactionDateEditMode == TransactionDateEditMode.recurring;
+    final bool originalTransactionWasRecurring = _currentlyEditing.isRecurring;
 
-    if (shouldPerformRecurringUpdate) {
+    if (originalTransactionWasRecurring) {
       mode = await showModalBottomSheet(
         context: context,
-        builder: (context) => SelectRecurringUpdateModeSheet(),
+        builder: (context) => SelectRecurringUpdateModeSheet(showAll: false),
         isScrollControlled: true,
       );
     }
 
-    if ((shouldPerformRecurringUpdate && mode == null) || !mounted) return;
+    assert(mode != RecurringUpdateMode.all);
+
+    if ((originalTransactionWasRecurring && mode == null) || !mounted) return;
 
     final bool pendingTransactionsRequireConfrimation =
         LocalPreferences().pendingTransactions.requireConfrimation.get();
@@ -996,89 +1007,135 @@ class _TransactionPageState extends State<TransactionPage> {
             ? transactionDate.isFuture
             : _currentlyEditing.isPending == true);
 
-    void updateTransaction(Transaction transaction) {
-      if (_transactionType == TransactionType.transfer) {
-        try {
-          _selectedAccount!.transferTo(
-            amount: _amount,
-            title: formattedTitle,
-            description: formattedDescription,
-            targetAccount: _selectedAccountTransferTo!,
-            createdDate: transaction.createdDate,
-            transactionDate: _transactionDate,
-            extensions:
-                transaction.extensions.getOverriden(_geo, Geo.keyName).data,
-            isPending: isPending,
-            conversionRate: crossCurrencyTransfer ? _conversionRate : null,
-            recurrence: significantRecurrence,
-          );
+    final String recurringTransactionUuid =
+        _recurringTransaction?.uuid ?? const Uuid().v4();
 
-          transaction.permanentlyDelete(true);
-          context.pop();
-        } catch (e, stackTrace) {
-          _log.severe("Failed to update transfer transaction", e, stackTrace);
-        }
+    if (_transactionType == TransactionType.transfer) {
+      try {
+        _selectedAccount!.transferTo(
+          amount: _amount,
+          title: formattedTitle,
+          description: formattedDescription,
+          targetAccount: _selectedAccountTransferTo!,
+          createdDate: _currentlyEditing.createdDate,
+          transactionDate: _transactionDate,
+          extensions:
+              _currentlyEditing.extensions.getOverriden(_geo, Geo.keyName).data,
+          isPending: isPending,
+          conversionRate: crossCurrencyTransfer ? _conversionRate : null,
+          recurrence: significantRecurrence,
+        );
+
+        _currentlyEditing.permanentlyDelete(true);
+        context.pop();
+      } catch (e, stackTrace) {
+        _log.severe("Failed to update transfer transaction", e, stackTrace);
+      }
+    } else {
+      _currentlyEditing.setCategory(_selectedCategory);
+      _currentlyEditing.setAccount(_selectedAccount);
+      _currentlyEditing.title = formattedTitle;
+      _currentlyEditing.description = formattedDescription;
+      _currentlyEditing.amount = _amount;
+      _currentlyEditing.transactionDate = transactionDate;
+      _currentlyEditing.isPending = isPending;
+
+      /// When user edits a balance amendment transaction, it is no longer a balance amendment.
+      if (_currentlyEditing.subtype == TransactionSubtype.updateBalance.value) {
+        _currentlyEditing.subtype = null;
+      }
+
+      final List<TransactionExtension> newExtensions = [
+        ..._currentlyEditing.extensions.getOverriden(_geo, Geo.keyName).data,
+      ];
+
+      newExtensions.removeWhere((ext) => ext.key == Recurring.keyName);
+
+      if (_transactionDateEditMode == TransactionDateEditMode.recurring) {
+        newExtensions.add(
+          Recurring(
+            uuid: recurringTransactionUuid,
+            initialTransactionDate: _currentlyEditing.transactionDate,
+          ),
+        );
+      }
+
+      _currentlyEditing.extensions = ExtensionsWrapper(newExtensions);
+
+      TransactionsService().updateOneSync(_currentlyEditing);
+    }
+
+    if (_recurringTransaction == null &&
+        _transactionDateEditMode == TransactionDateEditMode.recurring) {
+      _recurringTransaction = RecurringTransactionsService()
+          .createFromTransaction(
+            identifier: _currentlyEditing,
+            recurrence: _recurrence!,
+            uuidOverride: recurringTransactionUuid,
+            transferToAccountUuid:
+                isTransfer ? _selectedAccountTransferTo?.uuid : null,
+          );
+    }
+
+    if (originalTransactionWasRecurring &&
+        mode == RecurringUpdateMode.thisAndFuture) {
+      final RecurringTransaction? recurringTransaction =
+          RecurringTransactionsService().findOneSync(recurringTransactionUuid);
+
+      if (recurringTransaction == null) {
+        _log.warning(
+          "Failed to find recurring transaction for update. Transaction(${_currentlyEditing.uuid})",
+        );
         return;
       }
 
-      transaction.setCategory(_selectedCategory);
-      transaction.setAccount(_selectedAccount);
-      transaction.title = formattedTitle;
-      transaction.description = formattedDescription;
-      transaction.amount = _amount;
-      transaction.transactionDate = transactionDate;
-      transaction.isPending = isPending;
+      final (
+        _,
+        List<Transaction> futureRelatedRecurringTransactions,
+      ) = await RecurringTransactionsService().findRelatedTransactionsByMode(
+        _currentlyEditing,
+        RecurringUpdateMode.thisAndFuture,
+      );
 
-      /// When user edits a balance amendment transaction, it is no longer a balance amendment.
-      if (transaction.subtype == TransactionSubtype.updateBalance.value) {
-        transaction.subtype = null;
-      }
+      final List<Transaction> futureRelatedRecurringTransactionsToDelete =
+          futureRelatedRecurringTransactions
+              .where(
+                (futureTransaction) =>
+                    futureTransaction.isPending == true &&
+                    futureTransaction.transactionDate.isFutureAnchored(
+                      _initialTransactionDate,
+                    ),
+              )
+              .toList();
 
-      final List<TransactionExtension> newExtensions =
-          transaction.extensions.getOverriden(_geo, Geo.keyName).data;
+      bool hasDeletedFutureTransaction = false;
 
-      if (_transactionDateEditMode != TransactionDateEditMode.recurring) {
-        newExtensions.removeWhere((ext) => ext.key == Recurring.keyName);
-      }
-
-      transaction.extensions = ExtensionsWrapper(newExtensions);
-
-      TransactionsService().updateOneSync(transaction);
-    }
-
-    updateTransaction(_currentlyEditing);
-
-    if (shouldPerformRecurringUpdate && mode != RecurringUpdateMode.current) {
-      try {
-        final (
-          RecurringTransaction recurring,
-          List<Transaction> relatedTransactions,
-        ) = await RecurringTransactionsService().findRelatedTransactionsByMode(
-          _currentlyEditing,
-          mode!,
-        );
-
-        for (final Transaction relatedTransaction in relatedTransactions) {
-          try {
-            updateTransaction(relatedTransaction);
-          } catch (e) {
-            _log.severe(
-              "Failed to update recurring transaction's related transaction. Initiated by Transaction(${_currentlyEditing.uuid})",
-              e,
-            );
-          }
+      for (Transaction x in futureRelatedRecurringTransactionsToDelete) {
+        try {
+          TransactionsService().moveToBinSync(x);
+          hasDeletedFutureTransaction = true;
+        } catch (e, stackTrace) {
+          _log.severe("Failed to move transaction to trash bin", e, stackTrace);
         }
+      }
 
-        recurring.template = _currentlyEditing;
-        recurring.timeRange = _recurrence?.range ?? recurring.timeRange;
-        recurring.recurrenceRules =
-            _recurrence?.rules ?? recurring.recurrenceRules;
-        recurring.transferToAccountUuid =
-            _selectedAccountTransferTo?.uuid ?? recurring.transferToAccountUuid;
-        RecurringTransactionsService().updateSync(recurring);
+      try {
+        if (hasDeletedFutureTransaction) {
+          recurringTransaction.lastGeneratedTransactionDate =
+              _initialTransactionDate;
+        }
+        recurringTransaction.template = _currentlyEditing;
+        recurringTransaction.timeRange =
+            _recurrence?.range ?? recurringTransaction.timeRange;
+        recurringTransaction.recurrenceRules =
+            _recurrence?.rules ?? recurringTransaction.recurrenceRules;
+        recurringTransaction.transferToAccountUuid =
+            _selectedAccountTransferTo?.uuid ??
+            recurringTransaction.transferToAccountUuid;
+        RecurringTransactionsService().updateSync(recurringTransaction);
       } catch (e, stackTrace) {
         _log.severe(
-          "Failed to update recurring transaction's related transaction. Initiated by Transaction(${_currentlyEditing.uuid})",
+          "Failed to update RelatedTransaction($recurringTransactionUuid). Initiated by Transaction(${_currentlyEditing.uuid})",
           e,
           stackTrace,
         );
