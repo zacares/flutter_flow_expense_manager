@@ -40,6 +40,9 @@ class RecurringTransaction extends EntityBase {
   Transaction get template =>
       Transaction.fromJson(jsonDecode(jsonTransactionTemplate));
 
+  set template(Transaction value) =>
+      jsonTransactionTemplate = jsonEncode(value.toJson());
+
   /// [moment_dart](https://pub.dev/packages/moment_dart) compatible TimeRange string
   ///
   /// If null, same as [Moment.minValue] to [Moment.maxValue]

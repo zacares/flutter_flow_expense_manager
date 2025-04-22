@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:convert";
 
 import "package:flow/data/transaction_filter.dart";
+import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/category.dart";
 import "package:flow/entity/recurring_transaction.dart";
@@ -10,6 +11,7 @@ import "package:flow/entity/transaction/extensions/default/recurring.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/objectbox/objectbox.g.dart";
+import "package:flow/routes/transaction_page/select_recurring_update_mode_sheet.dart";
 import "package:flow/services/accounts.dart";
 import "package:flow/services/transactions.dart";
 import "package:flow/utils/extensions/recurring_transaction.dart";
@@ -357,5 +359,51 @@ class RecurringTransactionsService {
     ObjectBox().box<RecurringTransaction>().remove(recurringTransaction.id);
 
     return true;
+  }
+
+  /// Throws [ArgumentError] if the transaction does not have a recurring
+  /// extension.
+  ///
+  /// Throws [StateError] if the recurring transaction is not found.
+  ///
+  /// Returns a list of transactions that are related to the given transaction
+  Future<(RecurringTransaction, List<Transaction>)>
+  findRelatedTransactionsByMode(
+    Transaction transaction,
+    RecurringUpdateMode mode,
+  ) async {
+    final Recurring? recurringExt = transaction.extensions.recurring;
+
+    if (recurringExt == null) {
+      throw ArgumentError("Transaction does not have a recurring extension");
+    }
+
+    final RecurringTransaction? recurringTransaction = await findOne(
+      recurringExt.uuid,
+    );
+
+    if (recurringTransaction == null) {
+      throw StateError(
+        "Recurring transaction not found for transaction: ${transaction.uuid}",
+      );
+    }
+
+    if (mode == RecurringUpdateMode.current) {
+      return (recurringTransaction, [transaction]);
+    }
+
+    final List<Transaction> transactions = await TransactionsService().findMany(
+      TransactionFilter(
+        extraTag: recurringTransaction.extensionIdentifierTag,
+        range:
+            mode == RecurringUpdateMode.all
+                ? null
+                : TransactionFilterTimeRange.fromTimeRange(
+                  transaction.transactionDate.rangeToMax(),
+                ),
+      ),
+    );
+
+    return (recurringTransaction, transactions);
   }
 }

@@ -1,5 +1,3 @@
-import "package:flow/data/transaction_filter.dart";
-import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/recurring_transaction.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction/extensions/default/recurring.dart";
@@ -7,7 +5,6 @@ import "package:flow/entity/transaction/extensions/default/transfer.dart";
 import "package:flow/routes/transaction_page/select_recurring_update_mode_sheet.dart";
 import "package:flow/services/recurring_transactions.dart";
 import "package:flow/services/transactions.dart";
-import "package:flow/utils/extensions/recurring_transaction.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:moment_dart/moment_dart.dart";
@@ -50,74 +47,65 @@ extension TransactionHelpers on Transaction {
       isScrollControlled: true,
     );
 
-    switch (mode) {
-      case RecurringUpdateMode.current:
-        try {
-          TransactionsService().moveToBinSync(this);
-        } catch (e, stackTrace) {
-          _log.severe("Failed to move transaction to trash bin", e, stackTrace);
-        }
-        break;
-      case RecurringUpdateMode.all:
-        try {
-          final List<Transaction> all = await TransactionsService().findMany(
-            TransactionFilter(
-              extraTag: recurringTransaction.extensionIdentifierTag,
-            ),
-          );
-          for (var transaction in all) {
-            TransactionsService().moveToBinSync(transaction);
-          }
-        } catch (e, stackTrace) {
-          _log.severe(
-            "Failed to move recurring transaction to trash bin",
-            e,
-            stackTrace,
-          );
-        }
-        break;
-      case RecurringUpdateMode.thisAndFuture:
-        try {
-          final List<Transaction> all = await TransactionsService().findMany(
-            TransactionFilter(
-              extraTag: recurringTransaction.extensionIdentifierTag,
-              range: TransactionFilterTimeRange.fromTimeRange(
-                transactionDate.rangeToMax(),
-              ),
-            ),
-          );
-          for (final Transaction transaction in all) {
-            try {
-              TransactionsService().moveToBinSync(transaction);
-            } catch (e, stackTrace) {
-              _log.severe(
-                "Failed to move transaction (${transaction.uuid}) to trash bin (part of $mode deletion initiated by $uuid)",
-                e,
-                stackTrace,
-              );
-            }
-          }
-          TransactionsService().moveToBinSync(this);
-          recurringTransaction.disabled = true;
-          recurringTransaction.timeRange = CustomTimeRange(
-            recurringTransaction.timeRange.from,
-            recurringTransaction.recurrence.previousAbsoluteOccurrence(
-                  transactionDate,
-                ) ??
-                DateTime.now(),
-          );
-          RecurringTransactionsService().updateSync(recurringTransaction);
-        } catch (e, stackTrace) {
-          _log.severe(
-            "Failed to move recurring transaction to trash bin ($mode)",
-            e,
-            stackTrace,
-          );
-        }
-        break;
-      case null:
-        return;
+    if (mode == null) {
+      return;
     }
+
+    void disableRecurringTransaction() {
+      recurringTransaction.disabled = true;
+      recurringTransaction.timeRange = CustomTimeRange(
+        recurringTransaction.timeRange.from,
+        recurringTransaction.recurrence.previousAbsoluteOccurrence(
+              transactionDate,
+            ) ??
+            DateTime.now(),
+      );
+      RecurringTransactionsService().updateSync(recurringTransaction);
+    }
+
+    if (mode == RecurringUpdateMode.current) {
+      try {
+        TransactionsService().moveToBinSync(this);
+      } catch (e, stackTrace) {
+        _log.severe("Failed to move transaction to trash bin", e, stackTrace);
+      }
+      return;
+    }
+
+    final (
+      _,
+      List<Transaction> transactions,
+    ) = await RecurringTransactionsService().findRelatedTransactionsByMode(
+      this,
+      mode,
+    );
+
+    int deletedCount = 0;
+
+    for (final Transaction transaction in transactions) {
+      try {
+        TransactionsService().moveToBinSync(transaction);
+        deletedCount++;
+      } catch (e, stackTrace) {
+        _log.severe(
+          "Failed to move Transaction(${transaction.uuid}) to trash bin (Part of RecurringTransacion($uuid), initiated mass deletion by Tranasction($uuid))",
+          e,
+          stackTrace,
+        );
+      }
+    }
+
+    if (deletedCount == transactions.length) {
+      _log.info(
+        "Successfully moved ${transactions.length} transactions to trash bin (Part of RecurringTransacion($uuid), initiated mass deletion by Tranasction($uuid))",
+      );
+    } else {
+      _log.warning(
+        "Failed to move ${transactions.length - deletedCount} transactions to trash bin. Successfully moved $deletedCount though. (Part of RecurringTransacion($uuid), initiated mass deletion by Tranasction($uuid))",
+      );
+    }
+
+    disableRecurringTransaction();
   }
 
   Future<void> moveToTrashBin(BuildContext context) async {
