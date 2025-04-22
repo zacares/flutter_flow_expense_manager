@@ -9,6 +9,8 @@ import "package:flow/entity/recurring_transaction.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction/extensions/base.dart";
 import "package:flow/entity/transaction/extensions/default/geo.dart";
+import "package:flow/entity/transaction/extensions/default/recurring.dart";
+import "package:flow/entity/transaction/wrapper.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/l10n/named_enum.dart";
 import "package:flow/objectbox.dart";
@@ -20,10 +22,12 @@ import "package:flow/routes/transaction_page/section.dart";
 import "package:flow/routes/transaction_page/select_account_sheet.dart";
 import "package:flow/routes/transaction_page/select_category_sheet.dart";
 import "package:flow/routes/transaction_page/select_recurrence.dart";
+import "package:flow/routes/transaction_page/select_recurring_update_mode_sheet.dart";
 import "package:flow/routes/transaction_page/title_input.dart";
 import "package:flow/services/exchange_rates.dart";
 import "package:flow/services/recurring_transactions.dart";
 import "package:flow/services/transactions.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/general/button.dart";
@@ -414,7 +418,10 @@ class _TransactionPageState extends State<TransactionPage> {
                           mainAxisSize: MainAxisSize.min,
                           spacing: 12.0,
                           children: [
-                            SizedBox.shrink(),
+                            ListTile(
+                              title: Text(transactionDate.toMoment().LLL),
+                              onTap: () => selectTransactionDate(),
+                            ),
                             Align(
                               alignment: AlignmentDirectional.topStart,
                               child: SingleChildScrollView(
@@ -454,22 +461,15 @@ class _TransactionPageState extends State<TransactionPage> {
                                 ),
                               ),
                             ),
-                            AnimatedSize(
-                              duration: const Duration(milliseconds: 300),
-                              child:
-                                  _transactionDateEditMode ==
-                                          TransactionDateEditMode.recurring
-                                      ? SelectRecurrence(
-                                        initialValue: _recurrence,
-                                        onChanged: updateRecurrence,
-                                      )
-                                      : ListTile(
-                                        title: Text(
-                                          transactionDate.toMoment().LLL,
-                                        ),
-                                        onTap: () => selectTransactionDate(),
-                                      ),
-                            ),
+                            if (_transactionDateEditMode ==
+                                TransactionDateEditMode.recurring)
+                              AnimatedSize(
+                                duration: const Duration(milliseconds: 300),
+                                child: SelectRecurrence(
+                                  initialValue: _recurrence,
+                                  onChanged: updateRecurrence,
+                                ),
+                              ),
                           ],
                         ),
                       ),
@@ -964,64 +964,126 @@ class _TransactionPageState extends State<TransactionPage> {
     return true;
   }
 
-  void update({
+  void _update({
     required String? formattedTitle,
     required String? formattedDescription,
   }) async {
     if (_currentlyEditing == null) return;
 
+    RecurringUpdateMode? mode;
+
+    final bool shouldPerformRecurringUpdate =
+        _currentlyEditing.isRecurring ||
+        _transactionDateEditMode == TransactionDateEditMode.recurring;
+
+    if (shouldPerformRecurringUpdate) {
+      mode = await showModalBottomSheet(
+        context: context,
+        builder: (context) => SelectRecurringUpdateModeSheet(),
+        isScrollControlled: true,
+      );
+    }
+
+    if ((shouldPerformRecurringUpdate && mode == null) || !mounted) return;
+
     final bool pendingTransactionsRequireConfrimation =
         LocalPreferences().pendingTransactions.requireConfrimation.get();
 
-    final bool? isPending =
-        pendingTransactionsRequireConfrimation &&
+    final bool isPending =
+        _transactionDateEditMode == TransactionDateEditMode.pending ||
+        (pendingTransactionsRequireConfrimation &&
                 _currentlyEditing.transactionDate.isPast
             ? transactionDate.isFuture
-            : _currentlyEditing.isPending;
+            : _currentlyEditing.isPending == true);
 
-    if (_transactionType == TransactionType.transfer) {
+    void updateTransaction(Transaction transaction) {
+      if (_transactionType == TransactionType.transfer) {
+        try {
+          _selectedAccount!.transferTo(
+            amount: _amount,
+            title: formattedTitle,
+            description: formattedDescription,
+            targetAccount: _selectedAccountTransferTo!,
+            createdDate: transaction.createdDate,
+            transactionDate: _transactionDate,
+            extensions:
+                transaction.extensions.getOverriden(_geo, Geo.keyName).data,
+            isPending: isPending,
+            conversionRate: crossCurrencyTransfer ? _conversionRate : null,
+            recurrence: significantRecurrence,
+          );
+
+          transaction.permanentlyDelete(true);
+          context.pop();
+        } catch (e, stackTrace) {
+          _log.severe("Failed to update transfer transaction", e, stackTrace);
+        }
+        return;
+      }
+
+      transaction.setCategory(_selectedCategory);
+      transaction.setAccount(_selectedAccount);
+      transaction.title = formattedTitle;
+      transaction.description = formattedDescription;
+      transaction.amount = _amount;
+      transaction.transactionDate = transactionDate;
+      transaction.isPending = isPending;
+
+      /// When user edits a balance amendment transaction, it is no longer a balance amendment.
+      if (transaction.subtype == TransactionSubtype.updateBalance.value) {
+        transaction.subtype = null;
+      }
+
+      final List<TransactionExtension> newExtensions =
+          transaction.extensions.getOverriden(_geo, Geo.keyName).data;
+
+      if (_transactionDateEditMode != TransactionDateEditMode.recurring) {
+        newExtensions.removeWhere((ext) => ext.key == Recurring.keyName);
+      }
+
+      transaction.extensions = ExtensionsWrapper(newExtensions);
+
+      TransactionsService().updateOneSync(transaction);
+    }
+
+    updateTransaction(_currentlyEditing);
+
+    if (shouldPerformRecurringUpdate && mode != RecurringUpdateMode.current) {
       try {
-        _selectedAccount!.transferTo(
-          amount: _amount,
-          title: formattedTitle,
-          description: formattedDescription,
-          targetAccount: _selectedAccountTransferTo!,
-          createdDate: _currentlyEditing.createdDate,
-          transactionDate: _transactionDate,
-          extensions:
-              _currentlyEditing.extensions.getOverriden(_geo, Geo.keyName).data,
-          isPending: isPending,
-          conversionRate: crossCurrencyTransfer ? _conversionRate : null,
-          recurrence: significantRecurrence,
+        final (
+          RecurringTransaction recurring,
+          List<Transaction> relatedTransactions,
+        ) = await RecurringTransactionsService().findRelatedTransactionsByMode(
+          _currentlyEditing,
+          mode!,
         );
 
-        _currentlyEditing.permanentlyDelete(true);
-        context.pop();
+        for (final Transaction relatedTransaction in relatedTransactions) {
+          try {
+            updateTransaction(relatedTransaction);
+          } catch (e) {
+            _log.severe(
+              "Failed to update recurring transaction's related transaction. Initiated by Transaction(${_currentlyEditing.uuid})",
+              e,
+            );
+          }
+        }
+
+        recurring.template = _currentlyEditing;
+        recurring.timeRange = _recurrence?.range ?? recurring.timeRange;
+        recurring.recurrenceRules =
+            _recurrence?.rules ?? recurring.recurrenceRules;
+        recurring.transferToAccountUuid =
+            _selectedAccountTransferTo?.uuid ?? recurring.transferToAccountUuid;
+        RecurringTransactionsService().updateSync(recurring);
       } catch (e, stackTrace) {
-        _log.severe("Failed to update transfer transaction", e, stackTrace);
+        _log.severe(
+          "Failed to update recurring transaction's related transaction. Initiated by Transaction(${_currentlyEditing.uuid})",
+          e,
+          stackTrace,
+        );
       }
-      return;
     }
-
-    _currentlyEditing.setCategory(_selectedCategory);
-    _currentlyEditing.setAccount(_selectedAccount);
-    _currentlyEditing.title = formattedTitle;
-    _currentlyEditing.description = formattedDescription;
-    _currentlyEditing.amount = _amount;
-    _currentlyEditing.transactionDate = transactionDate;
-    _currentlyEditing.isPending = isPending;
-
-    /// When user edits a balance amendment transaction, it is no longer a balance amendment.
-    if (_currentlyEditing.subtype == TransactionSubtype.updateBalance.value) {
-      _currentlyEditing.subtype = null;
-    }
-
-    _currentlyEditing.extensions = _currentlyEditing.extensions.getOverriden(
-      _geo,
-      Geo.keyName,
-    );
-
-    TransactionsService().updateOneSync(_currentlyEditing);
 
     context.pop();
   }
@@ -1041,7 +1103,7 @@ class _TransactionPageState extends State<TransactionPage> {
         trimmedDescription.isNotEmpty ? trimmedDescription : null;
 
     if (_currentlyEditing != null) {
-      return update(
+      return _update(
         formattedTitle: formattedTitle,
         formattedDescription: formattedDescription,
       );
@@ -1050,9 +1112,10 @@ class _TransactionPageState extends State<TransactionPage> {
     final List<TransactionExtension> extensions = [if (_geo != null) _geo!];
 
     final bool isPending =
-        pendingTransactionsRequireConfrimation
+        _transactionDateEditMode == TransactionDateEditMode.pending ||
+        (pendingTransactionsRequireConfrimation
             ? transactionDate.isFutureAnchored(Moment.now().startOfNextMinute())
-            : false;
+            : false);
 
     if (isTransfer) {
       _selectedAccount!.transferTo(
@@ -1123,7 +1186,7 @@ class _TransactionPageState extends State<TransactionPage> {
       return;
     }
 
-    _currentlyEditing.moveToTrashBin();
+    await _currentlyEditing.moveToTrashBin(context);
 
     if (mounted) {
       context.showToast(text: "transaction.moveToTrashBin.success".t(context));
@@ -1181,13 +1244,20 @@ class _TransactionPageState extends State<TransactionPage> {
     context.pop();
   }
 
-  String get fallbackTitle => switch (_transactionType) {
-    TransactionType.transfer
-        when _selectedAccount != null && _selectedAccountTransferTo != null =>
-      "transaction.transfer.fromToTitle".t(context, {
-        "from": _selectedAccount!.name,
-        "to": _selectedAccountTransferTo!.name,
-      }),
-    _ => "transaction.fallbackTitle".t(context),
-  };
+  String get fallbackTitle {
+    if (UserPreferencesService().useCategoryNameForUntitledTransactions &&
+        _selectedCategory?.name != null) {
+      return _selectedCategory!.name;
+    }
+
+    return switch (_transactionType) {
+      TransactionType.transfer
+          when _selectedAccount != null && _selectedAccountTransferTo != null =>
+        "transaction.transfer.fromToTitle".t(context, {
+          "from": _selectedAccount!.name,
+          "to": _selectedAccountTransferTo!.name,
+        }),
+      _ => "transaction.fallbackTitle".t(context),
+    };
+  }
 }
