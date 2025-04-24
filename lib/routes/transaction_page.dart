@@ -423,10 +423,7 @@ class _TransactionPageState extends State<TransactionPage> {
                           mainAxisSize: MainAxisSize.min,
                           spacing: 12.0,
                           children: [
-                            ListTile(
-                              title: Text(transactionDate.toMoment().LLL),
-                              onTap: () => selectTransactionDate(),
-                            ),
+                            SizedBox.shrink(),
                             Align(
                               alignment: AlignmentDirectional.topStart,
                               child: SingleChildScrollView(
@@ -436,31 +433,22 @@ class _TransactionPageState extends State<TransactionPage> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     SizedBox.shrink(),
-                                    ...TransactionDateEditMode.values
-                                        .where(
-                                          (x) =>
-                                              x !=
-                                              TransactionDateEditMode.normal,
-                                        )
-                                        .map(
-                                          (mode) => FilterChip(
-                                            label: Text(
-                                              mode.localizedNameContext(
-                                                context,
-                                              ),
-                                            ),
-                                            selected:
-                                                mode ==
-                                                _transactionDateEditMode,
-                                            avatar: Icon(mode.icon),
-                                            showCheckmark: false,
-                                            onSelected:
-                                                (selected) =>
-                                                    updateTransactionEditMode(
-                                                      selected ? mode : null,
-                                                    ),
-                                          ),
+                                    ...TransactionDateEditMode.values.map(
+                                      (mode) => FilterChip(
+                                        label: Text(
+                                          mode.localizedNameContext(context),
                                         ),
+                                        selected:
+                                            mode == _transactionDateEditMode,
+                                        avatar: Icon(mode.icon),
+                                        showCheckmark: false,
+                                        onSelected: (selected) {
+                                          if (!selected) return;
+
+                                          updateTransactionEditMode(mode);
+                                        },
+                                      ),
+                                    ),
                                     SizedBox.shrink(),
                                   ],
                                 ),
@@ -475,6 +463,12 @@ class _TransactionPageState extends State<TransactionPage> {
                                   onChanged: updateRecurrence,
                                 ),
                               ),
+                            ListTile(
+                              title: Text(transactionDate.toMoment().LLL),
+                              onTap: () => selectTransactionDate(),
+                              leading: Icon(Symbols.calendar_month_rounded),
+                              trailing: const DirectionalChevron(),
+                            ),
                           ],
                         ),
                       ),
@@ -677,7 +671,8 @@ class _TransactionPageState extends State<TransactionPage> {
       );
     }
 
-    if (_transactionDateEditMode != TransactionDateEditMode.normal &&
+    if (widget.isNewTransaction &&
+        _transactionDateEditMode != TransactionDateEditMode.normal &&
         mode == null) {
       _transactionDate = null;
     }
@@ -912,7 +907,9 @@ class _TransactionPageState extends State<TransactionPage> {
 
   void updateRecurrence(Recurrence? recurrence) {
     _transactionDateEditMode = TransactionDateEditMode.recurring;
-    _transactionDate = recurrence?.range.from ?? _transactionDate;
+    if (widget.isNewTransaction) {
+      _transactionDate = recurrence?.range.from ?? _transactionDate;
+    }
     _recurrence = recurrence;
 
     if (!mounted) return;
@@ -988,12 +985,21 @@ class _TransactionPageState extends State<TransactionPage> {
 
     RecurringUpdateMode? mode;
 
-    final bool originalTransactionWasRecurring = _currentlyEditing.isRecurring;
+    final bool originalTransactionWasRecurring =
+        _currentlyEditing.isRecurring && _recurringTransaction != null;
 
     if (originalTransactionWasRecurring) {
       mode = await showModalBottomSheet(
         context: context,
-        builder: (context) => SelectRecurringUpdateModeSheet(showAll: false),
+        builder:
+            (context) => SelectRecurringUpdateModeSheet(
+              values: [
+                if (_recurrence == _recurringTransaction!.recurrence)
+                  RecurringUpdateMode.current,
+                RecurringUpdateMode.thisAndFuture,
+              ],
+              title: Text("transaction.recurring.edit".t(context)),
+            ),
         isScrollControlled: true,
       );
     }
@@ -1248,9 +1254,9 @@ class _TransactionPageState extends State<TransactionPage> {
       return;
     }
 
-    await _currentlyEditing.moveToTrashBin(context);
+    final bool moved = await _currentlyEditing.moveToTrashBin(context);
 
-    if (mounted) {
+    if (mounted && moved) {
       context.showToast(text: "transaction.moveToTrashBin.success".t(context));
       pop();
     }

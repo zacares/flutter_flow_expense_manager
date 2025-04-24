@@ -500,6 +500,7 @@
   "transaction.pending.preapproved": "Урьдчилан баталгаажуулсан",
   "transaction.recurring": "Давтамжит гүйлгээ",
   "transaction.recurring.delete": "Давтамжит гүйлгээг устгах",
+  "transaction.recurring.delete.deleteAllDisclaimer": "Энэ үйлдэл нь холбоотой бүх гүйлгээг устгах бөгөөд, цаашид шинэ гүйлгээ үүсгэхгүй. Хогийн савнаас устгсан гүйлгээнүүдийг сэргээх боломжтой боловч шинэ гүйлгээг дахиж үүсэхгүй.",
   "transaction.recurring.edit": "Давтамжит гүйлгээг засварлах",
   "transaction.transfer.conversionRate": "Хөрвүүлэх ханш",
   "transaction.transfer.from": "Илгээх данс",

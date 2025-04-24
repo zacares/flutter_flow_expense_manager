@@ -500,6 +500,7 @@
   "transaction.pending.preapproved": "Ön Onaylı",
   "transaction.recurring": "Yinelenen işlem",
   "transaction.recurring.delete": "Yinelenen işlemi sil",
+  "transaction.recurring.delete.deleteAllDisclaimer": "Bu işlem, ilgili tüm işlemleri silecek ve yeni işlemlerin oluşturulmasını durduracaktır. İşlemleri çöp kutusundan kurtarmak yeni işlemlerin oluşturulmasına neden olmayacaktır.",
   "transaction.recurring.edit": "Yinelenen işlemi düzenle",
   "transaction.transfer.conversionRate": "Dönüşüm oranı",
   "transaction.transfer.from": "Hesap gönderiliyor",

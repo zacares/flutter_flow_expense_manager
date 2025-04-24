@@ -356,9 +356,9 @@ class RecurringTransactionsService {
       return false;
     }
 
-    ObjectBox().box<RecurringTransaction>().remove(recurringTransaction.id);
-
-    return true;
+    return await ObjectBox().box<RecurringTransaction>().removeAsync(
+      recurringTransaction.id,
+    );
   }
 
   /// Throws [ArgumentError] if the transaction does not have a recurring

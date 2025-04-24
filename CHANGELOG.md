@@ -5,7 +5,6 @@
 ### New features
 
 * Now you can save backups to iCloud. Enable it in `Preferences > Sync`
-* [OPTIMISTIC] Now you can setup credit line accounts.
 * Added list of contributors, closes [#448](https://github.com/flow-mn/flow/issues/448)
 * Date and time are now in Arabic when the language is set to Arabic, thanks to [Ultrate](https://github.com/Ultrate)
 * Now you can do recurring transactions, closes [#59](https://github.com/flow-mn/flow/issues/59)
@@ -17,6 +16,8 @@
 * Title suggestion now considers recency of a transaction
 * Improved RTL support in certain parts of the UI. Feel free to report more issues regarding RTL
 * Transfer transactions now shows account balance
+* Home page default filter now shows transactions of the current month rather than last 30 days'
+* Transactions page now has time range filter (transactions pages for deleted, pending, account, etc.)
 
 ### Fixes
 

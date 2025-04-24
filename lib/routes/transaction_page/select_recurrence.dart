@@ -71,6 +71,7 @@ class _SelectRecurrenceState extends State<SelectRecurrence> {
               alignment: AlignmentDirectional.topEnd,
               items:
                   RecurrenceMode.values
+                      .where((mode) => mode != RecurrenceMode.custom)
                       .map(
                         (mode) => DropdownMenuItem<RecurrenceMode>(
                           value: mode,
