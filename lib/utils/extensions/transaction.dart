@@ -2,9 +2,11 @@ import "package:flow/entity/recurring_transaction.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction/extensions/default/recurring.dart";
 import "package:flow/entity/transaction/extensions/default/transfer.dart";
+import "package:flow/l10n/extensions.dart";
 import "package:flow/routes/transaction_page/select_recurring_update_mode_sheet.dart";
 import "package:flow/services/recurring_transactions.dart";
 import "package:flow/services/transactions.dart";
+import "package:flow/utils/extensions/custom_popups.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:moment_dart/moment_dart.dart";
@@ -43,24 +45,27 @@ extension TransactionHelpers on Transaction {
 
     final RecurringUpdateMode? mode = await showModalBottomSheet(
       context: context,
-      builder: (context) => SelectRecurringUpdateModeSheet(),
+      builder:
+          (context) => SelectRecurringUpdateModeSheet(
+            title: Text("transaction.recurring.delete".t(context)),
+          ),
       isScrollControlled: true,
     );
 
-    if (mode == null) {
-      return;
+    if (!context.mounted) return;
+
+    if (mode == RecurringUpdateMode.all) {
+      final bool? areTheySure = await context.showConfirmationSheet(
+        isDeletionConfirmation: true,
+      );
+
+      if (areTheySure != true) {
+        return;
+      }
     }
 
-    void disableRecurringTransaction() {
-      recurringTransaction.disabled = true;
-      recurringTransaction.timeRange = CustomTimeRange(
-        recurringTransaction.timeRange.from,
-        recurringTransaction.recurrence.previousAbsoluteOccurrence(
-              transactionDate,
-            ) ??
-            DateTime.now(),
-      );
-      RecurringTransactionsService().updateSync(recurringTransaction);
+    if (mode == null) {
+      return;
     }
 
     if (mode == RecurringUpdateMode.current) {
@@ -105,7 +110,25 @@ extension TransactionHelpers on Transaction {
       );
     }
 
-    disableRecurringTransaction();
+    if (mode == RecurringUpdateMode.all) {
+      try {
+        await RecurringTransactionsService().delete(recurringTransaction);
+      } catch (e, stackTrace) {
+        _log.severe("Failed to delete recurring transaction", e, stackTrace);
+      }
+    }
+
+    if (mode == RecurringUpdateMode.thisAndFuture) {
+      recurringTransaction.disabled = true;
+      recurringTransaction.timeRange = CustomTimeRange(
+        recurringTransaction.timeRange.from,
+        recurringTransaction.recurrence.previousAbsoluteOccurrence(
+              transactionDate,
+            ) ??
+            DateTime.now(),
+      );
+      await RecurringTransactionsService().update(recurringTransaction);
+    }
   }
 
   Future<void> moveToTrashBin(BuildContext context) async {

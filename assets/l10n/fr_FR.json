@@ -500,6 +500,7 @@
   "transaction.pending.preapproved": "Préapprouvé",
   "transaction.recurring": "Transaction récurrente",
   "transaction.recurring.delete": "Supprimer la transaction récurrente",
+  "transaction.recurring.delete.deleteAllDisclaimer": "Cette action supprimera toutes les transactions associées et empêchera la création de nouvelles transactions. La récupération des transactions depuis la corbeille ne provoquera pas la création de nouvelles transactions.",
   "transaction.recurring.edit": "Modifier la transaction récurrente",
   "transaction.transfer.conversionRate": "Taux de conversion",
   "transaction.transfer.from": "Compte d'envoi",

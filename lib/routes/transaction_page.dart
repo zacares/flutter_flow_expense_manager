@@ -993,7 +993,11 @@ class _TransactionPageState extends State<TransactionPage> {
     if (originalTransactionWasRecurring) {
       mode = await showModalBottomSheet(
         context: context,
-        builder: (context) => SelectRecurringUpdateModeSheet(showAll: false),
+        builder:
+            (context) => SelectRecurringUpdateModeSheet(
+              showAll: false,
+              title: Text("transaction.recurring.edit".t(context)),
+            ),
         isScrollControlled: true,
       );
     }
