@@ -40,7 +40,7 @@ extension TransactionHelpers on Transaction {
       _log.severe(
         "Couldn't delete recurring transaction properly due to missing recurring data",
       );
-      return;
+      return await moveToTrashBin(context, ignoreRecurring: true);
     }
 
     final RecurringUpdateMode? mode = await showModalBottomSheet(
@@ -89,6 +89,9 @@ extension TransactionHelpers on Transaction {
 
     for (final Transaction transaction in transactions) {
       try {
+        if (mode == RecurringUpdateMode.all) {
+          transaction.extensions.recurring = null;
+        }
         TransactionsService().moveToBinSync(transaction);
         deletedCount++;
       } catch (e, stackTrace) {
@@ -131,8 +134,11 @@ extension TransactionHelpers on Transaction {
     }
   }
 
-  Future<void> moveToTrashBin(BuildContext context) async {
-    if (isRecurring) {
+  Future<void> moveToTrashBin(
+    BuildContext context, {
+    bool ignoreRecurring = false,
+  }) async {
+    if (isRecurring && !ignoreRecurring) {
       return await _moveToTrashBinRecurring(context);
     }
 

@@ -35,7 +35,7 @@ class TransactionFilterPreset implements EntityBase {
 
   @Transient()
   static TransactionFilter defaultFilter = TransactionFilter(
-    range: TransactionFilterTimeRange.last30Days,
+    range: TransactionFilterTimeRange.thisMonth,
   );
 
   TransactionFilterPreset({
