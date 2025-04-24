@@ -12,10 +12,10 @@ part "model_v2.g.dart";
 
 @JsonSerializable()
 class SyncModelV2 extends SyncModelBase {
-  final List<Transaction> transactions;
-  final List<RecurringTransaction> recurringTransactions;
   final List<Account> accounts;
   final List<Category> categories;
+  final List<Transaction> transactions;
+  final List<RecurringTransaction>? recurringTransactions;
   final List<TransactionFilterPreset>? transactionFilterPresets;
   final Profile? profile;
   final UserPreferences? userPreferences;
