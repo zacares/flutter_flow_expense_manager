@@ -30,7 +30,7 @@ extension TransactionHelpers on Transaction {
     );
   }
 
-  Future<void> _moveToTrashBinRecurring(BuildContext context) async {
+  Future<bool> _moveToTrashBinRecurring(BuildContext context) async {
     final Recurring? recurring = extensions.recurring;
 
     final RecurringTransaction? recurringTransaction =
@@ -52,20 +52,23 @@ extension TransactionHelpers on Transaction {
       isScrollControlled: true,
     );
 
-    if (!context.mounted) return;
+    if (!context.mounted) return false;
 
     if (mode == RecurringUpdateMode.all) {
       final bool? areTheySure = await context.showConfirmationSheet(
         isDeletionConfirmation: true,
+        child: Text(
+          "transaction.recurring.delete.deleteAllDisclaimer".t(context),
+        ),
       );
 
       if (areTheySure != true) {
-        return;
+        return false;
       }
     }
 
     if (mode == null) {
-      return;
+      return false;
     }
 
     if (mode == RecurringUpdateMode.current) {
@@ -74,7 +77,7 @@ extension TransactionHelpers on Transaction {
       } catch (e, stackTrace) {
         _log.severe("Failed to move transaction to trash bin", e, stackTrace);
       }
-      return;
+      return true;
     }
 
     final (
@@ -132,9 +135,11 @@ extension TransactionHelpers on Transaction {
       );
       await RecurringTransactionsService().update(recurringTransaction);
     }
+
+    return true;
   }
 
-  Future<void> moveToTrashBin(
+  Future<bool> moveToTrashBin(
     BuildContext context, {
     bool ignoreRecurring = false,
   }) async {
@@ -144,9 +149,11 @@ extension TransactionHelpers on Transaction {
 
     try {
       TransactionsService().moveToBinSync(this);
+      return true;
     } catch (e, stackTrace) {
       _log.severe("Failed to move transaction to trash bin", e, stackTrace);
     }
+    return false;
   }
 
   void recoverFromTrashBin() {

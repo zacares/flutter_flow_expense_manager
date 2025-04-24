@@ -1254,9 +1254,9 @@ class _TransactionPageState extends State<TransactionPage> {
       return;
     }
 
-    await _currentlyEditing.moveToTrashBin(context);
+    final bool moved = await _currentlyEditing.moveToTrashBin(context);
 
-    if (mounted) {
+    if (mounted && moved) {
       context.showToast(text: "transaction.moveToTrashBin.success".t(context));
       pop();
     }
