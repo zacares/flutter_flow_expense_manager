@@ -38,6 +38,7 @@ personal expense tracking app.
 * Full export/backup
   * Fully recoverable backups (ZIP/JSON)
   * Export CSV for external software use (i.e., Google Sheets)
+* Multilingual, see [list of supported languages]
 
 ## Support Flow
 
@@ -45,7 +46,8 @@ Flow is a personal project developed during my free time, and it generates no
 income. Consider helping Flow! Here are some suggestions:
 
 * Give a star on [GitHub](https://github.com/flow-mn/flow)
-* Leave a review on [Google Play](https://play.google.com/store/apps/details?id=mn.flow.flow) and [App Store](https://apps.apple.com/mn/app/flow-expense-tracker/id6477741670)
+* Leave a review on [Google Play](https://play.google.com/store/apps/details?id=mn.flow.flow)
+  and [App Store](https://apps.apple.com/mn/app/flow-expense-tracker/id6477741670)
 * Tell a friend
 * [Buy me a coffee](https://buymeacoffee.com/sadespresso)
   
@@ -54,9 +56,22 @@ income. Consider helping Flow! Here are some suggestions:
   which [I currently cover](https://github.com/sadespresso).  To ensure Flow's
   continued existence and future development, your support is greatly appreciated.
 
+Thank you for all the contributors, supporters, testers, and those who
+indirectly contributed 🤍
+
+## List of supported languages
+
+* English
+* Arabic - thanks to [Ultrate](https://github.com/Ultrate)
+* Italian - thanks to [albertorizzi](https://github.com/albertorizzi)
+* Turkish - thanks to [NoRiskNoViski](https://github.com/NoRiskNoViski)
+* French
+* Mongolian
+
 ## Development
 
-Please read [Contribuition guide](./CONTRIBUTING.md) before contributing.
+Please read [Contribuition guide](./CONTRIBUTING.md), and
+[Code of Conduct](./CODE_OF_CONDUCT.md) before contributing.
 
 ### Prerequisites
 
@@ -64,7 +79,7 @@ Please read [Contribuition guide](./CONTRIBUTING.md) before contributing.
 
 Other:
 
-* JDK 1.8 or 17 if you're gonna build for Android
+* JDK 11 or 17 if you're gonna build for Android
 * [XCode](https://developer.apple.com/xcode/) if you're gonna build for iOS/macOS
 * To run tests on your machine, see [Testing](#testing)
 
@@ -80,9 +95,7 @@ Install ObjectBox dynamic libraries[^3]:
 
 `bash <(curl -s https://raw.githubusercontent.com/objectbox/objectbox-dart/main/install.sh)`
 
-Testing:
-
-`flutter test`
+Run tests with: `flutter test`
 
 [^1]: Flow requires internet to download currency exchage rates. Only necessary
 if you use more than one currencies

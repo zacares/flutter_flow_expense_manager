@@ -361,7 +361,7 @@ class RecurringTransactionsService {
 
     if (recurringTransaction == null) {
       _log.warning(
-        "Couldn't delete recurring transaction properly due to missing recurring data",
+        "Couldn't delete recurring transaction because it was not found",
       );
       return false;
     }
