@@ -1071,6 +1071,7 @@ class _TransactionPageState extends State<TransactionPage> {
     }
 
     if (_recurringTransaction == null &&
+        !originalTransactionWasRecurring &&
         _transactionDateEditMode == TransactionDateEditMode.recurring) {
       _recurringTransaction = RecurringTransactionsService()
           .createFromTransaction(

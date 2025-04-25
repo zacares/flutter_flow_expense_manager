@@ -1,5 +1,6 @@
 import "dart:async";
 import "dart:convert";
+import "dart:math";
 
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
@@ -32,7 +33,12 @@ class RecurringTransactionsService {
     _synchronizeAll();
   }
 
-  Future<void> _synchronize(RecurringTransaction recurringTransaction) async {
+  Future<void> _synchronize(
+    RecurringTransaction recurringTransaction, {
+    DateTime? anchor,
+  }) async {
+    anchor ??= DateTime.now();
+
     final String loggingPrefix = "Recurring(${recurringTransaction.uuid})";
 
     try {
@@ -46,27 +52,42 @@ class RecurringTransactionsService {
       final TimeRange? range =
           recurringTransaction.lastGeneratedTransactionDate?.rangeToMax();
 
-      final DateTime anchor =
-          recurringTransaction.lastGeneratedTransactionDate?.date ??
-          recurringTransaction.recurrence.range.from.date;
+      final DateTime nextOccurenceAnchor = DateTime.fromMicrosecondsSinceEpoch(
+        min(
+          anchor.date.microsecondsSinceEpoch,
+          recurringTransaction
+              .recurrence
+              .range
+              .from
+              .date
+              .microsecondsSinceEpoch,
+        ),
+      ).copyWith(
+        hour: recurringTransaction.timeRange.from.hour,
+        minute: recurringTransaction.timeRange.from.minute,
+        second: recurringTransaction.timeRange.from.second,
+        millisecond: recurringTransaction.timeRange.from.millisecond,
+        microsecond: 0,
+      );
 
       final DateTime? nextOccurence =
           recurringTransaction.recurrence
-              .nextAbsoluteOccurrence(
-                anchor.copyWith(
-                  hour: recurringTransaction.timeRange.from.hour,
-                  minute: recurringTransaction.timeRange.from.minute,
-                  second: recurringTransaction.timeRange.from.second,
-                  millisecond: recurringTransaction.timeRange.from.millisecond,
-                  microsecond: 0,
-                ),
-                subrange: range,
-              )
+              .nextAbsoluteOccurrence(nextOccurenceAnchor, subrange: range)
               ?.startOfMillisecond();
 
       if (nextOccurence == null) {
         _log.fine(
           "$loggingPrefix No next occurrence for recurring transaction; range is $range; last generated transaction's transaction date is ${recurringTransaction.lastGeneratedTransactionDate}",
+        );
+        return;
+      }
+
+      if (recurringTransaction.lastGeneratedTransactionDate != null &&
+          nextOccurence.startOfMillisecond() <=
+              recurringTransaction.lastGeneratedTransactionDate!
+                  .startOfMillisecond()) {
+        _log.fine(
+          "$loggingPrefix Next occurrence is before last generated transaction date: ${recurringTransaction.lastGeneratedTransactionDate}, skipping",
         );
         return;
       }
