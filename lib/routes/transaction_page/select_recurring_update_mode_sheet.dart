@@ -30,23 +30,20 @@ class SelectRecurringUpdateModeSheet extends StatelessWidget {
   final Widget? title;
   final RecurringUpdateMode? current;
   final bool showTrailing;
-  final bool showAll;
+  final List<RecurringUpdateMode>? values;
 
   const SelectRecurringUpdateModeSheet({
     super.key,
     this.title,
     this.current,
     this.showTrailing = true,
-    this.showAll = true,
+    this.values,
   });
 
   @override
   Widget build(BuildContext context) {
-    final List<RecurringUpdateMode> values = [...RecurringUpdateMode.values];
-
-    if (!showAll) {
-      values.remove(RecurringUpdateMode.all);
-    }
+    final List<RecurringUpdateMode> values =
+        this.values ?? [...RecurringUpdateMode.values];
 
     return ModalSheet.scrollable(
       title: title,

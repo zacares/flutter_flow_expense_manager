@@ -280,7 +280,7 @@ enum TransactionDateEditMode implements LocalizedEnum {
       case TransactionDateEditMode.pending:
         return Symbols.search_activity_rounded;
       default:
-        return Symbols.circle_rounded;
+        return Symbols.calendar_today_rounded;
     }
   }
 }
