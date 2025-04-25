@@ -118,7 +118,7 @@ extension TransactionHelpers on Transaction {
 
     if (mode == RecurringUpdateMode.all) {
       try {
-        await RecurringTransactionsService().delete(recurringTransaction);
+        await RecurringTransactionsService().delete(recurring?.uuid);
       } catch (e, stackTrace) {
         _log.severe("Failed to delete recurring transaction", e, stackTrace);
       }
