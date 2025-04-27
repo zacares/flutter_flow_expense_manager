@@ -19,16 +19,17 @@ TIP: Look for issues with `ready` label to get started without any friction
 
 1. Fork the repository
 2. Pick an issue. If the fix/feature you're gonna work doesn't have an issue,
-please create one first.
+  please create one first.
 3. Let everyone know that you're working on it by commenting "I'm working on it"
-4. Create a feature branch. For example, if you're working on [#82](https://github.com/flow-mn/flow/issues/82),
-create a branch `username/fix82` from `develop`
+4. Create a feature branch. For example, if you're working on
+  [#82](https://github.com/flow-mn/flow/issues/82), create a branch
+  `username/fix82` (based on `develop`). The name can be different, doesn't matter.
 5. Make changes on the new branch
 6. Ensure your code doesn't have any linter warnings, errors
-(Your editor will tell you, or you can run `flutter analyze`)
+  (Your editor will tell you, or you can run `flutter analyze`)
 7. Submit a PR to `develop` branch
 8. If your feature involves UI changes, add a short video demonstrating the
-implement change/feature
+  implement change/feature
 
 ## Code guides
 

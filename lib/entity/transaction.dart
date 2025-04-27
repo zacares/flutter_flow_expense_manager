@@ -80,6 +80,10 @@ class Transaction implements EntityBase {
   /// in this field. (ensuring no collision between extensions)
   String? extra;
 
+  /// List of keys separated by a semicolon. Used for looking up extensions
+  /// in [extra].
+  List<String> extraTags;
+
   @Transient()
   @JsonKey(includeFromJson: false, includeToJson: false)
   ExtensionsWrapper get extensions => ExtensionsWrapper.parse(extra);
@@ -87,15 +91,31 @@ class Transaction implements EntityBase {
   @Transient()
   set extensions(ExtensionsWrapper newValue) {
     extra = newValue.serialize();
+    extraTags =
+        <String>{
+          ...extraTags.where((tag) => !tag.startsWith("hasExtension:")),
+          ...newValue.data.map((ext) => ext.extensionExistenceTag),
+          ...newValue.data.map((ext) => ext.extensionIdentifierTag),
+        }.toList();
   }
 
   void addExtensions(Iterable<TransactionExtension> newExtensions) {
     extensions = extensions.getMerged(newExtensions.toList());
+    extraTags =
+        <String>{
+          ...extraTags,
+          ...newExtensions.map((e) => e.extensionIdentifierTag),
+          ...newExtensions.map((e) => e.extensionExistenceTag),
+        }.toList();
   }
 
   @Transient()
   @JsonKey(includeFromJson: false, includeToJson: false)
   bool get isTransfer => extensions.transfer != null;
+
+  @Transient()
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get isRecurring => extensions.recurring != null;
 
   @Transient()
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -137,9 +157,8 @@ class Transaction implements EntityBase {
 
   /// This won't be saved until you call `Box.put()`
   void setAccount(Account? newAccount) {
-    // TODO (sadespresso): When changing currencies, we can either ask
-    // the user to re-enter the amount, or do an automatic conversion
-
+    // The user will need to recreate the transaction if they want to change
+    // the currency of the transaction.
     if (currency != newAccount?.currency) {
       throw Exception("Cannot convert between currencies");
     }
@@ -160,6 +179,7 @@ class Transaction implements EntityBase {
     required this.uuid,
     DateTime? transactionDate,
     DateTime? createdDate,
+    this.extraTags = const <String>[],
   }) : createdDate = createdDate ?? DateTime.now(),
        transactionDate = transactionDate ?? createdDate ?? DateTime.now();
 

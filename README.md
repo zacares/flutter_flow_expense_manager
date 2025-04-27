@@ -1,10 +1,12 @@
 # ![Flow logo](logo@32.png) Flow
 
 [![Buy me a coffee](https://img.shields.io/badge/buy_me_a_coffee-sadespresso-f5ccff?logo=buy-me-a-coffee&logoColor=white&style=for-the-badge)](https://buymeacoffee.com/sadespresso)
-[![Patreon](https://img.shields.io/badge/patreon-sadespresso-f5ccff?logo=patreon&logoColor=white&style=for-the-badge)](https://patreon.com/sadespresso)
 [![Website](https://img.shields.io/badge/Website-flow.gege.mn-f5ccff?style=for-the-badge)](https://flow.gege.mn)&nbsp;
 [![Flow's GitHub repo](https://img.shields.io/badge/GitHub-flow--mn/flow-f5ccff?logo=github&logoColor=white&style=for-the-badge)](https://github.com/flow-mn/flow)&nbsp;
 [![Join Flow Discord server](https://img.shields.io/badge/Discord-Flow-f5ccff?logo=discord&logoColor=white&style=for-the-badge)](https://discord.gg/Ndh9VDeZa4)
+
+<!-- markdownlint-disable-next-line -->
+<a href="https://www.producthunt.com/posts/flow-2cbe921f-2ed9-4ed1-b8d7-26dff1c2c49d?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-flow&#0045;2cbe921f&#0045;2ed9&#0045;4ed1&#0045;b8d7&#0045;26dff1c2c49d" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=955354&theme=light&period=daily&t=1745222977391" alt="Flow - A&#0032;FOSS&#0032;expense&#0032;tracker&#0032;that&#0032;focuses&#0032;on&#0032;privacy&#0032;and&#0032;UX | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 
 ## Preface
 
@@ -36,6 +38,7 @@ personal expense tracking app.
 * Full export/backup
   * Fully recoverable backups (ZIP/JSON)
   * Export CSV for external software use (i.e., Google Sheets)
+* Multilingual, see [list of supported languages]
 
 ## Support Flow
 
@@ -43,19 +46,32 @@ Flow is a personal project developed during my free time, and it generates no
 income. Consider helping Flow! Here are some suggestions:
 
 * Give a star on [GitHub](https://github.com/flow-mn/flow)
-* Leave a review on [Google Play](https://play.google.com/store/apps/details?id=mn.flow.flow) and [App Store](https://apps.apple.com/mn/app/flow-expense-tracker/id6477741670)
+* Leave a review on [Google Play](https://play.google.com/store/apps/details?id=mn.flow.flow)
+  and [App Store](https://apps.apple.com/mn/app/flow-expense-tracker/id6477741670)
 * Tell a friend
 * [Buy me a coffee](https://buymeacoffee.com/sadespresso)
-* [Patreon](https://patreon.com/sadespresso)
   
   Maintaining Flow on the App Store requires a substantial annual fee
   (see [Apple Developer Program](https://developer.apple.com/support/enrollment/#:~:text=The%20Apple%20Developer%20Program%20annual,in%20local%20currency%20where%20available.)),
   which [I currently cover](https://github.com/sadespresso).  To ensure Flow's
   continued existence and future development, your support is greatly appreciated.
 
+Thank you for all the contributors, supporters, testers, and those who
+indirectly contributed 🤍
+
+## List of supported languages
+
+* English
+* Arabic - thanks to [Ultrate](https://github.com/Ultrate)
+* Italian - thanks to [albertorizzi](https://github.com/albertorizzi)
+* Turkish - thanks to [NoRiskNoViski](https://github.com/NoRiskNoViski)
+* French
+* Mongolian
+
 ## Development
 
-Please read [Contribuition guide](./CONTRIBUTING.md) before contributing.
+Please read [Contribuition guide](./CONTRIBUTING.md), and
+[Code of Conduct](./CODE_OF_CONDUCT.md) before contributing.
 
 ### Prerequisites
 
@@ -63,7 +79,7 @@ Please read [Contribuition guide](./CONTRIBUTING.md) before contributing.
 
 Other:
 
-* JDK 1.8 or 17 if you're gonna build for Android
+* JDK 11 or 17 if you're gonna build for Android
 * [XCode](https://developer.apple.com/xcode/) if you're gonna build for iOS/macOS
 * To run tests on your machine, see [Testing](#testing)
 
@@ -79,9 +95,7 @@ Install ObjectBox dynamic libraries[^3]:
 
 `bash <(curl -s https://raw.githubusercontent.com/objectbox/objectbox-dart/main/install.sh)`
 
-Testing:
-
-`flutter test`
+Run tests with: `flutter test`
 
 [^1]: Flow requires internet to download currency exchage rates. Only necessary
 if you use more than one currencies

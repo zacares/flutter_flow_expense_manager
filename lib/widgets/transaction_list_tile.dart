@@ -7,6 +7,7 @@ import "package:flow/l10n/extensions.dart";
 import "package:flow/providers/accounts_provider.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/extensions/transaction.dart";
+import "package:flow/widgets/general/directional_slidable.dart";
 import "package:flow/widgets/general/flow_icon.dart";
 import "package:flow/widgets/general/money_text.dart";
 import "package:flutter/material.dart";
@@ -85,6 +86,44 @@ class TransactionListTile extends StatelessWidget {
     final Transfer? transfer =
         transaction.isTransfer ? transaction.extensions.transfer : null;
 
+    final TextDirection textDirection = Directionality.of(context);
+
+    final List<String?> subtitleParts = [
+      (transaction.isTransfer && combineTransfers)
+          ? "${AccountsProvider.of(context).getName(transfer!.fromAccountUuid)} → ${AccountsProvider.of(context).getName(transfer.toAccountUuid)}"
+          : (AccountsProvider.of(context).getName(transaction.accountUuid) ??
+              transaction.account.target?.name),
+      if (showCategory && transaction.category.target != null)
+        transaction.category.target!.name,
+      dateString,
+      if (transaction.transactionDate.isFuture)
+        transaction.isPending == true
+            ? "transaction.pending".t(context)
+            : "transaction.pending.preapproved".t(context),
+    ];
+
+    final String subtitle = (textDirection == TextDirection.ltr
+            ? subtitleParts
+            : subtitleParts.reversed)
+        .nonNulls
+        .join(" • ");
+
+    final WidgetSpan? titleLeadingIconSpan =
+        transaction.isRecurring
+            ? titleIconSpan(context, Symbols.repeat_rounded)
+            : (transaction.transactionDate.isFutureAnchored(
+                  Moment.now().startOfNextMinute(),
+                )
+                ? titleIconSpan(
+                  context,
+                  Symbols.search_activity_rounded,
+                  color:
+                      transaction.isPending == true
+                          ? context.colorScheme.onSurface.withAlpha(0xc0)
+                          : context.flowColors.income,
+                )
+                : null);
+
     final Widget listTile = Material(
       type: MaterialType.card,
       color: kTransparent,
@@ -107,21 +146,8 @@ class TransactionListTile extends StatelessWidget {
                         RichText(
                           text: TextSpan(
                             children: [
-                              if (transaction.transactionDate.isFuture) ...[
-                                WidgetSpan(
-                                  alignment: PlaceholderAlignment.middle,
-                                  child: Icon(
-                                    Symbols.schedule_rounded,
-                                    size:
-                                        context.textTheme.bodyMedium!.fontSize!,
-                                    fill: 0.0,
-                                    color:
-                                        transaction.isPending == true
-                                            ? context.colorScheme.onSurface
-                                                .withAlpha(0xc0)
-                                            : context.flowColors.income,
-                                  ),
-                                ),
+                              if (titleLeadingIconSpan != null) ...[
+                                titleLeadingIconSpan,
                                 TextSpan(text: " "),
                               ],
                               TextSpan(text: resolvedTitle),
@@ -132,24 +158,7 @@ class TransactionListTile extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          [
-                            (transaction.isTransfer && combineTransfers)
-                                ? "${AccountsProvider.of(context).getName(transfer!.fromAccountUuid)} → ${AccountsProvider.of(context).getName(transfer.toAccountUuid)}"
-                                : (AccountsProvider.of(
-                                      context,
-                                    ).getName(transaction.accountUuid) ??
-                                    transaction.account.target?.name),
-                            if (showCategory &&
-                                transaction.category.target != null)
-                              transaction.category.target!.name,
-                            dateString,
-                            if (transaction.transactionDate.isFuture)
-                              transaction.isPending == true
-                                  ? "transaction.pending".t(context)
-                                  : "transaction.pending.preapproved".t(
-                                    context,
-                                  ),
-                          ].join(" • "),
+                          subtitle,
                           style: context.textTheme.labelSmall,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -226,7 +235,7 @@ class TransactionListTile extends StatelessWidget {
       ),
     );
 
-    final List<SlidableAction> startActionPanes = [
+    final List<SlidableAction> startActions = [
       if (!transaction.isTransfer && duplicateFn != null)
         SlidableAction(
           onPressed: (context) => duplicateFn!(),
@@ -235,7 +244,7 @@ class TransactionListTile extends StatelessWidget {
         ),
     ];
 
-    final List<SlidableAction> endActionPanes = [
+    final List<SlidableAction> endActions = [
       if (confirmFn != null && transaction.isPending == true)
         SlidableAction(
           onPressed: (context) => confirmFn!(),
@@ -266,23 +275,11 @@ class TransactionListTile extends StatelessWidget {
         ),
     ];
 
-    return Slidable(
+    return DirectionalSlidable(
       key: dismissibleKey,
       groupTag: "transaction_list_tile",
-      endActionPane:
-          endActionPanes.isNotEmpty
-              ? ActionPane(
-                motion: const DrawerMotion(),
-                children: endActionPanes,
-              )
-              : null,
-      startActionPane:
-          startActionPanes.isNotEmpty
-              ? ActionPane(
-                motion: const DrawerMotion(),
-                children: startActionPanes,
-              )
-              : null,
+      startActions: startActions,
+      endActions: endActions,
       child: listTile,
     );
   }
@@ -325,4 +322,18 @@ class TransactionListTile extends StatelessWidget {
       _ => transaction.transactionDate.toMoment().lll,
     };
   }
+
+  WidgetSpan titleIconSpan(
+    BuildContext context,
+    IconData icon, {
+    Color? color,
+  }) => WidgetSpan(
+    alignment: PlaceholderAlignment.middle,
+    child: Icon(
+      icon,
+      size: context.textTheme.bodyMedium!.fontSize!,
+      fill: 0.0,
+      color: color,
+    ),
+  );
 }

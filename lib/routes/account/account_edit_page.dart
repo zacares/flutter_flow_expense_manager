@@ -12,7 +12,7 @@ import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/prefs/local_preferences.dart";
-import "package:flow/routes/new_transaction/input_amount_sheet.dart";
+import "package:flow/routes/transaction_page/input_amount_sheet.dart";
 import "package:flow/services/transactions.dart";
 import "package:flow/sync/export.dart";
 import "package:flow/theme/theme.dart";
@@ -23,8 +23,8 @@ import "package:flow/widgets/general/flow_icon.dart";
 import "package:flow/widgets/general/form_close_button.dart";
 import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/general/info_text.dart";
-import "package:flow/widgets/select_currency_sheet.dart";
-import "package:flow/widgets/select_flow_icon_sheet.dart";
+import "package:flow/widgets/sheets/select_currency_sheet.dart";
+import "package:flow/widgets/sheets/select_flow_icon_sheet.dart";
 import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
 import "package:material_symbols_icons/symbols.dart";
@@ -52,6 +52,8 @@ class _AccountEditPageState extends State<AccountEditPage> {
   late String _currency;
   late FlowIconData? _iconData;
   late bool _excludeFromTotalBalance;
+
+  AccountType _accountType = AccountType.debit;
 
   late double _balance;
 
@@ -98,6 +100,7 @@ class _AccountEditPageState extends State<AccountEditPage> {
       _excludeFromTotalBalance =
           _currentlyEditing?.excludeFromTotalBalance ?? false;
       _archived = _currentlyEditing?.archived ?? false;
+      _accountType = _currentlyEditing?.accountType ?? _accountType;
     }
 
     _editNameFocusNode.addListener(() {
@@ -247,13 +250,13 @@ class _AccountEditPageState extends State<AccountEditPage> {
                   ),
                 ),
                 const SizedBox(height: 24.0),
-                CheckboxListTile /*.adaptive*/ (
+                CheckboxListTile(
                   value: _excludeFromTotalBalance,
                   onChanged: updateBalanceExclusion,
                   title: Text("account.excludeFromTotalBalance".t(context)),
                 ),
                 if (!widget.isNewAccount)
-                  CheckboxListTile /*.adaptive*/ (
+                  CheckboxListTile(
                     value: _archived,
                     onChanged: updateArchived,
                     title: Text("account.archive".t(context)),

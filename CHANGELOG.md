@@ -1,5 +1,34 @@
 # Changelog
 
+## Next
+
+### New Features
+
+* Now you can save backups to iCloud. Enable it in `Preferences > Sync`
+
+## 0.14.0
+
+### New features
+
+* Added list of contributors, closes [#448](https://github.com/flow-mn/flow/issues/448)
+* Date and time are now in Arabic when the language is set to Arabic, thanks to [Ultrate](https://github.com/Ultrate)
+* Now you can do recurring transactions, closes [#59](https://github.com/flow-mn/flow/issues/59)
+
+### Changes & Improvements
+
+* Backup files naming convention has changed (to comply with upcoming iCloud Drive file name requirements)
+* Added "Recommend Flow" button
+* Title suggestion now considers recency of a transaction
+* Improved RTL support in certain parts of the UI. Feel free to report more issues regarding RTL
+* Transfer transactions now shows account balance
+* Home page default filter now shows transactions of the current month rather than last 30 days'
+* Some transactions page now has time range filter (transactions pages for deleted, pending, account, etc.)
+
+### Fixes
+
+* Fixed `Categories page` add from preset buttons were squashed on smaller screens
+* `Add category from presets` page no longer show presets with same name as any of your existing categories
+
 ## 0.13.1
 
 ### Changes & Improvements

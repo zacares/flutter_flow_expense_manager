@@ -8,6 +8,7 @@ import "package:flow/widgets/general/modal_overflow_bar.dart";
 import "package:flow/widgets/general/modal_sheet.dart";
 import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
+import "package:moment_dart/moment_dart.dart";
 import "package:path/path.dart";
 import "package:share_plus/share_plus.dart";
 
@@ -68,10 +69,9 @@ extension CustomPopups on BuildContext {
   }
 
   /// Returns the saved path on desktop, null on mobile
-  Future<String?> showShareSheet({
+  Future<String?> showFileShareSheet({
     required String subject,
     required String filePath,
-    required RenderBox? renderBox,
   }) async {
     if (Platform.isMacOS || Platform.isLinux) {
       final String savedPath = await FileSaver.instance.saveFile(
@@ -87,6 +87,8 @@ extension CustomPopups on BuildContext {
       return savedPath;
     }
 
+    final RenderBox? renderBox = findRenderObject() as RenderBox?;
+
     final origin =
         renderBox == null
             ? Rect.zero
@@ -99,5 +101,59 @@ extension CustomPopups on BuildContext {
     );
 
     return null;
+  }
+
+  Future<ShareResult> showUriShareSheet({required Uri uri}) async {
+    final RenderBox? renderBox = findRenderObject() as RenderBox?;
+    final origin =
+        renderBox == null
+            ? Rect.zero
+            : renderBox.localToGlobal(Offset.zero) & renderBox.size;
+
+    if (Platform.isIOS || Platform.isAndroid) {
+      return await Share.shareUri(uri, sharePositionOrigin: origin);
+    }
+
+    return await Share.share(uri.toString(), sharePositionOrigin: origin);
+  }
+
+  static final CustomTimeRange _pickDateDefaultBounds = CustomTimeRange(
+    DateTime.fromMicrosecondsSinceEpoch(0),
+    DateTime(4000),
+  );
+
+  Future<DateTime?> pickDate([DateTime? initial, TimeRange? bounds]) async {
+    bounds =
+        (bounds ?? _pickDateDefaultBounds).intersect(_pickDateDefaultBounds) ??
+        _pickDateDefaultBounds;
+
+    final DateTime initialDate = DateTime.fromMicrosecondsSinceEpoch(
+      (initial ?? DateTime.now()).microsecondsSinceEpoch.clamp(
+        bounds.from.microsecondsSinceEpoch,
+        bounds.to.microsecondsSinceEpoch,
+      ),
+    );
+
+    return await showDatePicker(
+      context: this,
+      initialDate: initialDate,
+      firstDate: bounds.from,
+      lastDate: bounds.to,
+    );
+  }
+
+  Future<DateTime?> pickTime({DateTime? anchor, TimeOfDay? initial}) async {
+    anchor ??= DateTime.now();
+
+    final TimeOfDay initialTime = initial ?? TimeOfDay.fromDateTime(anchor);
+
+    final TimeOfDay? time = await showTimePicker(
+      context: this,
+      initialTime: initial ?? initialTime,
+    );
+
+    if (time == null) return null;
+
+    return anchor.date.add(Duration(hours: time.hour, minutes: time.minute));
   }
 }
