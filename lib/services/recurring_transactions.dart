@@ -1,5 +1,6 @@
 import "dart:async";
 import "dart:convert";
+import "dart:math";
 
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
@@ -32,7 +33,12 @@ class RecurringTransactionsService {
     _synchronizeAll();
   }
 
-  Future<void> _synchronize(RecurringTransaction recurringTransaction) async {
+  Future<void> _synchronize(
+    RecurringTransaction recurringTransaction, {
+    DateTime? anchor,
+  }) async {
+    anchor ??= DateTime.now();
+
     final String loggingPrefix = "Recurring(${recurringTransaction.uuid})";
 
     try {
@@ -43,30 +49,46 @@ class RecurringTransactionsService {
         return;
       }
 
-      final TimeRange? range =
-          recurringTransaction.lastGeneratedTransactionDate?.rangeToMax();
+      final TimeRange? range = recurringTransaction.lastGeneratedTransactionDate
+          ?.rangeToMax()
+          .intersect(recurringTransaction.recurrence.range);
 
-      final DateTime anchor =
-          recurringTransaction.lastGeneratedTransactionDate?.date ??
-          DateTime.now().date;
+      final DateTime nextOccurenceAnchor = DateTime.fromMicrosecondsSinceEpoch(
+        min(
+          anchor.date.microsecondsSinceEpoch,
+          recurringTransaction
+              .recurrence
+              .range
+              .from
+              .date
+              .microsecondsSinceEpoch,
+        ),
+      ).copyWith(
+        hour: recurringTransaction.timeRange.from.hour,
+        minute: recurringTransaction.timeRange.from.minute,
+        second: recurringTransaction.timeRange.from.second,
+        millisecond: recurringTransaction.timeRange.from.millisecond,
+        microsecond: 0,
+      );
 
       final DateTime? nextOccurence =
           recurringTransaction.recurrence
-              .nextAbsoluteOccurrence(
-                anchor.copyWith(
-                  hour: recurringTransaction.timeRange.from.hour,
-                  minute: recurringTransaction.timeRange.from.minute,
-                  second: recurringTransaction.timeRange.from.second,
-                  millisecond: recurringTransaction.timeRange.from.millisecond,
-                  microsecond: 0,
-                ),
-                subrange: range,
-              )
+              .nextAbsoluteOccurrence(nextOccurenceAnchor, subrange: range)
               ?.startOfMillisecond();
 
       if (nextOccurence == null) {
         _log.fine(
           "$loggingPrefix No next occurrence for recurring transaction; range is $range; last generated transaction's transaction date is ${recurringTransaction.lastGeneratedTransactionDate}",
+        );
+        return;
+      }
+
+      if (recurringTransaction.lastGeneratedTransactionDate != null &&
+          nextOccurence.startOfMillisecond() <=
+              recurringTransaction.lastGeneratedTransactionDate!
+                  .startOfMillisecond()) {
+        _log.fine(
+          "$loggingPrefix Next occurrence is before last generated transaction date: ${recurringTransaction.lastGeneratedTransactionDate}, skipping",
         );
         return;
       }
@@ -190,6 +212,14 @@ class RecurringTransactionsService {
         recurringTransaction,
         mode: PutMode.update,
       );
+
+      if (nextOccurence.isBefore(anchor)) {
+        _log.fine(
+          "$loggingPrefix Next occurrence is before anchor: $anchor, trying to create another one",
+        );
+
+        await _synchronize(recurringTransaction);
+      }
 
       _log.fine(
         "$loggingPrefix Updated recurring transaction with last generated transaction date: $nextOccurence",
@@ -340,7 +370,7 @@ class RecurringTransactionsService {
 
     if (recurringTransaction == null) {
       _log.warning(
-        "Couldn't delete recurring transaction properly due to missing recurring data",
+        "Couldn't delete recurring transaction because it was not found",
       );
       return false;
     }
@@ -356,9 +386,9 @@ class RecurringTransactionsService {
       return false;
     }
 
-    ObjectBox().box<RecurringTransaction>().remove(recurringTransaction.id);
-
-    return true;
+    return await ObjectBox().box<RecurringTransaction>().removeAsync(
+      recurringTransaction.id,
+    );
   }
 
   /// Throws [ArgumentError] if the transaction does not have a recurring

@@ -12,9 +12,12 @@ class SelectRecurrence extends StatefulWidget {
   final Recurrence? initialValue;
   final Function(Recurrence) onChanged;
 
+  final TimeRange? startBounds;
+
   const SelectRecurrence({
     super.key,
     required this.onChanged,
+    required this.startBounds,
     this.initialValue,
   });
 
@@ -71,6 +74,7 @@ class _SelectRecurrenceState extends State<SelectRecurrence> {
               alignment: AlignmentDirectional.topEnd,
               items:
                   RecurrenceMode.values
+                      .where((mode) => mode != RecurrenceMode.custom)
                       .map(
                         (mode) => DropdownMenuItem<RecurrenceMode>(
                           value: mode,
@@ -90,10 +94,14 @@ class _SelectRecurrenceState extends State<SelectRecurrence> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("select.recurrence.from".t(context)),
-              Text(_recurrence.range.from.toMoment().LLL),
+              Opacity(
+                opacity: widget.startBounds != null ? 1.0 : 0.66,
+                child: Text(_recurrence.range.from.toMoment().LLL),
+              ),
             ],
           ),
-          onTap: _selectFrom,
+          onTap: widget.startBounds != null ? _selectFrom : null,
+          // enabled: widget.canEditFromDate,
         ),
         ListTile(
           title: Row(
@@ -159,7 +167,10 @@ class _SelectRecurrenceState extends State<SelectRecurrence> {
             ? DateTime.now()
             : _recurrence.range.from;
 
-    final DateTime? result = await context.pickDate(initialDate);
+    final DateTime? result = await context.pickDate(
+      initialDate,
+      widget.startBounds,
+    );
 
     if (result == null) return;
     _recurrence = _recurrence.copyWith(

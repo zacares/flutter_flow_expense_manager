@@ -41,7 +41,7 @@ class _ICloudState extends State<ICloud> {
         ),
         if (lastSuccessfulICloudSyncAt != null)
           Text(
-            "preferences.sync.iCloud.lastSuccessfulSync".t(
+            "preferences.sync.iCloud.lastSyncedAt".t(
               context,
               lastSuccessfulICloudSyncAt.toMoment().lll,
             ),

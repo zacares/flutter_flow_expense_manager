@@ -6,6 +6,7 @@ import "package:flow/entity/account.dart";
 import "package:flow/entity/backup_entry.dart";
 import "package:flow/entity/category.dart";
 import "package:flow/entity/profile.dart";
+import "package:flow/entity/recurring_transaction.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction_filter_preset.dart";
 import "package:flow/entity/user_preferences.dart";
@@ -98,7 +99,15 @@ class ImportV2 extends Importer {
     progressNotifier.value = ImportV2Progress.writingAccounts;
     await ObjectBox().box<Account>().putManyAsync(data.accounts);
 
-    // 3. Resurrect [Transaction]s
+    // 3. Resurrect [RecurringTransaction]s
+    if (data.recurringTransactions?.isNotEmpty == true) {
+      progressNotifier.value = ImportV2Progress.writingRecurringTransactions;
+      await ObjectBox().box<RecurringTransaction>().putManyAsync(
+        data.recurringTransactions!,
+      );
+    }
+
+    // 4. Resurrect [Transaction]s
     //
     // Resolve ToOne<T> [account] and [category] by `uuid`.
     progressNotifier.value = ImportV2Progress.resolvingTransactions;

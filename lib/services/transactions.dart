@@ -49,27 +49,44 @@ class TransactionsService {
   final Condition<Transaction> nonDeletedCondition =
       Transaction_.isDeleted.equals(false) | Transaction_.isDeleted.isNull();
 
-  QueryBuilder<Transaction> pendingTransactionsQb([DateTime? anchor]) {
+  QueryBuilder<Transaction> pendingTransactionsQb({
+    DateTime? anchor,
+    TimeRange? range,
+  }) {
     anchor = DateTime.now();
 
-    final Condition<Transaction> condition =
+    Condition<Transaction> condition =
         nonDeletedCondition &
         (Transaction_.transactionDate.greaterThanDate(
               anchor.startOfNextMinute(),
             ) |
             Transaction_.isPending.equals(true));
 
+    if (range != null) {
+      condition =
+          condition &
+          Transaction_.transactionDate.betweenDate(range.from, range.to);
+    }
+
     return ObjectBox()
         .box<Transaction>()
         .query(condition)
-        .order(Transaction_.transactionDate);
+        .order(Transaction_.transactionDate, flags: Order.descending);
   }
 
-  QueryBuilder<Transaction> deletedTransactionsQb() {
+  QueryBuilder<Transaction> deletedTransactionsQb({TimeRange? range}) {
+    Condition<Transaction> condition = Transaction_.isDeleted.equals(true);
+
+    if (range != null) {
+      condition =
+          condition &
+          Transaction_.deletedDate.betweenDate(range.from, range.to);
+    }
+
     return ObjectBox()
         .box<Transaction>()
-        .query(Transaction_.isDeleted.equals(true))
-        .order(Transaction_.transactionDate);
+        .query(condition)
+        .order(Transaction_.transactionDate, flags: Order.descending);
   }
 
   Future<List<int>> upsertMany(List<Transaction> transactions) async {

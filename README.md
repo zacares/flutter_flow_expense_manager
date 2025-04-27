@@ -56,6 +56,9 @@ income. Consider helping Flow! Here are some suggestions:
   which [I currently cover](https://github.com/sadespresso).  To ensure Flow's
   continued existence and future development, your support is greatly appreciated.
 
+Thank you for all the contributors, supporters, testers, and those who
+indirectly contributed 🤍
+
 ## List of supported languages
 
 * English
@@ -103,5 +106,3 @@ to enhance the UI for desktop experience for now.
 [^3]: Please double-check from the official website, may be outdated. Visit
 <https://docs.objectbox.io/getting-started#add-objectbox-to-your-project>
 (make sure to choose Flutter to see the script).
-
-> Thank you for the contributors, and everyone who has supported indirectly

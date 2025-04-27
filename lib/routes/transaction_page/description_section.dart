@@ -7,7 +7,7 @@ import "package:flow/routes/utils/edit_markdown_page.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/extensions/toast.dart";
 import "package:flow/utils/open_url.dart";
-import "package:flow/widgets/general/frame.dart";
+import "package:flow/widgets/general/directional_chevron.dart";
 import "package:flow/widgets/general/markdown_view.dart";
 import "package:flutter/material.dart";
 import "package:flutter_markdown/flutter_markdown.dart";
@@ -53,14 +53,11 @@ class DescriptionSection extends StatelessWidget {
       ),
       child:
           noContent
-              ? Align(
-                alignment: AlignmentDirectional.topStart,
-                child: Frame(
-                  child: TextButton(
-                    onPressed: () => showEditModal(context),
-                    child: Text("transaction.description.add".t(context)),
-                  ),
-                ),
+              ? ListTile(
+                onTap: () => showEditModal(context),
+                title: Text("transaction.description.add".t(context)),
+                leading: Icon(Symbols.add_notes_rounded),
+                trailing: const DirectionalChevron(),
               )
               : Stack(
                 children: [
