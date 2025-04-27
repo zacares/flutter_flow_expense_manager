@@ -49,8 +49,9 @@ class RecurringTransactionsService {
         return;
       }
 
-      final TimeRange? range =
-          recurringTransaction.lastGeneratedTransactionDate?.rangeToMax();
+      final TimeRange? range = recurringTransaction.lastGeneratedTransactionDate
+          ?.rangeToMax()
+          .intersect(recurringTransaction.recurrence.range);
 
       final DateTime nextOccurenceAnchor = DateTime.fromMicrosecondsSinceEpoch(
         min(
@@ -211,6 +212,14 @@ class RecurringTransactionsService {
         recurringTransaction,
         mode: PutMode.update,
       );
+
+      if (nextOccurence.isBefore(anchor)) {
+        _log.fine(
+          "$loggingPrefix Next occurrence is before anchor: $anchor, trying to create another one",
+        );
+
+        await _synchronize(recurringTransaction);
+      }
 
       _log.fine(
         "$loggingPrefix Updated recurring transaction with last generated transaction date: $nextOccurence",
