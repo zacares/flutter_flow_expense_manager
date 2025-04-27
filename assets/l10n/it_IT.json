@@ -502,6 +502,7 @@
   "transaction.recurring.delete": "Elimina transazione ricorrente",
   "transaction.recurring.delete.deleteAllDisclaimer": "Questa azione eliminerà tutte le transazioni correlate e impedirà la creazione di nuove transazioni. Il recupero delle transazioni dal cestino non causerà la creazione di nuove transazioni.",
   "transaction.recurring.edit": "Modifica transazione ricorrente",
+  "transaction.recurring.setup": "Configurare la transazione ricorrente",
   "transaction.transfer.conversionRate": "Tasso di conversione",
   "transaction.transfer.from": "Conto di origine",
   "transaction.transfer.from.select": "Trasferisci da",
