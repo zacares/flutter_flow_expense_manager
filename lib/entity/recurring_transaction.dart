@@ -37,6 +37,7 @@ class RecurringTransaction extends EntityBase {
   String? transferToAccountUuid;
 
   @Transient()
+  @JsonKey(includeToJson: false, includeFromJson: false)
   Transaction get template =>
       Transaction.fromJson(jsonDecode(jsonTransactionTemplate));
 

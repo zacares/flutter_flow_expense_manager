@@ -222,9 +222,6 @@ class _TransactionPageState extends State<TransactionPage> {
   Widget build(BuildContext context) {
     final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
 
-    final bool showPostTransactionBalance =
-        _selectedAccount != null && !widget.isNewTransaction;
-
     final TimeRange? startBounds = getStartBounds();
 
     return GestureDetector(
@@ -316,7 +313,8 @@ class _TransactionPageState extends State<TransactionPage> {
                                     "transaction.edit.selectAccount".t(context),
                               ),
                               subtitle:
-                                  showPostTransactionBalance
+                                  (!widget.isNewTransaction &&
+                                          _selectedAccount != null)
                                       ? MoneyText(
                                         _selectedAccount!.balanceAt(
                                           transactionDate,
@@ -351,7 +349,8 @@ class _TransactionPageState extends State<TransactionPage> {
                                   "transaction.edit.selectAccount".t(context),
                             ),
                             subtitle:
-                                _selectedAccountTransferTo != null
+                                (!widget.isNewTransaction &&
+                                        _selectedAccountTransferTo != null)
                                     ? MoneyText(
                                       _selectedAccountTransferTo!.balanceAt(
                                         transactionDate,

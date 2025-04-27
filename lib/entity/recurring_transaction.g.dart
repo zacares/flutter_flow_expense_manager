@@ -23,7 +23,7 @@ RecurringTransaction _$RecurringTransactionFromJson(
     const UTCDateTimeConverter().fromJson,
   ),
   uuid: json['uuid'] as String?,
-)..template = Transaction.fromJson(json['template'] as Map<String, dynamic>);
+);
 
 Map<String, dynamic> _$RecurringTransactionToJson(
   RecurringTransaction instance,
@@ -31,7 +31,6 @@ Map<String, dynamic> _$RecurringTransactionToJson(
   'uuid': instance.uuid,
   'jsonTransactionTemplate': instance.jsonTransactionTemplate,
   'transferToAccountUuid': instance.transferToAccountUuid,
-  'template': instance.template.toJson(),
   'range': instance.range,
   'rules': instance.rules,
   'createdDate': const UTCDateTimeConverter().toJson(instance.createdDate),
