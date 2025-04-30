@@ -421,10 +421,16 @@ class TransactionsService {
       FlowNotificationPayloadItemType.transaction,
     );
 
+    final Duration earlyReminder = Duration(
+      seconds:
+          PendingTransactionsLocalPreferences().earlyReminderInSeconds.get() ??
+          0,
+    );
+
     await Future.wait(
       pendingTransactions.map(
         (transaction) => NotificationsService()
-            .scheduleForPlannedTransaction(transaction)
+            .scheduleForPlannedTransaction(transaction, earlyReminder)
             .catchError((error) {
               _log.severe(
                 "Failed to schedule exact reminder for transaction ${transaction.uuid}",
@@ -439,32 +445,6 @@ class TransactionsService {
       );
       return [];
     });
-
-    final Duration earlyReminder = Duration(
-      seconds:
-          PendingTransactionsLocalPreferences().earlyReminderInSeconds.get() ??
-          0,
-    );
-
-    if (earlyReminder.inSeconds > 60) {
-      await Future.wait(
-        pendingTransactions.map(
-          (transaction) => NotificationsService()
-              .scheduleForPlannedTransaction(transaction, earlyReminder)
-              .then((_) {
-                _log.info(
-                  "Scheduled early reminder for transaction '${transaction.title ?? 'untitled'}' ${transaction.uuid}",
-                );
-              })
-              .catchError((error) {
-                _log.warning(
-                  "Failed to schedule an early reminder notification for transaction ${transaction.uuid}",
-                  error,
-                );
-              }),
-        ),
-      );
-    }
   }
 
   /// Has no effect if it's already paused

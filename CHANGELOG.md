@@ -1,10 +1,11 @@
 # Changelog
 
-## Next
+## 0.14.1
 
-### New Features
+### Fixes
 
-* Now you can save backups to iCloud. Enable it in `Preferences > Sync`
+* Arabic ordinal numbers are somewhat fixed (Please help if you can <https://github.com/sadespresso/moment_dart/issues/47>)
+* Fixed early reminder date estimate was incorrect
 
 ## 0.14.0
 
