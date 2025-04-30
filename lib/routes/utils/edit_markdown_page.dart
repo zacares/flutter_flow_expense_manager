@@ -57,62 +57,69 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
             ? SizedBox.shrink()
             : null;
 
-    return Scaffold(
-      appBar: AppBar(
-        leadingWidth: 40.0,
-        leading: FormCloseButton(canPop: () => !hasChanged()),
-        actions: [
-          IconButton(
-            onPressed: () => save(),
-            icon: const Icon(Symbols.check_rounded),
-            tooltip: "general.save".t(context),
-          ),
-        ],
-        bottom: TabBar(
-          tabs: [
-            Tab(text: "general.edit".t(context)),
-            Tab(text: "transaction.description.preview".t(context)),
-          ],
-          controller: _tabController,
-        ),
-        centerTitle: true,
-        backgroundColor: context.colorScheme.surface,
-      ),
-      body: Stack(
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Stack(
         children: [
-          TabBarView(
-            controller: _tabController,
-            children: [
-              SingleChildScrollView(
-                padding: EdgeInsets.all(16.0),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    hintText: "transaction.description".t(context),
-                    border: OutlineInputBorder(),
-                    counter: counterOverride,
-                  ),
-                  focusNode: _focusNode,
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  maxLength: widget.maxLength,
-                  maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                  minLines: 10,
-                  controller: _controller,
-                  autofocus: true,
-                  textInputAction: TextInputAction.newline,
+          Scaffold(
+            appBar: AppBar(
+              leadingWidth: 40.0,
+              leading: FormCloseButton(canPop: () => !hasChanged()),
+              actions: [
+                IconButton(
+                  onPressed: () => save(),
+                  icon: const Icon(Symbols.check_rounded),
+                  tooltip: "general.save".t(context),
                 ),
+              ],
+              bottom: TabBar(
+                tabs: [
+                  Tab(text: "general.edit".t(context)),
+                  Tab(text: "transaction.description.preview".t(context)),
+                ],
+                controller: _tabController,
               ),
-              SingleChildScrollView(
-                padding: EdgeInsets.only(top: 16.0),
-                child: MarkdownView(controller: _controller),
-              ),
-            ],
+              centerTitle: true,
+              backgroundColor: context.colorScheme.surface,
+            ),
+            body: TabBarView(
+              controller: _tabController,
+              children: [
+                SingleChildScrollView(
+                  padding: EdgeInsets.all(16.0),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 80.0),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        hintText: "transaction.description".t(context),
+                        border: OutlineInputBorder(),
+                        counter: counterOverride,
+                      ),
+                      focusNode: _focusNode,
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      maxLength: widget.maxLength,
+                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                      minLines: 10,
+                      controller: _controller,
+                      autofocus: true,
+                      textInputAction: TextInputAction.newline,
+                    ),
+                  ),
+                ),
+                SingleChildScrollView(
+                  padding: EdgeInsets.only(top: 16.0),
+                  child: MarkdownView(controller: _controller),
+                ),
+              ],
+            ),
           ),
           Positioned(
             left: 0,
             right: 0,
             bottom: MediaQuery.of(context).viewInsets.bottom,
-            child: Padding(
+            child: Container(
+              color: context.colorScheme.surface,
               padding: const EdgeInsets.symmetric(
                 horizontal: 12.0,
                 vertical: 4.0,
