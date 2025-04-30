@@ -78,7 +78,6 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
         centerTitle: true,
         backgroundColor: context.colorScheme.surface,
       ),
-      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           TabBarView(

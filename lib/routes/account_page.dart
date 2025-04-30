@@ -89,7 +89,7 @@ class _AccountPageState extends State<AccountPage> {
         ExchangeRatesService().getPrimaryCurrencyRates();
     final bool showMissingExchangeRatesWarning =
         rates == null &&
-        TransitiveLocalPreferences().transitiveUsesSingleCurrency.get();
+        TransitiveLocalPreferences().usesNonPrimaryCurrency.get();
 
     return StreamBuilder<List<Transaction>>(
       stream: qb(
@@ -216,13 +216,14 @@ class _AccountPageState extends State<AccountPage> {
               ),
               _ => GroupedTransactionList(
                 listType: GroupedTransactionListType.reorderable,
-                header: header,
+                mainHeader: header,
                 transactions: grouped,
                 pendingTransactions: pendingTransactionsGrouped,
                 pendingDivider: WavyDivider(),
-                listPadding: widget.listPadding,
-                headerPadding: widget.headerPadding,
-                firstHeaderTopPadding: firstHeaderTopPadding,
+                groupHeaderPadding: widget.headerPadding,
+                mainHeaderPadding: widget.headerPadding.copyWith(
+                  top: firstHeaderTopPadding,
+                ),
                 headerBuilder: (pendingGroup, range, transactions) {
                   if (pendingGroup) {
                     return PendingTransactionsHeader(

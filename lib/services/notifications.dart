@@ -186,11 +186,14 @@ class NotificationsService {
       return;
     }
 
-    final TZDateTime dateTime = _getTZDateTime(
-      earlyReminder == null
-          ? transaction.transactionDate
-          : transaction.transactionDate.subtract(earlyReminder),
-    );
+    final TZDateTime dateTime = _getTZDateTime(transaction.transactionDate);
+
+    final TZDateTime? earlyDateTime =
+        (earlyReminder != null && earlyReminder >= const Duration(seconds: 60))
+            ? _getTZDateTime(
+              transaction.transactionDate.subtract(earlyReminder),
+            )
+            : null;
 
     try {
       final NotificationDetails details = NotificationDetails(
@@ -235,10 +238,28 @@ class NotificationsService {
               id: transaction.uuid,
             ).serialized,
       );
-
       _log.info(
         "Scheduled a reminder for transaction '${transaction.title ?? 'untitled'}' ${transaction.uuid} at ${dateTime.toString()}",
       );
+
+      if (earlyDateTime != null) {
+        await pluginInstance.zonedSchedule(
+          _getNextId(),
+          transaction.title ?? "transaction.fallbackTitle".tr(),
+          "${transaction.money.formatMoney()}, ${earlyDateTime.toMoment().from(dateTime)}",
+          earlyDateTime,
+          details,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          payload:
+              FlowNotificationPayload(
+                itemType: FlowNotificationPayloadItemType.transaction,
+                id: transaction.uuid,
+              ).serialized,
+        );
+        _log.info(
+          "Scheduled an early reminder for transaction '${transaction.title ?? 'untitled'}' ${transaction.uuid} at ${earlyDateTime.toString()}",
+        );
+      }
     } catch (e) {
       _log.warning("Failed to schedule notification", e);
     }

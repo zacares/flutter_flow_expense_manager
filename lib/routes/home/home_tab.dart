@@ -6,11 +6,13 @@ import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction_filter_preset.dart";
+import "package:flow/l10n/extensions.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/services/exchange_rates.dart";
 import "package:flow/services/internal_notifications.dart";
 import "package:flow/services/user_preferences.dart";
+import "package:flow/theme/helpers.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/default_transaction_filter_head.dart";
 import "package:flow/widgets/general/frame.dart";
@@ -91,7 +93,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     );
 
     _timer = Timer.periodic(
-      const Duration(seconds: 30),
+      const Duration(seconds: 20),
       (_) => refreshDateKeyAndDefaultFilter(),
     );
 
@@ -163,21 +165,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                 ],
               ),
             ),
-            // TODO @sadespresso show iCloud errors if enabled, and platform is supported
-            if (_internalNotification != null) ...[
-              const SliverToBoxAdapter(child: SizedBox(height: 12.0)),
-              SliverToBoxAdapter(
-                child: SlidableAutoCloseBehavior(
-                  child: InternalNotificationSection(
-                    notification: _internalNotification!,
-                    onDismiss:
-                        () => setState(() {
-                          _internalNotification = null;
-                        }),
-                  ),
-                ),
-              ),
-            ],
+
             switch ((transactions?.length ?? 0, snapshot.hasData)) {
               (0, true) => SliverFillRemaining(
                 child: NoTransactions(isFilterModified: isFilterModified),
@@ -208,7 +196,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
 
         final bool showMissingExchangeRatesWarning =
             rates == null &&
-            !TransitiveLocalPreferences().transitiveUsesSingleCurrency.get();
+            TransitiveLocalPreferences().usesNonPrimaryCurrency.get();
 
         final Map<TimeRange, List<Transaction>> grouped = transactions
             .where(
@@ -244,9 +232,26 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
 
         return GroupedTransactionList(
           listType: GroupedTransactionListType.sliverReorderable,
-          header: Column(
+          mainHeader: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // TODO @sadespresso show iCloud errors if enabled, and platform is supported
+              if (_internalNotification != null) ...[
+                SlidableAutoCloseBehavior(
+                  child: InternalNotificationSection(
+                    notification: _internalNotification!,
+                    onDismiss:
+                        () => setState(() {
+                          _internalNotification = null;
+                        }),
+                  ),
+                ),
+                SizedBox(height: 8.0),
+              ],
+              if (showMissingExchangeRatesWarning) ...[
+                RatesMissingWarning(),
+                SizedBox(height: 8.0),
+              ],
               // TODO @sadespresso want to analyze transactions shown in current
               // view. For example, average amount of transaction, how often this
               // happens, total txn count, etc
@@ -255,10 +260,14 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
               //   const SizedBox(height: 4.0),
               // ],
               FlowCards(transactions: transactions, rates: rates),
-              if (showMissingExchangeRatesWarning) ...[
-                SizedBox(height: 4.0),
-                RatesMissingWarning(),
-              ],
+              SizedBox(height: 8.0),
+              Align(
+                alignment: AlignmentDirectional.topStart,
+                child: Text(
+                  "transactions.count".t(context, transactions.renderableCount),
+                  style: context.textTheme.bodyMedium?.semi(context),
+                ),
+              ),
               SizedBox(height: 4.0),
             ],
           ),
@@ -268,7 +277,6 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           pendingTransactions: pendingTransactionsGrouped,
           shouldCombineTransferIfNeeded: shouldCombineTransferIfNeeded,
           pendingDivider: const WavyDivider(),
-          listPadding: const EdgeInsets.only(top: 0, bottom: 80.0),
           headerBuilder: (pendingGroup, range, transactions) {
             if (pendingGroup) {
               return PendingTransactionsHeader(

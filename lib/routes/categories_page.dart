@@ -22,30 +22,16 @@ class CategoriesPage extends StatefulWidget {
 }
 
 class _CategoriesPageState extends State<CategoriesPage> {
-  late bool usesSingleCurrency;
-
   QueryBuilder<Category> qb() =>
       ObjectBox().box<Category>().query().order(Category_.createdDate);
 
   @override
   void initState() {
     super.initState();
-    TransitiveLocalPreferences().transitiveUsesSingleCurrency.addListener(
-      _updateUsesSingleCurrency,
-    );
-    _updateUsesSingleCurrency();
 
-    if (!usesSingleCurrency) {
+    if (TransitiveLocalPreferences().usesNonPrimaryCurrency.get()) {
       ExchangeRatesService().getPrimaryCurrencyRates();
     }
-  }
-
-  @override
-  void dispose() {
-    TransitiveLocalPreferences().transitiveUsesSingleCurrency.removeListener(
-      _updateUsesSingleCurrency,
-    );
-    super.dispose();
   }
 
   @override
@@ -129,12 +115,5 @@ class _CategoriesPageState extends State<CategoriesPage> {
         ),
       ),
     );
-  }
-
-  void _updateUsesSingleCurrency() {
-    setState(() {
-      usesSingleCurrency =
-          TransitiveLocalPreferences().transitiveUsesSingleCurrency.get();
-    });
   }
 }

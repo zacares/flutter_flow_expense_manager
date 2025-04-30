@@ -653,7 +653,7 @@ class _TransactionPageState extends State<TransactionPage> {
   void inputAmount() async {
     await TransitiveLocalPreferences().updateTransitiveProperties();
     final hideCurrencySymbol =
-        !TransitiveLocalPreferences().transitiveUsesSingleCurrency.get();
+        !TransitiveLocalPreferences().usesMultipleCurrencies.get();
 
     if (!mounted) return;
 

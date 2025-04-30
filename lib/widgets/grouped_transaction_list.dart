@@ -21,14 +21,13 @@ enum GroupedTransactionListType {
 }
 
 class GroupedTransactionList extends StatefulWidget {
-  final EdgeInsets listPadding;
   final EdgeInsets itemPadding;
 
   /// When null, same as [itemPadding]
-  final EdgeInsets? headerPadding;
+  final EdgeInsets? groupHeaderPadding;
 
   /// Top padding for the first header
-  final double firstHeaderTopPadding;
+  final EdgeInsets? mainHeaderPadding;
 
   /// Rendered in order.
   final Map<TimeRange, List<Transaction>> transactions;
@@ -60,7 +59,7 @@ class GroupedTransactionList extends StatefulWidget {
 
   final ScrollController? controller;
 
-  final Widget? header;
+  final Widget? mainHeader;
 
   final TransactionGroupRange? groupBy;
 
@@ -79,19 +78,18 @@ class GroupedTransactionList extends StatefulWidget {
     required this.headerBuilder,
     this.pendingTransactions,
     this.controller,
-    this.header,
+    this.mainHeader,
     this.pendingDivider,
     this.pendingTrailing,
     this.anchor,
-    this.headerPadding,
+    this.groupHeaderPadding,
     this.groupBy,
     this.overrideObscure,
-    this.listPadding = const EdgeInsets.symmetric(vertical: 16.0),
     this.itemPadding = const EdgeInsets.symmetric(
       horizontal: 16.0,
       vertical: 4.0,
     ),
-    this.firstHeaderTopPadding = 8.0,
+    this.mainHeaderPadding,
     this.shouldCombineTransferIfNeeded = false,
     this.listType = GroupedTransactionListType.list,
   });
@@ -103,7 +101,7 @@ class GroupedTransactionList extends StatefulWidget {
 class _GroupedTransactionListState extends State<GroupedTransactionList> {
   late bool globalPrivacyMode;
 
-  Widget? get header => widget.header;
+  Widget? get header => widget.mainHeader;
 
   @override
   void initState() {
@@ -155,61 +153,61 @@ class _GroupedTransactionListState extends State<GroupedTransactionList> {
         widget.headerBuilder(false, entry.key, entry.value),
         ...entry.value,
       ],
+      Padding(padding: EdgeInsets.only(bottom: 16.0), child: SizedBox.shrink()),
     ];
 
-    final EdgeInsets headerPadding = widget.headerPadding ?? widget.itemPadding;
+    final EdgeInsets headerPadding =
+        widget.groupHeaderPadding ?? widget.itemPadding;
 
-    Widget itemBuilder(
-      BuildContext context,
-      int index,
-    ) => switch (flattened[index]) {
-      (Padding widgetWithPadding) => Container(
-        key: ValueKey("padding-$index-${widgetWithPadding.hashCode}"),
-        child: widgetWithPadding,
-      ),
-      (Widget header) => Padding(
-        key: ValueKey("header-$index-${header.hashCode}"),
-        padding: headerPadding.copyWith(
-          top: index == 0 ? widget.firstHeaderTopPadding : headerPadding.top,
-        ),
-        child: header,
-      ),
-      (Transaction transaction) => ReorderableDelayedDragStartListener(
-        index: index,
-        key: ValueKey(transaction.uuid),
-        child: TransactionListTile(
-          combineTransfers: combineTransfers,
-          transaction: transaction,
-          padding: widget.itemPadding,
-          dismissibleKey: ValueKey(transaction.id),
-          moveToTrashFn: () => transaction.moveToTrashBin(context),
-          recoverFromTrashFn: () => transaction.recoverFromTrashBin(),
-          confirmFn: ([bool confirm = true]) {
-            final bool updateTransactionDate =
-                LocalPreferences()
-                    .pendingTransactions
-                    .updateDateUponConfirmation
-                    .get();
+    Widget itemBuilder(BuildContext context, int index) =>
+        switch (flattened[index]) {
+          (Padding widgetWithPadding) => Container(
+            key: ValueKey("padding-$index-${widgetWithPadding.hashCode}"),
+            child: widgetWithPadding,
+          ),
+          (Widget header) => Padding(
+            key: ValueKey("header-$index-${header.hashCode}"),
+            padding:
+                index == 0
+                    ? (widget.mainHeaderPadding ?? headerPadding)
+                    : headerPadding,
+            child: header,
+          ),
+          (Transaction transaction) => ReorderableDelayedDragStartListener(
+            index: index,
+            key: ValueKey(transaction.uuid),
+            child: TransactionListTile(
+              combineTransfers: combineTransfers,
+              transaction: transaction,
+              padding: widget.itemPadding,
+              dismissibleKey: ValueKey(transaction.id),
+              moveToTrashFn: () => transaction.moveToTrashBin(context),
+              recoverFromTrashFn: () => transaction.recoverFromTrashBin(),
+              confirmFn: ([bool confirm = true]) {
+                final bool updateTransactionDate =
+                    LocalPreferences()
+                        .pendingTransactions
+                        .updateDateUponConfirmation
+                        .get();
 
-            transaction.confirm(confirm, updateTransactionDate);
-          },
-          duplicateFn: () => transaction.duplicate(),
-          overrideObscure: widget.overrideObscure,
-          groupRange: widget.groupBy,
-          useCategoryNameForUntitledTransactions:
-              useCategoryNameForUntitledTransactions,
-          useAccountIconForLeading: useAccountIconForLeading,
-          showCategory: showCategory,
-        ),
-      ),
-      (_) => Container(),
-    };
+                transaction.confirm(confirm, updateTransactionDate);
+              },
+              duplicateFn: () => transaction.duplicate(),
+              overrideObscure: widget.overrideObscure,
+              groupRange: widget.groupBy,
+              useCategoryNameForUntitledTransactions:
+                  useCategoryNameForUntitledTransactions,
+              useAccountIconForLeading: useAccountIconForLeading,
+              showCategory: showCategory,
+            ),
+          ),
+          (_) => Container(),
+        };
 
     switch (widget.listType) {
       case GroupedTransactionListType.list:
         return ListView.builder(
           controller: widget.controller,
-          padding: widget.listPadding,
           itemBuilder: itemBuilder,
           itemCount: flattened.length,
         );
