@@ -6,6 +6,9 @@
 
 * Arabic ordinal numbers are somewhat fixed (Please help if you can <https://github.com/sadespresso/moment_dart/issues/47>)
 * Fixed early reminder date estimate was incorrect
+* Fixed some place were misleadingly showing missing exchange rates when offline
+* You can no longer confirm a deleted transaction
+* Overall polishments
 
 ## 0.14.0
 

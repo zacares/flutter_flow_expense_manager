@@ -159,7 +159,7 @@
   "error.transaction.missingAccount": "Veuillez sélectionner un compte",
   "error.url.cannotOpen": "Impossible d'ouvrir le lien",
   "flowIcon.change": "Changer d'icône",
-  "flowIcon.type.character": "Caractère",
+  "flowIcon.type.character": "Emoji/Lettre",
   "flowIcon.type.character.description": "Entrez un emoji ou une lettre à utiliser comme icône",
   "flowIcon.type.icon": "Icône",
   "flowIcon.type.icon.brands": "Marques & Logos",
