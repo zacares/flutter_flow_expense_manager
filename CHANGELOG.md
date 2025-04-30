@@ -9,6 +9,7 @@
 * Fixed some place were misleadingly showing missing exchange rates when offline
 * You can no longer confirm a deleted transaction
 * Overall polishments
+* Improved markdown editor UX, fixed keyboard was covering the text area, closes [#493](https://github.com/flow-mn/flow/issues/493)
 
 ## 0.14.0
 

@@ -114,34 +114,35 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
               ],
             ),
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            child: Container(
-              color: context.colorScheme.surface,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12.0,
-                vertical: 4.0,
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: _bold,
-                    icon: Icon(Symbols.format_bold_rounded),
-                  ),
-                  IconButton(
-                    onPressed: _italic,
-                    icon: Icon(Symbols.format_italic_rounded),
-                  ),
-                  IconButton(
-                    onPressed: _checklist,
-                    icon: Icon(Symbols.checklist_rounded),
-                  ),
-                ],
+          if (focused)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              child: Container(
+                color: context.colorScheme.surface,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12.0,
+                  vertical: 4.0,
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: _bold,
+                      icon: Icon(Symbols.format_bold_rounded),
+                    ),
+                    IconButton(
+                      onPressed: _italic,
+                      icon: Icon(Symbols.format_italic_rounded),
+                    ),
+                    IconButton(
+                      onPressed: _checklist,
+                      icon: Icon(Symbols.checklist_rounded),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
