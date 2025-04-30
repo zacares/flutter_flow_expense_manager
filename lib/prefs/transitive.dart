@@ -23,7 +23,8 @@ class TransitiveLocalPreferences {
   static TransitiveLocalPreferences? _instance;
 
   /// Whether the user uses only one currency across accounts
-  late final BoolSettingsEntry transitiveUsesSingleCurrency;
+  late final BoolSettingsEntry usesNonPrimaryCurrency;
+  late final BoolSettingsEntry usesMultipleCurrencies;
 
   late final DateTimeSettingsEntry transitiveLastTimeFrecencyUpdated;
 
@@ -52,10 +53,15 @@ class TransitiveLocalPreferences {
   TransitiveLocalPreferences._internal(this._prefs) {
     SettingsEntry.defaultPrefix = "flow.";
 
-    transitiveUsesSingleCurrency = BoolSettingsEntry(
-      key: "transitive.usesSingleCurrency",
+    usesNonPrimaryCurrency = BoolSettingsEntry(
+      key: "transitive.usesNonPrimaryCurrency",
       preferences: _prefs,
-      initialValue: true,
+      initialValue: false,
+    );
+    usesMultipleCurrencies = BoolSettingsEntry(
+      key: "transitive.usesMultipleCurrencies",
+      preferences: _prefs,
+      initialValue: false,
     );
 
     transitiveLastTimeFrecencyUpdated = DateTimeSettingsEntry(
@@ -106,10 +112,16 @@ class TransitiveLocalPreferences {
     try {
       final accounts = await AccountsService().getAll();
 
-      final usesSingleCurrency =
-          accounts.map((e) => e.currency).toSet().length == 1;
+      final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
 
-      await transitiveUsesSingleCurrency.set(usesSingleCurrency);
+      final bool hasAnyNonPrimaryCurrencyAccount = accounts.any(
+        (account) => account.currency != primaryCurrency,
+      );
+
+      await usesNonPrimaryCurrency.set(hasAnyNonPrimaryCurrencyAccount);
+      await usesMultipleCurrencies.set(
+        accounts.map((account) => account.currency).toSet().length > 1,
+      );
     } catch (e, stackTrace) {
       _log.warning("Cannot update transitive properties", e, stackTrace);
     }

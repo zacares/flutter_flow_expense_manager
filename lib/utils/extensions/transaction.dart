@@ -15,6 +15,7 @@ final Logger _log = Logger("TransactionHelpers");
 
 extension TransactionHelpers on Transaction {
   bool confirmable([DateTime? anchor]) {
+    if (isDeleted == true) return false;
     if (isPending != true) return false;
 
     return transactionDate.isPastAnchored(
@@ -23,6 +24,7 @@ extension TransactionHelpers on Transaction {
   }
 
   bool holdable([DateTime? anchor]) {
+    if (isDeleted == true) return false;
     if (isPending != true) return false;
 
     return transactionDate.isFutureAnchored(

@@ -159,7 +159,7 @@
   "error.transaction.missingAccount": "يرجى اختيار حساب",
   "error.url.cannotOpen": "لا يمكن فتح الرابط",
   "flowIcon.change": "تغيير الأيقونة",
-  "flowIcon.type.character": "حرف",
+  "flowIcon.type.character": "رمز تعبيري/حرف",
   "flowIcon.type.character.description": "أدخل رمز تعبيري أو حرف لاستخدامه كأيقونة",
   "flowIcon.type.icon": "أيقونة",
   "flowIcon.type.icon.brands": "العلامات التجارية والشعارات",
