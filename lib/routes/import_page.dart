@@ -5,6 +5,7 @@ import "package:flow/constants.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/sync/import.dart";
 import "package:flow/sync/import/base.dart";
+import "package:flow/sync/import/external/ivy_wallet_csv.dart";
 import "package:flow/sync/import/import_csv.dart";
 import "package:flow/sync/import/import_v2.dart";
 import "package:flow/utils/utils.dart";
@@ -55,6 +56,24 @@ class _ImportPageState extends State<ImportPage> {
                       ListHeader("sync.import.other".t(context)),
                       const SizedBox(height: 8.0),
                       ListTile(
+                        leading: ClipRRect(
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(4.0),
+                          ),
+                          child: Image.asset(
+                            "assets/images/external/ivy_wallet.png",
+                            width: IconTheme.of(context).size,
+                            height: IconTheme.of(context).size,
+                          ),
+                        ),
+                        trailing: Icon(Symbols.chevron_right_rounded),
+                        title: Text("Ivy Wallet (CSV)"),
+                        onTap:
+                            () => initiateImport(
+                              externalFormat: ImportExternalFormat.ivyWallet,
+                            ),
+                      ),
+                      ListTile(
                         leading: Icon(SimpleIcons.googlesheets),
                         trailing: Icon(Symbols.chevron_right_rounded),
                         title: Text("sync.import.getCSVTemplate".t(context)),
@@ -67,7 +86,10 @@ class _ImportPageState extends State<ImportPage> {
     );
   }
 
-  Future<void> initiateImport([File? backupFile]) async {
+  Future<void> initiateImport({
+    File? backupFile,
+    ImportExternalFormat? externalFormat,
+  }) async {
     if (busy) return;
 
     setState(() {
@@ -75,7 +97,10 @@ class _ImportPageState extends State<ImportPage> {
     });
 
     try {
-      importer = await importBackup(backupFile: backupFile);
+      importer = await importBackup(
+        backupFile: backupFile,
+        externalFormat: externalFormat,
+      );
 
       if (mounted) {
         switch (importer) {
@@ -95,6 +120,12 @@ class _ImportPageState extends State<ImportPage> {
             context.pushReplacement(
               "/import/wizard/csv?setupMode=${widget.setupMode}",
               extra: importCSV,
+            );
+            break;
+          case IvyWalletCsvImporter ivyWalletCsvImporter:
+            context.pushReplacement(
+              "/import/wizard/external/ivy?setupMode=${widget.setupMode}",
+              extra: ivyWalletCsvImporter,
             );
             break;
           case null:
@@ -139,6 +170,6 @@ class _ImportPageState extends State<ImportPage> {
       return;
     }
 
-    return initiateImport(backupFile);
+    return initiateImport(backupFile: backupFile);
   }
 }
