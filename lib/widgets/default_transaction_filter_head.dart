@@ -65,11 +65,11 @@ class _DefaultTransactionsFilterHeadState
     super.initState();
     _filter = widget.current;
 
-    TransitiveLocalPreferences().transitiveUsesSingleCurrency.addListener(
+    TransitiveLocalPreferences().usesMultipleCurrencies.addListener(
       _updateShowCurrencyFilterChip,
     );
     showCurrencyFilterChip =
-        !TransitiveLocalPreferences().transitiveUsesSingleCurrency.get();
+        TransitiveLocalPreferences().usesMultipleCurrencies.get();
   }
 
   @override
@@ -82,7 +82,7 @@ class _DefaultTransactionsFilterHeadState
 
   @override
   void dispose() {
-    TransitiveLocalPreferences().transitiveUsesSingleCurrency.removeListener(
+    TransitiveLocalPreferences().usesNonPrimaryCurrency.removeListener(
       _updateShowCurrencyFilterChip,
     );
     super.dispose();
@@ -351,7 +351,7 @@ class _DefaultTransactionsFilterHeadState
   void _updateShowCurrencyFilterChip() {
     setState(() {
       showCurrencyFilterChip =
-          !TransitiveLocalPreferences().transitiveUsesSingleCurrency.get();
+          TransitiveLocalPreferences().usesMultipleCurrencies.get();
     });
   }
 

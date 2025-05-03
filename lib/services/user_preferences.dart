@@ -18,24 +18,18 @@ class UserPreferencesService {
 
   bool get combineTransfers => value.combineTransfers;
   set combineTransfers(bool newCombineTransfers) {
-    if (value.id == 0) return;
-
     value.combineTransfers = newCombineTransfers;
     ObjectBox().box<UserPreferences>().put(value);
   }
 
   bool get enableICloudSync => value.enableICloudSync;
   set enableICloudSync(bool newEnableICloudSync) {
-    if (value.id == 0) return;
-
     value.enableICloudSync = newEnableICloudSync;
     ObjectBox().box<UserPreferences>().put(value);
   }
 
   int? get trashBinRetentionDays => value.trashBinRetentionDays;
   set trashBinRetentionDays(int? newTrashBinRetentionDays) {
-    if (value.id == 0) return;
-
     if (newTrashBinRetentionDays == null) {
       value.trashBinRetentionDays = null;
     } else {
@@ -47,8 +41,6 @@ class UserPreferencesService {
 
   int? get autoBackupIntervalInHours => value.autoBackupIntervalInHours;
   set autoBackupIntervalInHours(int? newAutobackupIntervalInHours) {
-    if (value.id == 0) return;
-
     if (newAutobackupIntervalInHours == null) {
       value.autoBackupIntervalInHours = null;
     } else {
@@ -65,8 +57,6 @@ class UserPreferencesService {
 
   bool get excludeTransfersFromFlow => value.excludeTransfersFromFlow;
   set excludeTransfersFromFlow(bool newExcludeTransfersFromFlow) {
-    if (value.id == 0) return;
-
     value.excludeTransfersFromFlow = newExcludeTransfersFromFlow;
     ObjectBox().box<UserPreferences>().put(value);
   }
@@ -76,8 +66,6 @@ class UserPreferencesService {
   set useCategoryNameForUntitledTransactions(
     bool newUseCategoryNameForUntitledTransactions,
   ) {
-    if (value.id == 0) return;
-
     value.useCategoryNameForUntitledTransactions =
         newUseCategoryNameForUntitledTransactions;
     ObjectBox().box<UserPreferences>().put(value);
@@ -88,8 +76,6 @@ class UserPreferencesService {
   set transactionListTileShowCategoryName(
     bool newTransactionListTileShowCategoryName,
   ) {
-    if (value.id == 0) return;
-
     value.transactionListTileShowCategoryName =
         newTransactionListTileShowCategoryName;
     ObjectBox().box<UserPreferences>().put(value);
@@ -100,8 +86,6 @@ class UserPreferencesService {
   set transactionListTileShowAccountForLeading(
     bool newTransactionListTileShowAccountForLeading,
   ) {
-    if (value.id == 0) return;
-
     value.transactionListTileShowAccountForLeading =
         newTransactionListTileShowAccountForLeading;
     ObjectBox().box<UserPreferences>().put(value);
@@ -109,8 +93,6 @@ class UserPreferencesService {
 
   String? get defaultFilterPresetUuid => value.defaultFilterPreset;
   set defaultFilterPresetUuid(String? uuid) {
-    if (value.id == 0) return;
-
     value.defaultFilterPreset = uuid;
     ObjectBox().box<UserPreferences>().put(value);
   }

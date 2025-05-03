@@ -40,13 +40,11 @@ class CategoryPage extends StatefulWidget {
   final TimeRange? initialRange;
 
   final EdgeInsets headerPadding;
-  final EdgeInsets listPadding;
 
   const CategoryPage({
     super.key,
     required this.categoryId,
     this.initialRange,
-    this.listPadding = const EdgeInsets.symmetric(vertical: 16.0),
     this.headerPadding = _defaultHeaderPadding,
   });
 
@@ -89,7 +87,7 @@ class _CategoryPageState extends State<CategoryPage> {
         ExchangeRatesService().getPrimaryCurrencyRates();
     final bool showMissingExchangeRatesWarning =
         rates == null &&
-        TransitiveLocalPreferences().transitiveUsesSingleCurrency.get();
+        TransitiveLocalPreferences().usesNonPrimaryCurrency.get();
 
     return StreamBuilder<List<Transaction>>(
       stream: qb(
@@ -135,8 +133,6 @@ class _CategoryPageState extends State<CategoryPage> {
             );
 
         final MoneyFlow flow = transactions?.nonPending.flow ?? MoneyFlow();
-
-        const double firstHeaderTopPadding = 0.0;
 
         final Widget header = Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -185,9 +181,7 @@ class _CategoryPageState extends State<CategoryPage> {
         );
 
         final EdgeInsets headerPaddingOutOfList =
-            widget.headerPadding +
-            widget.listPadding.copyWith(bottom: 0, top: 0) +
-            const EdgeInsets.only(top: firstHeaderTopPadding);
+            widget.headerPadding;
 
         return Scaffold(
           appBar: AppBar(
@@ -215,13 +209,12 @@ class _CategoryPageState extends State<CategoryPage> {
                 ),
               ),
               _ => GroupedTransactionList(
-                header: header,
+                mainHeader: header,
                 transactions: grouped,
                 pendingTransactions: pendingTransactionsGrouped,
                 pendingDivider: WavyDivider(),
-                listPadding: widget.listPadding,
-                headerPadding: widget.headerPadding,
-                firstHeaderTopPadding: firstHeaderTopPadding,
+                groupHeaderPadding: widget.headerPadding,
+                mainHeaderPadding: EdgeInsets.zero,
                 headerBuilder: (pendingGroup, range, transactions) {
                   if (pendingGroup) {
                     return PendingTransactionsHeader(

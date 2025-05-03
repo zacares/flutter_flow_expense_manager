@@ -76,7 +76,7 @@ class _StatsTabState extends State<StatsTab>
 
     final bool showMissingExchangeRatesWarning =
         rates == null &&
-        TransitiveLocalPreferences().transitiveUsesSingleCurrency.get();
+        TransitiveLocalPreferences().usesNonPrimaryCurrency.get();
 
     return Column(
       children: [

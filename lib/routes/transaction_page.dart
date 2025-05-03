@@ -222,9 +222,6 @@ class _TransactionPageState extends State<TransactionPage> {
   Widget build(BuildContext context) {
     final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
 
-    final bool showPostTransactionBalance =
-        _selectedAccount != null && !widget.isNewTransaction;
-
     final TimeRange? startBounds = getStartBounds();
 
     return GestureDetector(
@@ -316,7 +313,8 @@ class _TransactionPageState extends State<TransactionPage> {
                                     "transaction.edit.selectAccount".t(context),
                               ),
                               subtitle:
-                                  showPostTransactionBalance
+                                  (!widget.isNewTransaction &&
+                                          _selectedAccount != null)
                                       ? MoneyText(
                                         _selectedAccount!.balanceAt(
                                           transactionDate,
@@ -351,7 +349,8 @@ class _TransactionPageState extends State<TransactionPage> {
                                   "transaction.edit.selectAccount".t(context),
                             ),
                             subtitle:
-                                _selectedAccountTransferTo != null
+                                (!widget.isNewTransaction &&
+                                        _selectedAccountTransferTo != null)
                                     ? MoneyText(
                                       _selectedAccountTransferTo!.balanceAt(
                                         transactionDate,
@@ -415,28 +414,32 @@ class _TransactionPageState extends State<TransactionPage> {
                         focusNode: _descriptionFocusNode,
                         onChanged: (_) => setState(() => {}),
                       ),
-                      const SizedBox(height: 24.0),
-                      Section(
-                        title: "transaction.date".t(context),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ListTile(
-                              title: Text(transactionDate.toMoment().LLL),
-                              onTap: () => selectTransactionDate(),
-                              leading: Icon(Symbols.calendar_month_rounded),
-                              trailing: const DirectionalChevron(),
-                            ),
-                            SwitchListTile(
-                              title: Text("transaction.pending".t(context)),
-                              secondary: Icon(Symbols.search_activity_rounded),
-                              value: _isPending,
-                              onChanged: pastDuePending ? null : updatePending,
-                            ),
-                          ],
+                      if (_recurrence == null || !widget.isNewTransaction) ...[
+                        const SizedBox(height: 24.0),
+                        Section(
+                          title: "transaction.date".t(context),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                title: Text(transactionDate.toMoment().LLL),
+                                onTap: () => selectTransactionDate(),
+                                leading: Icon(Symbols.calendar_month_rounded),
+                                trailing: const DirectionalChevron(),
+                              ),
+                              SwitchListTile(
+                                title: Text("transaction.pending".t(context)),
+                                secondary: Icon(
+                                  Symbols.search_activity_rounded,
+                                ),
+                                value: _isPending,
+                                onChanged:
+                                    pastDuePending ? null : updatePending,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-
+                      ],
                       const SizedBox(height: 24.0),
                       Section(
                         title: "transaction.recurring".t(context),
@@ -654,7 +657,7 @@ class _TransactionPageState extends State<TransactionPage> {
   void inputAmount() async {
     await TransitiveLocalPreferences().updateTransitiveProperties();
     final hideCurrencySymbol =
-        !TransitiveLocalPreferences().transitiveUsesSingleCurrency.get();
+        !TransitiveLocalPreferences().usesMultipleCurrencies.get();
 
     if (!mounted) return;
 
@@ -878,7 +881,7 @@ class _TransactionPageState extends State<TransactionPage> {
 
   void updateRecurrence(Recurrence? recurrence) {
     if (widget.isNewTransaction) {
-      _transactionDate = recurrence?.range.from ?? _transactionDate;
+      _transactionDate = recurrence?.range.from;
     }
     _recurrence = recurrence;
 

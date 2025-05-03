@@ -159,7 +159,7 @@
   "error.transaction.missingAccount": "Lütfen bir hesap seçin",
   "error.url.cannotOpen": "Bağlantı açılamıyor",
   "flowIcon.change": "Simgeyi değiştir",
-  "flowIcon.type.character": "Karakter",
+  "flowIcon.type.character": "Emoji/Harfi",
   "flowIcon.type.character.description": "Simge olarak kullanmak için bir emoji veya harf girin",
   "flowIcon.type.icon": "İkon",
   "flowIcon.type.icon.brands": "Markalar & Logolar",

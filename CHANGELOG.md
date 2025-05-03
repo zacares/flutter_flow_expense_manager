@@ -1,27 +1,49 @@
 # Changelog
 
-## Next
+## 0.14.2
+
+### Fixes
+
+* Fixed some preferences weren't toggling, and not getting included in the backups
+* Transaction title input placeholder no longer looks like a real title
+* Fixed recurring transactions weren't generating new transactions in some scenarios, special thanks to @abelood on Discord
 
 ### New features
 
-* Now you can save backups to iCloud. Enable it in `Preferences > Sync`
+* Now you can import from Ivy Wallet, closes [#477](https://github.com/flow-mn/flow/issues/477)
+
+## 0.14.1
+
+### Fixes
+
+* Arabic ordinal numbers are somewhat fixed (Please help if you can <https://github.com/sadespresso/moment_dart/issues/47>)
+* Fixed early reminder date estimate was incorrect
+* Fixed some place were misleadingly showing missing exchange rates when offline
+* You can no longer confirm a deleted transaction
+* Overall polishments
+* Improved markdown editor UX, fixed keyboard was covering the text area, closes [#493](https://github.com/flow-mn/flow/issues/493)
+
+## 0.14.0
+
+### New features
+
 * Added list of contributors, closes [#448](https://github.com/flow-mn/flow/issues/448)
 * Date and time are now in Arabic when the language is set to Arabic, thanks to [Ultrate](https://github.com/Ultrate)
 * Now you can do recurring transactions, closes [#59](https://github.com/flow-mn/flow/issues/59)
 
 ### Changes & Improvements
 
-* Backup files naming convention has changed to comply with iCloud Drive file name requirements
+* Backup files naming convention has changed (to comply with upcoming iCloud Drive file name requirements)
 * Added "Recommend Flow" button
 * Title suggestion now considers recency of a transaction
 * Improved RTL support in certain parts of the UI. Feel free to report more issues regarding RTL
 * Transfer transactions now shows account balance
 * Home page default filter now shows transactions of the current month rather than last 30 days'
-* Transactions page now has time range filter (transactions pages for deleted, pending, account, etc.)
+* Some transactions page now has time range filter (transactions pages for deleted, pending, account, etc.)
 
 ### Fixes
 
-* Categories page layout is no longer "suboptimal" on smaller screens
+* Fixed `Categories page` add from preset buttons were squashed on smaller screens
 * `Add category from presets` page no longer show presets with same name as any of your existing categories
 
 ## 0.13.1

@@ -61,31 +61,39 @@ class _SelectRecurrenceState extends State<SelectRecurrence> {
       mainAxisSize: MainAxisSize.min,
       children: [
         ListTile(
-          title: Text("select.recurrence".t(context)),
-          trailing: IgnorePointer(
-            child: DropdownButton<RecurrenceMode>(
-              key: _modeSelectorKey,
-              value: _selectedMode,
-              style: context.textTheme.titleSmall,
-              underline: SizedBox.shrink(),
-              focusColor: kTransparent,
-              isDense: true,
-              icon: Icon(Symbols.arrow_drop_down_rounded),
-              alignment: AlignmentDirectional.topEnd,
-              items:
-                  RecurrenceMode.values
-                      .where((mode) => mode != RecurrenceMode.custom)
-                      .map(
-                        (mode) => DropdownMenuItem<RecurrenceMode>(
-                          value: mode,
-                          child: Text(
-                            mode.localizedNameContext(context, l10nEnumPayload),
-                          ),
-                        ),
-                      )
-                      .toList(),
-              onChanged: _updateMode,
-            ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("select.recurrence".t(context)),
+              IgnorePointer(
+                child: DropdownButton<RecurrenceMode>(
+                  key: _modeSelectorKey,
+                  value: _selectedMode,
+                  style: context.textTheme.titleSmall,
+                  underline: SizedBox.shrink(),
+                  focusColor: kTransparent,
+                  isDense: true,
+                  icon: Icon(Symbols.arrow_drop_down_rounded),
+                  alignment: AlignmentDirectional.topEnd,
+                  items:
+                      RecurrenceMode.values
+                          .where((mode) => mode != RecurrenceMode.custom)
+                          .map(
+                            (mode) => DropdownMenuItem<RecurrenceMode>(
+                              value: mode,
+                              child: Text(
+                                mode.localizedNameContext(
+                                  context,
+                                  l10nEnumPayload,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                  onChanged: _updateMode,
+                ),
+              ),
+            ],
           ),
           onTap: openModeSelector,
         ),

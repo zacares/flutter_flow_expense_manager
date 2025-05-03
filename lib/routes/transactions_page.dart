@@ -6,6 +6,8 @@ import "package:flow/l10n/extensions.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/objectbox/objectbox.g.dart";
+import "package:flow/prefs/transitive.dart";
+import "package:flow/services/exchange_rates.dart";
 import "package:flow/services/transactions.dart";
 import "package:flow/theme/helpers.dart";
 import "package:flow/widgets/general/flow_icon.dart";
@@ -13,25 +15,29 @@ import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/general/spinner.dart";
 import "package:flow/widgets/general/wavy_divider.dart";
 import "package:flow/widgets/grouped_transaction_list.dart";
+import "package:flow/widgets/rates_missing_warning.dart";
 import "package:flow/widgets/time_range_selector.dart";
 import "package:flow/widgets/transactions_date_header.dart";
 import "package:flutter/material.dart";
 import "package:material_symbols_icons/symbols.dart";
 import "package:moment_dart/moment_dart.dart";
 
+/// Generic transactions page that can be used to display list of transactions
+///
+/// This view does not respect [UserPreferences.combineTransfers] since it may
+/// be used to show transactions of specific account, and there will be
+/// scenarios where the other half of the transfer transaction is wouldn't be
+/// shown.
 class TransactionsPage extends StatefulWidget {
   final QueryBuilder<Transaction> Function(TimeRange range) queryFn;
   final TimeRange? initialRange;
   final String? title;
-
-  final Widget? header;
 
   const TransactionsPage({
     super.key,
     required this.queryFn,
     this.initialRange,
     this.title,
-    this.header,
   });
 
   factory TransactionsPage.account({
@@ -55,12 +61,7 @@ class TransactionsPage extends StatefulWidget {
           .order(Transaction_.transactionDate, flags: Order.descending);
     }
 
-    return TransactionsPage(
-      queryFn: queryBuilder,
-      key: key,
-      title: title,
-      header: header,
-    );
+    return TransactionsPage(queryFn: queryBuilder, key: key, title: title);
   }
 
   factory TransactionsPage.all({Key? key, String? title, Widget? header}) {
@@ -71,12 +72,7 @@ class TransactionsPage extends StatefulWidget {
           range: TransactionFilterTimeRange.fromTimeRange(range),
         ).queryBuilder();
 
-    return TransactionsPage(
-      queryFn: queryBuilder,
-      key: key,
-      title: title,
-      header: header,
-    );
+    return TransactionsPage(queryFn: queryBuilder, key: key, title: title);
   }
 
   factory TransactionsPage.pending({
@@ -91,12 +87,7 @@ class TransactionsPage extends StatefulWidget {
           range: range,
         );
 
-    return TransactionsPage(
-      queryFn: queryBuilder,
-      key: key,
-      title: title,
-      header: header,
-    );
+    return TransactionsPage(queryFn: queryBuilder, key: key, title: title);
   }
 
   factory TransactionsPage.deleted({
@@ -108,12 +99,7 @@ class TransactionsPage extends StatefulWidget {
     QueryBuilder<Transaction> queryBuilder(TimeRange? range) =>
         TransactionsService().deletedTransactionsQb(range: range);
 
-    return TransactionsPage(
-      queryFn: queryBuilder,
-      key: key,
-      title: title,
-      header: header,
-    );
+    return TransactionsPage(queryFn: queryBuilder, key: key, title: title);
   }
 
   @override
@@ -125,10 +111,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   late TimeRange _timeRange;
 
+  late final bool showExchangeRatesMissingWarning;
+
   @override
   void initState() {
     super.initState();
     _timeRange = widget.initialRange ?? defaultTimeRange;
+    showExchangeRatesMissingWarning =
+        TransitiveLocalPreferences().usesNonPrimaryCurrency.get() &&
+        ExchangeRatesService().getPrimaryCurrencyRates() == null;
   }
 
   @override
@@ -139,15 +130,24 @@ class _TransactionsPageState extends State<TransactionsPage> {
         child: CustomScrollView(
           slivers: [
             PinnedHeaderSliver(
-              child: Frame(
-                child: TimeRangeSelector(
-                  initialValue: _timeRange,
-                  onChanged: (newRange) {
-                    setState(() {
-                      _timeRange = newRange;
-                    });
-                  },
-                ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (showExchangeRatesMissingWarning) RatesMissingWarning(),
+                  Frame(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: TimeRangeSelector(
+                        initialValue: _timeRange,
+                        onChanged: (newRange) {
+                          setState(() {
+                            _timeRange = newRange;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             SliverFillRemaining(
@@ -205,6 +205,22 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           )
                           .groupByDate();
 
+                  final int totalTransactionsCount =
+                      transactions.values.fold<int>(
+                        0,
+                        (previousValue, element) =>
+                            /// Since the [GroupedTransactionList] below isn't able to combine
+                            /// transfer transactions, we need to count them separately.
+                            previousValue + element.length,
+                      ) +
+                      pendingTransactions.values.fold<int>(
+                        0,
+                        (previousValue, element) =>
+                            /// Since the [GroupedTransactionList] below isn't able to combine
+                            /// transfer transactions, we need to count them separately.
+                            previousValue + element.length,
+                      );
+
                   return GroupedTransactionList(
                     transactions: transactions,
                     pendingTransactions: pendingTransactions,
@@ -216,7 +232,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               transactions: transactions,
                             ),
                     pendingDivider: WavyDivider(),
-                    header: widget.header,
+                    mainHeader: Frame(
+                      child: Text(
+                        "transactions.count".t(context, totalTransactionsCount),
+                        style: context.textTheme.bodyMedium?.semi(context),
+                      ),
+                    ),
+                    mainHeaderPadding: EdgeInsets.zero,
                   );
                 },
               ),

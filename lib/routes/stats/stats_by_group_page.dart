@@ -70,7 +70,7 @@ class StatsByGroupPageState extends State<StatsByGroupPage>
 
           final bool showMissingExchangeRatesWarning =
               rates == null &&
-              TransitiveLocalPreferences().transitiveUsesSingleCurrency.get();
+              TransitiveLocalPreferences().usesNonPrimaryCurrency.get();
 
           final Map<String, ChartData> expenses = _prepareChartData(
             analytics?.flow,
