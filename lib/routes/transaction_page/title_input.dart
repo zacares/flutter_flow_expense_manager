@@ -66,6 +66,9 @@ class TitleInput extends StatelessWidget {
             autocorrect: false,
             decoration: InputDecoration(
               hintText: fallbackTitle,
+              hintStyle: context.textTheme.headlineMedium?.copyWith(
+                color: context.textTheme.headlineMedium?.color?.withAlpha(0x80),
+              ),
               counter: const SizedBox.shrink(),
             ),
           );

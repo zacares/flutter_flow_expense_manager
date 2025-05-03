@@ -12,6 +12,7 @@ import "package:flow/entity/transaction/extensions/default/recurring.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/objectbox/objectbox.g.dart";
+import "package:flow/prefs/local_preferences.dart";
 import "package:flow/routes/transaction_page/select_recurring_update_mode_sheet.dart";
 import "package:flow/services/accounts.dart";
 import "package:flow/services/transactions.dart";
@@ -39,7 +40,8 @@ class RecurringTransactionsService {
   }) async {
     anchor ??= DateTime.now();
 
-    final String loggingPrefix = "Recurring(${recurringTransaction.uuid})";
+    final String loggingPrefix =
+        "Recurring(${recurringTransaction.template.title} ${recurringTransaction.uuid})";
 
     try {
       _log.fine("$loggingPrefix Synchronizing recurring transaction");
@@ -53,23 +55,25 @@ class RecurringTransactionsService {
           ?.rangeToMax()
           .intersect(recurringTransaction.recurrence.range);
 
-      final DateTime nextOccurenceAnchor = DateTime.fromMicrosecondsSinceEpoch(
-        min(
-          anchor.date.microsecondsSinceEpoch,
-          recurringTransaction
-              .recurrence
-              .range
-              .from
-              .date
-              .microsecondsSinceEpoch,
-        ),
-      ).copyWith(
-        hour: recurringTransaction.timeRange.from.hour,
-        minute: recurringTransaction.timeRange.from.minute,
-        second: recurringTransaction.timeRange.from.second,
-        millisecond: recurringTransaction.timeRange.from.millisecond,
-        microsecond: 0,
-      );
+      final DateTime nextOccurenceAnchor =
+          recurringTransaction.lastGeneratedTransactionDate ??
+          DateTime.fromMicrosecondsSinceEpoch(
+            min(
+              anchor.date.microsecondsSinceEpoch,
+              recurringTransaction
+                  .recurrence
+                  .range
+                  .from
+                  .date
+                  .microsecondsSinceEpoch,
+            ),
+          ).copyWith(
+            hour: recurringTransaction.timeRange.from.hour,
+            minute: recurringTransaction.timeRange.from.minute,
+            second: recurringTransaction.timeRange.from.second,
+            millisecond: recurringTransaction.timeRange.from.millisecond,
+            microsecond: 0,
+          );
 
       final DateTime? nextOccurence =
           recurringTransaction.recurrence
@@ -84,9 +88,10 @@ class RecurringTransactionsService {
       }
 
       if (recurringTransaction.lastGeneratedTransactionDate != null &&
-          nextOccurence.startOfMillisecond() <=
-              recurringTransaction.lastGeneratedTransactionDate!
-                  .startOfMillisecond()) {
+          (nextOccurence.startOfMillisecond() <=
+                  recurringTransaction.lastGeneratedTransactionDate!
+                      .startOfMillisecond() ||
+              recurringTransaction.lastGeneratedTransactionDate! >= anchor)) {
         _log.fine(
           "$loggingPrefix Next occurrence is before last generated transaction date: ${recurringTransaction.lastGeneratedTransactionDate}, skipping",
         );
@@ -163,6 +168,11 @@ class RecurringTransactionsService {
         );
       }
 
+      final bool isPending =
+          nextOccurence.isAfter(anchor)
+              ? PendingTransactionsLocalPreferences().requireConfrimation.get()
+              : false;
+
       if (to == null) {
         from.createAndSaveTransaction(
           amount: template.amount,
@@ -179,7 +189,7 @@ class RecurringTransactionsService {
               relatedTransactionUuid: generatedTransactionUuid,
             ),
           ],
-          isPending: true,
+          isPending: isPending,
         );
 
         _log.fine(
@@ -198,7 +208,7 @@ class RecurringTransactionsService {
               initialTransactionDate: nextOccurence,
             ),
           ],
-          isPending: true,
+          isPending: isPending,
         );
 
         _log.fine(

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.14.2
+
+### Fixes
+
+* Fixed some preferences weren't toggling, and not getting included in the backups
+* Transaction title input placeholder no longer looks like a real title
+* Fixed recurring transactions weren't generating new transactions in some scenarios, special thanks to @abelood on Discord
+
+### New features
+
+* Now you can import from Ivy Wallet, closes [#477](https://github.com/flow-mn/flow/issues/477)
+
 ## 0.14.1
 
 ### Fixes
