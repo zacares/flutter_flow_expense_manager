@@ -35,6 +35,12 @@ class _LockAppState extends State<LockApp> {
           value: requireLocalAuth,
           onChanged: updateRequireLocalAuth,
         ),
+        SwitchListTile(
+          secondary: const Icon(Symbols.lock_rounded),
+          title: Text("preferences.privacy.appLock".t(context)),
+          value: requireLocalAuth,
+          onChanged: requireLocalAuth ? updateRequireLocalAuthOnBlur : null,
+        ),
         if (Platform.isLinux) ...[
           const SizedBox(height: 8.0),
           Frame(
@@ -74,6 +80,21 @@ class _LockAppState extends State<LockApp> {
     }
 
     await LocalPreferences().requireLocalAuth.set(newRequireLocalAuth);
+
+    if (!mounted) return;
+
+    PreferencesPage.of(context).reload();
+    setState(() {});
+  }
+
+  void updateRequireLocalAuthOnBlur(bool? newRequireLocalAuthOnBlur) async {
+    if (newRequireLocalAuthOnBlur == null) return;
+
+    if (!LocalPreferences().requireLocalAuth.get()) return;
+
+    await LocalPreferences().requireLocalAuthOnBlur.set(
+      newRequireLocalAuthOnBlur,
+    );
 
     if (!mounted) return;
 

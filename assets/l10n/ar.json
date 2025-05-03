@@ -221,6 +221,7 @@
   "preferences.primaryCurrency": "العملة الأساسية",
   "preferences.privacy": "الخصوصية",
   "preferences.privacy.appLock": "قفل التطبيق",
+  "preferences.privacy.appLock.lockAfterClosing": "قفل بعد الإغلاق",
   "preferences.privacy.appLock.description#Android": "يتطلب التحقق البيومتري لفتح التطبيق",
   "preferences.privacy.appLock.description#iOS": "يتطلب Face ID أو Touch ID لفتح التطبيق",
   "preferences.privacy.maskAtStartup": "إخفاء الأرقام (*) عند بدء التشغيل",

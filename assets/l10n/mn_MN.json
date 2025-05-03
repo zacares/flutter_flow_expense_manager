@@ -221,6 +221,7 @@
   "preferences.primaryCurrency": "Үндсэн валют",
   "preferences.privacy": "Нууцлал",
   "preferences.privacy.appLock": "Апп түгжих",
+  "preferences.privacy.appLock.lockAfterClosing": "Хаах үед түгжих",
   "preferences.privacy.appLock.description#Android": "Аппыг нээхийн тулд биометрик түгжээ ашиглаж өөрийгөө баталгаажуулах",
   "preferences.privacy.appLock.description#iOS": "Аппыг нээхийн тулд Face ID эсвэл Touch ID шаардах",
   "preferences.privacy.maskAtStartup": "Апп нээгдэхэд дүнг нууцлах",

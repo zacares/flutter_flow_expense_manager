@@ -221,6 +221,7 @@
   "preferences.primaryCurrency": "Primary currency",
   "preferences.privacy": "Privacy",
   "preferences.privacy.appLock": "Lock app",
+  "preferences.privacy.appLock.lockAfterClosing": "Lock after closing",
   "preferences.privacy.appLock.description#Android": "Require biometric authentication to open the app",
   "preferences.privacy.appLock.description#iOS": "Require Face ID or Touch ID to open the app",
   "preferences.privacy.maskAtStartup": "Mask numbers (*) at startup",

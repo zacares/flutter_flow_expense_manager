@@ -221,6 +221,7 @@
   "preferences.primaryCurrency": "Valuta principale",
   "preferences.privacy": "Privacy",
   "preferences.privacy.appLock": "Blocca app",
+  "preferences.privacy.appLock.lockAfterClosing": "Blocca dopo la chiusura",
   "preferences.privacy.appLock.description#Android": "Richiedi autenticazione biometrica per aprire l'app",
   "preferences.privacy.appLock.description#iOS": "Richiedi Face ID o Touch ID per aprire l'app",
   "preferences.privacy.maskAtStartup": "Nascondi i numeri (*) all'avvio",
