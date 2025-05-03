@@ -7,6 +7,7 @@ import "package:flow/services/user_preferences.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/transaction_list_tile.dart";
 import "package:flutter/material.dart";
+import "package:flutter_slidable/flutter_slidable.dart";
 import "package:moment_dart/moment_dart.dart";
 
 enum GroupedTransactionListType {
@@ -204,32 +205,30 @@ class _GroupedTransactionListState extends State<GroupedTransactionList> {
           (_) => Container(),
         };
 
-    switch (widget.listType) {
-      case GroupedTransactionListType.list:
-        return ListView.builder(
-          controller: widget.controller,
-          itemBuilder: itemBuilder,
-          itemCount: flattened.length,
-        );
-      case GroupedTransactionListType.sliver:
-        return SliverList.builder(
-          itemBuilder: itemBuilder,
-          itemCount: flattened.length,
-        );
-      case GroupedTransactionListType.reorderable:
-        return ReorderableListView.builder(
-          itemBuilder: itemBuilder,
-          buildDefaultDragHandles: false,
-          itemCount: flattened.length,
-          onReorder: (i, j) => _onReorder(i, j, flattened),
-        );
-      case GroupedTransactionListType.sliverReorderable:
-        return SliverReorderableList(
-          itemBuilder: itemBuilder,
-          itemCount: flattened.length,
-          onReorder: (i, j) => _onReorder(i, j, flattened),
-        );
-    }
+    final Widget list = switch (widget.listType) {
+      GroupedTransactionListType.list => ListView.builder(
+        controller: widget.controller,
+        itemBuilder: itemBuilder,
+        itemCount: flattened.length,
+      ),
+      GroupedTransactionListType.sliver => SliverList.builder(
+        itemBuilder: itemBuilder,
+        itemCount: flattened.length,
+      ),
+      GroupedTransactionListType.reorderable => ReorderableListView.builder(
+        itemBuilder: itemBuilder,
+        buildDefaultDragHandles: false,
+        itemCount: flattened.length,
+        onReorder: (i, j) => _onReorder(i, j, flattened),
+      ),
+      GroupedTransactionListType.sliverReorderable => SliverReorderableList(
+        itemBuilder: itemBuilder,
+        itemCount: flattened.length,
+        onReorder: (i, j) => _onReorder(i, j, flattened),
+      ),
+    };
+
+    return SlidableAutoCloseBehavior(child: list);
   }
 
   _privacyModeUpdate() {

@@ -68,7 +68,13 @@ class TransactionListTile extends StatelessWidget {
     final bool showPendingConfirmation =
         confirmFn != null && transaction.confirmable();
 
+    final bool showDuplicateButton =
+        transaction.isDeleted != true &&
+        !transaction.isTransfer &&
+        duplicateFn != null;
     final bool showHoldButton = confirmFn != null && transaction.holdable();
+    final bool showConfirmButton =
+        confirmFn != null && transaction.confirmable();
 
     if ((combineTransfers || showPendingConfirmation) &&
         transaction.isTransfer &&
@@ -236,7 +242,7 @@ class TransactionListTile extends StatelessWidget {
     );
 
     final List<SlidableAction> startActions = [
-      if (!transaction.isTransfer && duplicateFn != null)
+      if (showDuplicateButton)
         SlidableAction(
           onPressed: (context) => duplicateFn!(),
           icon: Symbols.content_copy_rounded,
@@ -245,7 +251,7 @@ class TransactionListTile extends StatelessWidget {
     ];
 
     final List<SlidableAction> endActions = [
-      if (confirmFn != null && transaction.isPending == true)
+      if (showConfirmButton)
         SlidableAction(
           onPressed: (context) => confirmFn!(),
           icon: Symbols.check_rounded,

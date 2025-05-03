@@ -2,15 +2,18 @@
 
 ## 0.14.2
 
+### New features
+
+* Now you can import from Ivy Wallet, closes [#477](https://github.com/flow-mn/flow/issues/477)
+* Now you can choose to auto-lock the app when switching to different app, closes [#450](https://github.com/flow-mn/flow/issues/450)
+
 ### Fixes
 
 * Fixed some preferences weren't toggling, and not getting included in the backups
 * Transaction title input placeholder no longer looks like a real title
 * Fixed recurring transactions weren't generating new transactions in some scenarios, special thanks to @abelood on Discord
-
-### New features
-
-* Now you can import from Ivy Wallet, closes [#477](https://github.com/flow-mn/flow/issues/477)
+* Now you can slide transaction list tile even if they don't have any action
+* You can no longer slide multiple list tiles on home tab
 
 ## 0.14.1
 

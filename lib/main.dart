@@ -144,6 +144,8 @@ class Flow extends StatefulWidget {
 }
 
 class FlowState extends State<Flow> {
+  late final AppLifecycleListener _appLifeCycleListener;
+
   Locale _locale = FlowLocalizations.supportedLanguages.first;
   ThemeMode _themeMode = ThemeMode.system;
 
@@ -183,6 +185,19 @@ class FlowState extends State<Flow> {
     });
 
     _tryUnlockTempLock();
+
+    _appLifeCycleListener = AppLifecycleListener(
+      onHide: () {
+        if (LocalPreferences().requireLocalAuthOnBlur.get()) {
+          _tempLock = true;
+          setState(() {});
+        }
+      },
+      onShow: () {
+        if (!mounted) return;
+        _tryUnlockTempLock();
+      },
+    );
   }
 
   @override
@@ -192,6 +207,8 @@ class FlowState extends State<Flow> {
     LocalPreferences().primaryCurrency.removeListener(_refreshExchangeRates);
 
     TransactionsService().removeListener(_synchronizePlannedNotifications);
+
+    _appLifeCycleListener.dispose();
 
     super.dispose();
   }
