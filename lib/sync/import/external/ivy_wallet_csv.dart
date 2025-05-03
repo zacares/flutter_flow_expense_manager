@@ -16,6 +16,7 @@ import "package:flow/sync/import/import_csv.dart";
 import "package:flow/sync/model/external/ivy/ivy_wallet_csv.dart";
 import "package:flow/sync/model/external/ivy/ivy_wallet_transaction.dart";
 import "package:flow/utils/extensions/iterables.dart";
+import "package:flow/utils/guess_preset_icon.dart";
 import "package:flutter/foundation.dart" hide Category;
 import "package:logging/logging.dart";
 import "package:material_symbols_icons/symbols.dart";
@@ -98,7 +99,11 @@ class IvyWalletCsvImporter extends Importer<IvyWalletCsv> {
                 (name) => Category.preset(
                   name: name,
                   uuid: categoryNameUuidMapping[name]!,
-                  iconCode: IconFlowIcon(Symbols.category_rounded).toString(),
+                  iconCode:
+                      guessPresetIcon(
+                        name,
+                        fallback: IconFlowIcon(Symbols.category_rounded),
+                      ).toString(),
                 ),
               )
               .toList(),
@@ -126,7 +131,11 @@ class IvyWalletCsvImporter extends Importer<IvyWalletCsv> {
                 (name) => Account.preset(
                   name: name,
                   uuid: accountNameUuidMapping[name]!,
-                  iconCode: IconFlowIcon(Symbols.wallet).toString(),
+                  iconCode:
+                      guessPresetIcon(
+                        name,
+                        fallback: IconFlowIcon(Symbols.wallet),
+                      ).toString(),
                   currency: accountCurrencies[name]!,
                 ),
               )
