@@ -15,7 +15,6 @@ Account _$AccountFromJson(Map<String, dynamic> json) => Account(
   archived: json['archived'] as bool? ?? false,
   sortOrder: (json['sortOrder'] as num?)?.toInt() ?? -1,
   type: json['type'] as String? ?? AccountType.debitValue,
-  showCreditLimit: json['showCreditLimit'] as bool? ?? true,
   createdDate: _$JsonConverterFromJson<String, DateTime>(
     json['createdDate'],
     const UTCDateTimeConverter().fromJson,
@@ -28,7 +27,6 @@ Map<String, dynamic> _$AccountToJson(Account instance) => <String, dynamic>{
   'name': instance.name,
   'currency': instance.currency,
   'creditLimit': instance.creditLimit,
-  'showCreditLimit': instance.showCreditLimit,
   'sortOrder': instance.sortOrder,
   'type': instance.type,
   'iconCode': instance.iconCode,

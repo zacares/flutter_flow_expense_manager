@@ -25,6 +25,8 @@ class _LockAppState extends State<LockApp> {
   @override
   Widget build(BuildContext context) {
     final bool requireLocalAuth = LocalPreferences().requireLocalAuth.get();
+    final bool requireLocalAuthOnBlur =
+        LocalPreferences().requireLocalAuthOnBlur.get();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -37,8 +39,10 @@ class _LockAppState extends State<LockApp> {
         ),
         SwitchListTile(
           secondary: const Icon(Symbols.lock_rounded),
-          title: Text("preferences.privacy.appLock".t(context)),
-          value: requireLocalAuth,
+          title: Text(
+            "preferences.privacy.appLock.lockAfterClosing".t(context),
+          ),
+          value: requireLocalAuthOnBlur,
           onChanged: requireLocalAuth ? updateRequireLocalAuthOnBlur : null,
         ),
         if (Platform.isLinux) ...[

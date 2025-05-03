@@ -37,11 +37,6 @@ class Account implements EntityBase {
   /// Exclusive to [AccountType.creditLine] accounts
   double? creditLimit;
 
-  /// Shows how much you can spend on this account regarding [creditLimit].
-  ///
-  /// This is only relevant for [AccountType.creditLine] accounts.
-  bool showCreditLimit;
-
   int sortOrder;
 
   String type;
@@ -54,6 +49,10 @@ class Account implements EntityBase {
     } catch (e) {
       return AccountType.debit;
     }
+  }
+
+  set accountType(AccountType value) {
+    type = value.value;
   }
 
   @Backlink("account")
@@ -101,7 +100,6 @@ class Account implements EntityBase {
     this.archived = false,
     this.sortOrder = -1,
     this.type = AccountType.debitValue,
-    this.showCreditLimit = true,
     DateTime? createdDate,
   }) : createdDate = createdDate ?? DateTime.now(),
        uuid = const Uuid().v4();
@@ -113,7 +111,6 @@ class Account implements EntityBase {
     required this.uuid,
     this.creditLimit,
     this.type = AccountType.debitValue,
-    this.showCreditLimit = true,
     this.excludeFromTotalBalance = false,
   }) : archived = false,
        sortOrder = -1,
@@ -131,12 +128,30 @@ enum AccountType implements LocalizedEnum {
   /// savings, cash.
   debit(debitValue),
 
+  /// Just another name for debit. I added this just because I thought people
+  /// would ask me to add this if I added [AccountType]
+  savings(savingsValue),
+
   /// Accounts that are not holding money but rather a credit line. This
   /// includes but not limited to: credit cards
-  creditLine(creditLineValue);
+  creditLine(creditLineValue),
+
+  /// Accounts that are not holding money but rather a credit line. This
+  /// includes but not limited to: credit cards
+  loan(loanValue),
+
+  /// Assets. IDK, I don't have any assets yet.
+  asset(assetValue),
+
+  /// If people want more distinction.
+  other(otherValue);
 
   static const String debitValue = "debit";
+  static const String savingsValue = "savings";
   static const String creditLineValue = "creditLine";
+  static const String loanValue = "loan";
+  static const String assetValue = "asset";
+  static const String otherValue = "other";
 
   final String value;
 
@@ -146,4 +161,18 @@ enum AccountType implements LocalizedEnum {
   String get localizationEnumValue => name;
   @override
   String get localizationEnumName => "AccountType";
+
+  bool get preferExcludeFromBalance => switch (this) {
+    AccountType.debit => false,
+    AccountType.savings => false,
+    AccountType.creditLine => true,
+    AccountType.asset => true,
+    AccountType.loan => true,
+    AccountType.other => false,
+  };
+
+  bool get showCreditLimit => switch (this) {
+    AccountType.creditLine => true,
+    _ => false,
+  };
 }
