@@ -139,7 +139,19 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           ),
       builder: (context, snapshot) {
         final DateTime now = Moment.now().startOfNextMinute();
+        final DateTime cutoffPlanned =
+            now
+                .add(Duration(days: _plannedTransactionsNextNDays))
+                .startOfNextDay();
         final List<Transaction>? transactions = snapshot.data;
+
+        if (currentFilter.range?.range?.contains(now) == true) {
+          transactions?.removeWhere((transaction) {
+            if (transaction.transactionDate <= now) return false;
+
+            return transaction.transactionDate > cutoffPlanned;
+          });
+        }
 
         final Widget header = DefaultTransactionsFilterHead(
           defaultFilter: defaultFilter,
