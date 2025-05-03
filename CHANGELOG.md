@@ -6,6 +6,7 @@
 
 * Now you can import from Ivy Wallet, closes [#477](https://github.com/flow-mn/flow/issues/477)
 * Now you can choose to auto-lock the app when switching to different app, closes [#450](https://github.com/flow-mn/flow/issues/450)
+* Now you can assign types to accounts. This is part of an upcoming feature, [#464](https://github.com/flow-mn/flow/issues/464)
 
 ### Fixes
 
@@ -14,6 +15,8 @@
 * Fixed recurring transactions weren't generating new transactions in some scenarios, special thanks to @abelood on Discord
 * Now you can slide transaction list tile even if they don't have any action
 * You can no longer slide multiple list tiles on home tab
+* Pending transactions now respects "Show on home" option when the current date
+  is part of the filter (e.g., This month, Last 30 days, this *, etc...)
 
 ## 0.14.1
 
