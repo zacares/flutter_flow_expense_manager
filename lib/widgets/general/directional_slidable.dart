@@ -39,7 +39,12 @@ class DirectionalSlidable extends StatelessWidget {
 
   ActionPane? getPane(List<SlidableAction>? actions) {
     if (actions == null || actions.isEmpty) {
-      return null;
+      return ActionPane(
+        motion: DrawerMotion(),
+        closeThreshold: 1 - 0.000000000000001,
+        openThreshold: 1 - 0.000000000000001,
+        children: [],
+      );
     }
 
     return ActionPane(motion: DrawerMotion(), children: actions);

@@ -22,6 +22,12 @@ import "package:flutter/material.dart";
 import "package:material_symbols_icons/symbols.dart";
 import "package:moment_dart/moment_dart.dart";
 
+/// Generic transactions page that can be used to display list of transactions
+///
+/// This view does not respect [UserPreferences.combineTransfers] since it may
+/// be used to show transactions of specific account, and there will be
+/// scenarios where the other half of the transfer transaction is wouldn't be
+/// shown.
 class TransactionsPage extends StatefulWidget {
   final QueryBuilder<Transaction> Function(TimeRange range) queryFn;
   final TimeRange? initialRange;
@@ -203,12 +209,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       transactions.values.fold<int>(
                         0,
                         (previousValue, element) =>
-                            previousValue + element.renderableCount,
+                            /// Since the [GroupedTransactionList] below isn't able to combine
+                            /// transfer transactions, we need to count them separately.
+                            previousValue + element.length,
                       ) +
                       pendingTransactions.values.fold<int>(
                         0,
                         (previousValue, element) =>
-                            previousValue + element.renderableCount,
+                            /// Since the [GroupedTransactionList] below isn't able to combine
+                            /// transfer transactions, we need to count them separately.
+                            previousValue + element.length,
                       );
 
                   return GroupedTransactionList(
@@ -222,9 +232,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               transactions: transactions,
                             ),
                     pendingDivider: WavyDivider(),
-                    mainHeader: Text(
-                      "transactions.count".t(context, totalTransactionsCount),
-                      style: context.textTheme.bodyMedium?.semi(context),
+                    mainHeader: Frame(
+                      child: Text(
+                        "transactions.count".t(context, totalTransactionsCount),
+                        style: context.textTheme.bodyMedium?.semi(context),
+                      ),
                     ),
                     mainHeaderPadding: EdgeInsets.zero,
                   );
