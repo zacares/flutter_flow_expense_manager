@@ -58,7 +58,7 @@ dependencies:
   path_provider: ^2.1.5
   pie_menu: ^3.2.10
   recurrence: ^0.3.0
-  share_plus: ^10.0.0
+  share_plus: ^11.0.0
   shared_preferences: ^2.5.2
   simple_icons: ^14.6.1
   smooth_page_indicator: ^1.1.0
