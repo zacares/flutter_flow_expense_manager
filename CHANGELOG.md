@@ -1,5 +1,12 @@
 # Changelog
 
+## Next
+
+### Fixes
+
+* Fixed permenantly deleting a part of transfer transaction from the trash bin
+  would result in a stale transaction, that is unable to be opened
+
 ## 0.14.2
 
 ### New features
