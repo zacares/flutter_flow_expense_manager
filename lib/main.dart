@@ -67,6 +67,14 @@ void main() async {
 
   initializeFileLogger();
 
+  FlutterError.onError = (FlutterErrorDetails details) {
+    mainLogger.severe(
+      "[Flutter Error] [${details.library ?? 'unknown'}]",
+      details.exception,
+      details.stack,
+    );
+  };
+
   if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
     startupLog.fine("Initializing window manager");
     await windowManager.ensureInitialized().catchError((error) {
@@ -187,15 +195,20 @@ class FlowState extends State<Flow> {
     _tryUnlockTempLock();
 
     _appLifeCycleListener = AppLifecycleListener(
+      onInactive: () {
+        _tryTempLock();
+      },
       onHide: () {
-        if (LocalPreferences().requireLocalAuthOnBlur.get()) {
-          _tempLock = true;
-          setState(() {});
-        }
+        _tryTempLock();
       },
       onShow: () {
         if (!mounted) return;
         _tryUnlockTempLock();
+        if (LocalAuthService.platformSupported &&
+            LocalPreferences().requireLocalAuthOnBlur.get()) {
+          _tempLock = true;
+          setState(() {});
+        }
       },
     );
   }
@@ -335,6 +348,15 @@ class FlowState extends State<Flow> {
   void _synchronizePlannedNotifications() {
     TransactionsService().synchronizeNotifications().catchError((error) {
       startupLog.severe("Failed to synchronize notifications", error);
+    });
+  }
+
+  void _tryTempLock() {
+    if (!LocalAuthService.platformSupported) return;
+    if (!LocalPreferences().requireLocalAuthOnBlur.get()) return;
+
+    setState(() {
+      _tempLock = true;
     });
   }
 
