@@ -42,6 +42,8 @@ class _NewTransactionButtonState extends State<NewTransactionButton> {
             customAngleAnchor: PieAnchor.center,
             leftClickShowsMenu: true,
             rightClickShowsMenu: true,
+            regularPressShowsMenu: true,
+            longPressDuration: Duration.zero,
           ),
           onToggle: onToggle,
           actions: [

@@ -56,7 +56,7 @@ dependencies:
   package_info_plus: ^8.3.0
   path: ^1.9.1
   path_provider: ^2.1.5
-  pie_menu: ^3.2.10
+  pie_menu: ^3.3.0
   recurrence: ^0.3.0
   share_plus: ^11.0.0
   shared_preferences: ^2.5.2
