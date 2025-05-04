@@ -976,19 +976,25 @@ class _TransactionPageState extends State<TransactionPage> {
         _currentlyEditing.isRecurring && _recurringTransaction != null;
 
     if (originalTransactionWasRecurring) {
-      mode = await showModalBottomSheet(
-        context: context,
-        builder:
-            (context) => SelectRecurringUpdateModeSheet(
-              values: [
-                if (_recurrence == _recurringTransaction!.recurrence)
-                  RecurringUpdateMode.current,
-                RecurringUpdateMode.thisAndFuture,
-              ],
-              title: Text("transaction.recurring.edit".t(context)),
-            ),
-        isScrollControlled: true,
-      );
+      final List<RecurringUpdateMode> availableModes = [
+        if (_recurrence == _recurringTransaction!.recurrence)
+          RecurringUpdateMode.current,
+        RecurringUpdateMode.thisAndFuture,
+      ];
+
+      if (availableModes.length == 1) {
+        mode = availableModes.single;
+      } else {
+        mode = await showModalBottomSheet(
+          context: context,
+          builder:
+              (context) => SelectRecurringUpdateModeSheet(
+                values: availableModes,
+                title: Text("transaction.recurring.edit".t(context)),
+              ),
+          isScrollControlled: true,
+        );
+      }
     }
 
     assert(mode != RecurringUpdateMode.all);
