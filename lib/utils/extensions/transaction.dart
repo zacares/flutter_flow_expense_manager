@@ -28,8 +28,9 @@ extension TransactionHelpers on Transaction {
     if (isPending != true) return false;
 
     return transactionDate.isFutureAnchored(
-      anchor ?? Moment.now().startOfMinute(),
-    );
+          anchor ?? Moment.now().startOfMinute(),
+        ) &&
+        isPending == null;
   }
 
   Future<bool> _moveToTrashBinRecurring(BuildContext context) async {

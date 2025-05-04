@@ -8,6 +8,7 @@ import "package:flow/entity/account.dart";
 import "package:flow/entity/backup_entry.dart";
 import "package:flow/form_validators.dart";
 import "package:flow/l10n/extensions.dart";
+import "package:flow/l10n/named_enum.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/objectbox/objectbox.g.dart";
@@ -19,10 +20,13 @@ import "package:flow/theme/theme.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/account/update_balance_options_sheet.dart";
 import "package:flow/widgets/delete_button.dart";
+import "package:flow/widgets/general/directional_chevron.dart";
 import "package:flow/widgets/general/flow_icon.dart";
 import "package:flow/widgets/general/form_close_button.dart";
 import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/general/info_text.dart";
+import "package:flow/widgets/general/money_text.dart";
+import "package:flow/widgets/sheets/select_account_type_sheet.dart";
 import "package:flow/widgets/sheets/select_currency_sheet.dart";
 import "package:flow/widgets/sheets/select_flow_icon_sheet.dart";
 import "package:flutter/material.dart";
@@ -54,6 +58,8 @@ class _AccountEditPageState extends State<AccountEditPage> {
   late bool _excludeFromTotalBalance;
 
   AccountType _accountType = AccountType.debit;
+
+  double _creditLimit = 0.0;
 
   late double _balance;
 
@@ -93,6 +99,7 @@ class _AccountEditPageState extends State<AccountEditPage> {
         text: _currentlyEditing?.name,
       );
       _balance = _currentlyEditing?.balance.amount ?? 0.0;
+      _creditLimit = _currentlyEditing?.creditLimit ?? 0.0;
       _currency =
           _currentlyEditing?.currency ??
           LocalPreferences().getPrimaryCurrency();
@@ -141,87 +148,36 @@ class _AccountEditPageState extends State<AccountEditPage> {
             child: Column(
               children: [
                 const SizedBox(height: 16.0),
-                Padding(
-                  padding: contentPadding,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          FlowIcon(
-                            _iconData ??
-                                FlowIconData.icon(Symbols.wallet_rounded),
-                            size: 64.0,
-                            plated: true,
-                            onTap: selectIcon,
-                          ),
-                          TextButton(
-                            onPressed: selectIcon,
-                            child: Text(
-                              "flowIcon.change".t(context),
-                              style: context.textTheme.labelSmall?.copyWith(
-                                color: context.colorScheme.primary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 16.0),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _nameTextController,
-                                    focusNode: _editNameFocusNode,
-                                    maxLength: Account.maxNameLength,
-                                    decoration: InputDecoration(
-                                      hintText: "account.name".t(context),
-                                      focusColor: context.colorScheme.secondary,
-                                      isDense: true,
-                                      border:
-                                          _editingName
-                                              ? null
-                                              : InputBorder.none,
-                                      counter: const SizedBox.shrink(),
-                                    ),
-                                    onTap: () => toggleEditName(true),
-                                    onFieldSubmitted:
-                                        (_) => toggleEditName(false),
-                                    readOnly: !_editingName,
-                                    validator: validateNameField,
-                                  ),
-                                ),
-                                const SizedBox(width: 12.0),
-                                IconButton(
-                                  icon:
-                                      _editingName
-                                          ? const Icon(Symbols.done_rounded)
-                                          : const Icon(Symbols.edit_rounded),
-                                  onPressed: toggleEditName,
-                                ),
-                              ],
-                            ),
-                            if (!widget.isNewAccount)
-                              Text(
-                                _currency,
-                                style: context.textTheme.labelLarge?.semi(
-                                  context,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                FlowIcon(
+                  _iconData ?? FlowIconData.icon(Symbols.wallet_rounded),
+                  size: 96.0,
+                  plated: true,
+                  onTap: selectIcon,
                 ),
                 const SizedBox(height: 24.0),
+                ConstrainedBox(
+                  constraints: BoxConstraints.loose(
+                    Size(320.0, double.infinity),
+                  ),
+                  child: TextFormField(
+                    controller: _nameTextController,
+                    focusNode: _editNameFocusNode,
+                    maxLength: Account.maxNameLength,
+                    decoration: InputDecoration(
+                      hintText: "account.name".t(context),
+                      focusColor: context.colorScheme.secondary,
+                      isDense: true,
+                      counter: const SizedBox.shrink(),
+                    ),
+                    style: context.textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
+                    onTap: () => toggleEditName(true),
+                    onFieldSubmitted: (_) => toggleEditName(false),
+                    readOnly: !_editingName,
+                    validator: validateNameField,
+                  ),
+                ),
+                const SizedBox(height: 48.0),
                 InkWell(
                   borderRadius: BorderRadius.circular(16.0),
                   onTap: updateBalance,
@@ -249,14 +205,60 @@ class _AccountEditPageState extends State<AccountEditPage> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 48.0),
+                ListTile(
+                  leading: Icon(Symbols.attach_money_rounded),
+                  title: Text("currency".t(context)),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(_currency, style: context.textTheme.labelLarge),
+                      if (widget.isNewAccount) ...[
+                        const SizedBox(width: 8.0),
+                        const DirectionalChevron(),
+                      ],
+                    ],
+                  ),
+                  onTap: widget.isNewAccount ? selectCurrency : null,
+                ),
+                ListTile(
+                  leading: Icon(Symbols.category_rounded),
+                  title: Text("account.type".t(context)),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _accountType.localizedNameContext(context),
+                        style: context.textTheme.labelLarge,
+                      ),
+                      const SizedBox(width: 8.0),
+                      const DirectionalChevron(),
+                    ],
+                  ),
+                  onTap: selectAccountType,
+                ),
+                if (_accountType.showCreditLimit)
+                  ListTile(
+                    leading: Icon(Symbols.credit_card_rounded),
+                    title: Text("account.creditLimit".t(context)),
+                    trailing: MoneyText(
+                      Money(_creditLimit, _currency),
+                      style: context.textTheme.labelLarge,
+                    ),
+                    onTap: inputCreditLimit,
+                  ),
                 const SizedBox(height: 24.0),
-                CheckboxListTile(
+                const Divider(),
+                const SizedBox(height: 24.0),
+                SwitchListTile(
+                  secondary: Icon(Symbols.playlist_remove_rounded),
                   value: _excludeFromTotalBalance,
                   onChanged: updateBalanceExclusion,
                   title: Text("account.excludeFromTotalBalance".t(context)),
                 ),
                 if (!widget.isNewAccount)
-                  CheckboxListTile(
+                  SwitchListTile(
+                    secondary: Icon(Symbols.block_rounded),
                     value: _archived,
                     onChanged: updateArchived,
                     title: Text("account.archive".t(context)),
@@ -269,15 +271,6 @@ class _AccountEditPageState extends State<AccountEditPage> {
                     ),
                   ),
                 ],
-                if (widget.isNewAccount)
-                  ListTile(
-                    title: Text("currency".t(context)),
-                    trailing: Text(
-                      _currency,
-                      style: context.textTheme.labelLarge,
-                    ),
-                    onTap: selectCurrency,
-                  ),
                 if (_currentlyEditing != null && _archived) ...[
                   const SizedBox(height: 80.0),
                   DeleteButton(
@@ -292,6 +285,39 @@ class _AccountEditPageState extends State<AccountEditPage> {
         ),
       ),
     );
+  }
+
+  void inputCreditLimit() async {
+    final double? result = await showModalBottomSheet<double>(
+      context: context,
+      builder:
+          (context) => InputAmountSheet(
+            initialAmount: _creditLimit.abs(),
+            currency: _currency,
+            title: "account.creditLimit".t(context),
+            allowNegative: false,
+            lockSign: true,
+          ),
+      isScrollControlled: true,
+    );
+
+    if (result == null) return;
+
+    _creditLimit = result.abs();
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void updateType(AccountType newType) async {
+    if (newType.preferExcludeFromBalance) {
+      updateBalanceExclusion(true);
+    }
+
+    _accountType = newType;
+
+    setState(() {});
   }
 
   void updateBalance() async {
@@ -364,11 +390,26 @@ class _AccountEditPageState extends State<AccountEditPage> {
     });
   }
 
+  void selectAccountType() async {
+    final result = await showModalBottomSheet<AccountType>(
+      context: context,
+      builder: (context) => const SelectAccountTypeSheet(),
+      isScrollControlled: true,
+    );
+
+    if (result != null) {
+      updateType(result);
+    }
+  }
+
   void update({required String formattedName}) async {
     if (_currentlyEditing == null) return;
 
     _currentlyEditing!.name = formattedName;
     _currentlyEditing!.currency = _currency;
+
+    _currentlyEditing!.creditLimit = _creditLimit;
+    _currentlyEditing!.accountType = _accountType;
 
     _currentlyEditing!.iconCode = iconCodeOrError;
     _currentlyEditing!.excludeFromTotalBalance = _excludeFromTotalBalance;
@@ -399,6 +440,8 @@ class _AccountEditPageState extends State<AccountEditPage> {
       excludeFromTotalBalance: _excludeFromTotalBalance,
       iconCode: iconCodeOrError,
       sortOrder: sortOrder,
+      type: _accountType.value,
+      creditLimit: _creditLimit,
     );
 
     if (_balance.abs() != 0) {
@@ -430,6 +473,8 @@ class _AccountEditPageState extends State<AccountEditPage> {
           _currentlyEditing!.iconCode != iconCodeOrError ||
           _currentlyEditing!.archived != _archived ||
           _currentlyEditing!.currency != _currency ||
+          (_currentlyEditing!.creditLimit ?? 0) != _creditLimit ||
+          _currentlyEditing!.accountType != _accountType ||
           _currentlyEditing!.excludeFromTotalBalance !=
               _excludeFromTotalBalance ||
           _balance != _currentlyEditing!.balance.amount ||
@@ -440,6 +485,10 @@ class _AccountEditPageState extends State<AccountEditPage> {
         _iconData != null ||
         _currency != LocalPreferences().getPrimaryCurrency() ||
         _balance != 0.0 ||
+        _creditLimit != 0.0 ||
+        _accountType != AccountType.debit ||
+        _excludeFromTotalBalance ||
+        _archived ||
         _updateBalanceAt != null;
   }
 

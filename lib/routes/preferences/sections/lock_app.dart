@@ -25,6 +25,8 @@ class _LockAppState extends State<LockApp> {
   @override
   Widget build(BuildContext context) {
     final bool requireLocalAuth = LocalPreferences().requireLocalAuth.get();
+    final bool requireLocalAuthOnBlur =
+        LocalPreferences().requireLocalAuthOnBlur.get();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -34,6 +36,14 @@ class _LockAppState extends State<LockApp> {
           title: Text("preferences.privacy.appLock".t(context)),
           value: requireLocalAuth,
           onChanged: updateRequireLocalAuth,
+        ),
+        SwitchListTile(
+          secondary: const Icon(Symbols.lock_rounded),
+          title: Text(
+            "preferences.privacy.appLock.lockAfterClosing".t(context),
+          ),
+          value: requireLocalAuthOnBlur,
+          onChanged: requireLocalAuth ? updateRequireLocalAuthOnBlur : null,
         ),
         if (Platform.isLinux) ...[
           const SizedBox(height: 8.0),
@@ -74,6 +84,21 @@ class _LockAppState extends State<LockApp> {
     }
 
     await LocalPreferences().requireLocalAuth.set(newRequireLocalAuth);
+
+    if (!mounted) return;
+
+    PreferencesPage.of(context).reload();
+    setState(() {});
+  }
+
+  void updateRequireLocalAuthOnBlur(bool? newRequireLocalAuthOnBlur) async {
+    if (newRequireLocalAuthOnBlur == null) return;
+
+    if (!LocalPreferences().requireLocalAuth.get()) return;
+
+    await LocalPreferences().requireLocalAuthOnBlur.set(
+      newRequireLocalAuthOnBlur,
+    );
 
     if (!mounted) return;
 

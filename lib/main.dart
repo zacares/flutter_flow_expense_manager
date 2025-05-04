@@ -67,6 +67,14 @@ void main() async {
 
   initializeFileLogger();
 
+  FlutterError.onError = (FlutterErrorDetails details) {
+    mainLogger.severe(
+      "[Flutter Error] [${details.library ?? 'unknown'}]",
+      details.exception,
+      details.stack,
+    );
+  };
+
   if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
     startupLog.fine("Initializing window manager");
     await windowManager.ensureInitialized().catchError((error) {
@@ -144,6 +152,8 @@ class Flow extends StatefulWidget {
 }
 
 class FlowState extends State<Flow> {
+  late final AppLifecycleListener _appLifeCycleListener;
+
   Locale _locale = FlowLocalizations.supportedLanguages.first;
   ThemeMode _themeMode = ThemeMode.system;
 
@@ -183,6 +193,24 @@ class FlowState extends State<Flow> {
     });
 
     _tryUnlockTempLock();
+
+    _appLifeCycleListener = AppLifecycleListener(
+      onInactive: () {
+        _tryTempLock();
+      },
+      onHide: () {
+        _tryTempLock();
+      },
+      onShow: () {
+        if (!mounted) return;
+        _tryUnlockTempLock();
+        if (LocalAuthService.platformSupported &&
+            LocalPreferences().requireLocalAuthOnBlur.get()) {
+          _tempLock = true;
+          setState(() {});
+        }
+      },
+    );
   }
 
   @override
@@ -192,6 +220,8 @@ class FlowState extends State<Flow> {
     LocalPreferences().primaryCurrency.removeListener(_refreshExchangeRates);
 
     TransactionsService().removeListener(_synchronizePlannedNotifications);
+
+    _appLifeCycleListener.dispose();
 
     super.dispose();
   }
@@ -321,7 +351,18 @@ class FlowState extends State<Flow> {
     });
   }
 
+  void _tryTempLock() {
+    if (!LocalAuthService.platformSupported) return;
+    if (!LocalPreferences().requireLocalAuthOnBlur.get()) return;
+
+    setState(() {
+      _tempLock = true;
+    });
+  }
+
   void _tryUnlockTempLock() async {
+    if (!_tempLock) return;
+
     try {
       await LocalAuthService.initialize();
       if (!LocalAuthService.available || !LocalAuthService.platformSupported) {
