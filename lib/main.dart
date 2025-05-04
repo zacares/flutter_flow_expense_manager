@@ -361,6 +361,8 @@ class FlowState extends State<Flow> {
   }
 
   void _tryUnlockTempLock() async {
+    if (!_tempLock) return;
+
     try {
       await LocalAuthService.initialize();
       if (!LocalAuthService.available || !LocalAuthService.platformSupported) {
