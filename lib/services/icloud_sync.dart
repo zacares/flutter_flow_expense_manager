@@ -8,7 +8,6 @@ import "package:icloud_storage/icloud_storage.dart";
 import "package:logging/logging.dart";
 import "package:path/path.dart" as path;
 import "package:path_provider/path_provider.dart";
-import "package:uuid/uuid.dart";
 
 final Logger _log = Logger("ICloudSyncService");
 
@@ -100,10 +99,20 @@ class ICloudSyncService {
     }
   }
 
-  Future<void> delete(ICloudFile file) async {
+  Future<void> delete(dynamic file) async {
+    late final String relativePath;
+
+    if (file is String) {
+      relativePath = file;
+    } else if (file is ICloudFile) {
+      relativePath = file.relativePath;
+    } else {
+      throw Exception("Invalid file type: $file");
+    }
+
     return await ICloudStorage.delete(
       containerId: containerId,
-      relativePath: file.relativePath,
+      relativePath: relativePath,
     );
   }
 
@@ -160,7 +169,7 @@ class ICloudSyncService {
   Future<String> upload({
     required String filePath,
     required String destinationRelativePath,
-    Function(Stream<double>)? onProgress,
+    Function(double)? onProgress,
     DateTime? modifiedDate,
   }) async {
     final String tempLocation = await uploadTemporary(
@@ -170,6 +179,11 @@ class ICloudSyncService {
       modifiedDate: modifiedDate,
     );
 
+    await delete(destinationRelativePath).catchError((_) {
+      _log.warning(
+        "Failed to delete file: $destinationRelativePath before moving a new file into the same location",
+      );
+    });
     await move(from: tempLocation, to: destinationRelativePath);
 
     return destinationRelativePath;
@@ -230,18 +244,27 @@ class ICloudSyncService {
   Future<String> uploadTemporary({
     required String filePath,
     required String destinationRelativePath,
-    Function(Stream<double>)? onProgress,
+    Function(double)? onProgress,
     DateTime? modifiedDate,
   }) async {
     assert(filePath.isNotEmpty);
     assert(destinationRelativePath.isNotEmpty);
     assert(!destinationRelativePath.startsWith("/"));
 
-    final Directory tempDir = await getTemporaryDirectory();
-    final String tempFilePath = path.join(tempDir.path, Uuid().v4());
+    final Directory tempDir = await getTemporaryDirectory().then(
+      (dir) => Directory(path.join(dir.path, "tmp")),
+    );
+    final String tempFilePath = path.join(
+      tempDir.path,
+      path.basename(filePath),
+    );
 
     modifiedDate ??= DateTime.now();
 
+    await tempDir.create(recursive: true).catchError((e) {
+      _log.warning("Failed to create temporary directory: $tempDir", e);
+      return tempDir;
+    });
     final File tempFile = await File(filePath).copy(tempFilePath);
     await tempFile.setLastModified(modifiedDate);
     await tempFile.setLastAccessed(modifiedDate);
@@ -256,14 +279,32 @@ class ICloudSyncService {
     late final StreamSubscription<double> subscription;
 
     void finish([bool success = true]) {
-      subscription.cancel();
+      try {
+        subscription.cancel();
 
-      if (success) {
-        completer.complete(destinationRelativePath);
-        _log.info("Upload has been completed: $destinationRelativePath");
-      } else {
-        completer.completeError(Exception("Failed to upload file: $filePath"));
-        _log.severe("Failed to upload file: $filePath");
+        if (success) {
+          completer.complete(destinationRelativePath);
+          _log.info("Upload has been completed: $destinationRelativePath");
+        } else {
+          completer.completeError(
+            Exception("Failed to upload file: $filePath"),
+          );
+          _log.severe("Failed to upload file: $filePath");
+        }
+      } catch (e, stackTrace) {
+        _log.warning("Failed to complete upload: $filePath", e, stackTrace);
+      }
+    }
+
+    void cleanup() async {
+      try {
+        await completer.future.whenComplete(() {
+          tempFile.delete().then((_) {}).catchError((e) {
+            _log.warning("Failed to delete temporary file: $tempFile", e);
+          });
+        });
+      } catch (e) {
+        // Silent fail
       }
     }
 
@@ -273,10 +314,11 @@ class ICloudSyncService {
         filePath: tempFile.path,
         destinationRelativePath: destinationRelativePath,
         onProgress: (Stream<double> progress) {
-          onProgress?.call(progress);
           subscription = progress.listen(
             (double progress) {
               _log.finer("Upload progress for ($progress): $progress");
+
+              onProgress?.call(progress);
 
               if (progress >= 1.0) {
                 finish();
@@ -291,6 +333,8 @@ class ICloudSyncService {
 
       lastError = null;
 
+      cleanup();
+
       return completer.future;
     } catch (e) {
       lastError = e;
@@ -300,13 +344,10 @@ class ICloudSyncService {
       } catch (e) {
         // Silent fail
       }
+
+      cleanup();
+
       return completer.future;
-    } finally {
-      try {
-        await tempFile.delete();
-      } catch (e) {
-        _log.warning("Failed to delete temporary file: $tempFile", e);
-      }
     }
   }
 }

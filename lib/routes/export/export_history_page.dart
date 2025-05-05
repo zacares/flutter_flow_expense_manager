@@ -1,4 +1,3 @@
-import "dart:async";
 import "dart:io";
 
 import "package:flow/entity/backup_entry.dart";
@@ -92,7 +91,7 @@ class _ExportHistoryPageState extends State<ExportHistoryPage> {
 
                         final bool canUpload =
                             uploadEnabled &&
-                            !uploadBusy &&
+                            // !uploadBusy &&
                             entry.canUploadToCloud;
 
                         return BackupEntryCard(
@@ -145,37 +144,10 @@ class _ExportHistoryPageState extends State<ExportHistoryPage> {
     }
   }
 
-  void onUploadProgress(BackupEntry entry, Stream<double> progress) {
-    late final StreamSubscription<double> subscription;
-
-    void cancel() {
-      uploading = null;
-      subscription.cancel();
-
-      if (mounted) {
-        setState(() {});
-      }
+  void onUploadProgress(BackupEntry entry, double progress) {
+    uploading = (entry.id, progress);
+    if (mounted) {
+      setState(() {});
     }
-
-    subscription = progress.listen(
-      (double progress) {
-        uploading = (entry.id, progress);
-
-        if (mounted) {
-          setState(() {});
-        }
-
-        if (progress >= 1.0) {
-          cancel();
-        }
-      },
-      onError: (_) => cancel(),
-      onDone: () => cancel(),
-      cancelOnError: true,
-    );
-
-    setState(() {
-      uploading = (entry.id, 0.0);
-    });
   }
 }

@@ -86,30 +86,7 @@ Future<ExportResult> export({
       // Upload to iCloud if the user has enabled it
       unawaited(
         SyncService()
-            .saveBackupToICloud(
-              entry: entry,
-              onProgress: (progressStream) {
-                late StreamSubscription subscription;
-
-                subscription = progressStream.listen(
-                  (progress) {
-                    syncLogger.fine(
-                      "iCloud upload progress for (${entry.type}) (${path.basename(entry.filePath)}): ${(progress * 100).toStringAsFixed(1)}%",
-                    );
-                  },
-                  onDone: () {
-                    syncLogger.info(
-                      "iCloud upload completed for (${entry.type}) (${path.basename(entry.filePath)}): 100.0%",
-                    );
-                    try {
-                      subscription.cancel();
-                    } catch (e) {
-                      // silent fail
-                    }
-                  },
-                );
-              },
-            )
+            .saveBackupToICloud(entry: entry)
             .then((_) {
               syncLogger.info(
                 "Successfully uploaded manual backup to iCloud (${entry.filePath})",

@@ -38,9 +38,7 @@ class _DebugICloudPageState extends State<DebugICloudPage> {
                 subtitle: Text(iCloudFile.contentChangeDate.toString()),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete),
-                  onPressed: () async {
-                    await ICloudSyncService().delete(iCloudFile);
-                  },
+                  onPressed: () => ICloudSyncService().delete(iCloudFile),
                 ),
               );
             },

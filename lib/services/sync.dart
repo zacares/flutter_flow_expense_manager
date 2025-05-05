@@ -103,7 +103,7 @@ class SyncService {
   Future<void> saveBackupToICloud({
     required BackupEntry entry,
     String? parent,
-    Function(Stream<double>)? onProgress,
+    Function(double)? onProgress,
   }) async {
     if (!ICloudSyncService.supported) {
       return;
