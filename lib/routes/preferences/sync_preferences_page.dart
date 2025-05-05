@@ -1,5 +1,8 @@
 // import "package:flow/constants.dart";
+import "package:flow/constants.dart";
 import "package:flow/l10n/extensions.dart";
+import "package:flow/routes/preferences/sections/icloud.dart";
+import "package:flow/services/icloud_sync.dart";
 // import "package:flow/routes/preferences/sections/icloud.dart";
 // import "package:flow/services/icloud_sync.dart";
 import "package:flow/services/user_preferences.dart";
@@ -86,18 +89,18 @@ class _SyncPreferencesPageState extends State<SyncPreferencesPage> {
                   ),
                 ),
               ),
-              // if (ICloudSyncService.supported || flowDebugMode) ...[
-              //   const SizedBox(height: 16.0),
-              //   if (!ICloudSyncService.supported)
-              //     Frame(
-              //       child: InfoText(
-              //         child: Text(
-              //           "DEBUG MODE: Even though your currenct device does not support iCloud, following section is shown because you are in debug mode.",
-              //         ),
-              //       ),
-              //     ),
-              //   ICloud(),
-              // ],
+              if (ICloudSyncService.supported || flowDebugMode) ...[
+                const SizedBox(height: 16.0),
+                if (!ICloudSyncService.supported)
+                  Frame(
+                    child: InfoText(
+                      child: Text(
+                        "DEBUG MODE: Even though your currenct device does not support iCloud, following section is shown because you are in debug mode.",
+                      ),
+                    ),
+                  ),
+                ICloud(),
+              ],
               const SizedBox(height: 16.0),
             ],
           ),

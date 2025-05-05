@@ -169,7 +169,7 @@ class SyncService {
       );
 
       _log.info(
-        "Auto backup successfully uploaded to iCloud -> ${entry.filePath}",
+        "Auto backup successfully uploaded to iCloud: ${entry.filePath} -> $iCloudRelativePath",
       );
 
       try {
