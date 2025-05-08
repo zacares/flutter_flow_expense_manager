@@ -94,10 +94,12 @@ extension CustomPopups on BuildContext {
             ? Rect.zero
             : renderBox.localToGlobal(Offset.zero) & renderBox.size;
 
-    await Share.shareXFiles(
-      [XFile(filePath)],
-      sharePositionOrigin: origin,
-      subject: subject,
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(filePath)],
+        sharePositionOrigin: origin,
+        subject: subject,
+      ),
     );
 
     return null;
@@ -111,10 +113,14 @@ extension CustomPopups on BuildContext {
             : renderBox.localToGlobal(Offset.zero) & renderBox.size;
 
     if (Platform.isIOS || Platform.isAndroid) {
-      return await Share.shareUri(uri, sharePositionOrigin: origin);
+      return await SharePlus.instance.share(
+        ShareParams(uri: uri, sharePositionOrigin: origin),
+      );
     }
 
-    return await Share.share(uri.toString(), sharePositionOrigin: origin);
+    return await SharePlus.instance.share(
+      ShareParams(text: uri.toString(), sharePositionOrigin: origin),
+    );
   }
 
   static final CustomTimeRange _pickDateDefaultBounds = CustomTimeRange(
