@@ -13,9 +13,6 @@ class CategoryFlowReport extends FlowReport {
   /// Uses [Namespace.nil] for uncategorized transactions
   final Map<String, MoneyFlow> data = {};
 
-  @override
-  final bool ready = true;
-
   bool _showMissingExchangeRatesWarning = false;
 
   @override
@@ -46,12 +43,12 @@ class CategoryFlowReport extends FlowReport {
 
       final String categoryUuid =
           transaction.categoryUuid ?? Namespace.nil.value;
-      data[categoryUuid] ??= MoneyFlow();
 
+      data[categoryUuid] ??= MoneyFlow();
       data[categoryUuid]!.add(transaction.money);
     }
 
-    if (rates == null || hasNonPrimaryCurrency) {
+    if (hasNonPrimaryCurrency && rates == null) {
       _showMissingExchangeRatesWarning = true;
     }
   }

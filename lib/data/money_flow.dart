@@ -13,6 +13,11 @@ class MoneyFlow<T> {
   int expenseCount = 0;
   int incomeCount = 0;
 
+  Set<String> get uniqueCurrencies => {
+    ..._totalExpenseByCurrency.keys,
+    ..._totalIncomeByCurrency.keys,
+  };
+
   MoneyFlow({this.associatedData});
 
   void add(Money money) {

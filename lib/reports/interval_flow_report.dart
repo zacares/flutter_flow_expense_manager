@@ -1,21 +1,21 @@
+import "package:flow/data/money_flow.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/reports/report.dart";
-import "package:moment_dart/moment_dart.dart";
 
 class IntervalFlowReport extends FlowReport {
-  final List<Transaction> transactions;
-  final TimeRange? timeRange;
+  final RangeData rangeData;
   final Duration interval;
 
-  @override
-  final bool ready = true;
+  /// Map of start of range, [MoneyFlow]
+  ///
+  /// Uses [Namespace.nil] for uncategorized transactions
+  final Map<DateTime, MoneyFlow> data = {};
 
   bool _showMissingExchangeRatesWarning = false;
 
   IntervalFlowReport({
-    required this.timeRange,
     required this.interval,
-    required this.transactions,
+    required this.rangeData,
     required super.rates,
     required super.primaryCurrency,
   }) {
@@ -28,15 +28,38 @@ class IntervalFlowReport extends FlowReport {
   void init() {
     bool hasNonPrimaryCurrency = false;
 
-    for (final Transaction transaction in transactions) {
+    for (final Transaction transaction in rangeData.transactions) {
+      if (rangeData.range.contains(transaction.transactionDate) == false) {
+        continue;
+      }
+
       if (transaction.currency != primaryCurrency) {
         hasNonPrimaryCurrency = true;
-        // TODO @sadespresso
       }
+
+      final DateTime associatedInterval = _getInterval(
+        transaction.transactionDate,
+      );
+
+      data[associatedInterval] ??= MoneyFlow();
+      data[associatedInterval]!.add(transaction.money);
     }
 
-    if (rates == null || hasNonPrimaryCurrency) {
+    if (hasNonPrimaryCurrency && rates == null) {
       _showMissingExchangeRatesWarning = true;
     }
+  }
+
+  DateTime _getInterval(DateTime transactionDate) {
+    final int value =
+        transactionDate.millisecondsSinceEpoch -
+        rangeData.range.from.millisecondsSinceEpoch;
+
+    final int intervalValue = value ~/ interval.inMilliseconds;
+
+    return DateTime.fromMillisecondsSinceEpoch(
+      rangeData.range.from.millisecondsSinceEpoch +
+          (intervalValue * interval.inMilliseconds),
+    );
   }
 }

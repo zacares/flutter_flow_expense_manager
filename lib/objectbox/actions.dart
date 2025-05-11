@@ -593,6 +593,36 @@ extension TransactionListActions on Iterable<Transaction> {
   Iterable<Transaction> get nonDeleted =>
       where((transaction) => transaction.isDeleted != true);
 
+  /// Returns null if there are zero or one transaction.
+  ///
+  /// Returns the time range of the transactions;
+  ///
+  /// E.g., If the earliest transaction is 2023-01-01 and the latest is
+  /// 2023-12-31, the range will be 2023-01-01 to 2023-12-31.
+  ///
+  /// Always returns a [CustomTimeRange] object when not null.
+  TimeRange? get range {
+    if (length < 2) {
+      return null;
+    }
+
+    DateTime min = Moment.maxValue;
+    DateTime max = Moment.minValue;
+
+    for (final transaction in this) {
+      min =
+          transaction.transactionDate.isBefore(min)
+              ? transaction.transactionDate
+              : min;
+      max =
+          transaction.transactionDate.isAfter(max)
+              ? transaction.transactionDate
+              : max;
+    }
+
+    return min.rangeTo(max);
+  }
+
   /// Number of transactions that are rendered on the screen
   ///
   /// This depends on [LocalPreferences().combineTransferTransactions]
