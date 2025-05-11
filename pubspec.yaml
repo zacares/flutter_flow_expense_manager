@@ -12,8 +12,9 @@ dependencies:
   app_settings: ^6.1.1
   archive: ^4.0.7
   auto_size_text: ^3.0.0
-  crop_image: ^1.0.12
+  charset: ^2.0.1
   connectivity_plus: ^6.1.4
+  crop_image: ^1.0.12
   cross_file: ^0.3.3+8
   csv: ^6.0.0
   desktop_drop: ^0.6.0
@@ -67,7 +68,6 @@ dependencies:
   url_launcher: ^6.2.3
   uuid: ^4.5.1
   window_manager: ^0.4.3
-  charset: ^2.0.1
 
 dev_dependencies:
   build_runner: ^2.4.14
