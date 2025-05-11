@@ -62,6 +62,12 @@ class UserPreferences implements EntityBase {
   bool transactionListTileShowCategoryName;
   bool transactionListTileShowAccountForLeading;
 
+  String? icuCurrencyFormattingPattern;
+
+  /// A [`moment_dart`](https://pub.dev/packages/moment_dart) compatible
+  /// formatter token string
+  String? customDateFormatter;
+
   /// In hours, set as `null` to disable
   int? autoBackupIntervalInHours;
 

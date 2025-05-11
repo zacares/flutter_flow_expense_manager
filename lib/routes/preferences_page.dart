@@ -10,6 +10,7 @@ import "package:flow/routes/preferences/sections/lock_app.dart";
 import "package:flow/routes/preferences/sections/privacy.dart";
 import "package:flow/services/local_auth.dart";
 import "package:flow/services/notifications.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/color_themes/registry.dart";
 import "package:flow/theme/flow_color_scheme.dart";
 import "package:flow/theme/names.dart";
@@ -18,6 +19,7 @@ import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/general/list_header.dart";
 import "package:flow/widgets/general/rtl_flipper.dart";
 import "package:flow/widgets/sheets/select_currency_sheet.dart";
+import "package:flow/widgets/sheets/select_date_format.dart";
 import "package:flutter/material.dart" hide Flow;
 import "package:go_router/go_router.dart";
 import "package:logging/logging.dart";
@@ -39,6 +41,7 @@ class PreferencesPage extends StatefulWidget {
 class PreferencesPageState extends State<PreferencesPage> {
   bool _currencyBusy = false;
   bool _languageBusy = false;
+  bool _dateFormatBusy = false;
 
   bool _showLockApp = false;
 
@@ -127,6 +130,12 @@ class PreferencesPageState extends State<PreferencesPage> {
               title: Text("preferences.moneyFormatting".t(context)),
               leading: const Icon(Symbols.numbers_rounded),
               onTap: () => _pushAndRefreshAfter("/preferences/moneyFormatting"),
+              trailing: DirectionalChevron(),
+            ),
+            ListTile(
+              title: Text("preferences.dateFormat".t(context)),
+              leading: const Icon(Symbols.numbers_rounded),
+              onTap: () => _updateDateFormat(),
               trailing: DirectionalChevron(),
             ),
             const SizedBox(height: 24.0),
@@ -301,6 +310,27 @@ class PreferencesPageState extends State<PreferencesPage> {
     } finally {
       _currencyBusy = false;
 
+      if (mounted) {
+        setState(() {});
+      }
+    }
+  }
+
+  void _updateDateFormat() async {
+    if (_dateFormatBusy) return;
+
+    try {
+      final String? newFormat = await showModalBottomSheet(
+        context: context,
+        builder: (context) => SelectDateFormat(),
+        isScrollControlled: true,
+      );
+
+      if (newFormat != null) {
+        UserPreferencesService().customDateFormatter = newFormat;
+      }
+    } finally {
+      _dateFormatBusy = false;
       if (mounted) {
         setState(() {});
       }

@@ -334,7 +334,7 @@
     },
     {
       "id": "10:7829328581176695647",
-      "lastPropertyId": "13:6826663530484570285",
+      "lastPropertyId": "15:1701734084880256388",
       "name": "UserPreferences",
       "properties": [
         {
@@ -399,6 +399,16 @@
           "id": "13:6826663530484570285",
           "name": "enableICloudSync",
           "type": 1
+        },
+        {
+          "id": "14:8617478279582680424",
+          "name": "icuCurrencyFormattingPattern",
+          "type": 9
+        },
+        {
+          "id": "15:1701734084880256388",
+          "name": "customDateFormatter",
+          "type": 9
         }
       ],
       "relations": []

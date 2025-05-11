@@ -26,7 +26,10 @@ UserPreferences _$UserPreferencesFromJson(Map<String, dynamic> json) =>
       )
       ..uuid = json['uuid'] as String
       ..remindDailyAtRelativeSeconds =
-          (json['remindDailyAtRelativeSeconds'] as num?)?.toInt();
+          (json['remindDailyAtRelativeSeconds'] as num?)?.toInt()
+      ..icuCurrencyFormattingPattern =
+          json['icuCurrencyFormattingPattern'] as String?
+      ..customDateFormatter = json['customDateFormatter'] as String?;
 
 Map<String, dynamic> _$UserPreferencesToJson(UserPreferences instance) =>
     <String, dynamic>{
@@ -42,6 +45,8 @@ Map<String, dynamic> _$UserPreferencesToJson(UserPreferences instance) =>
           instance.transactionListTileShowCategoryName,
       'transactionListTileShowAccountForLeading':
           instance.transactionListTileShowAccountForLeading,
+      'icuCurrencyFormattingPattern': instance.icuCurrencyFormattingPattern,
+      'customDateFormatter': instance.customDateFormatter,
       'autoBackupIntervalInHours': instance.autoBackupIntervalInHours,
       'enableICloudSync': instance.enableICloudSync,
     };
