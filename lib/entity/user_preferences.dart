@@ -64,10 +64,6 @@ class UserPreferences implements EntityBase {
 
   String? icuCurrencyFormattingPattern;
 
-  /// A [`moment_dart`](https://pub.dev/packages/moment_dart) compatible
-  /// formatter token string
-  String? customDateFormatter;
-
   /// In hours, set as `null` to disable
   int? autoBackupIntervalInHours;
 
@@ -85,7 +81,6 @@ class UserPreferences implements EntityBase {
     this.defaultFilterPreset,
     this.enableICloudSync = false,
     this.autoBackupIntervalInHours = 72,
-    this.customDateFormatter,
     this.icuCurrencyFormattingPattern,
   }) : uuid = const Uuid().v4();
 

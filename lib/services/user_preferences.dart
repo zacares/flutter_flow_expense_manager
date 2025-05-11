@@ -104,12 +104,6 @@ class UserPreferencesService {
     ObjectBox().box<UserPreferences>().put(value);
   }
 
-  String? get customDateFormatter => value.customDateFormatter;
-  set customDateFormatter(String? newCustomDateFormatter) {
-    value.customDateFormatter = customDateFormatter;
-    ObjectBox().box<UserPreferences>().put(value);
-  }
-
   Duration? get remindDailyAt => value.remindDailyAt;
   set remindDailyAt(Duration? duration) {
     value.remindDailyAt = duration?.abs();
