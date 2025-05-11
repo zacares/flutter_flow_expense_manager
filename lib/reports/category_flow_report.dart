@@ -2,6 +2,7 @@ import "package:flow/data/money_flow.dart";
 import "package:flow/entity/category.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/reports/report.dart";
+import "package:uuid/uuid.dart";
 
 class CategoryFlowReport extends FlowReport {
   final List<Transaction> transactions;
@@ -9,7 +10,7 @@ class CategoryFlowReport extends FlowReport {
 
   /// Map of category UUID, [MoneyFlow]
   ///
-  /// Uses `00000000-0000-0000-0000-000000000000` for uncategorized transactions
+  /// Uses [Namespace.nil] for uncategorized transactions
   final Map<String, MoneyFlow> data = {};
 
   @override
@@ -44,7 +45,7 @@ class CategoryFlowReport extends FlowReport {
       }
 
       final String categoryUuid =
-          transaction.categoryUuid ?? "00000000-0000-0000-0000-000000000000";
+          transaction.categoryUuid ?? Namespace.nil.value;
       data[categoryUuid] ??= MoneyFlow();
 
       data[categoryUuid]!.add(transaction.money);
