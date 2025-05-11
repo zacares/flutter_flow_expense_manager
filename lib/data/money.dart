@@ -1,5 +1,7 @@
 import "package:flow/data/currencies.dart";
 import "package:flow/data/exchange_rates.dart";
+import "package:flow/services/user_preferences.dart";
+import "package:flow/utils/optional.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 
@@ -157,11 +159,21 @@ class Money {
     bool useCurrencySymbol = true,
     bool compact = false,
     bool takeAbsoluteValue = false,
+    Optional<String?>? customIcuPattern,
     int? decimalDigits,
   }) {
     final num amountToFormat = takeAbsoluteValue ? amount.abs() : amount;
     final String currencyToFormat = !includeCurrency ? "" : currency;
     useCurrencySymbol = useCurrencySymbol && includeCurrency;
+
+    Optional<String?>? formatterPattern = customIcuPattern;
+
+    if (formatterPattern == null &&
+        UserPreferencesService().icuCurrencyFormattingPattern != null) {
+      formatterPattern = Optional(
+        UserPreferencesService().icuCurrencyFormattingPattern!,
+      );
+    }
 
     final String? symbol =
         useCurrencySymbol
@@ -183,6 +195,7 @@ class Money {
       locale: Intl.defaultLocale,
       name: currencyToFormat,
       symbol: symbol,
+      customPattern: formatterPattern?.value,
       decimalDigits: decimalDigits,
     ).format(amountToFormat);
   }

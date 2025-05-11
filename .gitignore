@@ -53,3 +53,4 @@ app.*.map.json
 
 /download
 lib/libobjectbox.dylib
+lib/libobjectbox.so
