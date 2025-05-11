@@ -1333,6 +1333,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
         );
         final autoBackupIntervalInHoursParam = const fb.Int64Reader()
             .vTableGetNullable(buffer, rootOffset, 22);
+        final customDateFormatterParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 32);
+        final icuCurrencyFormattingPatternParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 30);
         final object =
             UserPreferences(
                 id: idParam,
@@ -1348,18 +1354,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 defaultFilterPreset: defaultFilterPresetParam,
                 enableICloudSync: enableICloudSyncParam,
                 autoBackupIntervalInHours: autoBackupIntervalInHoursParam,
+                customDateFormatter: customDateFormatterParam,
+                icuCurrencyFormattingPattern: icuCurrencyFormattingPatternParam,
               )
               ..uuid = const fb.StringReader(
                 asciiOptimization: true,
               ).vTableGet(buffer, rootOffset, 6, '')
               ..remindDailyAtRelativeSeconds = const fb.Int64Reader()
-                  .vTableGetNullable(buffer, rootOffset, 16)
-              ..icuCurrencyFormattingPattern = const fb.StringReader(
-                asciiOptimization: true,
-              ).vTableGetNullable(buffer, rootOffset, 30)
-              ..customDateFormatter = const fb.StringReader(
-                asciiOptimization: true,
-              ).vTableGetNullable(buffer, rootOffset, 32);
+                  .vTableGetNullable(buffer, rootOffset, 16);
 
         return object;
       },

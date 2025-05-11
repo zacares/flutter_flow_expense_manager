@@ -85,6 +85,8 @@ class UserPreferences implements EntityBase {
     this.defaultFilterPreset,
     this.enableICloudSync = false,
     this.autoBackupIntervalInHours = 72,
+    this.customDateFormatter,
+    this.icuCurrencyFormattingPattern,
   }) : uuid = const Uuid().v4();
 
   factory UserPreferences.fromJson(Map<String, dynamic> json) =>

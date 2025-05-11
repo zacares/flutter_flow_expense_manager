@@ -23,13 +23,13 @@ UserPreferences _$UserPreferencesFromJson(Map<String, dynamic> json) =>
         enableICloudSync: json['enableICloudSync'] as bool? ?? false,
         autoBackupIntervalInHours:
             (json['autoBackupIntervalInHours'] as num?)?.toInt() ?? 72,
+        customDateFormatter: json['customDateFormatter'] as String?,
+        icuCurrencyFormattingPattern:
+            json['icuCurrencyFormattingPattern'] as String?,
       )
       ..uuid = json['uuid'] as String
       ..remindDailyAtRelativeSeconds =
-          (json['remindDailyAtRelativeSeconds'] as num?)?.toInt()
-      ..icuCurrencyFormattingPattern =
-          json['icuCurrencyFormattingPattern'] as String?
-      ..customDateFormatter = json['customDateFormatter'] as String?;
+          (json['remindDailyAtRelativeSeconds'] as num?)?.toInt();
 
 Map<String, dynamic> _$UserPreferencesToJson(UserPreferences instance) =>
     <String, dynamic>{
