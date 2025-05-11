@@ -501,12 +501,6 @@ final _entities = <obx_int.ModelEntity>[
         type: 9,
         flags: 0,
       ),
-      obx_int.ModelProperty(
-        id: const obx_int.IdUid(15, 1701734084880256388),
-        name: 'customDateFormatter',
-        type: 9,
-        flags: 0,
-      ),
     ],
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[],
@@ -733,6 +727,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
       4341960036397140355,
       420551111786793892,
       3842898167150913136,
+      1701734084880256388,
     ],
     retiredRelationUids: const [],
     modelVersion: 5,
@@ -1271,10 +1266,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
             object.icuCurrencyFormattingPattern == null
                 ? null
                 : fbb.writeString(object.icuCurrencyFormattingPattern!);
-        final customDateFormatterOffset =
-            object.customDateFormatter == null
-                ? null
-                : fbb.writeString(object.customDateFormatter!);
         fbb.startTable(16);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uuidOffset);
@@ -1289,7 +1280,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addBool(11, object.transactionListTileShowAccountForLeading);
         fbb.addBool(12, object.enableICloudSync);
         fbb.addOffset(13, icuCurrencyFormattingPatternOffset);
-        fbb.addOffset(14, customDateFormatterOffset);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -1333,9 +1323,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
         );
         final autoBackupIntervalInHoursParam = const fb.Int64Reader()
             .vTableGetNullable(buffer, rootOffset, 22);
-        final customDateFormatterParam = const fb.StringReader(
-          asciiOptimization: true,
-        ).vTableGetNullable(buffer, rootOffset, 32);
         final icuCurrencyFormattingPatternParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGetNullable(buffer, rootOffset, 30);
@@ -1354,7 +1341,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 defaultFilterPreset: defaultFilterPresetParam,
                 enableICloudSync: enableICloudSyncParam,
                 autoBackupIntervalInHours: autoBackupIntervalInHoursParam,
-                customDateFormatter: customDateFormatterParam,
                 icuCurrencyFormattingPattern: icuCurrencyFormattingPatternParam,
               )
               ..uuid = const fb.StringReader(
@@ -1889,11 +1875,6 @@ class UserPreferences_ {
   /// See [UserPreferences.icuCurrencyFormattingPattern].
   static final icuCurrencyFormattingPattern =
       obx.QueryStringProperty<UserPreferences>(_entities[6].properties[12]);
-
-  /// See [UserPreferences.customDateFormatter].
-  static final customDateFormatter = obx.QueryStringProperty<UserPreferences>(
-    _entities[6].properties[13],
-  );
 }
 
 /// [Budget] entity fields to define ObjectBox queries.
