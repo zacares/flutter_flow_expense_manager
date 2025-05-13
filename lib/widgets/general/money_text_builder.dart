@@ -8,12 +8,6 @@ class MoneyTextBuilder extends StatefulWidget {
 
   final Money? money;
 
-  final String Function(
-    Money money,
-    ({bool abbreviate, bool obscure, bool useCurrencySymbol}) options,
-  )?
-  customFormatter;
-
   /// Defaults to [false]
   final bool abbreviate;
 
@@ -41,7 +35,6 @@ class MoneyTextBuilder extends StatefulWidget {
     this.omitCurrency = false,
     this.overrideUseCurrencySymbol,
     this.overrideObscure,
-    this.customFormatter,
   });
 
   @override
@@ -133,14 +126,6 @@ class _MoneyTextBuilderState extends State<MoneyTextBuilder> {
 
     final bool useCurrencySymbol =
         overrideUseCurrencySymbol ?? globalUseCurrencySymbol;
-
-    if (widget.customFormatter != null) {
-      return widget.customFormatter!(money, (
-        abbreviate: abbreviate,
-        obscure: obscure,
-        useCurrencySymbol: useCurrencySymbol,
-      ));
-    }
 
     final String text = money.formatMoney(
       compact: abbreviate,

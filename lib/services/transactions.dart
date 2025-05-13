@@ -126,13 +126,17 @@ class TransactionsService {
     );
   }
 
-  Transaction? findTransferRelatedTransactionSync(Transaction transaction) {
+  Transaction? findTransferRelatedTransactionSync(
+    Transaction transaction, {
+    bool includeDeleted = false,
+  }) {
     if (!transaction.isTransfer) {
       return null;
     }
 
     return findByIdentifierSync(
       transaction.extensions.transfer?.relatedTransactionUuid,
+      includeDeleted: includeDeleted,
     );
   }
 
@@ -278,10 +282,20 @@ class TransactionsService {
   ///
   /// Returns `true` if the transaction existed, and was deleted, `false` otherwise.
   bool deleteSync(dynamic identifier) {
-    final Transaction? transaction = findByIdentifierSync(identifier);
+    final Transaction? transaction = findByIdentifierSync(
+      identifier,
+      includeDeleted: true,
+    );
 
     if (transaction == null) {
       return false;
+    }
+
+    final Transaction? relatedTransferTransaction =
+        findTransferRelatedTransactionSync(transaction, includeDeleted: true);
+
+    if (relatedTransferTransaction != null) {
+      ObjectBox().box<Transaction>().remove(relatedTransferTransaction.id);
     }
 
     return ObjectBox().box<Transaction>().remove(transaction.id);

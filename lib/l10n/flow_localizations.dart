@@ -80,6 +80,7 @@ class FlowLocalizations {
     Locale("it", "IT"),
     Locale("tr", "TR"),
     Locale("fr", "FR"),
+    Locale("de", "DE"),
     Locale("ar"),
   ];
 

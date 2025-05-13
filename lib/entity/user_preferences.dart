@@ -62,6 +62,8 @@ class UserPreferences implements EntityBase {
   bool transactionListTileShowCategoryName;
   bool transactionListTileShowAccountForLeading;
 
+  String? icuCurrencyFormattingPattern;
+
   /// In hours, set as `null` to disable
   int? autoBackupIntervalInHours;
 
@@ -79,6 +81,7 @@ class UserPreferences implements EntityBase {
     this.defaultFilterPreset,
     this.enableICloudSync = false,
     this.autoBackupIntervalInHours = 72,
+    this.icuCurrencyFormattingPattern,
   }) : uuid = const Uuid().v4();
 
   factory UserPreferences.fromJson(Map<String, dynamic> json) =>
