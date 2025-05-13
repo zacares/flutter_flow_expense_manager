@@ -7,6 +7,7 @@
 * Fixed permenantly deleting a part of transfer transaction from the trash bin
   would result in a stale transaction, that is unable to be opened
 * Now you can customize money and date formats. Closes [#179](https://github.com/flow-mn/flow/issues/179)
+* German language support thanks to [@MarkusWangler](https://github.com/MarkusWangler)
 
 ## 0.14.2
 
