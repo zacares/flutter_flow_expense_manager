@@ -65,8 +65,12 @@ indirectly contributed 🤍
 * Arabic - thanks to [Ultrate](https://github.com/Ultrate)
 * Italian - thanks to [albertorizzi](https://github.com/albertorizzi)
 * Turkish - thanks to [NoRiskNoViski](https://github.com/NoRiskNoViski)
+* German - thanks to [MarkusWangler](https://github.com/MarkusWangler)
 * French
 * Mongolian
+
+> See [Translation guide](./CONTRIBUTING.md#translating) if you want to make
+> Flow available to your language
 
 ## Development
 
