@@ -194,7 +194,9 @@ class _TransactionListDateHeaderState extends State<TransactionListDateHeader> {
       (DayTimeRange dayTimeRange, false) => dayTimeRange.from
           .toMoment()
           .calendar(omitHours: true),
-      (DayTimeRange dayTimeRange, true) => dayTimeRange.from.toMoment().ll,
+      (DayTimeRange dayTimeRange, true) => dayTimeRange.from.toMoment().format(
+        "ll",
+      ),
       (TimeRange other, _) => other.format(),
     };
   }

@@ -191,10 +191,12 @@ Future<ExportResult> showFileSaveDialog(
   bool shareSuccess;
 
   if (isShareSupported) {
-    final shareResult = await Share.shareXFiles(
-      [XFile(savedFilePath)],
-      subject: path.basename(savedFilePath),
-      text: "Backup for Flow",
+    final shareResult = await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(savedFilePath)],
+        subject: path.basename(savedFilePath),
+        text: "Backup for Flow",
+      ),
     );
 
     shareSuccess = shareResult.status == ShareResultStatus.success;

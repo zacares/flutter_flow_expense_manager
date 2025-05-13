@@ -419,7 +419,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(10, 7829328581176695647),
     name: 'UserPreferences',
-    lastPropertyId: const obx_int.IdUid(13, 6826663530484570285),
+    lastPropertyId: const obx_int.IdUid(15, 1701734084880256388),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -493,6 +493,12 @@ final _entities = <obx_int.ModelEntity>[
         id: const obx_int.IdUid(13, 6826663530484570285),
         name: 'enableICloudSync',
         type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(14, 8617478279582680424),
+        name: 'icuCurrencyFormattingPattern',
+        type: 9,
         flags: 0,
       ),
     ],
@@ -721,6 +727,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
       4341960036397140355,
       420551111786793892,
       3842898167150913136,
+      1701734084880256388,
     ],
     retiredRelationUids: const [],
     modelVersion: 5,
@@ -1255,7 +1262,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
             object.defaultFilterPreset == null
                 ? null
                 : fbb.writeString(object.defaultFilterPreset!);
-        fbb.startTable(14);
+        final icuCurrencyFormattingPatternOffset =
+            object.icuCurrencyFormattingPattern == null
+                ? null
+                : fbb.writeString(object.icuCurrencyFormattingPattern!);
+        fbb.startTable(16);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uuidOffset);
         fbb.addBool(2, object.combineTransfers);
@@ -1268,6 +1279,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addBool(10, object.transactionListTileShowCategoryName);
         fbb.addBool(11, object.transactionListTileShowAccountForLeading);
         fbb.addBool(12, object.enableICloudSync);
+        fbb.addOffset(13, icuCurrencyFormattingPatternOffset);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -1311,6 +1323,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
         );
         final autoBackupIntervalInHoursParam = const fb.Int64Reader()
             .vTableGetNullable(buffer, rootOffset, 22);
+        final icuCurrencyFormattingPatternParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 30);
         final object =
             UserPreferences(
                 id: idParam,
@@ -1326,6 +1341,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 defaultFilterPreset: defaultFilterPresetParam,
                 enableICloudSync: enableICloudSyncParam,
                 autoBackupIntervalInHours: autoBackupIntervalInHoursParam,
+                icuCurrencyFormattingPattern: icuCurrencyFormattingPatternParam,
               )
               ..uuid = const fb.StringReader(
                 asciiOptimization: true,
@@ -1855,6 +1871,10 @@ class UserPreferences_ {
   static final enableICloudSync = obx.QueryBooleanProperty<UserPreferences>(
     _entities[6].properties[11],
   );
+
+  /// See [UserPreferences.icuCurrencyFormattingPattern].
+  static final icuCurrencyFormattingPattern =
+      obx.QueryStringProperty<UserPreferences>(_entities[6].properties[12]);
 }
 
 /// [Budget] entity fields to define ObjectBox queries.
