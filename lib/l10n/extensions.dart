@@ -16,6 +16,7 @@ final Map<String, (String, String)> _localeNames = {
   "it_IT": ("Italian (Italy)", "Italiano (Italia)"),
   "tr_TR": ("Turkish (Turkey)", "Türkçe (Türkiye)"),
   "fr_FR": ("French (France)", "Français (France)"),
+  "de_DE": ("German (Germany)", "Deutsch (Deutschland)"),
   "ar": ("Arabic", "العربية"),
 };
 
