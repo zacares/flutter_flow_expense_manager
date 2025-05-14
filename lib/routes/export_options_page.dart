@@ -44,6 +44,13 @@ class _ExportOptionsPageState extends State<ExportOptionsPage> {
               ),
               const SizedBox(height: 16.0),
               ActionCard(
+                onTap: () => context.push("/export/pdf"),
+                icon: FlowIconData.icon(Symbols.picture_as_pdf_rounded),
+                title: "sync.export.asPDF".t(context),
+                subtitle: "sync.export.asPDF.description".t(context),
+              ),
+              const SizedBox(height: 16.0),
+              ActionCard(
                 onTap: () => context.push("/export/history"),
                 icon: FlowIconData.icon(Symbols.history_rounded),
                 title: "sync.export.history".t(context),
