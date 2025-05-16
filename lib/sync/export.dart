@@ -10,6 +10,7 @@ import "package:flow/services/icloud_sync.dart";
 import "package:flow/services/sync.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flow/sync/export/export_csv.dart";
+import "package:flow/sync/export/export_pdf.dart";
 import "package:flow/sync/export/export_v1.dart";
 import "package:flow/sync/export/export_v2.dart";
 import "package:flow/sync/export/mode.dart";
@@ -41,6 +42,9 @@ Future<ExportResult> export({
 
   final backupContent = switch ((mode, latestSyncModelVersion)) {
     (ExportMode.csv, _) => await generateCSVContent(),
+    (ExportMode.pdf, _) => await generatePDFContent(
+      timeRange: DateTime(0).rangeTo(DateTime(4000)),
+    ),
     (ExportMode.json, 1) => await generateBackupContentV1(),
     (ExportMode.json, 2) => await generateBackupJSONContentV2(),
     (ExportMode.zip, 2) => await generateBackupZipV2(),

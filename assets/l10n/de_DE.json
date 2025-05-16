@@ -112,7 +112,6 @@
   "enum.PDFHeaders@category": "Kategorie",
   "enum.PDFHeaders@title": "Titel",
   "enum.PDFHeaders@transactionDate": "Buchungsdatum",
-  "enum.PDFHeaders@type": "Art",
   "enum.RecurrenceMode@custom": "Benutzerdefiniert",
   "enum.RecurrenceMode@every2Week": "Alle 2 Wochen, {weekday}",
   "enum.RecurrenceMode@everyDay": "Jeden Tag",

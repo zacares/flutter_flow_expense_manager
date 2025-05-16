@@ -112,7 +112,6 @@
   "enum.PDFHeaders@category": "Kategori",
   "enum.PDFHeaders@title": "Başlık",
   "enum.PDFHeaders@transactionDate": "İşlem tarihi",
-  "enum.PDFHeaders@type": "Tür",
   "enum.RecurrenceMode@custom": "Özel",
   "enum.RecurrenceMode@every2Week": "Her 2 haftada bir, {weekday}",
   "enum.RecurrenceMode@everyDay": "Her gün",

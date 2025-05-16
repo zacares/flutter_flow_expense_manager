@@ -112,7 +112,6 @@
   "enum.PDFHeaders@category": "الفئة",
   "enum.PDFHeaders@title": "العنوان",
   "enum.PDFHeaders@transactionDate": "تاريخ المعاملة",
-  "enum.PDFHeaders@type": "النوع",
   "enum.RecurrenceMode@custom": "مخصص",
   "enum.RecurrenceMode@every2Week": "كل أسبوعين، {weekday}",
   "enum.RecurrenceMode@everyDay": "كل يوم",

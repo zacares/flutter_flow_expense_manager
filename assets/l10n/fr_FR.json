@@ -112,7 +112,6 @@
   "enum.PDFHeaders@category": "Catégorie",
   "enum.PDFHeaders@title": "Titre",
   "enum.PDFHeaders@transactionDate": "Date de transaction",
-  "enum.PDFHeaders@type": "Type",
   "enum.RecurrenceMode@custom": "Personnalisé",
   "enum.RecurrenceMode@every2Week": "Toutes les 2 semaines, {weekday}",
   "enum.RecurrenceMode@everyDay": "Tous les jours",

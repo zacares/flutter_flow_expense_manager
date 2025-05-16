@@ -112,7 +112,6 @@
   "enum.PDFHeaders@category": "Ангилал",
   "enum.PDFHeaders@title": "Гарчиг",
   "enum.PDFHeaders@transactionDate": "Гүйлгээний огноо",
-  "enum.PDFHeaders@type": "Төрөл",
   "enum.RecurrenceMode@custom": "Өөрөө тохируулах",
   "enum.RecurrenceMode@every2Week": "Хоёр долоо хоног бүр, {weekday}",
   "enum.RecurrenceMode@everyDay": "Өдөр бүр",

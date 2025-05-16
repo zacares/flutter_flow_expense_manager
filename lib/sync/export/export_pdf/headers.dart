@@ -5,8 +5,7 @@ enum PDFHeader implements LocalizedEnum {
   title,
   amount,
   account,
-  category,
-  type;
+  category;
 
   @override
   String get localizationEnumValue => name;
