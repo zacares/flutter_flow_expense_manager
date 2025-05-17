@@ -268,7 +268,7 @@ class PreferencesPageState extends State<PreferencesPage> {
     try {
       Locale current =
           LocalPreferences().localeOverride.get() ??
-          FlowLocalizations.supportedLanguages.first;
+          FlowLocalizations.supportedLocales.first;
 
       final selected = await showModalBottomSheet<Locale>(
         context: context,
