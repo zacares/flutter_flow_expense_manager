@@ -1,7 +1,6 @@
 import "dart:async";
 import "dart:io";
 import "dart:math";
-import "dart:typed_data";
 
 import "package:flow/entity/backup_entry.dart";
 import "package:flow/logging.dart";
@@ -16,8 +15,12 @@ import "package:flow/sync/export/export_v2.dart";
 import "package:flow/sync/export/mode.dart";
 import "package:flow/sync/sync.dart";
 import "package:flow/utils/utils.dart";
+import "package:flutter/foundation.dart";
+import "package:flutter/services.dart";
 import "package:moment_dart/moment_dart.dart";
 import "package:path/path.dart" as path;
+import "package:path_provider/path_provider.dart";
+import "package:pdf/widgets.dart";
 import "package:share_plus/share_plus.dart";
 
 typedef ExportResult =
@@ -34,25 +37,23 @@ Future<ExportResult> export({
   ExportMode mode = ExportMode.zip,
   bool showShareDialog = true,
   String? subfolder,
+  dynamic options,
 }) async {
-  // Sharing [XFile]s aren't supported yet on Linux.
-  //
-  // https://pub.dev/packages/share_plus#platform-support
-  final bool isShareSupported = !(Platform.isLinux || Platform.isFuchsia);
-
-  final backupContent = switch ((mode, latestSyncModelVersion)) {
-    (ExportMode.csv, _) => await generateCSVContent(),
-    (ExportMode.pdf, _) => await generatePDFContent(
-      timeRange: DateTime(0).rangeTo(DateTime(4000)),
+  final Directory appSupportDirectory = await getApplicationSupportDirectory();
+  final backupContent = await compute(
+    (_) => getBackupContent(
+      mode: mode,
+      options: options,
+      appSupportDirectory: appSupportDirectory,
     ),
-    (ExportMode.json, 1) => await generateBackupContentV1(),
-    (ExportMode.json, 2) => await generateBackupJSONContentV2(),
-    (ExportMode.zip, 2) => await generateBackupZipV2(),
-    _ => throw UnimplementedError(),
-  };
+    null,
+  );
+  // final backupContent = await compute(
+  //   (args) => getBackupContent(mode: args.mode, options: args.options),
+  //   (mode: mode, options: options),
+  // );
   final savedFilePath = await saveBackupFile(
     backupContent,
-    isShareSupported,
     fileExt: mode.fileExt,
     subfolder: subfolder,
     type: type,
@@ -144,13 +145,37 @@ Future<ExportResult> export({
     );
   }
 
-  return await showFileSaveDialog(savedFilePath, isShareSupported, objectBoxId);
+  return await showFileSaveDialog(savedFilePath, objectBoxId);
+}
+
+Future<Object> getBackupContent({
+  required ExportMode mode,
+  required Directory appSupportDirectory,
+  dynamic options,
+}) async {
+  await ObjectBox.initialize(appSupportDirectory: appSupportDirectory);
+
+  return await switch ((mode, latestSyncModelVersion)) {
+    (ExportMode.csv, _) => generateCSVContent(),
+    (ExportMode.pdf, _) => generatePDFContent(
+      options: options,
+      logoBytes: await rootBundle
+          .load("assets/images/4.0x/flow.png")
+          .then((value) => value.buffer.asUint8List()),
+      defaultFont: await rootBundle
+          .load("assets/fonts/NotoSansVariable.ttf")
+          .then((value) => Font.ttf(value.buffer.asByteData())),
+    ),
+    (ExportMode.json, 1) => generateBackupContentV1(),
+    (ExportMode.json, 2) => generateBackupJSONContentV2(),
+    (ExportMode.zip, 2) => generateBackupZipV2(),
+    _ => throw UnimplementedError(),
+  };
 }
 
 /// Returns file path after successfully saving it
 Future<String> saveBackupFile(
-  dynamic backupContent,
-  bool isShareSupported, {
+  dynamic backupContent, {
   required String fileExt,
   required BackupEntryType type,
   String? subfolder,
@@ -189,9 +214,13 @@ Future<String> saveBackupFile(
 /// Returns whether the file was saved/revealed successfully
 Future<ExportResult> showFileSaveDialog(
   String savedFilePath,
-  bool isShareSupported,
   Future<int?> objectBoxId,
 ) async {
+  // Sharing [XFile]s aren't supported yet on Linux.
+  //
+  // https://pub.dev/packages/share_plus#platform-support
+  final bool isShareSupported = !(Platform.isLinux || Platform.isFuchsia);
+
   bool shareSuccess;
 
   if (isShareSupported) {

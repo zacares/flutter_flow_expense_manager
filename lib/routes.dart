@@ -348,13 +348,14 @@ final router = GoRouter(
     GoRoute(
       path: "/export/:type",
       builder: (context, state) {
-        if (state.pathParameters["type"] == "pdf") {
+        if (state.pathParameters["type"] == "pdf" && state.extra == null) {
           return ExportPdfPage();
         }
 
         return ExportPage(
           ExportMode.tryParse(state.pathParameters["type"] ?? "zip") ??
               ExportMode.zip,
+          options: state.extra,
         );
       },
     ),

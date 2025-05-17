@@ -3,7 +3,7 @@ import "package:flow/entity/account.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
-import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/general/button.dart";
 import "package:flow/widgets/general/info_text.dart";
@@ -33,7 +33,7 @@ class _SetupAccountsPageState extends State<SetupAccountsPage> {
   void initState() {
     super.initState();
 
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
     final Query<Account> existingAccountsQuery = qb().build();
 

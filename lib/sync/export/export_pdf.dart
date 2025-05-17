@@ -15,10 +15,23 @@ import "package:moment_dart/moment_dart.dart";
 import "package:pdf/pdf.dart";
 import "package:pdf/widgets.dart" as pw;
 
+class ExportPdfOptions {
+  final TimeRange timeRange;
+  final List<Account>? whitelistedAccounts;
+  final bool useA4;
+
+  const ExportPdfOptions({
+    required this.timeRange,
+    this.whitelistedAccounts,
+    this.useA4 = true,
+  });
+}
+
 Future<Uint8List> generatePDFContent({
-  List<Account>? whitelistedAccounts,
-  required TimeRange timeRange,
-  bool useA4 = true,
+  required ExportPdfOptions options,
+  List<pw.Font>? fontFallbacks,
+  required pw.Font defaultFont,
+  required Uint8List logoBytes,
 }) async {
   final List<Account> accounts = await AccountsService().getAll();
   final List<Category> categories =
@@ -33,8 +46,9 @@ Future<Uint8List> generatePDFContent({
   };
 
   final TransactionFilter filter = TransactionFilter(
-    accounts: whitelistedAccounts?.map((account) => account.uuid).toList(),
-    range: TransactionFilterTimeRange.fromTimeRange(timeRange),
+    accounts:
+        options.whitelistedAccounts?.map((account) => account.uuid).toList(),
+    range: TransactionFilterTimeRange.fromTimeRange(options.timeRange),
   );
 
   final List<Transaction> transactions = await TransactionsService().findMany(
@@ -59,19 +73,13 @@ Future<Uint8List> generatePDFContent({
           .toSet()
           .toList();
 
-  final Uint8List logoBytes = await rootBundle
-      .load("assets/images/4.0x/flow.png")
-      .then((value) => value.buffer.asUint8List());
-
-  final ByteData fontBytes = await rootBundle
-      .load("assets/fonts/NotoSansVariable.ttf")
-      .then((value) => value.buffer.asByteData());
-
   final pw.TextStyle defaultTextStyle = pw.TextStyle(
-    font: pw.Font.ttf(fontBytes),
+    font: defaultFont,
     color: PdfColor.fromInt(0xFF050505),
     fontSize: 10.0,
-    fontFallback: [pw.Font()],
+    fontFallback:
+        fontFallbacks ??
+        [pw.Font.courier(), pw.Font.helvetica(), pw.Font.times()],
   );
 
   final pw.TextStyle fineTextStyle = defaultTextStyle.copyWith(
@@ -152,7 +160,7 @@ Future<Uint8List> generatePDFContent({
   final pw.Document pdf = pw.Document(
     theme: pw.ThemeData(defaultTextStyle: defaultTextStyle),
     // TODO @sadespresso add l10n support
-    title: "Flow - Transactions statement ($timeRange)",
+    title: "Flow - Transactions statement (${options.timeRange})",
     author: author,
     keywords: "Flow, statement, personal, non-legal",
   );
@@ -161,7 +169,7 @@ Future<Uint8List> generatePDFContent({
       maxPages: 10000,
       pageTheme: pw.PageTheme(
         clip: true,
-        pageFormat: useA4 ? PdfPageFormat.a4 : PdfPageFormat.letter,
+        pageFormat: options.useA4 ? PdfPageFormat.a4 : PdfPageFormat.letter,
         buildBackground: (context) {
           return pw.Container(height: 4.0, color: PdfColor.fromInt(0xFF8500a6));
         },
@@ -171,8 +179,8 @@ Future<Uint8List> generatePDFContent({
           (context) => pw.Container(
             width: double.infinity,
             child: pw.Text(
-              "sync.export.asPDF.header".tr({
-                "range": timeRange.format(useRelative: false),
+              "sync.export.pdf.header".tr({
+                "range": options.timeRange.format(useRelative: false),
               }),
             ),
           ),
@@ -184,14 +192,14 @@ Future<Uint8List> generatePDFContent({
               text: pw.TextSpan(
                 style: fineTextStyle,
                 children: [
-                  pw.TextSpan(text: "sync.export.asPDF.notice[0]".tr()),
+                  pw.TextSpan(text: "sync.export.pdf.notice[0]".tr()),
                   pw.WidgetSpan(
                     child: pw.UrlLink(
                       child: pw.Text("Flow", style: fineTextStyle),
                       destination: "https://flow.gege.mn",
                     ),
                   ),
-                  pw.TextSpan(text: "sync.export.asPDF.notice[1]".tr()),
+                  pw.TextSpan(text: "sync.export.pdf.notice[1]".tr()),
                 ],
               ),
             ),
@@ -213,7 +221,7 @@ Future<Uint8List> generatePDFContent({
                 pw.Text(
                   "Statement for: ${resultingAccounts.nonNulls.map((account) => accountNames[account] ?? "~").join(", ")}",
                 ),
-                pw.Text(timeRange.format(useRelative: false)),
+                pw.Text(options.timeRange.format(useRelative: false)),
               ],
             ),
             pw.Divider(),

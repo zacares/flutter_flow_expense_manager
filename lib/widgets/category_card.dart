@@ -3,7 +3,7 @@ import "package:flow/data/money_flow.dart";
 import "package:flow/entity/category.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/objectbox/actions.dart";
-import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/optional.dart";
 import "package:flow/widgets/general/flow_icon.dart";
@@ -43,7 +43,7 @@ class CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final DateTime now = DateTime.now();
 
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
     final Iterable<Transaction> transactions = category
         .transactions

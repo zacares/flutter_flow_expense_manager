@@ -1,6 +1,6 @@
 import "package:flow/l10n/extensions.dart";
-import "package:flow/prefs/local_preferences.dart";
 import "package:flow/services/exchange_rates.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/extensions/toast.dart";
 import "package:flow/widgets/general/frame.dart";
@@ -69,7 +69,7 @@ class _RatesMissingWarningState extends State<RatesMissingWarning> {
 
     try {
       await ExchangeRatesService().fetchRates(
-        LocalPreferences().getPrimaryCurrency(),
+        UserPreferencesService().primaryCurrency,
       );
     } catch (e) {
       if (mounted) {
