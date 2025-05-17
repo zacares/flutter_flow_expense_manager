@@ -12,9 +12,9 @@ import "package:flow/l10n/named_enum.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/objectbox/objectbox.g.dart";
-import "package:flow/prefs/local_preferences.dart";
 import "package:flow/routes/transaction_page/input_amount_sheet.dart";
 import "package:flow/services/transactions.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/sync/export.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/utils.dart";
@@ -102,7 +102,7 @@ class _AccountEditPageState extends State<AccountEditPage> {
       _creditLimit = _currentlyEditing?.creditLimit ?? 0.0;
       _currency =
           _currentlyEditing?.currency ??
-          LocalPreferences().getPrimaryCurrency();
+          UserPreferencesService().primaryCurrency;
       _iconData = _currentlyEditing?.icon;
       _excludeFromTotalBalance =
           _currentlyEditing?.excludeFromTotalBalance ?? false;
@@ -483,7 +483,7 @@ class _AccountEditPageState extends State<AccountEditPage> {
 
     return _nameTextController.text.trim().isNotEmpty ||
         _iconData != null ||
-        _currency != LocalPreferences().getPrimaryCurrency() ||
+        _currency != UserPreferencesService().primaryCurrency ||
         _balance != 0.0 ||
         _creditLimit != 0.0 ||
         _accountType != AccountType.debit ||

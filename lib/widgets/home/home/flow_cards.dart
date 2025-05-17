@@ -58,7 +58,7 @@ class _FlowCardsState extends State<FlowCards> {
         excludeTransferFromFlow
             ? widget.transactions?.nonPending.nonTransfers.flow
             : widget.transactions?.nonPending.flow;
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
     final Money? totalExpense = switch ((flow, widget.rates)) {
       (null, _) => null,

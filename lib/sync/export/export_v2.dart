@@ -14,8 +14,8 @@ import "package:flow/entity/user_preferences.dart";
 import "package:flow/logging.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
-import "package:flow/prefs/local_preferences.dart";
 import "package:flow/services/transactions.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/sync/export.dart";
 import "package:flow/sync/model/model_v2.dart";
 import "package:path/path.dart" as path;
@@ -79,7 +79,9 @@ Future<String> generateBackupJSONContentV2() async {
     profile: profile,
     userPreferences: userPreferences,
     recurringTransactions: recurringTransactions,
-    primaryCurrency: LocalPreferences().getPrimaryCurrency(),
+    primaryCurrency:
+        userPreferences?.primaryCurrency ??
+        UserPreferencesService().primaryCurrency,
   );
 
   return jsonEncode(obj.toJson());

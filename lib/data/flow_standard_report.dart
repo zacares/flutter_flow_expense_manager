@@ -6,7 +6,7 @@ import "package:flow/data/money_flow.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
-import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:moment_dart/moment_dart.dart";
 
 /// Only capable of working with the primary currency
@@ -66,7 +66,7 @@ class FlowStandardReport {
   }
 
   void _initCurrent() {
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
     dailyExpenditure = currentFlowByDay.map(
       (key, value) => MapEntry(
@@ -138,7 +138,7 @@ class FlowStandardReport {
       return;
     }
 
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
     previousDailyExpenditure = previousFlowByDay?.map(
       (key, value) => MapEntry(
@@ -218,7 +218,7 @@ class FlowStandardReport {
     TimeRange range,
     ExchangeRates? rates,
   ) async {
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
     final List<Transaction> transactions = await ObjectBox()
         .transcationsByRange(range);

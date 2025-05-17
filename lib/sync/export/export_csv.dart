@@ -2,7 +2,7 @@ import "package:csv/csv.dart";
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/l10n/named_enum.dart";
 import "package:flow/services/transactions.dart";
-import "package:flow/sync/export/headers/header_v1.dart";
+import "package:flow/sync/export/export_csv/header_v1.dart";
 import "package:intl/intl.dart";
 import "package:moment_dart/moment_dart.dart";
 
@@ -12,23 +12,23 @@ Future<String> generateCSVContent() async {
   );
 
   final headers = [
-    CSVHeadersV1.uuid.localizedName,
-    CSVHeadersV1.title.localizedName,
-    CSVHeadersV1.notes.localizedName,
-    CSVHeadersV1.amount.localizedName,
-    CSVHeadersV1.currency.localizedName,
-    CSVHeadersV1.account.localizedName,
-    CSVHeadersV1.accountUuid.localizedName,
-    CSVHeadersV1.category.localizedName,
-    CSVHeadersV1.categoryUuid.localizedName,
-    CSVHeadersV1.type.localizedName,
-    CSVHeadersV1.subtype.localizedName,
-    CSVHeadersV1.createdDate.localizedName,
-    CSVHeadersV1.transactionDate.localizedName,
-    CSVHeadersV1.transactionDateIso8601.localizedName,
-    CSVHeadersV1.latitude.localizedName,
-    CSVHeadersV1.longitude.localizedName,
-    CSVHeadersV1.extra.localizedName,
+    CSVHeader.uuid.localizedName,
+    CSVHeader.title.localizedName,
+    CSVHeader.notes.localizedName,
+    CSVHeader.amount.localizedName,
+    CSVHeader.currency.localizedName,
+    CSVHeader.account.localizedName,
+    CSVHeader.accountUuid.localizedName,
+    CSVHeader.category.localizedName,
+    CSVHeader.categoryUuid.localizedName,
+    CSVHeader.type.localizedName,
+    CSVHeader.subtype.localizedName,
+    CSVHeader.createdDate.localizedName,
+    CSVHeader.transactionDate.localizedName,
+    CSVHeader.transactionDateIso8601.localizedName,
+    CSVHeader.latitude.localizedName,
+    CSVHeader.longitude.localizedName,
+    CSVHeader.extra.localizedName,
   ];
 
   final Map<String, int> numberOfDecimalsToKeep = {};

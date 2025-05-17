@@ -6,6 +6,7 @@ import "package:flow/l10n/extensions.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/services/exchange_rates.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/widgets/general/money_text_builder.dart";
 import "package:flutter/services.dart";
@@ -81,7 +82,7 @@ class _TransactionListDateHeaderState extends State<TransactionListDateHeader> {
           child: Text(_getRangeTitle()),
         );
 
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
     final MoneyFlow flow =
         MoneyFlow()

@@ -190,6 +190,7 @@ class FlowState extends State<Flow> {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       migrateRemoveTitleFromUntitledTransactions();
       migrateExtraKeyIndexing();
+      migratePrimaryCurrencyToDb();
     });
 
     _tryUnlockTempLock();
@@ -341,7 +342,7 @@ class FlowState extends State<Flow> {
 
   void _refreshExchangeRates() {
     ExchangeRatesService().tryFetchRates(
-      LocalPreferences().getPrimaryCurrency(),
+      UserPreferencesService().primaryCurrency,
     );
   }
 

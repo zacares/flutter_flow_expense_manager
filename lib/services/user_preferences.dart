@@ -1,6 +1,8 @@
 import "dart:math";
 
+import "package:flow/data/currencies.dart";
 import "package:flow/data/flow_notification_payload.dart";
+import "package:flow/entity/account.dart";
 import "package:flow/entity/transaction_filter_preset.dart";
 import "package:flow/entity/user_preferences.dart";
 import "package:flow/objectbox.dart";
@@ -8,6 +10,7 @@ import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/services/notifications.dart";
 import "package:flow/services/sync.dart";
 import "package:flutter/material.dart";
+import "package:intl/intl.dart";
 
 class UserPreferencesService {
   final ValueNotifier<UserPreferences> valueNotifier = ValueNotifier(
@@ -94,6 +97,52 @@ class UserPreferencesService {
   String? get defaultFilterPresetUuid => value.defaultFilterPreset;
   set defaultFilterPresetUuid(String? uuid) {
     value.defaultFilterPreset = uuid;
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
+  String get primaryCurrency {
+    if (value.primaryCurrency != null) {
+      return value.primaryCurrency!;
+    }
+
+    late final String? firstAccountCurency;
+
+    try {
+      final Query<Account> firstAccountQuery =
+          ObjectBox()
+              .box<Account>()
+              .query()
+              .order(Account_.createdDate)
+              .build();
+
+      firstAccountCurency = firstAccountQuery.findFirst()?.currency;
+
+      firstAccountQuery.close();
+    } catch (e) {
+      firstAccountCurency = null;
+    }
+
+    if (firstAccountCurency != null) {
+      return primaryCurrency = firstAccountCurency;
+    }
+
+    // Generally, primary currency will be set up when the user first
+    // opens the app. When recovering from a backup, backup logic should
+    // handle setting this value.
+    return primaryCurrency =
+        NumberFormat.currency(
+          locale: Intl.defaultLocale ?? "en_US",
+        ).currencyName ??
+        "USD";
+  }
+
+  set primaryCurrency(String? newPrimaryCurrency) {
+    if (newPrimaryCurrency == null ||
+        !isCurrencyCodeValid(newPrimaryCurrency)) {
+      throw ArgumentError("Invalid currency code: $newPrimaryCurrency");
+    }
+
+    value.primaryCurrency = newPrimaryCurrency;
     ObjectBox().box<UserPreferences>().put(value);
   }
 
