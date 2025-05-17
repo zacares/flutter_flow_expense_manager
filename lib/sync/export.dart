@@ -16,11 +16,10 @@ import "package:flow/sync/export/mode.dart";
 import "package:flow/sync/sync.dart";
 import "package:flow/utils/utils.dart";
 import "package:flutter/foundation.dart";
-import "package:flutter/services.dart";
 import "package:moment_dart/moment_dart.dart";
 import "package:path/path.dart" as path;
 import "package:path_provider/path_provider.dart";
-import "package:pdf/widgets.dart";
+import "package:pdf/widgets.dart" as pw;
 import "package:share_plus/share_plus.dart";
 
 typedef ExportResult =
@@ -159,12 +158,10 @@ Future<Object> getBackupContent({
     (ExportMode.csv, _) => generateCSVContent(),
     (ExportMode.pdf, _) => generatePDFContent(
       options: options,
-      logoBytes: await rootBundle
-          .load("assets/images/4.0x/flow.png")
-          .then((value) => value.buffer.asUint8List()),
-      defaultFont: await rootBundle
-          .load("assets/fonts/NotoSansVariable.ttf")
-          .then((value) => Font.ttf(value.buffer.asByteData())),
+      defaultFont: pw.Font.courier(),
+      // defaultFont: await rootBundle
+      //     .load("assets/fonts/NotoSansVariable.ttf")
+      //     .then((value) => pw.Font.ttf(value.buffer.asByteData())),
     ),
     (ExportMode.json, 1) => generateBackupContentV1(),
     (ExportMode.json, 2) => generateBackupJSONContentV2(),
