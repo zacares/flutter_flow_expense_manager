@@ -173,6 +173,7 @@ class LocalPreferences {
     transitive = TransitiveLocalPreferences.initialize(_prefs);
   }
 
+  @Deprecated("Use UserPreferencesService().primaryCurrency instead")
   String getPrimaryCurrency() {
     String? primaryCurrencyName = primaryCurrency.value;
 

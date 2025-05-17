@@ -5,6 +5,7 @@ import "package:flow/prefs/local_preferences.dart";
 import "package:flow/routes/transaction_page/amount_text.dart";
 import "package:flow/routes/transaction_page/input_amount_sheet/calculator_button.dart";
 import "package:flow/routes/transaction_page/input_amount_sheet/input_value.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/general/modal_sheet.dart";
@@ -86,7 +87,7 @@ class _InputAmountSheetState extends State<InputAmountSheet>
     _numberOfDecimals =
         widget.overrideDecimalPrecision ??
         NumberFormat.simpleCurrency(
-          name: widget.currency ?? LocalPreferences().getPrimaryCurrency(),
+          name: widget.currency ?? UserPreferencesService().primaryCurrency,
         ).decimalDigits ??
         2;
     if (_numberOfDecimals <= 0) {

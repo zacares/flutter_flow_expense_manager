@@ -1,6 +1,6 @@
 import "package:flow/l10n/named_enum.dart";
 
-enum CSVHeadersV1 implements LocalizedEnum {
+enum CSVHeader implements LocalizedEnum {
   uuid,
   title,
   notes,
@@ -22,5 +22,5 @@ enum CSVHeadersV1 implements LocalizedEnum {
   @override
   String get localizationEnumValue => name;
   @override
-  String get localizationEnumName => "CSVHeadersV1";
+  String get localizationEnumName => "CSVHeader";
 }

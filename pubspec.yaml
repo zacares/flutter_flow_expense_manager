@@ -3,7 +3,7 @@ description: A personal finance managing app
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: "0.14.3+238"
+version: "0.14.4+239"
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -57,6 +57,7 @@ dependencies:
   package_info_plus: ^8.3.0
   path: ^1.9.1
   path_provider: ^2.1.5
+  pdf: ^3.11.3
   pie_menu: ^3.3.0
   recurrence: ^0.3.0
   share_plus: ^11.0.0

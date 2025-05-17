@@ -4,7 +4,7 @@ import "package:auto_size_text/auto_size_text.dart";
 import "package:fl_chart/fl_chart.dart";
 import "package:flow/data/flow_standard_report.dart";
 import "package:flow/data/money.dart";
-import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/widgets/chart_legend.dart";
 import "package:flow/widgets/general/money_text.dart";
@@ -105,7 +105,7 @@ class _RangeDailyChartState extends State<RangeDailyChart> {
     final int maxDays = calculateMaxDays(report.current);
     final bool hasPrevious = report.previousFlowByDay != null;
 
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
     final Color currentPeriod = context.colorScheme.primary;
     final Color previousPeriod = context.colorScheme.primary.withAlpha(0x40);

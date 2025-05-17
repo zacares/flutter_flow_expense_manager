@@ -203,7 +203,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       valueListenable: ExchangeRatesService().exchangeRatesCache,
       builder: (context, ratesSet, _) {
         final ExchangeRates? rates = ratesSet?.get(
-          LocalPreferences().getPrimaryCurrency(),
+          UserPreferencesService().primaryCurrency,
         );
 
         final bool showMissingExchangeRatesWarning =

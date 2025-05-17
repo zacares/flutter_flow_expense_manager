@@ -63,6 +63,7 @@ class ObjectBox {
   static Future<ObjectBox> initialize({
     String? customDirectory,
     String? subdirectory,
+    Directory? appSupportDirectory,
   }) async {
     if (subdirectory == null && flowDebugMode) {
       subdirectory = kDebugDefaultSubdirectory;
@@ -71,7 +72,9 @@ class ObjectBox {
     ObjectBox.subdirectory = subdirectory;
     ObjectBox.customDirectory = customDirectory;
 
-    ObjectBox.appDataDirectory = await _appDataDirectory();
+    ObjectBox.appDataDirectory = await _appDataDirectory(
+      supportDir: appSupportDirectory,
+    );
 
     final dir = Directory(ObjectBox.appDataDirectory);
     if (!(await dir.exists())) {
@@ -95,12 +98,12 @@ class ObjectBox {
     return _instance = ObjectBox._internal(store);
   }
 
-  static Future<String> _appDataDirectory() async {
+  static Future<String> _appDataDirectory({Directory? supportDir}) async {
     if (customDirectory != null) {
       return path.join(customDirectory!, subdirectory);
     }
 
-    final appDataDir = await getApplicationSupportDirectory();
+    final appDataDir = supportDir ?? await getApplicationSupportDirectory();
 
     return path.join(appDataDir.path, subdirectory);
   }
