@@ -14,6 +14,7 @@ import "package:flow/routes/debug/debug_scheduled_notifications_page.dart";
 import "package:flow/routes/debug/debug_theme_page.dart";
 import "package:flow/routes/error_page.dart";
 import "package:flow/routes/export/export_history_page.dart";
+import "package:flow/routes/export/export_pdf_page.dart";
 import "package:flow/routes/export_options_page.dart";
 import "package:flow/routes/export_page.dart";
 import "package:flow/routes/home_page.dart";
@@ -346,11 +347,17 @@ final router = GoRouter(
     ),
     GoRoute(
       path: "/export/:type",
-      builder:
-          (context, state) => ExportPage(
-            ExportMode.tryParse(state.pathParameters["type"] ?? "zip") ??
-                ExportMode.zip,
-          ),
+      builder: (context, state) {
+        if (state.pathParameters["type"] == "pdf" && state.extra == null) {
+          return ExportPdfPage();
+        }
+
+        return ExportPage(
+          ExportMode.tryParse(state.pathParameters["type"] ?? "zip") ??
+              ExportMode.zip,
+          options: state.extra,
+        );
+      },
     ),
     GoRoute(
       path: "/import",

@@ -10,6 +10,7 @@ import "package:flow/routes/preferences/sections/lock_app.dart";
 import "package:flow/routes/preferences/sections/privacy.dart";
 import "package:flow/services/local_auth.dart";
 import "package:flow/services/notifications.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/color_themes/registry.dart";
 import "package:flow/theme/flow_color_scheme.dart";
 import "package:flow/theme/names.dart";
@@ -71,6 +72,9 @@ class PreferencesPageState extends State<PreferencesPage> {
     final bool pendingTransactionsRequireConfrimation =
         LocalPreferences().pendingTransactions.requireConfrimation.get();
 
+    final String currentPrimaryCurrency =
+        UserPreferencesService().primaryCurrency;
+
     return Scaffold(
       appBar: AppBar(title: Text("preferences".t(context))),
       body: SafeArea(
@@ -103,7 +107,7 @@ class PreferencesPageState extends State<PreferencesPage> {
 
               leading: const Icon(Symbols.universal_currency_alt_rounded),
               onTap: () => _updatePrimaryCurrency(),
-              subtitle: Text(LocalPreferences().getPrimaryCurrency()),
+              subtitle: Text(currentPrimaryCurrency),
               trailing: DirectionalChevron(),
             ),
             ListTile(
@@ -264,7 +268,7 @@ class PreferencesPageState extends State<PreferencesPage> {
     try {
       Locale current =
           LocalPreferences().localeOverride.get() ??
-          FlowLocalizations.supportedLanguages.first;
+          FlowLocalizations.supportedLocales.first;
 
       final selected = await showModalBottomSheet<Locale>(
         context: context,
@@ -288,7 +292,7 @@ class PreferencesPageState extends State<PreferencesPage> {
     });
 
     try {
-      String current = LocalPreferences().getPrimaryCurrency();
+      final String current = UserPreferencesService().primaryCurrency;
 
       final selected = await showModalBottomSheet<String>(
         context: context,
@@ -296,7 +300,7 @@ class PreferencesPageState extends State<PreferencesPage> {
       );
 
       if (selected != null) {
-        await LocalPreferences().primaryCurrency.set(selected);
+        UserPreferencesService().primaryCurrency = selected;
       }
     } finally {
       _currencyBusy = false;

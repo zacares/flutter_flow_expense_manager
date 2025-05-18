@@ -68,7 +68,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       final bool excludeTransfersInTotal =
                           userPreferences.excludeTransfersFromFlow;
                       final String primaryCurrency =
-                          LocalPreferences().getPrimaryCurrency();
+                          UserPreferencesService().primaryCurrency;
 
                       return SingleChildScrollView(
                         padding: const EdgeInsets.all(16.0),

@@ -6,8 +6,8 @@ import "package:flow/entity/category.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
-import "package:flow/prefs/local_preferences.dart";
 import "package:flow/services/exchange_rates.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/helpers.dart";
 import "package:flow/widgets/general/blur_backgorund.dart";
 import "package:flow/widgets/general/flow_icon.dart";
@@ -123,7 +123,7 @@ class _MostSpendingCategoryState extends State<MostSpendingCategory> {
     try {
       final FlowAnalytics<Category?> result = await ObjectBox()
           .flowByCategories(range: range);
-      final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+      final String primaryCurrency = UserPreferencesService().primaryCurrency;
       final ExchangeRates? rates =
           ExchangeRatesService().getPrimaryCurrencyRates();
 

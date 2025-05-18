@@ -37,7 +37,7 @@ typedef RelevanceScoredTitle = ({String title, double relevancy});
 extension MainActions on ObjectBox {
   /// Returns the grand total of all accounts in primary currency in the primary currency
   Money getPrimaryCurrencyGrandTotal() {
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
     final Query<Account> accountsQuery =
         box<Account>()
@@ -62,7 +62,7 @@ extension MainActions on ObjectBox {
 
   /// Returns the grand total of all accounts (including non-primary currency accounts) in the primary currency
   Future<Money?> getGrandTotal() async {
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
     final Condition<Account> query = Account_.excludeFromTotalBalance
         .isNull()

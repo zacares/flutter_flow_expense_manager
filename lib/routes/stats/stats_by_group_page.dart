@@ -10,6 +10,7 @@ import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/services/exchange_rates.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/widgets/general/spinner.dart";
 import "package:flow/widgets/home/stats/pie_graph_view.dart";
 import "package:flow/widgets/rates_missing_warning.dart";
@@ -65,7 +66,7 @@ class StatsByGroupPageState extends State<StatsByGroupPage>
         valueListenable: ExchangeRatesService().exchangeRatesCache,
         builder: (context, exchangeRatesCache, child) {
           final ExchangeRates? rates = exchangeRatesCache?.get(
-            LocalPreferences().getPrimaryCurrency(),
+            UserPreferencesService().primaryCurrency,
           );
 
           final bool showMissingExchangeRatesWarning =
@@ -187,7 +188,7 @@ class StatsByGroupPageState extends State<StatsByGroupPage>
   ) {
     if (raw == null || raw.isEmpty) return {};
 
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
     final Map<String, Money> cache = {};
 

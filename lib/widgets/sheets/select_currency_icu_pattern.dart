@@ -1,6 +1,5 @@
 import "package:flow/data/money.dart";
 import "package:flow/l10n/extensions.dart";
-import "package:flow/prefs/local_preferences.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/helpers.dart";
 import "package:flow/utils/optional.dart";
@@ -49,7 +48,7 @@ class _SelectCurrencyIcuPatternState extends State<SelectCurrencyIcuPattern> {
 
   @override
   Widget build(BuildContext context) {
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
     return ModalSheet.scrollable(
       title: Text("preferences.moneyFormatting.setICUPattern".t(context)),

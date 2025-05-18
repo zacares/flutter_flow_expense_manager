@@ -12,6 +12,7 @@ import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/routes/error_page.dart";
 import "package:flow/services/exchange_rates.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/category/transactions_info.dart";
 import "package:flow/widgets/flow_card.dart";
@@ -82,7 +83,7 @@ class _CategoryPageState extends State<CategoryPage> {
     if (this.category == null) return const ErrorPage();
 
     final Category category = this.category!;
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
     final ExchangeRates? rates =
         ExchangeRatesService().getPrimaryCurrencyRates();
     final bool showMissingExchangeRatesWarning =

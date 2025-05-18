@@ -50,6 +50,9 @@ skip lints and tests (step 6 and 7).
 It's highly recommended to copy [en_US.json](./assets/l10n/en_US.json) or
 any other existing translations with full coverage, and work on top of it.
 
+Make sure you add the your language in the list of supported languages. See
+[lib/l10n/supported_languages.dart](./lib/l10n/supported_languages.dart).
+
 ## License
 
 By contributing, you agree that your contributions will be licensed under

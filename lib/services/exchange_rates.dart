@@ -4,6 +4,7 @@ import "package:flow/data/currencies.dart";
 import "package:flow/data/exchange_rates.dart";
 import "package:flow/data/exchange_rates_set.dart";
 import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flutter/widgets.dart";
 import "package:http/http.dart" as http;
 import "package:logging/logging.dart";
@@ -30,13 +31,13 @@ class ExchangeRatesService {
       exchangeRatesCache.value = exchangeRates;
     }
 
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
     tryFetchRates(primaryCurrency);
   }
 
   ExchangeRates? getPrimaryCurrencyRates() {
     return exchangeRatesCache.value?.get(
-      LocalPreferences().getPrimaryCurrency(),
+      UserPreferencesService().primaryCurrency,
     );
   }
 

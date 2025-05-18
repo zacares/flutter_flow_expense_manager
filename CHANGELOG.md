@@ -2,11 +2,21 @@
 
 ## Next
 
-### 0.14.3
+### New features
+
+* Now you can export transactions history in PDF format. Closes [#516](https://github.com/flow-mn/flow/issues/516)
+
+### Changes and improvements
+
+* Primary currency now persists with backups.
+* Exports now run in a different [Isolate](https://dart.dev/language/isolates)
+
+## 0.14.3
 
 * Fixed permenantly deleting a part of transfer transaction from the trash bin
   would result in a stale transaction, that is unable to be opened
-* Now you can customize money and date formats. Closes [#179](https://github.com/flow-mn/flow/issues/179)
+* Now you can customize money formats. Closes [#179](https://github.com/flow-mn/flow/issues/179)
+* German language support thanks to [@MarkusWangler](https://github.com/MarkusWangler)
 
 ## 0.14.2
 

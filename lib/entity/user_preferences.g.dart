@@ -25,6 +25,7 @@ UserPreferences _$UserPreferencesFromJson(Map<String, dynamic> json) =>
             (json['autoBackupIntervalInHours'] as num?)?.toInt() ?? 72,
         icuCurrencyFormattingPattern:
             json['icuCurrencyFormattingPattern'] as String?,
+        primaryCurrency: json['primaryCurrency'] as String?,
       )
       ..uuid = json['uuid'] as String
       ..remindDailyAtRelativeSeconds =
@@ -45,6 +46,7 @@ Map<String, dynamic> _$UserPreferencesToJson(UserPreferences instance) =>
       'transactionListTileShowAccountForLeading':
           instance.transactionListTileShowAccountForLeading,
       'icuCurrencyFormattingPattern': instance.icuCurrencyFormattingPattern,
+      'primaryCurrency': instance.primaryCurrency,
       'autoBackupIntervalInHours': instance.autoBackupIntervalInHours,
       'enableICloudSync': instance.enableICloudSync,
     };

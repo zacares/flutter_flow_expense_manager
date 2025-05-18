@@ -2,7 +2,7 @@ import "package:flow/data/currencies.dart";
 import "package:flow/data/exchange_rates.dart";
 import "package:flow/data/money.dart";
 import "package:flow/entity/transaction.dart";
-import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/user_preferences.dart";
 
 class MoneyFlow<T> {
   final T? associatedData;
@@ -119,7 +119,7 @@ class MoneyFlow<T> {
     ExchangeRates rates,
     String? currency,
   ) {
-    currency ??= LocalPreferences().getPrimaryCurrency();
+    currency ??= UserPreferencesService().primaryCurrency;
 
     return switch (type) {
       TransactionType.expense => getTotalExpense(rates, currency),
@@ -129,7 +129,7 @@ class MoneyFlow<T> {
   }
 
   Money getTotalFlow(ExchangeRates rates, String? currency) {
-    currency ??= LocalPreferences().getPrimaryCurrency();
+    currency ??= UserPreferencesService().primaryCurrency;
 
     return getTotalIncome(rates, currency) + getTotalExpense(rates, currency);
   }

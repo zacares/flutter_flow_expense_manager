@@ -154,7 +154,7 @@ class Flow extends StatefulWidget {
 class FlowState extends State<Flow> {
   late final AppLifecycleListener _appLifeCycleListener;
 
-  Locale _locale = FlowLocalizations.supportedLanguages.first;
+  Locale _locale = FlowLocalizations.supportedLocales.first;
   ThemeMode _themeMode = ThemeMode.system;
 
   ThemeFactory _themeFactory = ThemeFactory.fromThemeName(null);
@@ -190,6 +190,7 @@ class FlowState extends State<Flow> {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       migrateRemoveTitleFromUntitledTransactions();
       migrateExtraKeyIndexing();
+      migratePrimaryCurrencyToDb();
     });
 
     _tryUnlockTempLock();
@@ -237,7 +238,7 @@ class FlowState extends State<Flow> {
         GlobalWidgetsLocalizations.delegate,
         FlowLocalizations.delegate,
       ],
-      supportedLocales: FlowLocalizations.supportedLanguages,
+      supportedLocales: FlowLocalizations.supportedLocales,
       locale: _locale,
       routerConfig: router,
       theme: _themeFactory.materialTheme,
@@ -301,7 +302,7 @@ class FlowState extends State<Flow> {
     final List<Locale> favorableLocales =
         systemLocales
             .where(
-              (locale) => FlowLocalizations.supportedLanguages.any(
+              (locale) => FlowLocalizations.supportedLocales.any(
                 (flowSupportedLocalization) =>
                     flowSupportedLocalization.languageCode ==
                     locale.languageCode,
@@ -341,7 +342,7 @@ class FlowState extends State<Flow> {
 
   void _refreshExchangeRates() {
     ExchangeRatesService().tryFetchRates(
-      LocalPreferences().getPrimaryCurrency(),
+      UserPreferencesService().primaryCurrency,
     );
   }
 
