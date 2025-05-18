@@ -8,7 +8,8 @@ extension L10nHelper on BuildContext {
 
 extension Underscore on Locale {
   /// Example outcome:
-  /// * en_US
+  /// * en
+  /// * fr_FR
   /// * mn_Mong_MN
   String get code => [languageCode, scriptCode, countryCode].nonNulls.join("_");
 

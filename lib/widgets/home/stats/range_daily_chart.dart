@@ -229,7 +229,7 @@ class _RangeDailyChartState extends State<RangeDailyChart> {
       range.from.endOfMonth().day,
       range.last.from.endOfMonth().day,
     ),
-    TimeRange other => other.duration.inDays,
+    TimeRange other => other.duration.inDays.abs(),
   };
 
   FlGridData gridData(FlowStandardReport report) {

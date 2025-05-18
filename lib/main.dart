@@ -137,6 +137,15 @@ void main() async {
     );
   }
 
+  try {
+    Moment.minValue = DateTime(0);
+    Moment.maxValue = DateTime(4000);
+    Moment.minValueUtc = DateTime.utc(0);
+    Moment.maxValueUtc = DateTime.utc(4000);
+  } catch (e) {
+    // Silent fail
+  }
+
   startupLog.fine("Finally telling Flutter to run the app widget");
   runApp(const Flow());
 }

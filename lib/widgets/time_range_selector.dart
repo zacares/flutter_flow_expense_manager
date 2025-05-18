@@ -132,8 +132,8 @@ class _TimeRangeSelectorState extends State<TimeRangeSelector> {
                           _ => Button(
                             onTap: pickRange,
                             child: Text(
-                              (_timeRange.from <= DateTime(0) &&
-                                      _timeRange.to >= DateTime(4000))
+                              (_timeRange.from <= Moment.minValue &&
+                                      _timeRange.to >= Moment.maxValue)
                                   ? "select.timeRange.allTime".t(context)
                                   : "${_timeRange.from.toMoment().ll} -> ${_timeRange.to.toMoment().ll}",
                               textAlign: TextAlign.center,

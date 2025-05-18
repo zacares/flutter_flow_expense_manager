@@ -17,9 +17,10 @@ class ThemeFactory {
     "SF Pro Display",
     "SF UI Text",
     "Helvetica",
-    "Google Sans",
+    "Product Sans",
     "Roboto",
-    "Arial",
+    "sans-serif",
+    "serif",
   ];
 
   final FlowColorScheme flowColorScheme;
