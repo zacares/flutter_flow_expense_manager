@@ -209,7 +209,7 @@ class _ExportPdfPageState extends State<ExportPdfPage> {
   }
 
   String get rangeText {
-    if (_range.from <= DateTime(0) && _range.to >= DateTime(4000)) {
+    if (_range.from <= Moment.minValue && _range.to >= Moment.maxValue) {
       return "select.timeRange.allTime".t(context);
     }
 
