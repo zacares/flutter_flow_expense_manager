@@ -16,6 +16,7 @@ import "package:flow/sync/export/mode.dart";
 import "package:flow/sync/sync.dart";
 import "package:flow/utils/utils.dart";
 import "package:flutter/foundation.dart";
+import "package:flutter/services.dart";
 import "package:moment_dart/moment_dart.dart";
 import "package:path/path.dart" as path;
 import "package:path_provider/path_provider.dart";
@@ -39,11 +40,33 @@ Future<ExportResult> export({
   dynamic options,
 }) async {
   final Directory appSupportDirectory = await getApplicationSupportDirectory();
+
+  final dynamic extra = switch (mode) {
+    ExportMode.pdf => {
+      "default": pw.Font.ttf(
+        await rootBundle.load("assets/fonts/NotoSans-Regular.ttf"),
+      ),
+      "fallbacks": [
+        pw.Font.ttf(
+          await rootBundle.load("assets/fonts/NotoEmoji-Regular.ttf"),
+        ),
+        pw.Font.ttf(
+          await rootBundle.load("assets/fonts/NotoSansArabic-Regular.ttf"),
+        ),
+        pw.Font.ttf(
+          await rootBundle.load("assets/fonts/NotoSansHebrew-Regular.ttf"),
+        ),
+      ],
+    },
+    _ => null,
+  };
+
   final backupContent = await compute(
     (_) => getBackupContent(
       mode: mode,
       options: options,
       appSupportDirectory: appSupportDirectory,
+      extra: extra,
     ),
     null,
   );
@@ -151,6 +174,7 @@ Future<Object> getBackupContent({
   required ExportMode mode,
   required Directory appSupportDirectory,
   dynamic options,
+  dynamic extra,
 }) async {
   await ObjectBox.initialize(appSupportDirectory: appSupportDirectory);
 
@@ -158,10 +182,8 @@ Future<Object> getBackupContent({
     (ExportMode.csv, _) => generateCSVContent(),
     (ExportMode.pdf, _) => generatePDFContent(
       options: options,
-      defaultFont: pw.Font.courier(),
-      // defaultFont: await rootBundle
-      //     .load("assets/fonts/NotoSansVariable.ttf")
-      //     .then((value) => pw.Font.ttf(value.buffer.asByteData())),
+      defaultFont: extra["default"],
+      fontFallbacks: extra["fallbacks"],
     ),
     (ExportMode.json, 1) => generateBackupContentV1(),
     (ExportMode.json, 2) => generateBackupJSONContentV2(),
