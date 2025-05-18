@@ -61,13 +61,15 @@ indirectly contributed 🤍
 
 ## List of supported languages
 
-* English
 * Arabic - thanks to [Ultrate](https://github.com/Ultrate)
-* Italian - thanks to [albertorizzi](https://github.com/albertorizzi)
-* Turkish - thanks to [NoRiskNoViski](https://github.com/NoRiskNoViski)
-* German - thanks to [MarkusWangler](https://github.com/MarkusWangler)
-* French
-* Mongolian
+* English
+* French (France)
+* German (Germany) - thanks to [MarkusWangler](https://github.com/MarkusWangler)
+* Italian (Italy) - thanks to [albertorizzi](https://github.com/albertorizzi)
+* Mongolian (Mongolia)
+* Russian (Russia)
+* Spanish (Spain)
+* Turkish (Turkiye) - thanks to [NoRiskNoViski](https://github.com/NoRiskNoViski)
 
 > See [Translation guide](./CONTRIBUTING.md#translating) if you want to make
 > Flow available to your language

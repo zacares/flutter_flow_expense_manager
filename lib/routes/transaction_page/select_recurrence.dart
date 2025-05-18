@@ -171,7 +171,7 @@ class _SelectRecurrenceState extends State<SelectRecurrence> {
 
   void _selectFrom() async {
     final DateTime initialDate =
-        _recurrence.range.from.isBefore(DateTime(0))
+        _recurrence.range.from.isBefore(Moment.minValue)
             ? DateTime.now()
             : _recurrence.range.from;
 

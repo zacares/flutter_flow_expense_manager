@@ -13,7 +13,7 @@ List<String> getKeys(File file) {
 void main() {
   final Directory directory = Directory("assets/l10n");
 
-  final File baseFile = File("assets/l10n/en_US.json");
+  final File baseFile = File("assets/l10n/en.json");
 
   test("Directory exists", () {
     expect(directory.existsSync(), true);

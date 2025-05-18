@@ -30,10 +30,10 @@ class FlowLocalizations {
     _localizedValues = await _loadLocale(locale);
 
     if (_enUS.isEmpty) {
-      if (locale.code == supportedLocales.first.code) {
+      if (locale.code == "en") {
         _enUS = {..._localizedValues};
       } else {
-        _enUS = await _loadLocale(supportedLocales.first);
+        _enUS = await _loadLocale(Locale("en"));
       }
     }
   }

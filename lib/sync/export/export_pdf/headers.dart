@@ -10,5 +10,5 @@ enum PDFHeader implements LocalizedEnum {
   @override
   String get localizationEnumValue => name;
   @override
-  String get localizationEnumName => "PDFHeaders";
+  String get localizationEnumName => "PDFHeader";
 }
