@@ -1,5 +1,8 @@
 import "package:flow/data/exchange_rates.dart";
+import "package:flow/data/transaction_filter.dart";
+import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/transaction.dart";
+import "package:flow/services/transactions.dart";
 import "package:moment_dart/moment_dart.dart";
 
 abstract class FlowReport {
@@ -11,11 +14,45 @@ abstract class FlowReport {
   bool get missingExchangeRates => rates == null;
 
   bool get showMissingExchangeRatesWarning;
+
+  static Future<RangeData> prepareRangeData(TimeRange range) async {
+    final List<Transaction> transactions = await TransactionsService().findMany(
+      TransactionFilter(range: TransactionFilterTimeRange.fromTimeRange(range)),
+    );
+
+    return RangeData(range: range, transactions: transactions);
+  }
+
+  static Future<({RangeData current, RangeData? previous})>
+  prepareRangeDataWithPrevious(TimeRange range) async {
+    final TimeRange? previous = range is PageableRange ? range.last : null;
+
+    final RangeData currentRangeData = await prepareRangeData(range);
+    RangeData? previousRangeData;
+    if (previous != null) {
+      previousRangeData = await prepareRangeData(previous);
+    }
+    return (current: currentRangeData, previous: previousRangeData);
+  }
 }
 
 class RangeData {
   final TimeRange range;
   final List<Transaction> transactions;
+
+  static DurationUnit getOptimalUnit(TimeRange range) {
+    final int days = (range.duration.inHours / 24).ceil();
+
+    if (days <= 2) {
+      return DurationUnit.hour;
+    } else if (days <= 93) {
+      return DurationUnit.day;
+    } else if (days <= 915) {
+      return DurationUnit.month;
+    } else {
+      return DurationUnit.year;
+    }
+  }
 
   RangeData({required this.range, required this.transactions})
     : assert(transactions.every((t) => range.contains(t.transactionDate)));

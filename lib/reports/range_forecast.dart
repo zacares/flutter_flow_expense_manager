@@ -1,11 +1,14 @@
+import "package:flow/data/money.dart";
 import "package:flow/data/money_flow.dart";
-import "package:flow/entity/transaction.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/reports/report.dart";
 import "package:moment_dart/moment_dart.dart";
 
 class RangeForecast extends FlowReport {
   final RangeData previousRangeData;
+
+  /// The duration doesn't have to same as the previous range,
+  /// and it will be aligned to the end of the previous range.
   final RangeData currentRangeData;
 
   late final MoneyFlow forecast;
@@ -54,33 +57,60 @@ class RangeForecast extends FlowReport {
       _showMissingExchangeRatesWarning = true;
     }
 
-    late final double previousExpensePerSecond;
-    late final double previousIncomePerSecond;
-
-    late final double currentExpensePerSecond;
-    late final double currentIncomePerSecond;
+    late final Money previousTotalExpense;
+    late final Money previousTotalIncome;
+    late final Money currentTotalExpense;
+    late final Money currentTotalIncome;
 
     if (rates == null || _showMissingExchangeRatesWarning) {
-      previousExpensePerSecond =
-          previousFlow.getExpenseByCurrency(primaryCurrency).amount /
-          previousRangeData.range.duration.inSeconds;
-      previousIncomePerSecond =
-          previousFlow.getIncomeByCurrency(primaryCurrency).amount /
-          previousRangeData.range.duration.inSeconds;
+      previousTotalExpense = previousFlow.getExpenseByCurrency(primaryCurrency);
+      previousTotalIncome = previousFlow.getIncomeByCurrency(primaryCurrency);
+      currentTotalExpense = currentFlow.getExpenseByCurrency(primaryCurrency);
+      currentTotalIncome = currentFlow.getIncomeByCurrency(primaryCurrency);
     } else {
-      previousExpensePerSecond =
-          previousFlow.getTotalExpense(rates!, primaryCurrency).amount /
-          previousRangeData.range.duration.inSeconds;
-      previousIncomePerSecond =
-          previousFlow.getTotalIncome(rates!, primaryCurrency).amount /
-          previousRangeData.range.duration.inSeconds;
+      previousTotalExpense = previousFlow.getTotalExpense(
+        rates!,
+        primaryCurrency,
+      );
+      previousTotalIncome = previousFlow.getTotalIncome(
+        rates!,
+        primaryCurrency,
+      );
+      currentTotalExpense = currentFlow.getTotalExpense(
+        rates!,
+        primaryCurrency,
+      );
+      currentTotalIncome = currentFlow.getTotalIncome(rates!, primaryCurrency);
     }
+
+    final double previousExpensePerSecond =
+        previousTotalExpense.amount /
+        previousRangeData.range.duration.inSeconds;
+    final double previousIncomePerSecond =
+        previousTotalIncome.amount / previousRangeData.range.duration.inSeconds;
 
     final TimeRange currentSpannedRange = currentRangeData.range.from.rangeTo(
       currentRangeData.transactions.range?.to ??
           currentRangeData.transactions.firstOrNull?.transactionDate ??
           currentRangeData.range.from,
     );
+
+    final Duration remainingCurrentRange =
+        currentSpannedRange.duration - currentSpannedRange.duration;
+
+    forecast =
+        MoneyFlow()..addAll([
+          Money(
+            currentTotalIncome.amount +
+                (previousIncomePerSecond * remainingCurrentRange.inSeconds),
+            primaryCurrency,
+          ),
+          Money(
+            currentTotalExpense.amount +
+                (previousExpensePerSecond * remainingCurrentRange.inSeconds),
+            primaryCurrency,
+          ),
+        ]);
   }
 
   @override
