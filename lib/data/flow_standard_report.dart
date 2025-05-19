@@ -2,7 +2,7 @@ import "dart:math" as math;
 
 import "package:flow/data/exchange_rates.dart";
 import "package:flow/data/money.dart";
-import "package:flow/data/money_flow.dart";
+import "package:flow/data/multi_currency_flow.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
@@ -20,8 +20,8 @@ class FlowStandardReport {
     return null;
   }
 
-  final Map<int, MoneyFlow<DayTimeRange>> currentFlowByDay;
-  final Map<int, MoneyFlow<DayTimeRange>>? previousFlowByDay;
+  final Map<int, MultiCurrencyFlow<DayTimeRange>> currentFlowByDay;
+  final Map<int, MultiCurrencyFlow<DayTimeRange>>? previousFlowByDay;
 
   // current range stuff
 
@@ -194,9 +194,9 @@ class FlowStandardReport {
     TimeRange range,
     ExchangeRates? rates,
   ) async {
-    final Map<int, MoneyFlow<DayTimeRange>> currentFlowByDay =
+    final Map<int, MultiCurrencyFlow<DayTimeRange>> currentFlowByDay =
         await _reportMonthRangeFlowByDayInPrimaryCurrencyOnly(range, rates);
-    final Map<int, MoneyFlow<DayTimeRange>>? previousFlowByDay =
+    final Map<int, MultiCurrencyFlow<DayTimeRange>>? previousFlowByDay =
         switch (range) {
           PageableRange pageable =>
             await _reportMonthRangeFlowByDayInPrimaryCurrencyOnly(
@@ -213,7 +213,7 @@ class FlowStandardReport {
     );
   }
 
-  static Future<Map<int, MoneyFlow<DayTimeRange>>>
+  static Future<Map<int, MultiCurrencyFlow<DayTimeRange>>>
   _reportMonthRangeFlowByDayInPrimaryCurrencyOnly(
     TimeRange range,
     ExchangeRates? rates,
@@ -223,7 +223,7 @@ class FlowStandardReport {
     final List<Transaction> transactions = await ObjectBox()
         .transcationsByRange(range);
 
-    final Map<int, MoneyFlow<DayTimeRange>> result = {};
+    final Map<int, MultiCurrencyFlow<DayTimeRange>> result = {};
 
     for (final Transaction transaction in transactions) {
       if (transaction.isTransfer) continue;
@@ -233,7 +233,7 @@ class FlowStandardReport {
       );
       final int dayOffset = day.from.difference(range.from).inDays.abs();
 
-      result[dayOffset] ??= MoneyFlow(associatedData: day);
+      result[dayOffset] ??= MultiCurrencyFlow(associatedData: day);
 
       if (transaction.currency == primaryCurrency) {
         result[dayOffset]!.add(transaction.money);

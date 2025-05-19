@@ -132,9 +132,7 @@ class _MostSpendingCategoryState extends State<MostSpendingCategory> {
 
       for (final flow in result.flow.values) {
         final Money flowTotalExpense =
-            rates == null
-                ? flow.getExpenseByCurrency(primaryCurrency)
-                : flow.getTotalExpense(rates, primaryCurrency);
+            flow.merge(primaryCurrency, rates).totalExpense;
 
         if (mostExpense == null ||
             flowTotalExpense.amount.abs() > mostExpense.amount.abs()) {

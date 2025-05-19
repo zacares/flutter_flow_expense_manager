@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flow/data/exchange_rates.dart";
 import "package:flow/data/internal_nofications/internal_notification.dart";
+import "package:flow/data/single_currency_flow.dart";
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/transaction.dart";
@@ -18,7 +19,7 @@ import "package:flow/widgets/default_transaction_filter_head.dart";
 import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/general/pending_transactions_header.dart";
 import "package:flow/widgets/general/wavy_divider.dart";
-import "package:flow/widgets/grouped_transaction_list.dart";
+import "package:flow/widgets/grouped_transactions_list_view.dart";
 import "package:flow/widgets/home/greetings_bar.dart";
 import "package:flow/widgets/home/home/flow_cards.dart";
 import "package:flow/widgets/home/home/no_transactions.dart";
@@ -242,8 +243,14 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         final bool shouldCombineTransferIfNeeded =
             currentFilter.accounts?.isNotEmpty != true;
 
-        return GroupedTransactionList(
-          listType: GroupedTransactionListType.sliverReorderable,
+        final String primaryCurrency = UserPreferencesService().primaryCurrency;
+
+        final SingleCurrencyFlow combinedFlow = SingleCurrencyFlow(
+          currency: primaryCurrency,
+        )..addAll(transactions.map((t) => t.money), rates);
+
+        return GroupedTransactionsListView(
+          listType: GroupedTransactionsListViewType.sliverReorderable,
           mainHeader: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -271,7 +278,10 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
               //   Text("transactions.count".t(context, transactions.length)),
               //   const SizedBox(height: 4.0),
               // ],
-              FlowCards(transactions: transactions, rates: rates),
+              FlowCards(
+                totalExpense: combinedFlow.totalExpense,
+                totalIncome: combinedFlow.totalIncome,
+              ),
               SizedBox(height: 8.0),
               Align(
                 alignment: AlignmentDirectional.topStart,

@@ -1,4 +1,4 @@
-import "package:flow/data/money_flow.dart";
+import "package:flow/data/multi_currency_flow.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/reports/report.dart";
 
@@ -6,10 +6,10 @@ class IntervalFlowReport extends FlowReport {
   final RangeData rangeData;
   final Duration interval;
 
-  /// Map of start of range, [MoneyFlow]
+  /// Map of start of range, [MultiCurrencyFlow]
   ///
   /// Uses [Namespace.nil] for uncategorized transactions
-  final Map<DateTime, MoneyFlow> data = {};
+  final Map<DateTime, MultiCurrencyFlow> data = {};
 
   bool _showMissingExchangeRatesWarning = false;
 
@@ -41,7 +41,7 @@ class IntervalFlowReport extends FlowReport {
         transaction.transactionDate,
       );
 
-      data[associatedInterval] ??= MoneyFlow();
+      data[associatedInterval] ??= MultiCurrencyFlow();
       data[associatedInterval]!.add(transaction.money);
     }
 

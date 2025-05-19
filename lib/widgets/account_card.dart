@@ -1,4 +1,4 @@
-import "package:flow/data/money_flow.dart";
+import "package:flow/data/multi_currency_flow.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/l10n/extensions.dart";
@@ -44,8 +44,8 @@ class AccountCard extends StatelessWidget {
         .nonDeleted
         .where((x) => x.transactionDate.isAtSameMonthAs(now));
 
-    final MoneyFlow flow =
-        MoneyFlow()..addAll(
+    final MultiCurrencyFlow flow =
+        MultiCurrencyFlow()..addAll(
           (excludeTransfersInTotal ? transactions.nonTransfers : transactions)
               .map((transaction) => transaction.money),
         );

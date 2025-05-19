@@ -220,6 +220,8 @@
   "preferences": "Tercihler",
   "preferences.appearance": "Görünüm",
   "preferences.dateFormat": "Tarih formatı",
+  "preferences.feedback": "Sorunlar ve geri bildirim",
+  "preferences.feedback.debugLogs": "Hata ayıklama günlüklerini görüntüle",
   "preferences.hapticFeedback": "Düğme geri bildirimi",
   "preferences.hapticFeedback.description": "Tıklama üzerine sesli/dokunsal geri bildirim",
   "preferences.language": "Dil",

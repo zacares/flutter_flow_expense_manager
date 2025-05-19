@@ -220,6 +220,8 @@
   "preferences": "Preferences",
   "preferences.appearance": "Appearance",
   "preferences.dateFormat": "Date format",
+  "preferences.feedback": "Problems and feedback",
+  "preferences.feedback.debugLogs": "View debug logs",
   "preferences.hapticFeedback": "Button feedback",
   "preferences.hapticFeedback.description": "Sound/haptic feedback upon click",
   "preferences.language": "Language",

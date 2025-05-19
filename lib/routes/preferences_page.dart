@@ -15,7 +15,6 @@ import "package:flow/theme/color_themes/registry.dart";
 import "package:flow/theme/flow_color_scheme.dart";
 import "package:flow/theme/names.dart";
 import "package:flow/widgets/general/directional_chevron.dart";
-import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/general/list_header.dart";
 import "package:flow/widgets/general/rtl_flipper.dart";
 import "package:flow/widgets/sheets/select_currency_sheet.dart";
@@ -222,15 +221,14 @@ class PreferencesPageState extends State<PreferencesPage> {
             ListHeader("preferences.hapticFeedback".t(context)),
             const SizedBox(height: 8.0),
             const Haptics(),
-            const SizedBox(height: 16.0),
-            Frame(
-              child: Align(
-                alignment: Alignment.topRight,
-                child: TextButton(
-                  onPressed: () => context.push("/_debug/logs"),
-                  child: Text("View debug logs"),
-                ),
-              ),
+            const SizedBox(height: 24.0),
+            ListHeader("preferences.feedback".t(context)),
+            const SizedBox(height: 8.0),
+            ListTile(
+              title: Text("preferences.feedback.debugLogs".t(context)),
+              leading: const Icon(Symbols.bug_report_rounded),
+              onTap: () => context.push("/_debug/logs"),
+              trailing: DirectionalChevron(),
             ),
             const SizedBox(height: 16.0),
           ],

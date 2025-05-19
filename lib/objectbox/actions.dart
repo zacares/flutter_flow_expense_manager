@@ -4,7 +4,7 @@ import "dart:math" as math;
 import "package:flow/data/exchange_rates.dart";
 import "package:flow/data/flow_analytics.dart";
 import "package:flow/data/money.dart";
-import "package:flow/data/money_flow.dart";
+import "package:flow/data/multi_currency_flow.dart";
 import "package:flow/data/prefs/frecency_group.dart";
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
@@ -188,12 +188,12 @@ extension MainActions on ObjectBox {
     return transactions;
   }
 
-  Future<Map<T, MoneyFlow<K>>> flowBy<T, K>(
+  Future<Map<T, MultiCurrencyFlow<K>>> flowBy<T, K>(
     List<Transaction> transactions,
     T? Function(Transaction t) keyBy,
     K Function(Transaction t)? associateBy,
   ) async {
-    final Map<T, MoneyFlow<K>> flow = {};
+    final Map<T, MultiCurrencyFlow<K>> flow = {};
 
     for (final transaction in transactions) {
       final T? key = keyBy(transaction);
@@ -202,14 +202,14 @@ extension MainActions on ObjectBox {
 
       final K? associatedData = associateBy?.call(transaction);
 
-      flow[key] ??= MoneyFlow<K>(associatedData: associatedData);
+      flow[key] ??= MultiCurrencyFlow<K>(associatedData: associatedData);
       flow[key]!.add(transaction.money);
     }
 
     return flow;
   }
 
-  /// Returns a map of category uuid -> [MoneyFlow]
+  /// Returns a map of category uuid -> [MultiCurrencyFlow]
   Future<FlowAnalytics<Category?>> flowByCategories({
     required TimeRange range,
     bool ignoreTransfers = true,
@@ -225,20 +225,22 @@ extension MainActions on ObjectBox {
     return FlowAnalytics(flow: flow, range: range);
   }
 
-  /// Returns a map of category uuid -> [MoneyFlow]
+  /// Returns a map of category uuid -> [MultiCurrencyFlow]
   Future<FlowAnalytics<Account>> flowByAccounts({
     required TimeRange range,
     bool ignoreTransfers = true,
   }) async {
     final List<Transaction> transactions = await transcationsByRange(range);
 
-    final Map<String, MoneyFlow<Account>> flow = await flowBy(transactions, (
-      t,
-    ) {
-      if (ignoreTransfers && t.isTransfer) return null;
+    final Map<String, MultiCurrencyFlow<Account>> flow = await flowBy(
+      transactions,
+      (t) {
+        if (ignoreTransfers && t.isTransfer) return null;
 
-      return t.account.target?.uuid ?? Namespace.nil.value;
-    }, (t) => t.account.target!);
+        return t.account.target?.uuid ?? Namespace.nil.value;
+      },
+      (t) => t.account.target!,
+    );
 
     assert(
       !flow.containsKey(Namespace.nil.value),
@@ -651,8 +653,8 @@ extension TransactionListActions on Iterable<Transaction> {
     (value, element) => value + element.money,
   );
 
-  MoneyFlow get flow =>
-      MoneyFlow()..addAll(map((transaction) => transaction.money));
+  MultiCurrencyFlow get flow =>
+      MultiCurrencyFlow()..addAll(map((transaction) => transaction.money));
 
   /// If [mergeFutureTransactions] is set to true, transactions in future
   /// relative to [anchor] will be grouped into the same group

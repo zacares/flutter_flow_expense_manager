@@ -220,6 +220,8 @@
   "preferences": "التفضيلات",
   "preferences.appearance": "المظهر",
   "preferences.dateFormat": "تنسيق التاريخ",
+  "preferences.feedback": "مشاكل وملاحظات",
+  "preferences.feedback.debugLogs": "عرض سجلات التصحيح",
   "preferences.hapticFeedback": "ردود فعل الأزرار",
   "preferences.hapticFeedback.description": "صوت/اهتزاز عند الضغط",
   "preferences.language": "اللغة",

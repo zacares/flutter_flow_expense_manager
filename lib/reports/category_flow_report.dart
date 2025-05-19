@@ -1,4 +1,4 @@
-import "package:flow/data/money_flow.dart";
+import "package:flow/data/multi_currency_flow.dart";
 import "package:flow/entity/category.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/reports/report.dart";
@@ -8,10 +8,10 @@ class CategoryFlowReport extends FlowReport {
   final List<Transaction> transactions;
   final List<Category> categories;
 
-  /// Map of category UUID, [MoneyFlow]
+  /// Map of category UUID, [MultiCurrencyFlow]
   ///
   /// Uses [Namespace.nil] for uncategorized transactions
-  final Map<String, MoneyFlow> data = {};
+  final Map<String, MultiCurrencyFlow> data = {};
 
   bool _showMissingExchangeRatesWarning = false;
 
@@ -44,7 +44,7 @@ class CategoryFlowReport extends FlowReport {
       final String categoryUuid =
           transaction.categoryUuid ?? Namespace.nil.value;
 
-      data[categoryUuid] ??= MoneyFlow();
+      data[categoryUuid] ??= MultiCurrencyFlow();
       data[categoryUuid]!.add(transaction.money);
     }
 

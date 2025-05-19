@@ -406,6 +406,7 @@ void initializeFileLogger() async {
           logsDir,
           flowDebugMode ? "flow_debug.log" : "flow.log",
         ),
+        rotateAtSizeBytes: 2 * 1024 * 1024,
         keepRotateCount: 5,
       )..attachToLogger(Logger.root);
     } catch (e) {

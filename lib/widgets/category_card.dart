@@ -1,5 +1,5 @@
 import "package:flow/data/exchange_rates.dart";
-import "package:flow/data/money_flow.dart";
+import "package:flow/data/multi_currency_flow.dart";
 import "package:flow/entity/category.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/objectbox/actions.dart";
@@ -51,8 +51,8 @@ class CategoryCard extends StatelessWidget {
         .nonDeleted
         .where((x) => x.transactionDate.isAtSameMonthAs(now));
 
-    final MoneyFlow flow =
-        MoneyFlow()..addAll(
+    final MultiCurrencyFlow flow =
+        MultiCurrencyFlow()..addAll(
           (excludeTransfersInTotal ? transactions.nonTransfers : transactions)
               .map((transaction) => transaction.money),
         );
@@ -76,11 +76,7 @@ class CategoryCard extends StatelessWidget {
                   children: [
                     Text(category.name, style: context.textTheme.titleSmall),
                     if (showAmount)
-                      MoneyText(
-                        rates == null
-                            ? flow.getFlowByCurrency(primaryCurrency)
-                            : flow.getTotalFlow(rates!, primaryCurrency),
-                      ),
+                      MoneyText(flow.merge(primaryCurrency, rates).totalFlow),
                   ],
                 ),
                 const Spacer(),

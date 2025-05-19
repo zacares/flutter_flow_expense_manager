@@ -1,6 +1,6 @@
 import "package:flow/data/exchange_rates.dart";
-import "package:flow/data/money.dart";
-import "package:flow/data/money_flow.dart";
+import "package:flow/data/multi_currency_flow.dart";
+import "package:flow/data/single_currency_flow.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/objectbox/actions.dart";
@@ -84,8 +84,8 @@ class _TransactionListDateHeaderState extends State<TransactionListDateHeader> {
 
     final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
-    final MoneyFlow flow =
-        MoneyFlow()
+    final MultiCurrencyFlow flow =
+        MultiCurrencyFlow()
           ..addAll(widget.transactions.map((transaction) => transaction.money));
 
     final bool containsNonPrimaryCurrency = widget.transactions.any(
@@ -100,24 +100,19 @@ class _TransactionListDateHeaderState extends State<TransactionListDateHeader> {
             TransitiveLocalPreferences().usesNonPrimaryCurrency.get() &&
             rates == null;
 
-        final bool resolve =
-            widget.resolveNonPrimaryCurrencies &&
-            containsNonPrimaryCurrency &&
-            rates != null;
+        final SingleCurrencyFlow mergedFlow = flow.merge(
+          primaryCurrency,
+          rates,
+        );
 
         final String exclamation = switch ((
           containsNonPrimaryCurrency,
-          resolve,
+          mergedFlow.hasMissingData,
         )) {
           (true, true) => "~",
           (true, false) => "+",
           _ => "",
         };
-
-        final Money sum =
-            resolve
-                ? flow.getTotalFlow(rates, primaryCurrency)
-                : flow.getFlowByCurrency(primaryCurrency);
 
         return Row(
           mainAxisSize: MainAxisSize.max,
@@ -161,7 +156,7 @@ class _TransactionListDateHeaderState extends State<TransactionListDateHeader> {
                               ],
                             ),
                           ),
-                      money: sum,
+                      money: mergedFlow.totalFlow,
                     ),
                 ],
               ),

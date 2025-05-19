@@ -1,5 +1,6 @@
 import "package:flow/data/money.dart";
-import "package:flow/data/money_flow.dart";
+import "package:flow/data/multi_currency_flow.dart";
+import "package:flow/data/single_currency_flow.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/reports/report.dart";
 import "package:moment_dart/moment_dart.dart";
@@ -11,7 +12,7 @@ class RangeForecast extends FlowReport {
   /// and it will be aligned to the end of the previous range.
   final RangeData currentRangeData;
 
-  late final MoneyFlow forecast;
+  late final MultiCurrencyFlow forecast;
 
   bool _showMissingExchangeRatesWarning = false;
 
@@ -31,10 +32,10 @@ class RangeForecast extends FlowReport {
 
     bool hasNonPrimaryCurrency = false;
 
-    final MoneyFlow previousFlow = previousRangeData.transactions
+    final MultiCurrencyFlow previousFlow = previousRangeData.transactions
         .where((t) => previousRangeData.range.contains(t.transactionDate))
         .map((t) => t.money)
-        .fold(MoneyFlow(), (total, current) => total..add(current));
+        .fold(MultiCurrencyFlow(), (total, current) => total..add(current));
 
     if (previousFlow.uniqueCurrencies.any(
       (currency) => currency != primaryCurrency,
@@ -42,9 +43,9 @@ class RangeForecast extends FlowReport {
       hasNonPrimaryCurrency = true;
     }
 
-    final MoneyFlow currentFlow = currentRangeData.transactions
+    final MultiCurrencyFlow currentFlow = currentRangeData.transactions
         .map((t) => t.money)
-        .fold(MoneyFlow(), (total, current) => total..add(current));
+        .fold(MultiCurrencyFlow(), (total, current) => total..add(current));
 
     if (!hasNonPrimaryCurrency &&
         currentFlow.uniqueCurrencies.any(
@@ -57,37 +58,21 @@ class RangeForecast extends FlowReport {
       _showMissingExchangeRatesWarning = true;
     }
 
-    late final Money previousTotalExpense;
-    late final Money previousTotalIncome;
-    late final Money currentTotalExpense;
-    late final Money currentTotalIncome;
-
-    if (rates == null || _showMissingExchangeRatesWarning) {
-      previousTotalExpense = previousFlow.getExpenseByCurrency(primaryCurrency);
-      previousTotalIncome = previousFlow.getIncomeByCurrency(primaryCurrency);
-      currentTotalExpense = currentFlow.getExpenseByCurrency(primaryCurrency);
-      currentTotalIncome = currentFlow.getIncomeByCurrency(primaryCurrency);
-    } else {
-      previousTotalExpense = previousFlow.getTotalExpense(
-        rates!,
-        primaryCurrency,
-      );
-      previousTotalIncome = previousFlow.getTotalIncome(
-        rates!,
-        primaryCurrency,
-      );
-      currentTotalExpense = currentFlow.getTotalExpense(
-        rates!,
-        primaryCurrency,
-      );
-      currentTotalIncome = currentFlow.getTotalIncome(rates!, primaryCurrency);
-    }
+    final SingleCurrencyFlow previousMergedFlow = previousFlow.merge(
+      primaryCurrency,
+      rates,
+    );
+    final SingleCurrencyFlow currentMergedFlow = currentFlow.merge(
+      primaryCurrency,
+      rates,
+    );
 
     final double previousExpensePerSecond =
-        previousTotalExpense.amount /
+        previousMergedFlow.totalExpense.amount /
         previousRangeData.range.duration.inSeconds;
     final double previousIncomePerSecond =
-        previousTotalIncome.amount / previousRangeData.range.duration.inSeconds;
+        previousMergedFlow.totalIncome.amount /
+        previousRangeData.range.duration.inSeconds;
 
     final TimeRange currentSpannedRange = currentRangeData.range.from.rangeTo(
       currentRangeData.transactions.range?.to ??
@@ -99,14 +84,14 @@ class RangeForecast extends FlowReport {
         currentSpannedRange.duration - currentSpannedRange.duration;
 
     forecast =
-        MoneyFlow()..addAll([
+        MultiCurrencyFlow()..addAll([
           Money(
-            currentTotalIncome.amount +
+            currentMergedFlow.totalIncome.amount +
                 (previousIncomePerSecond * remainingCurrentRange.inSeconds),
             primaryCurrency,
           ),
           Money(
-            currentTotalExpense.amount +
+            currentMergedFlow.totalExpense.amount +
                 (previousExpensePerSecond * remainingCurrentRange.inSeconds),
             primaryCurrency,
           ),

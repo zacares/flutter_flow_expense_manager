@@ -220,6 +220,8 @@
   "preferences": "Настройки",
   "preferences.appearance": "Внешний вид",
   "preferences.dateFormat": "Формат даты",
+  "preferences.feedback": "Проблемы и отзывы",
+  "preferences.feedback.debugLogs": "Просмотреть отладочные логи",
   "preferences.hapticFeedback": "Отклик кнопок",
   "preferences.hapticFeedback.description": "Звуковой/тактильный отклик при нажатии",
   "preferences.language": "Язык",
