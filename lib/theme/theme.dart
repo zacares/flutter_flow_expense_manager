@@ -70,7 +70,7 @@ class ThemeFactory {
       visualDensity: VisualDensity.adaptivePlatformDensity,
       brightness: colorScheme.brightness,
       colorScheme: colorScheme,
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: colorScheme.secondary,
         surfaceTintColor: colorScheme.primary,
       ),
@@ -157,7 +157,7 @@ class ThemeFactory {
         cursorColor: colorScheme.primary,
         selectionHandleColor: colorScheme.primary,
       ),
-      tabBarTheme: TabBarTheme(dividerColor: colorScheme.primary),
+      tabBarTheme: TabBarThemeData(dividerColor: colorScheme.primary),
     );
   }
 
