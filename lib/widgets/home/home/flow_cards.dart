@@ -102,13 +102,13 @@ class _FlowCardsState extends State<FlowCards> {
     setState(() => abbreviate = !abbreviate);
   }
 
-  _updateAbbreviation() {
+  void _updateAbbreviation() {
     abbreviate = !LocalPreferences().preferFullAmounts.get();
 
     if (mounted) setState(() {});
   }
 
-  _updateExcludeTransferFromFlow() {
+  void _updateExcludeTransferFromFlow() {
     excludeTransferFromFlow = UserPreferencesService().excludeTransfersFromFlow;
 
     if (mounted) setState(() {});

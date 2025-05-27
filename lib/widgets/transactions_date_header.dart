@@ -84,9 +84,8 @@ class _TransactionListDateHeaderState extends State<TransactionListDateHeader> {
 
     final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
-    final MultiCurrencyFlow flow =
-        MultiCurrencyFlow()
-          ..addAll(widget.transactions.map((transaction) => transaction.money));
+    final MultiCurrencyFlow flow = MultiCurrencyFlow()
+      ..addAll(widget.transactions.map((transaction) => transaction.money));
 
     final bool containsNonPrimaryCurrency = widget.transactions.any(
       (transaction) => transaction.currency != primaryCurrency,
@@ -132,30 +131,26 @@ class _TransactionListDateHeaderState extends State<TransactionListDateHeader> {
                   if (!widget.pendingGroup)
                     //
                     MoneyTextBuilder(
-                      builder:
-                          (context, formattedSum, originalSum) => RichText(
-                            text: TextSpan(
-                              style: context.textTheme.labelMedium,
-                              children: [
-                                TextSpan(
-                                  text: "$formattedSum$exclamation",
-                                  style:
-                                      showMissingExchangeRatesWarning
-                                          ? TextStyle(
-                                            color: context.colorScheme.error,
-                                          )
-                                          : null,
-                                ),
-                                TextSpan(text: " • "),
-                                TextSpan(
-                                  text: "tabs.home.transactionsCount".t(
-                                    context,
-                                    widget.transactions.renderableCount,
-                                  ),
-                                ),
-                              ],
+                      builder: (context, formattedSum, originalSum) => RichText(
+                        text: TextSpan(
+                          style: context.textTheme.labelMedium,
+                          children: [
+                            TextSpan(
+                              text: "$formattedSum$exclamation",
+                              style: showMissingExchangeRatesWarning
+                                  ? TextStyle(color: context.colorScheme.error)
+                                  : null,
                             ),
-                          ),
+                            TextSpan(text: " • "),
+                            TextSpan(
+                              text: "tabs.home.transactionsCount".t(
+                                context,
+                                widget.transactions.renderableCount,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       money: mergedFlow.totalFlow,
                     ),
                 ],
@@ -168,7 +163,7 @@ class _TransactionListDateHeaderState extends State<TransactionListDateHeader> {
     );
   }
 
-  _updatePrivacyMode() {
+  void _updatePrivacyMode() {
     obscure = TransitiveLocalPreferences().sessionPrivacyMode.get();
 
     if (!mounted) return;
@@ -187,9 +182,8 @@ class _TransactionListDateHeaderState extends State<TransactionListDateHeader> {
 
   String _getRangeTitle() {
     return switch ((widget.range, rangeTitleAlternative)) {
-      (DayTimeRange dayTimeRange, false) => dayTimeRange.from
-          .toMoment()
-          .calendar(omitHours: true),
+      (DayTimeRange dayTimeRange, false) =>
+        dayTimeRange.from.toMoment().calendar(omitHours: true),
       (DayTimeRange dayTimeRange, true) => dayTimeRange.from.toMoment().format(
         "ll",
       ),

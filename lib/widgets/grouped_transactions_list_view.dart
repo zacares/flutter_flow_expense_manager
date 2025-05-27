@@ -170,10 +170,9 @@ class _GroupedTransactionsListViewState
           ),
           (Widget header) => Padding(
             key: ValueKey("header-$index-${header.hashCode}"),
-            padding:
-                index == 0
-                    ? (widget.mainHeaderPadding ?? headerPadding)
-                    : headerPadding,
+            padding: index == 0
+                ? (widget.mainHeaderPadding ?? headerPadding)
+                : headerPadding,
             child: header,
           ),
           (Transaction transaction) => ReorderableDelayedDragStartListener(
@@ -187,11 +186,10 @@ class _GroupedTransactionsListViewState
               moveToTrashFn: () => transaction.moveToTrashBin(context),
               recoverFromTrashFn: () => transaction.recoverFromTrashBin(),
               confirmFn: ([bool confirm = true]) {
-                final bool updateTransactionDate =
-                    LocalPreferences()
-                        .pendingTransactions
-                        .updateDateUponConfirmation
-                        .get();
+                final bool updateTransactionDate = LocalPreferences()
+                    .pendingTransactions
+                    .updateDateUponConfirmation
+                    .get();
 
                 transaction.confirm(confirm, updateTransactionDate);
               },
@@ -235,7 +233,7 @@ class _GroupedTransactionsListViewState
     return SlidableAutoCloseBehavior(child: list);
   }
 
-  _privacyModeUpdate() {
+  void _privacyModeUpdate() {
     globalPrivacyMode = TransitiveLocalPreferences().sessionPrivacyMode.get();
     if (!mounted) return;
     setState(() {});
@@ -274,7 +272,7 @@ class _GroupedTransactionsListViewState
     }
   }
 
-  _rerender() {
+  void _rerender() {
     if (!mounted) return;
     setState(() {});
   }
