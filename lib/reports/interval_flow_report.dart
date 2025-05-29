@@ -1,7 +1,12 @@
+import "package:flow/data/money.dart";
 import "package:flow/data/multi_currency_flow.dart";
+import "package:flow/data/single_currency_flow.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/reports/report.dart";
 
+/// A report that summarizes transactions in a given time range by intervals.
+///
+/// Everything is in the given [primaryCurrency]
 class IntervalFlowReport extends FlowReport {
   final RangeData rangeData;
   final Duration interval;
@@ -9,7 +14,24 @@ class IntervalFlowReport extends FlowReport {
   /// Map of start of range, [MultiCurrencyFlow]
   ///
   /// Uses [Namespace.nil] for uncategorized transactions
-  final Map<DateTime, MultiCurrencyFlow> data = {};
+  final Map<DateTime, SingleCurrencyFlow> data = {};
+
+  /// Average of sum by interval, in the primary currency.
+  late Money _averageIncome;
+  late Money _averageExpense;
+  late Money _averageFlow;
+
+  /// Average of sum by interval, in the primary currency.
+  late Money _totalIncome;
+  late Money _totalExpense;
+  late Money _totalFlow;
+
+  Money get averageIncome => _averageIncome;
+  Money get averageExpense => _averageExpense;
+  Money get averageFlow => _averageFlow;
+  Money get totalIncome => _totalIncome;
+  Money get totalExpense => _totalExpense;
+  Money get totalFlow => _totalFlow;
 
   bool _showMissingExchangeRatesWarning = false;
 
@@ -37,29 +59,67 @@ class IntervalFlowReport extends FlowReport {
         hasNonPrimaryCurrency = true;
       }
 
-      final DateTime associatedInterval = _getInterval(
+      final (DateTime associatedInterval, int index) = getInterval(
         transaction.transactionDate,
       );
 
-      data[associatedInterval] ??= MultiCurrencyFlow();
-      data[associatedInterval]!.add(transaction.money);
+      data[associatedInterval] ??= SingleCurrencyFlow();
+      data[associatedInterval]!.add(transaction.money, rates);
     }
 
     if (hasNonPrimaryCurrency && rates == null) {
       _showMissingExchangeRatesWarning = true;
     }
+
+    int incomeCount = 0;
+    int expenseCount = 0;
+    int flowCount = 0;
+
+    _totalIncome = Money(0.0, primaryCurrency);
+    _totalExpense = Money(0.0, primaryCurrency);
+    _totalFlow = Money(0.0, primaryCurrency);
+
+    for (final SingleCurrencyFlow flow in data.values) {
+      if (flow.incomeSum > 0) {
+        _totalIncome += Money(flow.incomeSum, primaryCurrency);
+        incomeCount += flow.incomeCount;
+      }
+
+      if (flow.expenseSum < 0) {
+        _totalExpense += Money(flow.expenseSum, primaryCurrency);
+        expenseCount += flow.expenseCount;
+      }
+
+      if (flow.flow != 0) {
+        _totalFlow += Money(flow.flow, primaryCurrency);
+        flowCount++;
+      }
+    }
+
+    _averageIncome = totalIncome / incomeCount.toDouble();
+    _averageExpense = totalExpense / expenseCount.toDouble();
+    _averageFlow = totalFlow / flowCount.toDouble();
+
+    print("totalIncome $totalIncome");
+    print("incomeCount $incomeCount");
+    print("totalExpense $totalExpense");
+    print("expenseCount $expenseCount");
+    print("totalFlow $totalFlow");
+    print("flowCount $flowCount");
   }
 
-  DateTime _getInterval(DateTime transactionDate) {
+  (DateTime, int) getInterval(DateTime transactionDate) {
     final int value =
         transactionDate.millisecondsSinceEpoch -
         rangeData.range.from.millisecondsSinceEpoch;
 
     final int intervalValue = value ~/ interval.inMilliseconds;
 
-    return DateTime.fromMillisecondsSinceEpoch(
+    final DateTime startOfInterval = DateTime.fromMillisecondsSinceEpoch(
       rangeData.range.from.millisecondsSinceEpoch +
           (intervalValue * interval.inMilliseconds),
     );
+
+    return (startOfInterval, intervalValue);
   }
 }

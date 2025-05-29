@@ -5,18 +5,18 @@ import "package:flow/objectbox/actions.dart";
 import "package:flow/reports/report.dart";
 import "package:moment_dart/moment_dart.dart";
 
-class RangeForecast extends FlowReport {
+class RangeForecastReport extends FlowReport {
   final RangeData previousRangeData;
 
   /// The duration doesn't have to same as the previous range,
   /// and it will be aligned to the end of the previous range.
   final RangeData currentRangeData;
 
-  late final MultiCurrencyFlow forecast;
+  final SingleCurrencyFlow forecast = SingleCurrencyFlow();
 
   bool _showMissingExchangeRatesWarning = false;
 
-  RangeForecast({
+  RangeForecastReport({
     required super.rates,
     required super.primaryCurrency,
     required this.previousRangeData,
@@ -83,19 +83,18 @@ class RangeForecast extends FlowReport {
     final Duration remainingCurrentRange =
         currentSpannedRange.duration - currentSpannedRange.duration;
 
-    forecast =
-        MultiCurrencyFlow()..addAll([
-          Money(
-            currentMergedFlow.totalIncome.amount +
-                (previousIncomePerSecond * remainingCurrentRange.inSeconds),
-            primaryCurrency,
-          ),
-          Money(
-            currentMergedFlow.totalExpense.amount +
-                (previousExpensePerSecond * remainingCurrentRange.inSeconds),
-            primaryCurrency,
-          ),
-        ]);
+    forecast.addAll([
+      Money(
+        currentMergedFlow.totalIncome.amount +
+            (previousIncomePerSecond * remainingCurrentRange.inSeconds),
+        primaryCurrency,
+      ),
+      Money(
+        currentMergedFlow.totalExpense.amount +
+            (previousExpensePerSecond * remainingCurrentRange.inSeconds),
+        primaryCurrency,
+      ),
+    ], rates);
   }
 
   @override

@@ -54,6 +54,11 @@ class RangeData {
     }
   }
 
+  static Duration getOptimalInterval(TimeRange range) {
+    final DurationUnit unit = getOptimalUnit(range);
+    return Duration(microseconds: unit.microseconds);
+  }
+
   RangeData({required this.range, required this.transactions})
     : assert(transactions.every((t) => range.contains(t.transactionDate)));
 }
