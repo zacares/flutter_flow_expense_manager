@@ -100,12 +100,7 @@ class IntervalFlowReport extends FlowReport {
     _averageExpense = totalExpense / expenseCount.toDouble();
     _averageFlow = totalFlow / flowCount.toDouble();
 
-    print("totalIncome $totalIncome");
-    print("incomeCount $incomeCount");
-    print("totalExpense $totalExpense");
-    print("expenseCount $expenseCount");
-    print("totalFlow $totalFlow");
-    print("flowCount $flowCount");
+    // TODO @sadespresso account for insignificant values
   }
 
   (DateTime, int) getInterval(DateTime transactionDate) {
