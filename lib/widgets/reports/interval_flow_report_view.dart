@@ -233,7 +233,7 @@ class IntervalFlowReportView extends StatelessWidget {
         showTitles: true,
         getTitlesWidget: (value, meta) =>
             Text((value + 1.0).toStringAsFixed(0)),
-        interval: 3,
+        interval: 2.0,
         minIncluded: true,
         maxIncluded: false,
       ),

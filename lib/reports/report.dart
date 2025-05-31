@@ -1,4 +1,5 @@
 import "package:flow/data/exchange_rates.dart";
+import "package:flow/data/multi_currency_flow.dart";
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/transaction.dart";
@@ -39,6 +40,9 @@ abstract class FlowReport {
 class RangeData {
   final TimeRange range;
   final List<Transaction> transactions;
+
+  late final MultiCurrencyFlow<RangeData> multiCurrencyFlow =
+      MultiCurrencyFlow()..addAll(transactions.map((t) => t.money));
 
   static DurationUnit getOptimalUnit(TimeRange range) {
     final int days = (range.duration.inHours / 24).ceil();

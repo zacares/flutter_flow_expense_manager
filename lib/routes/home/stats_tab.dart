@@ -149,7 +149,8 @@ class _StatsTabState extends State<StatsTab>
                                               ?.forecast
                                               .totalExpense
                                         : intervalFlowReport!.totalExpense,
-                                    previous: intervalFlowReport!.totalExpense,
+                                    previous: previousIntervalFlowReport
+                                        ?.totalExpense,
                                     invertDelta: true,
                                   ),
                                 ],
@@ -257,14 +258,20 @@ class _StatsTabState extends State<StatsTab>
     try {
       final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
-      transactions = await ObjectBox().transcationsByRange(range);
+      transactions = await ObjectBox().transcationsByRange(
+        range,
+        includeTransfers: false,
+      );
 
       final TimeRange? previousRange = range is PageableRange
           ? (range as PageableRange).last
           : null;
 
       final List<Transaction>? previousRangeTransactions = previousRange != null
-          ? await ObjectBox().transcationsByRange(previousRange)
+          ? await ObjectBox().transcationsByRange(
+              previousRange,
+              includeTransfers: false,
+            )
           : null;
 
       final RangeData currentRangeData = RangeData(

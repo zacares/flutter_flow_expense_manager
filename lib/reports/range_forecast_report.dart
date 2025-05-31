@@ -1,5 +1,4 @@
 import "package:flow/data/money.dart";
-import "package:flow/data/multi_currency_flow.dart";
 import "package:flow/data/single_currency_flow.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/reports/report.dart";
@@ -11,6 +10,17 @@ class RangeForecastReport extends FlowReport {
   /// The duration doesn't have to same as the previous range,
   /// and it will be aligned to the end of the previous range.
   final RangeData currentRangeData;
+
+  TimeRange? calculateCurrentTransactionsSpannedRange() => currentRangeData
+      .transactions
+      .where(
+        (transaction) =>
+            transaction.isPending != true &&
+            !transaction.transactionDate.isFutureAnchored(
+              DateTime.now().startOfNextMinute(),
+            ),
+      )
+      .range;
 
   final SingleCurrencyFlow forecast = SingleCurrencyFlow();
 
@@ -32,23 +42,17 @@ class RangeForecastReport extends FlowReport {
 
     bool hasNonPrimaryCurrency = false;
 
-    final MultiCurrencyFlow previousFlow = previousRangeData.transactions
-        .where((t) => previousRangeData.range.contains(t.transactionDate))
-        .map((t) => t.money)
-        .fold(MultiCurrencyFlow(), (total, current) => total..add(current));
+    final TimeRange? currentSpannedRange =
+        calculateCurrentTransactionsSpannedRange();
 
-    if (previousFlow.uniqueCurrencies.any(
+    if (previousRangeData.multiCurrencyFlow.uniqueCurrencies.any(
       (currency) => currency != primaryCurrency,
     )) {
       hasNonPrimaryCurrency = true;
     }
 
-    final MultiCurrencyFlow currentFlow = currentRangeData.transactions
-        .map((t) => t.money)
-        .fold(MultiCurrencyFlow(), (total, current) => total..add(current));
-
     if (!hasNonPrimaryCurrency &&
-        currentFlow.uniqueCurrencies.any(
+        currentRangeData.multiCurrencyFlow.uniqueCurrencies.any(
           (currency) => currency != primaryCurrency,
         )) {
       hasNonPrimaryCurrency = true;
@@ -58,30 +62,31 @@ class RangeForecastReport extends FlowReport {
       _showMissingExchangeRatesWarning = true;
     }
 
-    final SingleCurrencyFlow previousMergedFlow = previousFlow.merge(
-      primaryCurrency,
-      rates,
-    );
-    final SingleCurrencyFlow currentMergedFlow = currentFlow.merge(
-      primaryCurrency,
-      rates,
-    );
+    final SingleCurrencyFlow previousMergedFlow = previousRangeData
+        .multiCurrencyFlow
+        .merge(primaryCurrency, rates);
+    final SingleCurrencyFlow currentMergedFlow = currentRangeData
+        .multiCurrencyFlow
+        .merge(primaryCurrency, rates);
 
     final double previousExpensePerSecond =
-        previousMergedFlow.totalExpense.amount /
-        previousRangeData.range.duration.inSeconds;
+        (previousMergedFlow.totalExpense.amount +
+            currentMergedFlow.totalExpense.amount) /
+        (previousRangeData.range.duration.inSeconds +
+            currentSpannedRange!.duration.inSeconds);
     final double previousIncomePerSecond =
-        previousMergedFlow.totalIncome.amount /
-        previousRangeData.range.duration.inSeconds;
+        (previousMergedFlow.totalIncome.amount +
+            currentMergedFlow.totalIncome.amount) /
+        (previousRangeData.range.duration.inSeconds +
+            currentSpannedRange.duration.inSeconds);
 
-    final TimeRange currentSpannedRange = currentRangeData.range.from.rangeTo(
-      currentRangeData.transactions.range?.to ??
-          currentRangeData.transactions.firstOrNull?.transactionDate ??
-          currentRangeData.range.from,
+    final Duration remainingCurrentRange = currentRangeData.range.to.difference(
+      currentSpannedRange.to,
     );
 
-    final Duration remainingCurrentRange =
-        currentSpannedRange.duration - currentSpannedRange.duration;
+    if (remainingCurrentRange.isNegative) {
+      throw StateError("Invalid state. Remaining duration is less than zero.");
+    }
 
     forecast.addAll([
       Money(
