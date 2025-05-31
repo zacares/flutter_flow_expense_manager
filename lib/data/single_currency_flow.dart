@@ -57,24 +57,26 @@ class SingleCurrencyFlow<T> {
       _expenseCount++;
       if (money.currency == this.currency) {
         _expenseSum += amount;
+      } else if (rates != null) {
+        _expenseSum += money.convert(this.currency, rates).amount;
       } else {
-        if (rates == null) {
-          _hasMissingData = true;
-        } else {
-          _expenseSum += money.convert(this.currency, rates).amount;
-        }
+        _hasMissingData = true;
       }
-    } else {
+
+      return;
+    }
+
+    if (!amount.isNegative) {
       _incomeCount++;
       if (money.currency == this.currency) {
         _incomeSum += amount;
+      } else if (rates != null) {
+        _incomeSum += money.convert(this.currency, rates).amount;
       } else {
-        if (rates == null) {
-          _hasMissingData = true;
-        } else {
-          _incomeSum += money.convert(this.currency, rates).amount;
-        }
+        _hasMissingData = true;
       }
+
+      return;
     }
   }
 

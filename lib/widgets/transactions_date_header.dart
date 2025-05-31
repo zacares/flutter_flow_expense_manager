@@ -85,7 +85,11 @@ class _TransactionListDateHeaderState extends State<TransactionListDateHeader> {
     final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
     final MultiCurrencyFlow flow = MultiCurrencyFlow()
-      ..addAll(widget.transactions.map((transaction) => transaction.money));
+      ..addAll(
+        widget.transactions
+            .where((transaction) => !transaction.isTransfer)
+            .map((transaction) => transaction.money),
+      );
 
     final bool containsNonPrimaryCurrency = widget.transactions.any(
       (transaction) => transaction.currency != primaryCurrency,

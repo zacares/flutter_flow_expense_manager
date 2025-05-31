@@ -73,11 +73,21 @@ class MultiCurrencyFlow<T> {
   }
 
   SingleCurrencyFlow<T> merge(String currency, ExchangeRates? rates) {
-    return SingleCurrencyFlow(currency: currency)..addAll(
-      _totalIncomeByCurrency.entries.map(
-        (entry) => Money(entry.value, entry.key),
-      ),
-      rates,
-    );
+    return SingleCurrencyFlow(
+        currency: currency,
+        associatedData: associatedData,
+      )
+      ..addAll(
+        _totalIncomeByCurrency.entries.map(
+          (entry) => Money(entry.value, entry.key),
+        ),
+        rates,
+      )
+      ..addAll(
+        _totalExpenseByCurrency.entries.map(
+          (entry) => Money(entry.value, entry.key),
+        ),
+        rates,
+      );
   }
 }

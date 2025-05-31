@@ -53,10 +53,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   late TransactionFilter currentFilter;
 
   TransactionFilter get currentFilterWithPlanned {
-    final DateTime plannedTransactionTo =
-        Moment.now()
-            .add(Duration(days: _plannedTransactionsNextNDays))
-            .startOfNextDay();
+    final DateTime plannedTransactionTo = Moment.now()
+        .add(Duration(days: _plannedTransactionsNextNDays))
+        .startOfNextDay();
 
     final TimeRange? timeRange = currentFilter.range?.range;
 
@@ -140,10 +139,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           ),
       builder: (context, snapshot) {
         final DateTime now = Moment.now().startOfNextMinute();
-        final DateTime cutoffPlanned =
-            now
-                .add(Duration(days: _plannedTransactionsNextNDays))
-                .startOfNextDay();
+        final DateTime cutoffPlanned = now
+            .add(Duration(days: _plannedTransactionsNextNDays))
+            .startOfNextDay();
         final List<Transaction>? transactions = snapshot.data;
 
         if (currentFilter.range?.range?.contains(now) == true) {
@@ -219,25 +217,22 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             )
             .groupByRange(rangeFn: currentFilter.groupBy.fromTransaction);
 
-        final List<Transaction> pendingTransactions =
-            transactions
-                .where(
-                  (transaction) =>
-                      transaction.transactionDate.isAfter(now) ||
-                      transaction.isPending == true,
-                )
-                .toList();
+        final List<Transaction> pendingTransactions = transactions
+            .where(
+              (transaction) =>
+                  transaction.transactionDate.isAfter(now) ||
+                  transaction.isPending == true,
+            )
+            .toList();
 
-        final int actionNeededCount =
-            pendingTransactions
-                .where((transaction) => transaction.confirmable())
-                .length;
+        final int actionNeededCount = pendingTransactions
+            .where((transaction) => transaction.confirmable())
+            .length;
 
         final Map<TimeRange, List<Transaction>> pendingTransactionsGrouped =
             pendingTransactions.groupByRange(
-              rangeFn:
-                  (transaction) =>
-                      CustomTimeRange(Moment.minValue, Moment.maxValue),
+              rangeFn: (transaction) =>
+                  CustomTimeRange(Moment.minValue, Moment.maxValue),
             );
 
         final bool shouldCombineTransferIfNeeded =
@@ -245,9 +240,13 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
 
         final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
-        final SingleCurrencyFlow combinedFlow = SingleCurrencyFlow(
-          currency: primaryCurrency,
-        )..addAll(transactions.map((t) => t.money), rates);
+        final SingleCurrencyFlow combinedFlow =
+            SingleCurrencyFlow(currency: primaryCurrency)..addAll(
+              transactions
+                  .where((transaction) => !transaction.isTransfer)
+                  .map((t) => t.money),
+              rates,
+            );
 
         return GroupedTransactionsListView(
           listType: GroupedTransactionsListViewType.sliverReorderable,
@@ -259,10 +258,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                 SlidableAutoCloseBehavior(
                   child: InternalNotificationSection(
                     notification: _internalNotification!,
-                    onDismiss:
-                        () => setState(() {
-                          _internalNotification = null;
-                        }),
+                    onDismiss: () => setState(() {
+                      _internalNotification = null;
+                    }),
                   ),
                 ),
                 SizedBox(height: 8.0),

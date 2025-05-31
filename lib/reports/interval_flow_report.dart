@@ -51,7 +51,15 @@ class IntervalFlowReport extends FlowReport {
     bool hasNonPrimaryCurrency = false;
 
     for (final Transaction transaction in rangeData.transactions) {
-      if (rangeData.range.contains(transaction.transactionDate) == false) {
+      if (transaction.isDeleted == true) {
+        continue;
+      }
+
+      if (transaction.isTransfer == true) {
+        continue;
+      }
+
+      if (!rangeData.range.contains(transaction.transactionDate)) {
         continue;
       }
 
@@ -71,28 +79,73 @@ class IntervalFlowReport extends FlowReport {
       _showMissingExchangeRatesWarning = true;
     }
 
-    int incomeCount = 0;
-    int expenseCount = 0;
-    int flowCount = 0;
-
     _totalIncome = Money(0.0, primaryCurrency);
     _totalExpense = Money(0.0, primaryCurrency);
     _totalFlow = Money(0.0, primaryCurrency);
 
-    for (final SingleCurrencyFlow flow in data.values) {
-      if (flow.incomeSum > 0) {
-        _totalIncome += Money(flow.incomeSum, primaryCurrency);
-        incomeCount += flow.incomeCount;
+    final List<DateTime> sortedKeys = data.keys.toList()
+      ..sort((a, b) => a.compareTo(b));
+
+    int? firstIncomeIndex;
+    int? firstExpenseIndex;
+    int? firstFlowIndex;
+
+    for (int i = 0; i < sortedKeys.length; i++) {
+      final DateTime startOfInterval = sortedKeys[i];
+      final SingleCurrencyFlow flow = data[startOfInterval]!;
+
+      if (flow.incomeSum > 0 && firstIncomeIndex == null) {
+        firstIncomeIndex = i;
+      }
+      if (flow.expenseSum < 0 && firstExpenseIndex == null) {
+        firstExpenseIndex = i;
+      }
+      if (flow.flow != 0 && firstFlowIndex == null) {
+        firstFlowIndex = i;
       }
 
-      if (flow.expenseSum < 0) {
-        _totalExpense += Money(flow.expenseSum, primaryCurrency);
-        expenseCount += flow.expenseCount;
+      if (firstIncomeIndex != null) {
+        _totalIncome += flow.totalIncome;
       }
 
-      if (flow.flow != 0) {
-        _totalFlow += Money(flow.flow, primaryCurrency);
-        flowCount++;
+      if (firstExpenseIndex != null) {
+        _totalExpense += flow.totalExpense;
+      }
+
+      if (firstFlowIndex != null) {
+        _totalFlow += flow.totalFlow;
+      }
+    }
+
+    int incomeCount = sortedKeys.length - (firstIncomeIndex ?? 0);
+    int expenseCount = sortedKeys.length - (firstExpenseIndex ?? 0);
+    int flowCount = sortedKeys.length - (firstFlowIndex ?? 0);
+
+    for (final DateTime startOfInterval in sortedKeys.reversed) {
+      final SingleCurrencyFlow flow = data[startOfInterval]!;
+
+      if (firstIncomeIndex != null) {
+        if (flow.incomeSum <= 0) {
+          incomeCount--;
+        } else {
+          firstIncomeIndex = null;
+        }
+      }
+
+      if (firstExpenseIndex != null) {
+        if (flow.expenseSum >= 0) {
+          expenseCount--;
+        } else {
+          firstExpenseIndex = null;
+        }
+      }
+
+      if (firstFlowIndex != null) {
+        if (flow.flow == 0) {
+          flowCount--;
+        } else {
+          firstFlowIndex = null;
+        }
       }
     }
 

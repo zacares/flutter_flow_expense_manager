@@ -323,6 +323,7 @@ class _StatsTabState extends State<StatsTab>
 
   void _updateRates() {
     rates = ExchangeRatesService().getPrimaryCurrencyRates();
+    fetch();
     if (mounted) {
       setState(() {});
     }
