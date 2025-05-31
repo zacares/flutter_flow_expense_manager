@@ -32,8 +32,7 @@ class IntervalFlowReportView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final LineChartData? dailyExpenditureChartData =
-        prepareDailyExpenseChartData(context);
+    final LineChartData? dailyExpenditureChartData = preparChartData(context);
 
     final Widget child = Container(
       height: height,
@@ -59,12 +58,12 @@ class IntervalFlowReportView extends StatelessWidget {
           runSpacing: 12.0,
           children: [
             ChartLegend(
-              color: context.colorScheme.primary,
-              label: report.rangeData.range.format(),
-            ),
-            ChartLegend(
               color: context.colorScheme.primary.withAlpha(0x40),
               label: previousLabel,
+            ),
+            ChartLegend(
+              color: context.colorScheme.primary,
+              label: report.rangeData.range.format(),
             ),
           ],
         ),
@@ -72,9 +71,7 @@ class IntervalFlowReportView extends StatelessWidget {
     );
   }
 
-  LineChartData? prepareDailyExpenseChartData(BuildContext context) {
-    final int maxDays = calculateMaxDays(report.rangeData.range);
-
+  LineChartData? preparChartData(BuildContext context) {
     final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
     final Color currentPeriod = context.colorScheme.primary;
@@ -84,9 +81,8 @@ class IntervalFlowReportView extends StatelessWidget {
 
     return LineChartData(
       minX: 0.0,
-      maxX: maxDays.toDouble(),
+      maxX: xAxesIntervalCount(),
       minY: 0.0,
-      // maxY: report.dailyMaxExpenditure.amount.abs(),
       lineTouchData: LineTouchData(
         touchTooltipData: LineTouchTooltipData(
           fitInsideHorizontally: true,
@@ -209,22 +205,27 @@ class IntervalFlowReportView extends StatelessWidget {
   FlGridData gridData() {
     final double verticalInterval = switch (report.rangeData.range) {
       DayTimeRange() => 1.0,
-      MonthTimeRange() => 5.0,
-      YearTimeRange() => 30.0,
+      MonthTimeRange() => 7.0,
+      YearTimeRange() => 1.0,
       _ => math.max(
         (report.rangeData.range.duration.inDays / 7.0).floorToDouble(),
         1,
       ),
     };
 
-    // final double horizontalInterval = report.dailyAvgExpenditure.amount.abs();
-
-    return FlGridData(
-      show: true,
-      // horizontalInterval: horizontalInterval > 0 ? horizontalInterval : null,
-      verticalInterval: verticalInterval,
-    );
+    return FlGridData(show: true, verticalInterval: verticalInterval);
   }
+
+  double xAxesIntervalCount() => switch (report.rangeData.range) {
+    YearTimeRange() => 12.0,
+    _ =>
+      (math.max(
+                report.rangeData.range.duration.inMicroseconds,
+                compareWith?.rangeData.range.duration.inMicroseconds ?? -1,
+              ) /
+              report.interval.inMicroseconds)
+          .ceilToDouble(),
+  };
 
   SideTitles bottomTitles() {
     return switch (report.rangeData.range) {
@@ -236,42 +237,14 @@ class IntervalFlowReportView extends StatelessWidget {
         minIncluded: true,
         maxIncluded: false,
       ),
-      YearTimeRange yearTimeRange => SideTitles(
+      YearTimeRange _ => SideTitles(
         showTitles: true,
         getTitlesWidget: (value, meta) {
-          final int month = yearTimeRange.from.isLeapYear
-              ? [
-                  0,
-                  31,
-                  60,
-                  91,
-                  121,
-                  152,
-                  182,
-                  213,
-                  244,
-                  274,
-                  303,
-                  333,
-                ].indexOf(value.toInt())
-              : [
-                  0,
-                  31,
-                  59,
-                  90,
-                  120,
-                  151,
-                  181,
-                  212,
-                  243,
-                  273,
-                  302,
-                  332,
-                ].indexOf(value.toInt());
+          if (value <= 0 || value > 11) return const SizedBox.shrink();
 
-          if (month < 0) return const SizedBox.shrink();
-
-          return Text(DateTime(1970, month + 1).toMoment().format("MMM"));
+          return Text(
+            DateTime(1970, (value + 1).toInt()).toMoment().format("MMM"),
+          );
         },
         interval: 1,
         minIncluded: true,

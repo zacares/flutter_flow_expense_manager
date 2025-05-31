@@ -22,10 +22,10 @@ class RangeForecastReport extends FlowReport {
     required this.previousRangeData,
     required this.currentRangeData,
   }) {
-    init();
+    _init();
   }
 
-  void init() {
+  void _init() {
     if (previousRangeData.transactions.isEmpty) {
       throw StateError("Previous transactions cannot be empty");
     }

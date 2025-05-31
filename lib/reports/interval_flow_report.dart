@@ -17,21 +17,21 @@ class IntervalFlowReport extends FlowReport {
   final Map<DateTime, SingleCurrencyFlow> data = {};
 
   /// Average of sum by interval, in the primary currency.
-  late Money _averageIncome;
-  late Money _averageExpense;
-  late Money _averageFlow;
+  late double _averageIncome;
+  late double _averageExpense;
+  late double _averageFlow;
 
   /// Average of sum by interval, in the primary currency.
-  late Money _totalIncome;
-  late Money _totalExpense;
-  late Money _totalFlow;
+  late double _totalIncome;
+  late double _totalExpense;
+  late double _totalFlow;
 
-  Money get averageIncome => _averageIncome;
-  Money get averageExpense => _averageExpense;
-  Money get averageFlow => _averageFlow;
-  Money get totalIncome => _totalIncome;
-  Money get totalExpense => _totalExpense;
-  Money get totalFlow => _totalFlow;
+  Money get averageIncome => Money(_averageIncome, primaryCurrency);
+  Money get averageExpense => Money(_averageExpense, primaryCurrency);
+  Money get averageFlow => Money(_averageFlow, primaryCurrency);
+  Money get totalIncome => Money(_totalIncome, primaryCurrency);
+  Money get totalExpense => Money(_totalExpense, primaryCurrency);
+  Money get totalFlow => Money(_totalFlow, primaryCurrency);
 
   bool _showMissingExchangeRatesWarning = false;
 
@@ -41,13 +41,13 @@ class IntervalFlowReport extends FlowReport {
     required super.rates,
     required super.primaryCurrency,
   }) {
-    init();
+    _init();
   }
 
   @override
   bool get showMissingExchangeRatesWarning => _showMissingExchangeRatesWarning;
 
-  void init() {
+  void _init() {
     bool hasNonPrimaryCurrency = false;
 
     for (final Transaction transaction in rangeData.transactions) {
@@ -79,9 +79,9 @@ class IntervalFlowReport extends FlowReport {
       _showMissingExchangeRatesWarning = true;
     }
 
-    _totalIncome = Money(0.0, primaryCurrency);
-    _totalExpense = Money(0.0, primaryCurrency);
-    _totalFlow = Money(0.0, primaryCurrency);
+    _totalIncome = 0.0;
+    _totalExpense = 0.0;
+    _totalFlow = 0.0;
 
     final List<DateTime> sortedKeys = data.keys.toList()
       ..sort((a, b) => a.compareTo(b));
@@ -105,15 +105,15 @@ class IntervalFlowReport extends FlowReport {
       }
 
       if (firstIncomeIndex != null) {
-        _totalIncome += flow.totalIncome;
+        _totalIncome += flow.incomeSum;
       }
 
       if (firstExpenseIndex != null) {
-        _totalExpense += flow.totalExpense;
+        _totalExpense += flow.expenseSum;
       }
 
       if (firstFlowIndex != null) {
-        _totalFlow += flow.totalFlow;
+        _totalFlow += flow.flow;
       }
     }
 
@@ -149,9 +149,9 @@ class IntervalFlowReport extends FlowReport {
       }
     }
 
-    _averageIncome = totalIncome / incomeCount.toDouble();
-    _averageExpense = totalExpense / expenseCount.toDouble();
-    _averageFlow = totalFlow / flowCount.toDouble();
+    _averageIncome = _totalIncome / incomeCount.toDouble();
+    _averageExpense = _totalExpense / expenseCount.toDouble();
+    _averageFlow = _totalFlow / flowCount.toDouble();
 
     // TODO @sadespresso account for insignificant values
   }

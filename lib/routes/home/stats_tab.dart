@@ -288,12 +288,12 @@ class _StatsTabState extends State<StatsTab>
 
       rangeForecastReport =
           (previousRange != null && previousRangeData.transactions.isNotEmpty)
-          ? (RangeForecastReport(
+          ? RangeForecastReport(
               rates: rates,
               primaryCurrency: primaryCurrency,
               previousRangeData: previousRangeData,
               currentRangeData: currentRangeData,
-            )..init())
+            )
           : null;
 
       final Duration interval = RangeData.getOptimalInterval(range);
@@ -303,14 +303,14 @@ class _StatsTabState extends State<StatsTab>
         rangeData: currentRangeData,
         rates: rates,
         primaryCurrency: primaryCurrency,
-      )..init();
+      );
       previousIntervalFlowReport = previousRange != null
-          ? (IntervalFlowReport(
+          ? IntervalFlowReport(
               interval: interval,
               rangeData: previousRangeData,
               rates: rates,
               primaryCurrency: primaryCurrency,
-            )..init())
+            )
           : null;
     } finally {
       busy = false;
