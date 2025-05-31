@@ -582,6 +582,7 @@
   "transactions.query.filter.sort": "Эрэмбэ",
   "transactions.query.filter.timeRange": "Хугацаа",
   "transactions.query.filter.timeRange.all": "Бүх цаг үе",
+  "transactions.query.filter.transactionType": "Төрөл",
   "transactions.query.noResult": "Тохирох гүйлгээнүүд олдсонгүй",
   "transactions.query.noResult.description": "Шүүлтүүрээ өөрчлөөд дахин оролдоно уу",
   "visitGitHubRepo": "GitHub repo-р зочлох"

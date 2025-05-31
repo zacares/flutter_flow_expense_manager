@@ -66,12 +66,11 @@ class _SetupPageState extends State<SetupPage> {
                   radius: 12.0,
                   spacing: 6.0,
                 ),
-                onDotClicked:
-                    (index) => _pageController.animateToPage(
-                      index,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOut,
-                    ),
+                onDotClicked: (index) => _pageController.animateToPage(
+                  index,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOut,
+                ),
               ),
               const Spacer(),
               Button(

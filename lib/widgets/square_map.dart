@@ -27,10 +27,9 @@ class OSMap extends StatelessWidget {
         initialCenter: center,
         initialZoom: 17.0,
         keepAlive: interactable,
-        interactionOptions:
-            interactable
-                ? const InteractionOptions()
-                : InteractionOptions(flags: InteractiveFlag.none),
+        interactionOptions: interactable
+            ? const InteractionOptions()
+            : InteractionOptions(flags: InteractiveFlag.none),
       ),
       children: [
         TileLayer(
@@ -49,9 +48,8 @@ class OSMap extends StatelessWidget {
           attributions: [
             TextSourceAttribution(
               "OpenStreetMap contributors",
-              onTap:
-                  () =>
-                      openUrl(Uri.parse("https://openstreetmap.org/copyright")),
+              onTap: () =>
+                  openUrl(Uri.parse("https://openstreetmap.org/copyright")),
             ),
           ],
           popupBackgroundColor: Color(0xC0FFFFFF),

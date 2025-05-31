@@ -51,8 +51,9 @@ class _TransactionGeoPreferencesPageState
     final bool geoSupported = !Platform.isLinux;
 
     final bool enableGeo = LocalPreferences().enableGeo.get();
-    final bool autoAttachTransactionGeo =
-        LocalPreferences().autoAttachTransactionGeo.get();
+    final bool autoAttachTransactionGeo = LocalPreferences()
+        .autoAttachTransactionGeo
+        .get();
 
     return Scaffold(
       appBar: AppBar(title: Text("preferences.transactions.geo".t(context))),

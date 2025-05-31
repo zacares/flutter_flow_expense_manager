@@ -44,10 +44,9 @@ class _SelectImageFlowIconSheetState extends State<SelectImageFlowIconSheet> {
   @override
   void initState() {
     super.initState();
-    value =
-        widget.initialValue is ImageFlowIcon
-            ? widget.initialValue as ImageFlowIcon
-            : null;
+    value = widget.initialValue is ImageFlowIcon
+        ? widget.initialValue as ImageFlowIcon
+        : null;
 
     if (value != null) {
       final String initialImagePath = value!.imagePath;

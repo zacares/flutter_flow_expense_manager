@@ -14,8 +14,8 @@ class Haptics extends StatefulWidget {
 class _HapticsState extends State<Haptics> {
   @override
   Widget build(BuildContext context) {
-    final bool enableHapticFeedback =
-        LocalPreferences().enableHapticFeedback.get();
+    final bool enableHapticFeedback = LocalPreferences().enableHapticFeedback
+        .get();
 
     return Column(
       mainAxisSize: MainAxisSize.min,

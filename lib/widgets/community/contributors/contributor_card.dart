@@ -33,9 +33,8 @@ class ContributorCard extends StatelessWidget {
                     contributor.avatarUrl,
                     width: 64.0,
                     fit: BoxFit.cover,
-                    loadingBuilder:
-                        (context, child, loadingProgress) =>
-                            loadingProgress == null ? child : Spinner(),
+                    loadingBuilder: (context, child, loadingProgress) =>
+                        loadingProgress == null ? child : Spinner(),
                   ),
                 ),
               ),

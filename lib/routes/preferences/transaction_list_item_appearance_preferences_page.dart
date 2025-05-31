@@ -75,7 +75,8 @@ class _TransactionListItemAppearancePreferencesPageState
                 value: useCategoryNameForUntitledTransactions,
                 onChanged: (bool newValue) {
                   UserPreferencesService()
-                      .useCategoryNameForUntitledTransactions = newValue;
+                          .useCategoryNameForUntitledTransactions =
+                      newValue;
                   setState(() {});
                 },
               ),
@@ -113,7 +114,8 @@ class _TransactionListItemAppearancePreferencesPageState
                         if (!selected) return;
 
                         UserPreferencesService()
-                            .transactionListTileShowAccountForLeading = false;
+                                .transactionListTileShowAccountForLeading =
+                            false;
                         setState(() {});
                       },
                     ),
@@ -128,7 +130,8 @@ class _TransactionListItemAppearancePreferencesPageState
                         if (!selected) return;
 
                         UserPreferencesService()
-                            .transactionListTileShowAccountForLeading = true;
+                                .transactionListTileShowAccountForLeading =
+                            true;
                         setState(() {});
                       },
                     ),

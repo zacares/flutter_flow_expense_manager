@@ -41,11 +41,10 @@ class _YearSelectorSheetState extends State<YearSelectorSheet> {
         alignment: MainAxisAlignment.end,
         children: [
           TextButton(
-            onPressed:
-                () => setState(() {
-                  final DateTime now = DateTime.now();
-                  _yearController.text = now.year.toString();
-                }),
+            onPressed: () => setState(() {
+              final DateTime now = DateTime.now();
+              _yearController.text = now.year.toString();
+            }),
             child: Text("select.time.now".t(context)),
           ),
           Button(onTap: pop, child: Text("general.done".t(context))),

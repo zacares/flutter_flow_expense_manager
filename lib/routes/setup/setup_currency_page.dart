@@ -61,10 +61,9 @@ class _SetupCurrencyPageState extends State<SetupCurrencyPage> {
                 onSubmitted: (_) => save(),
                 decoration: const InputDecoration(border: InputBorder.none),
                 textAlign: TextAlign.center,
-                style:
-                    _currency == null
-                        ? context.textTheme.displaySmall?.semi(context)
-                        : context.textTheme.displaySmall,
+                style: _currency == null
+                    ? context.textTheme.displaySmall?.semi(context)
+                    : context.textTheme.displaySmall,
               ),
               if (error != null) ...[
                 const SizedBox(height: 8.0),

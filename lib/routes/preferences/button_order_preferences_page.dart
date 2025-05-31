@@ -3,7 +3,7 @@ import "dart:developer";
 import "package:dotted_border/dotted_border.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/l10n/extensions.dart";
-import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/widgets/general/info_text.dart";
 import "package:flow/widgets/home/preferences/button_order_preferences/transaction_type_button.dart";
 import "package:flutter/material.dart";
@@ -27,7 +27,8 @@ class ButtonOrderPreferencesPageState
 
   @override
   Widget build(BuildContext context) {
-    final List<TransactionType> transactionButtonOrder = getButtonOrder();
+    final List<TransactionType> transactionButtonOrder =
+        UserPreferencesService().transactionButtonOrder;
 
     return Scaffold(
       appBar: AppBar(
@@ -135,7 +136,7 @@ class ButtonOrderPreferencesPageState
       order[indexA] = b;
       order[indexB] = a;
 
-      await LocalPreferences().transactionButtonOrder.set(order);
+      UserPreferencesService().transactionButtonOrder = order;
     } catch (e) {
       log("An error was occured while swapping transaction button order: $e");
     } finally {
@@ -159,23 +160,10 @@ class ButtonOrderPreferencesPageState
     final TransactionType removed = transactionButtonOrder.removeAt(oldIndex);
     transactionButtonOrder.insert(newIndex, removed);
 
-    await LocalPreferences().transactionButtonOrder.set(transactionButtonOrder);
+    UserPreferencesService().transactionButtonOrder = transactionButtonOrder;
 
     if (mounted) {
       setState(() {});
     }
-  }
-
-  List<TransactionType> getButtonOrder() {
-    final value = LocalPreferences().transactionButtonOrder.get();
-
-    if (value == null || value.length < 3) {
-      // await
-      LocalPreferences().transactionButtonOrder.set(TransactionType.values);
-
-      return TransactionType.values;
-    }
-
-    return value;
   }
 }

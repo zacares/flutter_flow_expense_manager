@@ -51,42 +51,37 @@ class CategoryCard extends StatelessWidget {
         .nonDeleted
         .where((x) => x.transactionDate.isAtSameMonthAs(now));
 
-    final MultiCurrencyFlow flow =
-        MultiCurrencyFlow()..addAll(
-          (excludeTransfersInTotal ? transactions.nonTransfers : transactions)
-              .map((transaction) => transaction.money),
-        );
+    final MultiCurrencyFlow flow = MultiCurrencyFlow()
+      ..addAll(
+        (excludeTransfersInTotal ? transactions.nonTransfers : transactions)
+            .map((transaction) => transaction.money),
+      );
 
     return Surface(
       shape: RoundedRectangleBorder(borderRadius: borderRadius),
-      builder:
-          (context) => InkWell(
-            borderRadius: borderRadius,
-            onTap:
-                onTapOverride == null
-                    ? () => context.push("/category/${category.id}")
-                    : onTapOverride!.value,
-            child: Row(
+      builder: (context) => InkWell(
+        borderRadius: borderRadius,
+        onTap: onTapOverride == null
+            ? () => context.push("/category/${category.id}")
+            : onTapOverride!.value,
+        child: Row(
+          children: [
+            FlowIcon(category.icon, size: 32.0, plated: true),
+            const SizedBox(width: 12.0),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                FlowIcon(category.icon, size: 32.0, plated: true),
-                const SizedBox(width: 12.0),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(category.name, style: context.textTheme.titleSmall),
-                    if (showAmount)
-                      MoneyText(flow.merge(primaryCurrency, rates).totalFlow),
-                  ],
-                ),
-                const Spacer(),
-                if (trailing != null) ...[
-                  trailing!,
-                  const SizedBox(width: 12.0),
-                ],
+                Text(category.name, style: context.textTheme.titleSmall),
+                if (showAmount)
+                  MoneyText(flow.merge(primaryCurrency, rates).totalFlow),
               ],
             ),
-          ),
+            const Spacer(),
+            if (trailing != null) ...[trailing!, const SizedBox(width: 12.0)],
+          ],
+        ),
+      ),
     );
   }
 }

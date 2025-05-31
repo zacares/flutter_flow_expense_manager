@@ -75,17 +75,17 @@ class FlowStandardReport {
       ),
     );
 
-    expenseSum =
-        -Money(
-          currentFlowByDay.values
-              .map((flow) {
-                final int dayOffset =
-                    flow.associatedData!.from.difference(current.from).inDays;
-                return dailyExpenditure[dayOffset] ?? 0;
-              })
-              .fold(0, (a, b) => a + b),
-          primaryCurrency,
-        );
+    expenseSum = -Money(
+      currentFlowByDay.values
+          .map((flow) {
+            final int dayOffset = flow.associatedData!.from
+                .difference(current.from)
+                .inDays;
+            return dailyExpenditure[dayOffset] ?? 0;
+          })
+          .fold(0, (a, b) => a + b),
+      primaryCurrency,
+    );
     incomeSum = currentFlowByDay.values
         .map((flow) => flow.getIncomeByCurrency(primaryCurrency))
         .fold(Money(0, primaryCurrency), (a, b) => a + b);
@@ -147,17 +147,17 @@ class FlowStandardReport {
       ),
     );
 
-    previousExpenseSum =
-        -Money(
-          previousFlowByDay!.values
-              .map((flow) {
-                final int? dayOffset =
-                    flow.associatedData?.from.difference(previous.from).inDays;
-                return previousDailyExpenditure![dayOffset] ?? 0;
-              })
-              .fold(0, (a, b) => a + b),
-          primaryCurrency,
-        );
+    previousExpenseSum = -Money(
+      previousFlowByDay!.values
+          .map((flow) {
+            final int? dayOffset = flow.associatedData?.from
+                .difference(previous.from)
+                .inDays;
+            return previousDailyExpenditure![dayOffset] ?? 0;
+          })
+          .fold(0, (a, b) => a + b),
+      primaryCurrency,
+    );
     previousIncomeSum = previousFlowByDay!.values
         .map((flow) => flow.getIncomeByCurrency(primaryCurrency))
         .fold(Money(0, primaryCurrency), (a, b) => a == null ? b : (a + b));
@@ -174,10 +174,9 @@ class FlowStandardReport {
       }
     }
 
-    final int previousCountableDays =
-        previousDailyExpenditure == null
-            ? 1
-            : math.max(1, previous.duration.inDays - uncountableDays);
+    final int previousCountableDays = previousDailyExpenditure == null
+        ? 1
+        : math.max(1, previous.duration.inDays - uncountableDays);
 
     previousDailyAvgExpenditure =
         previousExpenseSum! / previousCountableDays.toDouble();

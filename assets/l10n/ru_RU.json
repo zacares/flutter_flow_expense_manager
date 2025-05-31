@@ -582,6 +582,7 @@
   "transactions.query.filter.sort": "Сортировать",
   "transactions.query.filter.timeRange": "Диапазон времени",
   "transactions.query.filter.timeRange.all": "За все время",
+  "transactions.query.filter.transactionType": "Тип",
   "transactions.query.noResult": "Нет транзакций для отображения",
   "transactions.query.noResult.description": "Попробуйте обновить фильтры",
   "visitGitHubRepo": "Посетить репозиторий на GitHub"

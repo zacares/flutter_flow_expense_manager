@@ -45,10 +45,9 @@ class InputValue implements Comparable<InputValue> {
 
     final int decimalPart = int.tryParse(rawDecimal) ?? 0;
 
-    final int decimalLeadingZeroesCount =
-        decimalPart == 0
-            ? 0
-            : rawDecimal.length - decimalPart.toString().length;
+    final int decimalLeadingZeroesCount = decimalPart == 0
+        ? 0
+        : rawDecimal.length - decimalPart.toString().length;
 
     return InputValue(
       wholePart: wholePart,
@@ -79,15 +78,14 @@ class InputValue implements Comparable<InputValue> {
     decimalLeadingZeroesCount: decimalLeadingZeroesCount,
   );
 
-  InputValue abs() =>
-      isNegative
-          ? InputValue(
-            wholePart: wholePart,
-            decimalPart: decimalPart,
-            isNegative: false,
-            decimalLeadingZeroesCount: decimalLeadingZeroesCount,
-          )
-          : this;
+  InputValue abs() => isNegative
+      ? InputValue(
+          wholePart: wholePart,
+          decimalPart: decimalPart,
+          isNegative: false,
+          decimalLeadingZeroesCount: decimalLeadingZeroesCount,
+        )
+      : this;
 
   InputValue appendWhole(int n) {
     assert(n >= 0 && n <= 9);
@@ -109,10 +107,9 @@ class InputValue implements Comparable<InputValue> {
       wholePart: wholePart,
       decimalPart: decimalPart * 10 + n,
       isNegative: isNegative,
-      decimalLeadingZeroesCount:
-          zeroOnZero
-              ? decimalLeadingZeroesCount + 1
-              : decimalLeadingZeroesCount,
+      decimalLeadingZeroesCount: zeroOnZero
+          ? decimalLeadingZeroesCount + 1
+          : decimalLeadingZeroesCount,
     );
   }
 
@@ -132,10 +129,9 @@ class InputValue implements Comparable<InputValue> {
       wholePart: wholePart,
       decimalPart: decimalPart ~/ 10,
       isNegative: isNegative,
-      decimalLeadingZeroesCount:
-          decimalPart == 0
-              ? math.max(decimalLeadingZeroesCount - 1, 0)
-              : decimalLeadingZeroesCount,
+      decimalLeadingZeroesCount: decimalPart == 0
+          ? math.max(decimalLeadingZeroesCount - 1, 0)
+          : decimalLeadingZeroesCount,
     );
   }
 

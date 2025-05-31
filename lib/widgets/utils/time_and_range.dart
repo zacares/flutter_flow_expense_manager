@@ -45,25 +45,23 @@ Future<TimeRange?> showTimeRangePickerSheet(
       context,
       initialDate: initialValue is YearTimeRange ? initialValue.from : null,
     ).then((value) => value == null ? null : YearTimeRange.fromDateTime(value)),
-    TimeRangeMode.byMonth when context.mounted => await showMonthPickerSheet(
-      context,
-    ).then(
-      (value) => value == null ? null : MonthTimeRange.fromDateTime(value),
-    ),
-    TimeRangeMode.custom when context.mounted => await showDateRangePicker(
-      context: context,
-      firstDate: DateTime.fromMicrosecondsSinceEpoch(0),
-      lastDate: DateTime(4000),
-      initialDateRange:
-          initialValue is CustomTimeRange
-              ? DateTimeRange(start: initialValue.from, end: initialValue.to)
-              : null,
-    ).then(
-      (value) =>
-          value == null
-              ? null
-              : CustomTimeRange(value.start.startOfDay(), value.end.endOfDay()),
-    ),
+    TimeRangeMode.byMonth when context.mounted =>
+      await showMonthPickerSheet(context).then(
+        (value) => value == null ? null : MonthTimeRange.fromDateTime(value),
+      ),
+    TimeRangeMode.custom when context.mounted =>
+      await showDateRangePicker(
+        context: context,
+        firstDate: DateTime.fromMicrosecondsSinceEpoch(0),
+        lastDate: DateTime(4000),
+        initialDateRange: initialValue is CustomTimeRange
+            ? DateTimeRange(start: initialValue.from, end: initialValue.to)
+            : null,
+      ).then(
+        (value) => value == null
+            ? null
+            : CustomTimeRange(value.start.startOfDay(), value.end.endOfDay()),
+      ),
     _ => null, // context.mounted == true
   };
 }

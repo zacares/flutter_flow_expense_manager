@@ -66,17 +66,16 @@ class ModalSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget? title =
-        this.title == null
-            ? null
-            : DefaultTextStyle(
-              style: context.textTheme.headlineSmall!,
-              textAlign: TextAlign.center,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: this.title!,
-              ),
-            );
+    final Widget? title = this.title == null
+        ? null
+        : DefaultTextStyle(
+            style: context.textTheme.headlineSmall!,
+            textAlign: TextAlign.center,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: this.title!,
+            ),
+          );
 
     return Container(
       padding: MediaQuery.of(context).viewInsets,
@@ -134,8 +133,8 @@ class ModalSheet extends StatelessWidget {
       builder: (context, constraints) {
         final double maxScrollableContentHeight =
             scrollableContentMaxHeight == 0.0
-                ? (MediaQuery.of(context).size.height * 0.5)
-                : scrollableContentMaxHeight;
+            ? (MediaQuery.of(context).size.height * 0.5)
+            : scrollableContentMaxHeight;
 
         return AnimatedContainer(
           constraints: BoxConstraints.loose(

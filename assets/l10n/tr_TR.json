@@ -582,6 +582,7 @@
   "transactions.query.filter.sort": "Sırala",
   "transactions.query.filter.timeRange": "Zaman aralığı",
   "transactions.query.filter.timeRange.all": "Tüm zamanlar",
+  "transactions.query.filter.transactionType": "Tür",
   "transactions.query.noResult": "Gösterilecek işlem yok",
   "transactions.query.noResult.description": "Filtreleri güncellemeyi deneyin",
   "visitGitHubRepo": "GitHub'da depoyu ziyaret edin"

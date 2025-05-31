@@ -582,6 +582,7 @@
   "transactions.query.filter.sort": "ترتيب",
   "transactions.query.filter.timeRange": "النطاق الزمني",
   "transactions.query.filter.timeRange.all": "كل الفترات",
+  "transactions.query.filter.transactionType": "النوع",
   "transactions.query.noResult": "لا توجد معاملات للعرض",
   "transactions.query.noResult.description": "حاول تحديث الفلاتر",
   "visitGitHubRepo": "زيارة المستودع على جيثب"

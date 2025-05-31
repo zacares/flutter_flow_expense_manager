@@ -64,18 +64,16 @@ class _TransactionSearchSheetState extends State<TransactionSearchSheet> {
               child: Wrap(
                 spacing: 8.0,
                 runSpacing: 8.0,
-                children:
-                    TransactionSearchMode.values
-                        .map(
-                          (mode) => ChoiceChip(
-                            label: Text(mode.localizedTextKey.t(context)),
-                            selected: mode == _searchData.mode,
-                            onSelected:
-                                (bool selected) =>
-                                    _updateMode(selected ? mode : null),
-                          ),
-                        )
-                        .toList(),
+                children: TransactionSearchMode.values
+                    .map(
+                      (mode) => ChoiceChip(
+                        label: Text(mode.localizedTextKey.t(context)),
+                        selected: mode == _searchData.mode,
+                        onSelected: (bool selected) =>
+                            _updateMode(selected ? mode : null),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
             const SizedBox(height: 16.0),

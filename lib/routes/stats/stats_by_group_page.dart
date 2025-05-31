@@ -155,10 +155,9 @@ class StatsByGroupPageState extends State<StatsByGroupPage>
     });
 
     try {
-      analytics =
-          widget.byCategory
-              ? await ObjectBox().flowByCategories(range: range)
-              : await ObjectBox().flowByAccounts(range: range);
+      analytics = widget.byCategory
+          ? await ObjectBox().flowByCategories(range: range)
+          : await ObjectBox().flowByAccounts(range: range);
     } finally {
       busy = false;
 
@@ -192,8 +191,8 @@ class StatsByGroupPageState extends State<StatsByGroupPage>
 
     final Map<String, Money> cache = {};
 
-    final List<MapEntry<String, MultiCurrencyFlow<T>>> filtered =
-        raw.entries.where((entry) {
+    final List<MapEntry<String, MultiCurrencyFlow<T>>> filtered = raw.entries
+        .where((entry) {
           final mergedFlow = entry.value.merge(primaryCurrency, rates);
 
           if (type == TransactionType.expense) {
@@ -203,7 +202,8 @@ class StatsByGroupPageState extends State<StatsByGroupPage>
             cache[entry.key] = mergedFlow.totalIncome;
             return mergedFlow.totalIncome.amount > 0.0;
           }
-        }).toList();
+        })
+        .toList();
 
     filtered.sort((a, b) => cache[b.key]!.tryCompareTo(cache[a.key]!));
 

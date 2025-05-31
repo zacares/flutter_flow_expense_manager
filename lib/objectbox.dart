@@ -149,11 +149,10 @@ class ObjectBox {
           const IconFlowIcon(Symbols.request_quote_rounded).toString(),
     );
 
-    final [main, cash, savings] =
-        getAccountPresets("USD").map((e) {
-          e.id = 0;
-          return e;
-        }).toList();
+    final [main, cash, savings] = getAccountPresets("USD").map((e) {
+      e.id = 0;
+      return e;
+    }).toList();
 
     main
       ..updateBalanceAndSave(

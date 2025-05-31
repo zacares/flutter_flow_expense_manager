@@ -44,36 +44,30 @@ class _SyncPreferencesPageState extends State<SyncPreferencesPage> {
                 child: Wrap(
                   spacing: 12.0,
                   runSpacing: 8.0,
-                  children:
-                      options
-                          .map(
-                            (value) => FilterChip(
-                              showCheckmark: false,
-                              key: ValueKey(value),
-                              label: Text(
-                                value == null
-                                    ? "preferences.sync.autoBackup.disabled".t(
-                                      context,
-                                    )
-                                    : Duration(hours: value).toDurationString(
-                                      dropPrefixOrSuffix: true,
-                                      format:
-                                          value >= 24
-                                              ? DurationFormat.dh
-                                              : DurationFormat.hm,
-                                    ),
-                              ),
-                              onSelected:
-                                  (bool selected) =>
-                                      selected
-                                          ? updateAutoBackupIntervalInHours(
-                                            value,
-                                          )
-                                          : null,
-                              selected: value == autobackupIntervalInHours,
-                            ),
-                          )
-                          .toList(),
+                  children: options
+                      .map(
+                        (value) => FilterChip(
+                          showCheckmark: false,
+                          key: ValueKey(value),
+                          label: Text(
+                            value == null
+                                ? "preferences.sync.autoBackup.disabled".t(
+                                    context,
+                                  )
+                                : Duration(hours: value).toDurationString(
+                                    dropPrefixOrSuffix: true,
+                                    format: value >= 24
+                                        ? DurationFormat.dh
+                                        : DurationFormat.hm,
+                                  ),
+                          ),
+                          onSelected: (bool selected) => selected
+                              ? updateAutoBackupIntervalInHours(value)
+                              : null,
+                          selected: value == autobackupIntervalInHours,
+                        ),
+                      )
+                      .toList(),
                 ),
               ),
               const SizedBox(height: 8.0),

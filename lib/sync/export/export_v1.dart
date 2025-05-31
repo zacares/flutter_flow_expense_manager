@@ -24,14 +24,17 @@ Future<String> generateBackupContentV1() async {
   final List<Account> accounts = await ObjectBox().box<Account>().getAllAsync();
   syncLogger.fine("Finished fetching accounts");
 
-  final List<Category> categories =
-      await ObjectBox().box<Category>().getAllAsync();
+  final List<Category> categories = await ObjectBox()
+      .box<Category>()
+      .getAllAsync();
   syncLogger.fine("Finished fetching categories");
 
   final DateTime exportDate = DateTime.now().toUtc();
 
-  final Query<Profile> firstProfileQuery =
-      ObjectBox().box<Profile>().query().build();
+  final Query<Profile> firstProfileQuery = ObjectBox()
+      .box<Profile>()
+      .query()
+      .build();
 
   final String username =
       firstProfileQuery.findFirst()?.name ?? "Default Profile";

@@ -224,13 +224,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   return GroupedTransactionsListView(
                     transactions: transactions,
                     pendingTransactions: pendingTransactions,
-                    headerBuilder:
-                        (pendingGroup, range, transactions) =>
-                            TransactionListDateHeader(
-                              pendingGroup: pendingGroup,
-                              range: range,
-                              transactions: transactions,
-                            ),
+                    headerBuilder: (pendingGroup, range, transactions) =>
+                        TransactionListDateHeader(
+                          pendingGroup: pendingGroup,
+                          range: range,
+                          transactions: transactions,
+                        ),
                     pendingDivider: WavyDivider(),
                     mainHeader: Frame(
                       child: Text(

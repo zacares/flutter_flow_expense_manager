@@ -141,12 +141,11 @@ class _TransactionPageState extends State<TransactionPage> {
     categories = ObjectBox().getCategories();
 
     /// Transaction we're editing.
-    _currentlyEditing =
-        widget.isNewTransaction
-            ? null
-            : TransactionsService()
-                .getOneSync(widget.transactionId)
-                ?.findTransferOriginalOrThis();
+    _currentlyEditing = widget.isNewTransaction
+        ? null
+        : TransactionsService()
+              .getOneSync(widget.transactionId)
+              ?.findTransferOriginalOrThis();
 
     if (!widget.isNewTransaction && _currentlyEditing == null) {
       error = "Transaction with id ${widget.transactionId} was not found";
@@ -165,11 +164,10 @@ class _TransactionPageState extends State<TransactionPage> {
           _currentlyEditing?.type ??
           widget.initialTransactionType ??
           TransactionType.expense;
-      _amount =
-          _currentlyEditing?.isTransfer == true
-              ? _currentlyEditing!.amount.abs()
-              : _currentlyEditing?.amount ??
-                  (_transactionType == TransactionType.expense ? -0 : 0);
+      _amount = _currentlyEditing?.isTransfer == true
+          ? _currentlyEditing!.amount.abs()
+          : _currentlyEditing?.amount ??
+                (_transactionType == TransactionType.expense ? -0 : 0);
       _selectedAccountTransferTo = accounts.firstWhereOrNull(
         (account) =>
             account.uuid ==
@@ -294,38 +292,35 @@ class _TransactionPageState extends State<TransactionPage> {
                       const SizedBox(height: 24.0),
                       // From account
                       Section(
-                        title:
-                            isTransfer
-                                ? "transaction.transfer.from".t(context)
-                                : "account".t(context),
+                        title: isTransfer
+                            ? "transaction.transfer.from".t(context)
+                            : "account".t(context),
                         child: Column(
                           children: [
                             ListTile(
-                              leading:
-                                  _selectedAccount == null
-                                      ? null
-                                      : FlowIcon(
-                                        _selectedAccount!.icon,
-                                        plated: true,
-                                      ),
+                              leading: _selectedAccount == null
+                                  ? null
+                                  : FlowIcon(
+                                      _selectedAccount!.icon,
+                                      plated: true,
+                                    ),
                               title: Text(
                                 _selectedAccount?.name ??
                                     "transaction.edit.selectAccount".t(context),
                               ),
                               subtitle:
                                   (!widget.isNewTransaction &&
-                                          _selectedAccount != null)
-                                      ? MoneyText(
-                                        _selectedAccount!.balanceAt(
-                                          transactionDate,
-                                        ),
-                                      )
-                                      : null,
+                                      _selectedAccount != null)
+                                  ? MoneyText(
+                                      _selectedAccount!.balanceAt(
+                                        transactionDate,
+                                      ),
+                                    )
+                                  : null,
                               onTap: () => selectAccount(),
-                              trailing:
-                                  _selectedAccount == null
-                                      ? const Icon(Symbols.chevron_right)
-                                      : null,
+                              trailing: _selectedAccount == null
+                                  ? const Icon(Symbols.chevron_right)
+                                  : null,
                               focusNode: _selectAccountFocusNode,
                             ),
                           ],
@@ -337,31 +332,29 @@ class _TransactionPageState extends State<TransactionPage> {
                         Section(
                           title: "transaction.transfer.to".t(context),
                           child: ListTile(
-                            leading:
-                                _selectedAccountTransferTo == null
-                                    ? null
-                                    : FlowIcon(
-                                      _selectedAccountTransferTo!.icon,
-                                      plated: true,
-                                    ),
+                            leading: _selectedAccountTransferTo == null
+                                ? null
+                                : FlowIcon(
+                                    _selectedAccountTransferTo!.icon,
+                                    plated: true,
+                                  ),
                             title: Text(
                               _selectedAccountTransferTo?.name ??
                                   "transaction.edit.selectAccount".t(context),
                             ),
                             subtitle:
                                 (!widget.isNewTransaction &&
-                                        _selectedAccountTransferTo != null)
-                                    ? MoneyText(
-                                      _selectedAccountTransferTo!.balanceAt(
-                                        transactionDate,
-                                      ),
-                                    )
-                                    : null,
+                                    _selectedAccountTransferTo != null)
+                                ? MoneyText(
+                                    _selectedAccountTransferTo!.balanceAt(
+                                      transactionDate,
+                                    ),
+                                  )
+                                : null,
                             onTap: () => selectAccountTransferTo(),
-                            trailing:
-                                _selectedAccountTransferTo == null
-                                    ? const Icon(Symbols.chevron_right)
-                                    : null,
+                            trailing: _selectedAccountTransferTo == null
+                                ? const Icon(Symbols.chevron_right)
+                                : null,
                             focusNode: _selectAccountTransferToFocusNode,
                           ),
                         ),
@@ -376,10 +369,9 @@ class _TransactionPageState extends State<TransactionPage> {
                                 "${Money(1.0, _selectedAccount!.currency).formatMoney()} = ${Money(_conversionRate, _selectedAccountTransferTo!.currency).formatMoney()}",
                               ),
                               onTap: () => inputPostConversionAmount(),
-                              trailing:
-                                  _selectedAccountTransferTo == null
-                                      ? DirectionalChevron()
-                                      : null,
+                              trailing: _selectedAccountTransferTo == null
+                                  ? DirectionalChevron()
+                                  : null,
                               focusNode: _selectAccountTransferToFocusNode,
                             ),
                           ),
@@ -390,22 +382,20 @@ class _TransactionPageState extends State<TransactionPage> {
                         Section(
                           title: "category".t(context),
                           child: ListTile(
-                            leading:
-                                _selectedCategory == null
-                                    ? null
-                                    : FlowIcon(
-                                      _selectedCategory!.icon,
-                                      plated: true,
-                                    ),
+                            leading: _selectedCategory == null
+                                ? null
+                                : FlowIcon(
+                                    _selectedCategory!.icon,
+                                    plated: true,
+                                  ),
                             title: Text(
                               _selectedCategory?.name ??
                                   "transaction.edit.selectCategory".t(context),
                             ),
                             onTap: () => selectCategory(),
-                            trailing:
-                                _selectedCategory == null
-                                    ? const Icon(Symbols.chevron_right)
-                                    : null,
+                            trailing: _selectedCategory == null
+                                ? const Icon(Symbols.chevron_right)
+                                : null,
                           ),
                         ),
                       const SizedBox(height: 24.0),
@@ -433,8 +423,9 @@ class _TransactionPageState extends State<TransactionPage> {
                                   Symbols.search_activity_rounded,
                                 ),
                                 value: _isPending,
-                                onChanged:
-                                    pastDuePending ? null : updatePending,
+                                onChanged: pastDuePending
+                                    ? null
+                                    : updatePending,
                               ),
                             ],
                           ),
@@ -445,21 +436,20 @@ class _TransactionPageState extends State<TransactionPage> {
                         title: "transaction.recurring".t(context),
                         child: AnimatedSize(
                           duration: const Duration(milliseconds: 300),
-                          child:
-                              _recurrence != null
-                                  ? SelectRecurrence(
-                                    initialValue: _recurrence,
-                                    onChanged: updateRecurrence,
-                                    startBounds: startBounds,
-                                  )
-                                  : ListTile(
-                                    leading: Icon(Symbols.repeat_rounded),
-                                    title: Text(
-                                      "transaction.recurring.setup".t(context),
-                                    ),
-                                    onTap: _setupRecurring,
-                                    trailing: const DirectionalChevron(),
+                          child: _recurrence != null
+                              ? SelectRecurrence(
+                                  initialValue: _recurrence,
+                                  onChanged: updateRecurrence,
+                                  startBounds: startBounds,
+                                )
+                              : ListTile(
+                                  leading: Icon(Symbols.repeat_rounded),
+                                  title: Text(
+                                    "transaction.recurring.setup".t(context),
                                   ),
+                                  onTap: _setupRecurring,
+                                  trailing: const DirectionalChevron(),
+                                ),
                         ),
                       ),
 
@@ -469,69 +459,66 @@ class _TransactionPageState extends State<TransactionPage> {
                           title: "transaction.location".t(context),
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
-                            child:
-                                _geo == null
-                                    ? Container(
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                          image: AssetImage(
-                                            "assets/images/map_square.png",
-                                          ),
-                                        ),
-                                        shape: BoxShape.rectangle,
-                                        borderRadius: BorderRadius.circular(
-                                          8.0,
+                            child: _geo == null
+                                ? Container(
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                          "assets/images/map_square.png",
                                         ),
                                       ),
-                                      child: AspectRatio(
-                                        aspectRatio: 1.0,
-                                        child: Center(
-                                          child: Button(
-                                            onTap: selectLocation,
-                                            trailing: const Icon(
-                                              Symbols.pin_drop_rounded,
-                                            ),
-                                            child: Text(
-                                              "transaction.location.add".t(
-                                                context,
-                                              ),
-                                            ),
+                                      shape: BoxShape.rectangle,
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    child: AspectRatio(
+                                      aspectRatio: 1.0,
+                                      child: Center(
+                                        child: Button(
+                                          onTap: selectLocation,
+                                          trailing: const Icon(
+                                            Symbols.pin_drop_rounded,
                                           ),
-                                        ),
-                                      ),
-                                    )
-                                    : Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            8.0,
-                                          ),
-                                          child: AspectRatio(
-                                            aspectRatio: 1.0,
-                                            child: OSMap(
-                                              mapController: _mapController,
-                                              interactable: false,
-                                              onTap: (_) => selectLocation(),
-                                              center: LatLng(
-                                                _geo?.latitude ??
-                                                    sukhbaatarSquareCenterLat,
-                                                _geo?.longitude ??
-                                                    sukhbaatarSquareCenterLong,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(height: 8.0),
-                                        InfoText(
                                           child: Text(
-                                            "transaction.location.edit".t(
+                                            "transaction.location.add".t(
                                               context,
                                             ),
                                           ),
                                         ),
-                                      ],
+                                      ),
                                     ),
+                                  )
+                                : Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(
+                                          8.0,
+                                        ),
+                                        child: AspectRatio(
+                                          aspectRatio: 1.0,
+                                          child: OSMap(
+                                            mapController: _mapController,
+                                            interactable: false,
+                                            onTap: (_) => selectLocation(),
+                                            center: LatLng(
+                                              _geo?.latitude ??
+                                                  sukhbaatarSquareCenterLat,
+                                              _geo?.longitude ??
+                                                  sukhbaatarSquareCenterLong,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(height: 8.0),
+                                      InfoText(
+                                        child: Text(
+                                          "transaction.location.edit".t(
+                                            context,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                           ),
                         ),
                       ],
@@ -656,32 +643,31 @@ class _TransactionPageState extends State<TransactionPage> {
 
   void inputAmount() async {
     await TransitiveLocalPreferences().updateTransitiveProperties();
-    final hideCurrencySymbol =
-        !TransitiveLocalPreferences().usesMultipleCurrencies.get();
+    final hideCurrencySymbol = !TransitiveLocalPreferences()
+        .usesMultipleCurrencies
+        .get();
 
     if (!mounted) return;
 
     final double? result = await showModalBottomSheet<double>(
       context: context,
-      builder:
-          (context) => InputAmountSheet(
-            initialAmount: _amount.abs(),
-            currency: _selectedAccount?.currency,
-            hideCurrencySymbol: _selectedAccount == null && hideCurrencySymbol,
-            title: _transactionType.localizedNameContext(context),
-            lockSign: true,
-          ),
+      builder: (context) => InputAmountSheet(
+        initialAmount: _amount.abs(),
+        currency: _selectedAccount?.currency,
+        hideCurrencySymbol: _selectedAccount == null && hideCurrencySymbol,
+        title: _transactionType.localizedNameContext(context),
+        lockSign: true,
+      ),
       isScrollControlled: true,
     );
 
-    final double? resultAmount =
-        result == null
-            ? null
-            : switch (_transactionType) {
-              TransactionType.expense => -result.abs(),
-              TransactionType.income => result.abs(),
-              TransactionType.transfer => result.abs(),
-            };
+    final double? resultAmount = result == null
+        ? null
+        : switch (_transactionType) {
+            TransactionType.expense => -result.abs(),
+            TransactionType.income => result.abs(),
+            TransactionType.transfer => result.abs(),
+          };
 
     setState(() {
       _amount = resultAmount ?? _amount;
@@ -710,17 +696,15 @@ class _TransactionPageState extends State<TransactionPage> {
     // In the currency of [to]
     final double? postConversionAmount = await showModalBottomSheet<double>(
       context: context,
-      builder:
-          (context) => InputAmountSheet(
-            initialAmount: initialAmount,
-            currency: _selectedAccountTransferTo?.currency,
-            overrideDecimalPrecision: 8,
-            hideCurrencySymbol: false,
-            title:
-                "${Money(_amount, _selectedAccount!.currency).formatMoney()} =",
-            lockSign: true,
-            allowNegative: false,
-          ),
+      builder: (context) => InputAmountSheet(
+        initialAmount: initialAmount,
+        currency: _selectedAccountTransferTo?.currency,
+        overrideDecimalPrecision: 8,
+        hideCurrencySymbol: false,
+        title: "${Money(_amount, _selectedAccount!.currency).formatMoney()} =",
+        lockSign: true,
+        allowNegative: false,
+      ),
       isScrollControlled: true,
     );
 
@@ -732,24 +716,21 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void selectAccount() async {
-    final Account? result =
-        accounts.length == 1
-            ? accounts.single
-            : await showModalBottomSheet<Account>(
-              context: context,
-              builder:
-                  (context) => SelectAccountSheet(
-                    accounts: accounts,
-                    currentlySelectedAccountId: _selectedAccount?.id,
-                    titleOverride:
-                        isTransfer
-                            ? "transaction.transfer.from.select".t(context)
-                            : null,
-                    showBalance: true,
-                    showTrailing: widget.isNewTransaction,
-                  ),
-              isScrollControlled: true,
-            );
+    final Account? result = accounts.length == 1
+        ? accounts.single
+        : await showModalBottomSheet<Account>(
+            context: context,
+            builder: (context) => SelectAccountSheet(
+              accounts: accounts,
+              currentlySelectedAccountId: _selectedAccount?.id,
+              titleOverride: isTransfer
+                  ? "transaction.transfer.from.select".t(context)
+                  : null,
+              showBalance: true,
+              showTrailing: widget.isNewTransaction,
+            ),
+            isScrollControlled: true,
+          );
 
     setState(() {
       if (result?.id == _selectedAccountTransferTo?.id) {
@@ -768,25 +749,22 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void selectAccountTransferTo() async {
-    final List<Account> toAccounts =
-        accounts.where((element) {
-          return element.id != _selectedAccount?.id;
-        }).toList();
+    final List<Account> toAccounts = accounts.where((element) {
+      return element.id != _selectedAccount?.id;
+    }).toList();
 
-    final Account? result =
-        toAccounts.length == 1
-            ? toAccounts.single
-            : await showModalBottomSheet<Account>(
-              context: context,
-              builder:
-                  (context) => SelectAccountSheet(
-                    accounts: toAccounts,
-                    currentlySelectedAccountId: _selectedAccountTransferTo?.id,
-                    titleOverride: "transaction.transfer.to.select".t(context),
-                    showBalance: true,
-                  ),
-              isScrollControlled: true,
-            );
+    final Account? result = toAccounts.length == 1
+        ? toAccounts.single
+        : await showModalBottomSheet<Account>(
+            context: context,
+            builder: (context) => SelectAccountSheet(
+              accounts: toAccounts,
+              currentlySelectedAccountId: _selectedAccountTransferTo?.id,
+              titleOverride: "transaction.transfer.to.select".t(context),
+              showBalance: true,
+            ),
+            isScrollControlled: true,
+          );
 
     setState(() {
       _selectedAccountTransferTo = result ?? _selectedAccountTransferTo;
@@ -798,15 +776,14 @@ class _TransactionPageState extends State<TransactionPage> {
         _selectedAccount!.currency != _selectedAccountTransferTo!.currency;
 
     if (crossCurrency && widget.isNewTransaction) {
-      final ExchangeRates? rates =
-          ExchangeRatesService().getPrimaryCurrencyRates();
+      final ExchangeRates? rates = ExchangeRatesService()
+          .getPrimaryCurrencyRates();
 
       if (rates != null) {
-        _conversionRate =
-            Money(
-              1.0,
-              _selectedAccount!.currency,
-            ).convert(_selectedAccountTransferTo!.currency, rates).amount;
+        _conversionRate = Money(
+          1.0,
+          _selectedAccount!.currency,
+        ).convert(_selectedAccountTransferTo!.currency, rates).amount;
       }
     }
 
@@ -822,12 +799,11 @@ class _TransactionPageState extends State<TransactionPage> {
     final Optional<Category>? result =
         await showModalBottomSheet<Optional<Category>>(
           context: context,
-          builder:
-              (context) => SelectCategorySheet(
-                categories: categories,
-                currentlySelectedCategoryId: _selectedCategory?.id,
-                showTrailing: widget.isNewTransaction,
-              ),
+          builder: (context) => SelectCategorySheet(
+            categories: categories,
+            currentlySelectedCategoryId: _selectedCategory?.id,
+            showTrailing: widget.isNewTransaction,
+          ),
           isScrollControlled: true,
         );
 
@@ -891,8 +867,10 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void _postSelectTransactionDate() async {
-    final bool pendingTransactionsRequireConfrimation =
-        LocalPreferences().pendingTransactions.requireConfrimation.get();
+    final bool pendingTransactionsRequireConfrimation = LocalPreferences()
+        .pendingTransactions
+        .requireConfrimation
+        .get();
 
     if (!_isPending && pendingTransactionsRequireConfrimation) {
       _isPending = transactionDate.isFutureAnchored(
@@ -911,11 +889,10 @@ class _TransactionPageState extends State<TransactionPage> {
     final Optional<LatLng>? result =
         await showModalBottomSheet<Optional<LatLng>>(
           context: context,
-          builder:
-              (context) => LocationPickerSheet(
-                latitude: _geo?.latitude,
-                longitude: _geo?.longitude,
-              ),
+          builder: (context) => LocationPickerSheet(
+            latitude: _geo?.latitude,
+            longitude: _geo?.longitude,
+          ),
           isScrollControlled: true,
         );
 
@@ -987,11 +964,10 @@ class _TransactionPageState extends State<TransactionPage> {
       } else {
         mode = await showModalBottomSheet(
           context: context,
-          builder:
-              (context) => SelectRecurringUpdateModeSheet(
-                values: availableModes,
-                title: Text("transaction.recurring.edit".t(context)),
-              ),
+          builder: (context) => SelectRecurringUpdateModeSheet(
+            values: availableModes,
+            title: Text("transaction.recurring.edit".t(context)),
+          ),
           isScrollControlled: true,
         );
       }
@@ -1013,8 +989,9 @@ class _TransactionPageState extends State<TransactionPage> {
           targetAccount: _selectedAccountTransferTo!,
           createdDate: _currentlyEditing.createdDate,
           transactionDate: _transactionDate,
-          extensions:
-              _currentlyEditing.extensions.getOverriden(_geo, Geo.keyName).data,
+          extensions: _currentlyEditing.extensions
+              .getOverriden(_geo, Geo.keyName)
+              .data,
           isPending: _isPending,
           conversionRate: crossCurrencyTransfer ? _conversionRate : null,
           recurrence: _recurrence,
@@ -1067,8 +1044,9 @@ class _TransactionPageState extends State<TransactionPage> {
             identifier: _currentlyEditing,
             recurrence: _recurrence!,
             uuidOverride: recurringTransactionUuid,
-            transferToAccountUuid:
-                isTransfer ? _selectedAccountTransferTo?.uuid : null,
+            transferToAccountUuid: isTransfer
+                ? _selectedAccountTransferTo?.uuid
+                : null,
           );
     }
 
@@ -1144,12 +1122,14 @@ class _TransactionPageState extends State<TransactionPage> {
     if (!_ensureAccountsSelected()) return;
 
     final String trimmedTitle = _titleController.text.trim();
-    final String? formattedTitle =
-        trimmedTitle.isNotEmpty ? trimmedTitle : null;
+    final String? formattedTitle = trimmedTitle.isNotEmpty
+        ? trimmedTitle
+        : null;
 
     final String trimmedDescription = _descriptionController.text.trim();
-    final String? formattedDescription =
-        trimmedDescription.isNotEmpty ? trimmedDescription : null;
+    final String? formattedDescription = trimmedDescription.isNotEmpty
+        ? trimmedDescription
+        : null;
 
     if (_currentlyEditing != null) {
       return _update(
@@ -1199,10 +1179,9 @@ class _TransactionPageState extends State<TransactionPage> {
         return true;
       }
 
-      final bool ammountChanged =
-          isTransfer
-              ? _currentlyEditing.amount.abs() != _amount
-              : _currentlyEditing.amount != _amount;
+      final bool ammountChanged = isTransfer
+          ? _currentlyEditing.amount.abs() != _amount
+          : _currentlyEditing.amount != _amount;
 
       return ammountChanged ||
           _geoHandpicked ||

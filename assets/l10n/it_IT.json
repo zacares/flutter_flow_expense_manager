@@ -582,6 +582,7 @@
   "transactions.query.filter.sort": "Ordina",
   "transactions.query.filter.timeRange": "Periodo",
   "transactions.query.filter.timeRange.all": "Tutto il tempo",
+  "transactions.query.filter.transactionType": "Tipo",
   "transactions.query.noResult": "Nessuna transazione da mostrare",
   "transactions.query.noResult.description": "Prova ad aggiornare i filtri",
   "visitGitHubRepo": "Visita la repo su GitHub"

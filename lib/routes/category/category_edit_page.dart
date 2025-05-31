@@ -49,10 +49,9 @@ class _CategoryEditPageState extends State<CategoryEditPage> {
   void initState() {
     super.initState();
 
-    _currentlyEditing =
-        widget.isNewCategory
-            ? null
-            : ObjectBox().box<Category>().get(widget.categoryId);
+    _currentlyEditing = widget.isNewCategory
+        ? null
+        : ObjectBox().box<Category>().get(widget.categoryId);
 
     if (!widget.isNewCategory && _currentlyEditing == null) {
       error = "Category with id ${widget.categoryId} was not found";
@@ -184,15 +183,14 @@ class _CategoryEditPageState extends State<CategoryEditPage> {
 
     final String trimmed = value!.trim();
 
-    final Query<Category> otherCategoriesWithSameNameQuery =
-        ObjectBox()
-            .box<Category>()
-            .query(
-              Category_.name
-                  .equals(trimmed)
-                  .and(Category_.id.notEquals(_currentlyEditing?.id ?? 0)),
-            )
-            .build();
+    final Query<Category> otherCategoriesWithSameNameQuery = ObjectBox()
+        .box<Category>()
+        .query(
+          Category_.name
+              .equals(trimmed)
+              .and(Category_.id.notEquals(_currentlyEditing?.id ?? 0)),
+        )
+        .build();
 
     final bool isNameUnique = otherCategoriesWithSameNameQuery.count() == 0;
 

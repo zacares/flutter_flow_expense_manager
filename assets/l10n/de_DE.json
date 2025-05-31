@@ -582,6 +582,7 @@
   "transactions.query.filter.sort": "Sortieren",
   "transactions.query.filter.timeRange": "Zeitraum",
   "transactions.query.filter.timeRange.all": "Gesamter Zeitraum",
+  "transactions.query.filter.transactionType": "Transaktionstyp",
   "transactions.query.noResult": "Keine Buchungen zum Anzeigen.",
   "transactions.query.noResult.description": "Versuche, die Filter anzupassen.",
   "visitGitHubRepo": "Repo auf GitHub besuchen"

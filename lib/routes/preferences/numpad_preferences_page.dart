@@ -14,8 +14,8 @@ class NumpadPreferencesPage extends StatefulWidget {
 class _NumpadPreferencesPageState extends State<NumpadPreferencesPage> {
   @override
   Widget build(BuildContext context) {
-    final bool usePhoneNumpadLayout =
-        LocalPreferences().usePhoneNumpadLayout.get();
+    final bool usePhoneNumpadLayout = LocalPreferences().usePhoneNumpadLayout
+        .get();
 
     return Scaffold(
       appBar: AppBar(title: Text("preferences.numpad".t(context))),

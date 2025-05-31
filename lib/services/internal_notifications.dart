@@ -63,8 +63,9 @@ class InternalNotificationsService {
 
     if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
       try {
-        final DateTime? lastRateAppShowedAt =
-            TransitiveLocalPreferences().lastRateAppShowedAt.get();
+        final DateTime? lastRateAppShowedAt = TransitiveLocalPreferences()
+            .lastRateAppShowedAt
+            .get();
 
         if (shouldExecuteScheduledTask(
           Duration(days: 75),
@@ -91,8 +92,9 @@ class InternalNotificationsService {
     }
 
     try {
-      final DateTime? lastStarOnGitHubShowedAt =
-          TransitiveLocalPreferences().lastStarOnGitHubShowedAt.get();
+      final DateTime? lastStarOnGitHubShowedAt = TransitiveLocalPreferences()
+          .lastStarOnGitHubShowedAt
+          .get();
 
       if (shouldExecuteScheduledTask(
         Duration(days: 120),
@@ -117,18 +119,18 @@ class InternalNotificationsService {
     if (UserPreferencesService().enableICloudSync) return;
 
     try {
-      final String? savedPath =
-          TransitiveLocalPreferences().lastSavedAutoBackupPath.get();
+      final String? savedPath = TransitiveLocalPreferences()
+          .lastSavedAutoBackupPath
+          .get();
 
-      final String? lastPath =
-          TransitiveLocalPreferences().lastAutoBackupPath.get();
+      final String? lastPath = TransitiveLocalPreferences().lastAutoBackupPath
+          .get();
 
       if (lastPath != null && lastPath != savedPath) {
-        final Query<BackupEntry> query =
-            ObjectBox()
-                .box<BackupEntry>()
-                .query(BackupEntry_.filePath.equals(lastPath))
-                .build();
+        final Query<BackupEntry> query = ObjectBox()
+            .box<BackupEntry>()
+            .query(BackupEntry_.filePath.equals(lastPath))
+            .build();
 
         final BackupEntry? backupEntry = query.findFirst();
 

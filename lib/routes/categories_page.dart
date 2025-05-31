@@ -50,12 +50,10 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
             final List<Category> categories = snapshot.requireData;
 
-            final bool showPresetsButton =
-                !getCategoryPresets().every(
-                  (preset) => categories.any(
-                    (category) => category.uuid == preset.uuid,
-                  ),
-                );
+            final bool showPresetsButton = !getCategoryPresets().every(
+              (preset) =>
+                  categories.any((category) => category.uuid == preset.uuid),
+            );
 
             return switch (categories.length) {
               0 => const NoCategories(),

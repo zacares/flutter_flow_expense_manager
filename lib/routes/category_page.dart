@@ -59,13 +59,12 @@ class _CategoryPageState extends State<CategoryPage> {
 
   bool busy = false;
 
-  QueryBuilder<Transaction> qb(TimeRange range) =>
-      TransactionFilter(
-        range: TransactionFilterTimeRange.fromTimeRange(range),
-        categories: [category!.uuid],
-        sortBy: TransactionSortField.transactionDate,
-        sortDescending: true,
-      ).queryBuilder();
+  QueryBuilder<Transaction> qb(TimeRange range) => TransactionFilter(
+    range: TransactionFilterTimeRange.fromTimeRange(range),
+    categories: [category!.uuid],
+    sortBy: TransactionSortField.transactionDate,
+    sortDescending: true,
+  ).queryBuilder();
 
   late Category? category;
 
@@ -85,8 +84,8 @@ class _CategoryPageState extends State<CategoryPage> {
 
     final Category category = this.category!;
     final String primaryCurrency = UserPreferencesService().primaryCurrency;
-    final ExchangeRates? rates =
-        ExchangeRatesService().getPrimaryCurrencyRates();
+    final ExchangeRates? rates = ExchangeRatesService()
+        .getPrimaryCurrencyRates();
     final bool showMissingExchangeRatesWarning =
         rates == null &&
         TransitiveLocalPreferences().usesNonPrimaryCurrency.get();
@@ -122,16 +121,14 @@ class _CategoryPageState extends State<CategoryPage> {
                 .toList() ??
             [];
 
-        final int actionNeededCount =
-            pendingTransactions
-                .where((transaction) => transaction.confirmable())
-                .length;
+        final int actionNeededCount = pendingTransactions
+            .where((transaction) => transaction.confirmable())
+            .length;
 
         final Map<TimeRange, List<Transaction>> pendingTransactionsGrouped =
             pendingTransactions.groupByRange(
-              rangeFn:
-                  (transaction) =>
-                      CustomTimeRange(Moment.minValue, Moment.maxValue),
+              rangeFn: (transaction) =>
+                  CustomTimeRange(Moment.minValue, Moment.maxValue),
             );
 
         final MultiCurrencyFlow flow =
@@ -196,13 +193,19 @@ class _CategoryPageState extends State<CategoryPage> {
               true => Padding(
                 padding: headerPaddingOutOfList,
                 child: Column(
-                  children: [header, const Expanded(child: Spinner.center())],
+                  children: [
+                    header,
+                    const Expanded(child: Spinner.center()),
+                  ],
                 ),
               ),
               false when noTransactions => Padding(
                 padding: headerPaddingOutOfList,
                 child: Column(
-                  children: [header, const Expanded(child: NoResult())],
+                  children: [
+                    header,
+                    const Expanded(child: NoResult()),
+                  ],
                 ),
               ),
               _ => GroupedTransactionsListView(
