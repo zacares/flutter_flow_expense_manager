@@ -21,6 +21,9 @@ class IntervalFlowReport extends FlowReport {
   late double _averageExpense;
   late double _averageFlow;
 
+  /// Median of sum by interval, in the primary currency.
+  late double _medianExpense;
+
   /// Average of sum by interval, in the primary currency.
   late double _totalIncome;
   late double _totalExpense;
@@ -32,6 +35,7 @@ class IntervalFlowReport extends FlowReport {
   Money get totalIncome => Money(_totalIncome, primaryCurrency);
   Money get totalExpense => Money(_totalExpense, primaryCurrency);
   Money get totalFlow => Money(_totalFlow, primaryCurrency);
+  Money get medianExpense => Money(_medianExpense, primaryCurrency);
 
   bool _showMissingExchangeRatesWarning = false;
 
@@ -152,6 +156,16 @@ class IntervalFlowReport extends FlowReport {
     _averageIncome = _totalIncome / incomeCount.toDouble();
     _averageExpense = _totalExpense / expenseCount.toDouble();
     _averageFlow = _totalFlow / flowCount.toDouble();
+
+    final List<double> sortedExpenses =
+        data.values.map((flow) => flow.expenseSum).toList()
+          ..sort((a, b) => a.compareTo(b));
+
+    _medianExpense = sortedExpenses.length.isEven
+        ? (sortedExpenses[sortedExpenses.length ~/ 2 - 1] +
+                  sortedExpenses[sortedExpenses.length ~/ 2]) *
+              0.5
+        : sortedExpenses[sortedExpenses.length ~/ 2];
 
     // TODO @sadespresso account for insignificant values
   }
