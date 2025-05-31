@@ -1,10 +1,7 @@
 import "package:auto_size_text/auto_size_text.dart";
-import "package:flow/data/exchange_rates.dart";
 import "package:flow/data/money.dart";
-import "package:flow/data/money_flow.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/l10n/named_enum.dart";
-import "package:flow/objectbox/actions.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/theme.dart";
@@ -14,10 +11,14 @@ import "package:flutter/cupertino.dart";
 import "package:flutter/services.dart";
 
 class FlowCards extends StatefulWidget {
-  final List<Transaction>? transactions;
-  final ExchangeRates? rates;
+  final Money? totalIncome;
+  final Money? totalExpense;
 
-  const FlowCards({super.key, required this.transactions, required this.rates});
+  const FlowCards({
+    super.key,
+    required this.totalExpense,
+    required this.totalIncome,
+  });
 
   @override
   State<FlowCards> createState() => _FlowCardsState();
@@ -54,30 +55,6 @@ class _FlowCardsState extends State<FlowCards> {
 
   @override
   Widget build(BuildContext context) {
-    final MoneyFlow? flow =
-        excludeTransferFromFlow
-            ? widget.transactions?.nonPending.nonTransfers.flow
-            : widget.transactions?.nonPending.flow;
-    final String primaryCurrency = UserPreferencesService().primaryCurrency;
-
-    final Money? totalExpense = switch ((flow, widget.rates)) {
-      (null, _) => null,
-      (MoneyFlow moneyFlow, null) => moneyFlow.getExpenseByCurrency(
-        primaryCurrency,
-      ),
-      (MoneyFlow moneyFlow, ExchangeRates exchangeRates) => moneyFlow
-          .getTotalExpense(exchangeRates, primaryCurrency),
-    };
-
-    final Money? totalIncome = switch ((flow, widget.rates)) {
-      (null, _) => null,
-      (MoneyFlow moneyFlow, null) => moneyFlow.getIncomeByCurrency(
-        primaryCurrency,
-      ),
-      (MoneyFlow moneyFlow, ExchangeRates exchangeRates) => moneyFlow
-          .getTotalIncome(exchangeRates, primaryCurrency),
-    };
-
     return Row(
       key: ValueKey(abbreviate),
       children: [
@@ -88,7 +65,7 @@ class _FlowCardsState extends State<FlowCards> {
               TransactionType.income.icon,
               color: TransactionType.income.color(context),
             ),
-            money: styledMoney(totalIncome, context),
+            money: styledMoney(widget.totalIncome, context),
           ),
         ),
         const SizedBox(width: 16.0),
@@ -99,7 +76,7 @@ class _FlowCardsState extends State<FlowCards> {
               TransactionType.expense.icon,
               color: TransactionType.expense.color(context),
             ),
-            money: styledMoney(totalExpense, context),
+            money: styledMoney(widget.totalExpense, context),
           ),
         ),
       ],
@@ -125,13 +102,13 @@ class _FlowCardsState extends State<FlowCards> {
     setState(() => abbreviate = !abbreviate);
   }
 
-  _updateAbbreviation() {
+  void _updateAbbreviation() {
     abbreviate = !LocalPreferences().preferFullAmounts.get();
 
     if (mounted) setState(() {});
   }
 
-  _updateExcludeTransferFromFlow() {
+  void _updateExcludeTransferFromFlow() {
     excludeTransferFromFlow = UserPreferencesService().excludeTransfersFromFlow;
 
     if (mounted) setState(() {});

@@ -40,26 +40,23 @@ class _FilterPresetListTileState extends State<FilterPresetListTile> {
 
   @override
   Widget build(BuildContext context) {
-    final String? filterSummary =
-        widget.valid ? preset.filter.summary(context) : null;
+    final String? filterSummary = widget.valid
+        ? preset.filter.summary(context)
+        : null;
 
     final Widget listTile = ListTile(
       onTap: widget.onTap,
       title: Text(preset.name),
       enabled: widget.valid,
-      subtitle:
-          widget.valid
-              ? (filterSummary == null ? null : Text(filterSummary))
-              : Text("transactionFilterPreset.invalid".t(context)),
-      trailing:
-          widget.valid
-              ? (widget.isDefault ? Icon(Symbols.star_rounded) : null)
-              : Tooltip(
-                message: "transactionFilterPreset.invalid.description".t(
-                  context,
-                ),
-                child: Icon(Symbols.error_circle_rounded),
-              ),
+      subtitle: widget.valid
+          ? (filterSummary == null ? null : Text(filterSummary))
+          : Text("transactionFilterPreset.invalid".t(context)),
+      trailing: widget.valid
+          ? (widget.isDefault ? Icon(Symbols.star_rounded) : null)
+          : Tooltip(
+              message: "transactionFilterPreset.invalid.description".t(context),
+              child: Icon(Symbols.error_circle_rounded),
+            ),
       selected: widget.selected,
     );
 

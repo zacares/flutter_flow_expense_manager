@@ -55,17 +55,15 @@ class _SetupCategoriesPageState extends State<SetupCategoriesPage> {
 
     existingCategoriesQuery.close();
 
-    presetCategories =
-        getCategoryPresets()
-            .where(
-              (category) =>
-                  !existingCategories.any(
-                    (existingCategory) =>
-                        existingCategory.uuid == category.uuid ||
-                        existingCategory.name == category.name,
-                  ),
-            )
-            .toList();
+    presetCategories = getCategoryPresets()
+        .where(
+          (category) => !existingCategories.any(
+            (existingCategory) =>
+                existingCategory.uuid == category.uuid ||
+                existingCategory.name == category.name,
+          ),
+        )
+        .toList();
 
     if (widget.selectAll) {
       // Select all in upon loading
@@ -86,11 +84,13 @@ class _SetupCategoriesPageState extends State<SetupCategoriesPage> {
             final List<Category> currentCategories =
                 snapshot.data?.find() ?? [];
 
-            final Set<bool> presetSelections =
-                presetCategories.map((preset) => preset.id == 0).toSet();
+            final Set<bool> presetSelections = presetCategories
+                .map((preset) => preset.id == 0)
+                .toSet();
 
-            final bool? presetSelectedAll =
-                presetSelections.length == 1 ? presetSelections.first : null;
+            final bool? presetSelectedAll = presetSelections.length == 1
+                ? presetSelections.first
+                : null;
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
@@ -131,28 +131,24 @@ class _SetupCategoriesPageState extends State<SetupCategoriesPage> {
                     curve: Curves.easeOut,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
-                      children:
-                          presetCategories
-                              .map(
-                                (preset) => LocalHero(
-                                  key: ValueKey(preset.uuid),
-                                  tag: preset.uuid,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                      bottom: 16.0,
-                                    ),
-                                    child: CategoryPresetCard(
-                                      category: preset,
-                                      onSelect:
-                                          (selected) =>
-                                              select(preset.uuid, selected),
-                                      selected: preset.id == 0,
-                                      preexisting: false,
-                                    ),
-                                  ),
+                      children: presetCategories
+                          .map(
+                            (preset) => LocalHero(
+                              key: ValueKey(preset.uuid),
+                              tag: preset.uuid,
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: CategoryPresetCard(
+                                  category: preset,
+                                  onSelect: (selected) =>
+                                      select(preset.uuid, selected),
+                                  selected: preset.id == 0,
+                                  preexisting: false,
                                 ),
-                              )
-                              .toList(),
+                              ),
+                            ),
+                          )
+                          .toList(),
                     ),
                   ),
                   if (currentCategories.isNotEmpty) ...[
@@ -190,14 +186,12 @@ class _SetupCategoriesPageState extends State<SetupCategoriesPage> {
               const Spacer(),
               Button(
                 onTap: busy ? null : save,
-                trailing:
-                    widget.standalone
-                        ? const Icon(Symbols.check_rounded)
-                        : const Icon(Symbols.chevron_right_rounded),
-                child:
-                    widget.standalone
-                        ? Text("general.done".t(context))
-                        : Text("setup.next".t(context)),
+                trailing: widget.standalone
+                    ? const Icon(Symbols.check_rounded)
+                    : const Icon(Symbols.chevron_right_rounded),
+                child: widget.standalone
+                    ? Text("general.done".t(context))
+                    : Text("setup.next".t(context)),
               ),
             ],
           ),
@@ -237,8 +231,9 @@ class _SetupCategoriesPageState extends State<SetupCategoriesPage> {
     });
 
     try {
-      final List<Category> selectedCategories =
-          presetCategories.where((element) => element.id == 0).toList();
+      final List<Category> selectedCategories = presetCategories
+          .where((element) => element.id == 0)
+          .toList();
 
       await ObjectBox().box<Category>().putManyAsync(selectedCategories);
 

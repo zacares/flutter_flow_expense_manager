@@ -10,9 +10,9 @@ import "package:flow/services/exchange_rates.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/helpers.dart";
 import "package:flow/widgets/general/blur_backgorund.dart";
+import "package:flow/widgets/general/directional_chevron.dart";
 import "package:flow/widgets/general/flow_icon.dart";
 import "package:flow/widgets/general/money_text.dart";
-import "package:flow/widgets/general/rtl_flipper.dart";
 import "package:flow/widgets/general/surface.dart";
 import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
@@ -64,52 +64,48 @@ class _MostSpendingCategoryState extends State<MostSpendingCategory> {
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: widget.borderRadius,
-      onTap:
-          (busy || category == null)
-              ? null
-              : (() => context.push(
-                "/category/${category?.id}?range=${Uri.encodeQueryComponent(range.encodeShort())}",
-              )),
+      onTap: (busy || category == null)
+          ? null
+          : (() => context.push(
+              "/category/${category?.id}?range=${Uri.encodeQueryComponent(range.encodeShort())}",
+            )),
       child: BlurBackground(
         blur: busy,
         child: Surface(
           shape: RoundedRectangleBorder(
             borderRadius: widget.borderRadius as BorderRadiusGeometry,
           ),
-          builder:
-              (context) => Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  spacing: 16.0,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+          builder: (context) => Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              spacing: 16.0,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        spacing: 8.0,
                         children: [
-                          Row(
-                            spacing: 8.0,
-                            children: [
-                              FlowIcon(
-                                category?.icon ??
-                                    FlowIconData.icon(Symbols.category_rounded),
-                              ),
-                              Text(
-                                category?.name ?? "category.none".t(context),
-                              ),
-                            ],
+                          FlowIcon(
+                            category?.icon ??
+                                FlowIconData.icon(Symbols.category_rounded),
                           ),
-                          MoneyText(
-                            expense,
-                            autoSize: true,
-                            style: context.textTheme.displaySmall,
-                          ),
+                          Text(category?.name ?? "category.none".t(context)),
                         ],
                       ),
-                    ),
-                    RTLFlipper(child: Icon(Symbols.chevron_right_rounded)),
-                  ],
+                      MoneyText(
+                        expense,
+                        autoSize: true,
+                        style: context.textTheme.displaySmall,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                DirectionalChevron(),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -124,17 +120,16 @@ class _MostSpendingCategoryState extends State<MostSpendingCategory> {
       final FlowAnalytics<Category?> result = await ObjectBox()
           .flowByCategories(range: range);
       final String primaryCurrency = UserPreferencesService().primaryCurrency;
-      final ExchangeRates? rates =
-          ExchangeRatesService().getPrimaryCurrencyRates();
+      final ExchangeRates? rates = ExchangeRatesService()
+          .getPrimaryCurrencyRates();
 
       Money? mostExpense;
       Category? mostExpensedCategory;
 
       for (final flow in result.flow.values) {
-        final Money flowTotalExpense =
-            rates == null
-                ? flow.getExpenseByCurrency(primaryCurrency)
-                : flow.getTotalExpense(rates, primaryCurrency);
+        final Money flowTotalExpense = flow
+            .merge(primaryCurrency, rates)
+            .totalExpense;
 
         if (mostExpense == null ||
             flowTotalExpense.amount.abs() > mostExpense.amount.abs()) {

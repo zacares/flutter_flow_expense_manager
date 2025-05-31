@@ -52,8 +52,9 @@ class ThemeFactory {
       menuAlignment: Alignment.center,
     );
 
-    final Color bottomNavigationBarItemColor =
-        isDark ? colorScheme.onSurface : colorScheme.primary;
+    final Color bottomNavigationBarItemColor = isDark
+        ? colorScheme.onSurface
+        : colorScheme.primary;
 
     final TextTheme textTheme = flowTextTheme.apply(
       fontFamily: fontFamily,
@@ -70,7 +71,7 @@ class ThemeFactory {
       visualDensity: VisualDensity.adaptivePlatformDensity,
       brightness: colorScheme.brightness,
       colorScheme: colorScheme,
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: colorScheme.secondary,
         surfaceTintColor: colorScheme.primary,
       ),
@@ -157,7 +158,7 @@ class ThemeFactory {
         cursorColor: colorScheme.primary,
         selectionHandleColor: colorScheme.primary,
       ),
-      tabBarTheme: TabBarTheme(dividerColor: colorScheme.primary),
+      tabBarTheme: TabBarThemeData(dividerColor: colorScheme.primary),
     );
   }
 

@@ -5,10 +5,11 @@
 ### New features
 
 * Now you can export transactions history in PDF format. Closes [#516](https://github.com/flow-mn/flow/issues/516)
+* Now you can filter transactions by type in the home tab
 
 ### Changes and improvements
 
-* Primary currency now persists with backups.
+* Primary currency, and transaction button orders now persists with backups.
 * Exports now run in a different [Isolate](https://dart.dev/language/isolates)
 
 ## 0.14.3

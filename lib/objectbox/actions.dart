@@ -4,7 +4,7 @@ import "dart:math" as math;
 import "package:flow/data/exchange_rates.dart";
 import "package:flow/data/flow_analytics.dart";
 import "package:flow/data/money.dart";
-import "package:flow/data/money_flow.dart";
+import "package:flow/data/multi_currency_flow.dart";
 import "package:flow/data/prefs/frecency_group.dart";
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
@@ -39,14 +39,13 @@ extension MainActions on ObjectBox {
   Money getPrimaryCurrencyGrandTotal() {
     final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
-    final Query<Account> accountsQuery =
-        box<Account>()
-            .query(
-              Account_.excludeFromTotalBalance
-                  .notEquals(true)
-                  .and(Account_.currency.equals(primaryCurrency)),
-            )
-            .build();
+    final Query<Account> accountsQuery = box<Account>()
+        .query(
+          Account_.excludeFromTotalBalance
+              .notEquals(true)
+              .and(Account_.currency.equals(primaryCurrency)),
+        )
+        .build();
 
     final List<Account> accounts = accountsQuery.find();
 
@@ -82,10 +81,9 @@ extension MainActions on ObjectBox {
           (previousValue, element) => previousValue + element.balance,
         );
 
-    final List<Account> nonPrimaryCurrencyAccounts =
-        accounts
-            .where((account) => account.currency != primaryCurrency)
-            .toList();
+    final List<Account> nonPrimaryCurrencyAccounts = accounts
+        .where((account) => account.currency != primaryCurrency)
+        .toList();
 
     final ExchangeRates? rates = await ExchangeRatesService().tryFetchRates(
       primaryCurrency,
@@ -175,7 +173,10 @@ extension MainActions on ObjectBox {
   }
 
   /// Returns all non-pending transactions in given [range]
-  Future<List<Transaction>> transcationsByRange(TimeRange range) async {
+  Future<List<Transaction>> transcationsByRange(
+    TimeRange range, {
+    bool includeTransfers = true,
+  }) async {
     final TransactionFilter filter = TransactionFilter(
       range: TransactionFilterTimeRange.fromTimeRange(range),
       isPending: false,
@@ -185,15 +186,21 @@ extension MainActions on ObjectBox {
       filter,
     );
 
-    return transactions;
+    if (includeTransfers) {
+      return transactions;
+    }
+
+    return transactions
+        .where((transaction) => !transaction.isTransfer)
+        .toList();
   }
 
-  Future<Map<T, MoneyFlow<K>>> flowBy<T, K>(
+  Future<Map<T, MultiCurrencyFlow<K>>> flowBy<T, K>(
     List<Transaction> transactions,
     T? Function(Transaction t) keyBy,
     K Function(Transaction t)? associateBy,
   ) async {
-    final Map<T, MoneyFlow<K>> flow = {};
+    final Map<T, MultiCurrencyFlow<K>> flow = {};
 
     for (final transaction in transactions) {
       final T? key = keyBy(transaction);
@@ -202,14 +209,14 @@ extension MainActions on ObjectBox {
 
       final K? associatedData = associateBy?.call(transaction);
 
-      flow[key] ??= MoneyFlow<K>(associatedData: associatedData);
+      flow[key] ??= MultiCurrencyFlow<K>(associatedData: associatedData);
       flow[key]!.add(transaction.money);
     }
 
     return flow;
   }
 
-  /// Returns a map of category uuid -> [MoneyFlow]
+  /// Returns a map of category uuid -> [MultiCurrencyFlow]
   Future<FlowAnalytics<Category?>> flowByCategories({
     required TimeRange range,
     bool ignoreTransfers = true,
@@ -225,20 +232,22 @@ extension MainActions on ObjectBox {
     return FlowAnalytics(flow: flow, range: range);
   }
 
-  /// Returns a map of category uuid -> [MoneyFlow]
+  /// Returns a map of category uuid -> [MultiCurrencyFlow]
   Future<FlowAnalytics<Account>> flowByAccounts({
     required TimeRange range,
     bool ignoreTransfers = true,
   }) async {
     final List<Transaction> transactions = await transcationsByRange(range);
 
-    final Map<String, MoneyFlow<Account>> flow = await flowBy(transactions, (
-      t,
-    ) {
-      if (ignoreTransfers && t.isTransfer) return null;
+    final Map<String, MultiCurrencyFlow<Account>> flow = await flowBy(
+      transactions,
+      (t) {
+        if (ignoreTransfers && t.isTransfer) return null;
 
-      return t.account.target?.uuid ?? Namespace.nil.value;
-    }, (t) => t.account.target!);
+        return t.account.target?.uuid ?? Namespace.nil.value;
+      },
+      (t) => t.account.target!,
+    );
 
     assert(
       !flow.containsKey(Namespace.nil.value),
@@ -275,17 +284,16 @@ extension MainActions on ObjectBox {
     final List<Transaction> transactions = await TransactionsService()
         .findMany(filter)
         .then(
-          (value) =>
-              value.where((element) {
-                if (element.title?.trim().isNotEmpty != true) {
-                  return false;
-                }
-                if (type != TransactionType.transfer && element.isTransfer) {
-                  return false;
-                }
+          (value) => value.where((element) {
+            if (element.title?.trim().isNotEmpty != true) {
+              return false;
+            }
+            if (type != TransactionType.transfer && element.isTransfer) {
+              return false;
+            }
 
-                return true;
-              }).toList(),
+            return true;
+          }).toList(),
         )
         .catchError((error, stackTrace) {
           _log.severe(
@@ -296,23 +304,22 @@ extension MainActions on ObjectBox {
           return <Transaction>[];
         });
 
-    final List<RelevanceScoredTitle> relevanceCalculatedList =
-        transactions
-            .map(
-              (e) => (
-                title: e.title,
-                relevancy: e.titleSuggestionScore(
-                  accountId: accountId,
-                  categoryId: categoryId,
-                  transactionType: type,
-                  transactionDate: transactionDate,
-                  amount: amount,
-                  currency: currency,
-                ),
-              ),
-            )
-            .cast<RelevanceScoredTitle>()
-            .toList();
+    final List<RelevanceScoredTitle> relevanceCalculatedList = transactions
+        .map(
+          (e) => (
+            title: e.title,
+            relevancy: e.titleSuggestionScore(
+              accountId: accountId,
+              categoryId: categoryId,
+              transactionType: type,
+              transactionDate: transactionDate,
+              amount: amount,
+              currency: currency,
+            ),
+          ),
+        )
+        .cast<RelevanceScoredTitle>()
+        .toList();
 
     relevanceCalculatedList.sort((a, b) => b.relevancy.compareTo(a.relevancy));
 
@@ -332,11 +339,10 @@ extension MainActions on ObjectBox {
   List<RelevanceScoredTitle> _mergeTitleRelevancy(
     List<RelevanceScoredTitle> scores,
   ) {
-    final List<List<RelevanceScoredTitle>> grouped =
-        scores
-            .groupBy((relevance) => relevance.title.toLowerCase())
-            .values
-            .toList();
+    final List<List<RelevanceScoredTitle>> grouped = scores
+        .groupBy((relevance) => relevance.title.toLowerCase())
+        .values
+        .toList();
 
     return grouped.map((items) {
       final double max = items.map((x) => x.relevancy).reduce(math.max);
@@ -378,14 +384,14 @@ extension TransactionActions on Transaction {
 
     double score = 10.0;
 
-    final String? normalizedTitle =
-        caseSensitive ? title?.trim() : title?.trim().toLowerCase();
+    final String? normalizedTitle = caseSensitive
+        ? title?.trim()
+        : title?.trim().toLowerCase();
 
     if (query?.trim().isNotEmpty == true && normalizedTitle != null) {
-      score +=
-          fuzzyPartial
-              ? partialRatio(query!, normalizedTitle).toDouble()
-              : ratio(query!, normalizedTitle).toDouble();
+      score += fuzzyPartial
+          ? partialRatio(query!, normalizedTitle).toDouble()
+          : ratio(query!, normalizedTitle).toDouble();
     }
 
     final bool amountMatches =
@@ -417,8 +423,9 @@ extension TransactionActions on Transaction {
         multiplier += 3.5;
       }
 
-      final Duration? transactionDateDifference =
-          transactionDate?.difference(this.transactionDate).abs();
+      final Duration? transactionDateDifference = transactionDate
+          ?.difference(this.transactionDate)
+          .abs();
 
       final double recencyScoreMultipler = switch (transactionDateDifference) {
         null => 0,
@@ -448,15 +455,14 @@ extension TransactionActions on Transaction {
 
     if (amount.isNegative) return this;
 
-    final Query<Transaction> query =
-        ObjectBox()
-            .box<Transaction>()
-            .query(
-              Transaction_.uuid.equals(
-                transfer.relatedTransactionUuid ?? Namespace.nil.value,
-              ),
-            )
-            .build();
+    final Query<Transaction> query = ObjectBox()
+        .box<Transaction>()
+        .query(
+          Transaction_.uuid.equals(
+            transfer.relatedTransactionUuid ?? Namespace.nil.value,
+          ),
+        )
+        .build();
 
     try {
       return query.findFirst();
@@ -593,6 +599,34 @@ extension TransactionListActions on Iterable<Transaction> {
   Iterable<Transaction> get nonDeleted =>
       where((transaction) => transaction.isDeleted != true);
 
+  /// Returns null if there are zero or one transaction.
+  ///
+  /// Returns the time range of the transactions;
+  ///
+  /// E.g., If the earliest transaction is 2023-01-01 and the latest is
+  /// 2023-12-31, the range will be 2023-01-01 to 2023-12-31.
+  ///
+  /// Always returns a [CustomTimeRange] object when not null.
+  TimeRange? get range {
+    if (length < 2) {
+      return null;
+    }
+
+    DateTime min = Moment.maxValue;
+    DateTime max = Moment.minValue;
+
+    for (final transaction in this) {
+      min = transaction.transactionDate.isBefore(min)
+          ? transaction.transactionDate
+          : min;
+      max = transaction.transactionDate.isAfter(max)
+          ? transaction.transactionDate
+          : max;
+    }
+
+    return min.rangeTo(max);
+  }
+
   /// Number of transactions that are rendered on the screen
   ///
   /// This depends on [LocalPreferences().combineTransferTransactions]
@@ -621,16 +655,15 @@ extension TransactionListActions on Iterable<Transaction> {
     (value, element) => value + element.money,
   );
 
-  MoneyFlow get flow =>
-      MoneyFlow()..addAll(map((transaction) => transaction.money));
+  MultiCurrencyFlow get flow =>
+      MultiCurrencyFlow()..addAll(map((transaction) => transaction.money));
 
   /// If [mergeFutureTransactions] is set to true, transactions in future
   /// relative to [anchor] will be grouped into the same group
   Map<TimeRange, List<Transaction>> groupByDate({DateTime? anchor}) =>
       groupByRange(
-        rangeFn:
-            (transaction) =>
-                DayTimeRange.fromDateTime(transaction.transactionDate),
+        rangeFn: (transaction) =>
+            DayTimeRange.fromDateTime(transaction.transactionDate),
         anchor: anchor,
       );
 
@@ -793,8 +826,9 @@ extension AccountActions on Account {
 
     transactionDate ??= recurrence?.range.from ?? DateTime.now();
 
-    final String? recurringTransactionUuid =
-        recurrence == null ? null : const Uuid().v4();
+    final String? recurringTransactionUuid = recurrence == null
+        ? null
+        : const Uuid().v4();
 
     Recurring? recurringExtension;
 
@@ -869,8 +903,9 @@ extension AccountActions on Account {
   }) {
     final String uuid = uuidOverride ?? const Uuid().v4();
 
-    final String? recurringTransactionUuid =
-        recurrence == null ? null : const Uuid().v4();
+    final String? recurringTransactionUuid = recurrence == null
+        ? null
+        : const Uuid().v4();
 
     Recurring? recurringExtension;
 
@@ -903,31 +938,30 @@ extension AccountActions on Account {
           ..setCategory(category)
           ..setAccount(this);
 
-    final List<TransactionExtension>? applicableExtensions =
-        extensions
-            ?.map((ext) {
-              _log.fine(
-                "Adding extension to Transaction($uuidOverride): ${ext.runtimeType}(${ext.uuid})",
-              );
-              _log.fine("Checking extension: ${ext.runtimeType}");
+    final List<TransactionExtension>? applicableExtensions = extensions
+        ?.map((ext) {
+          _log.fine(
+            "Adding extension to Transaction($uuidOverride): ${ext.runtimeType}(${ext.uuid})",
+          );
+          _log.fine("Checking extension: ${ext.runtimeType}");
 
-              if (ext.relatedTransactionUuid == null) {
-                return ext..setRelatedTransactionUuid(uuid);
-              }
+          if (ext.relatedTransactionUuid == null) {
+            return ext..setRelatedTransactionUuid(uuid);
+          }
 
-              if (ext.key == Transfer.keyName) {
-                // Transfer extension is handled separately
-                return ext;
-              }
+          if (ext.key == Transfer.keyName) {
+            // Transfer extension is handled separately
+            return ext;
+          }
 
-              if (ext.relatedTransactionUuid == uuid) {
-                return ext;
-              }
+          if (ext.relatedTransactionUuid == uuid) {
+            return ext;
+          }
 
-              return null;
-            })
-            .nonNulls
-            .toList();
+          return null;
+        })
+        .nonNulls
+        .toList();
 
     if (applicableExtensions != null && applicableExtensions.isNotEmpty) {
       value.addExtensions(applicableExtensions);

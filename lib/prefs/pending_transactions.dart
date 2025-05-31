@@ -17,8 +17,9 @@ class PendingTransactionsLocalPreferences {
   }
 
   static const int homeTimeframeDefault = 3;
-  static final int earlyReminderInSecondsDefault =
-      const Duration(days: 1).inSeconds;
+  static final int earlyReminderInSecondsDefault = const Duration(
+    days: 1,
+  ).inSeconds;
 
   late final BoolSettingsEntry requireConfrimation;
 

@@ -172,10 +172,9 @@ class FlowState extends State<Flow> {
 
   late bool _tempLock;
 
-  bool get useDarkTheme =>
-      (_themeMode == ThemeMode.system
-          ? (PlatformDispatcher.instance.platformBrightness == Brightness.dark)
-          : (_themeMode == ThemeMode.dark));
+  bool get useDarkTheme => (_themeMode == ThemeMode.system
+      ? (PlatformDispatcher.instance.platformBrightness == Brightness.dark)
+      : (_themeMode == ThemeMode.dark));
 
   @override
   void initState() {
@@ -257,10 +256,9 @@ class FlowState extends State<Flow> {
         return AccountsProviderScope(
           child: CategoriesProviderScope(
             child: GestureDetector(
-              behavior:
-                  _tempLock
-                      ? HitTestBehavior.opaque
-                      : HitTestBehavior.deferToChild,
+              behavior: _tempLock
+                  ? HitTestBehavior.opaque
+                  : HitTestBehavior.deferToChild,
               onTap: _tryUnlockTempLock,
               child: IgnorePointer(
                 ignoring: _tempLock,
@@ -308,16 +306,14 @@ class FlowState extends State<Flow> {
     final List<Locale> systemLocales =
         WidgetsBinding.instance.platformDispatcher.locales;
 
-    final List<Locale> favorableLocales =
-        systemLocales
-            .where(
-              (locale) => FlowLocalizations.supportedLocales.any(
-                (flowSupportedLocalization) =>
-                    flowSupportedLocalization.languageCode ==
-                    locale.languageCode,
-              ),
-            )
-            .toList();
+    final List<Locale> favorableLocales = systemLocales
+        .where(
+          (locale) => FlowLocalizations.supportedLocales.any(
+            (flowSupportedLocalization) =>
+                flowSupportedLocalization.languageCode == locale.languageCode,
+          ),
+        )
+        .toList();
 
     final Locale overriddenLocale =
         LocalPreferences().localeOverride.value ??
@@ -406,6 +402,7 @@ void initializeFileLogger() async {
           logsDir,
           flowDebugMode ? "flow_debug.log" : "flow.log",
         ),
+        rotateAtSizeBytes: 2 * 1024 * 1024,
         keepRotateCount: 5,
       )..attachToLogger(Logger.root);
     } catch (e) {

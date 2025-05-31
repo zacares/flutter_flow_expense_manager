@@ -57,12 +57,13 @@ class _AmountTextState extends State<AmountText>
   void initState() {
     super.initState();
 
-    _amountTextAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 60),
-    )..addListener(() {
-      setState(() {});
-    });
+    _amountTextAnimationController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 60),
+        )..addListener(() {
+          setState(() {});
+        });
 
     _amountTextScaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
       CurvedAnimation(
@@ -124,16 +125,14 @@ class _AmountTextState extends State<AmountText>
     final String currency =
         widget.currency ?? UserPreferencesService().primaryCurrency;
 
-    final String formatted = Money(
-      currentValue.currentAmount,
-      currency,
-    ).formatMoney(
-      decimalDigits: math.max(
-        currentValue.decimalLength,
-        _inputtingDecimal ? 1 : 0,
-      ),
-      includeCurrency: !widget.hideCurrencySymbol,
-    );
+    final String formatted = Money(currentValue.currentAmount, currency)
+        .formatMoney(
+          decimalDigits: math.max(
+            currentValue.decimalLength,
+            _inputtingDecimal ? 1 : 0,
+          ),
+          includeCurrency: !widget.hideCurrencySymbol,
+        );
 
     if (currentValue.decimalLength == 0) {
       final String decimalSeparator = getDecimalSeparatorForCurrency(

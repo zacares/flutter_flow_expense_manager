@@ -56,8 +56,8 @@ class _SelectFlowIconSheetState extends State<SelectFlowIconSheet>
   void _selectIcon() async {
     final FlowIconData? result = await showModalBottomSheet<IconFlowIcon>(
       context: context,
-      builder:
-          (context) => SelectIconFlowIconSheet(initialValue: widget.current),
+      builder: (context) =>
+          SelectIconFlowIconSheet(initialValue: widget.current),
       isScrollControlled: true,
     );
 
@@ -69,11 +69,10 @@ class _SelectFlowIconSheetState extends State<SelectFlowIconSheet>
   void _selectEmoji() async {
     final FlowIconData? result = await showModalBottomSheet<CharacterFlowIcon>(
       context: context,
-      builder:
-          (context) => SelectCharFlowIconSheet(
-            iconSize: widget.iconSize,
-            initialValue: widget.current,
-          ),
+      builder: (context) => SelectCharFlowIconSheet(
+        iconSize: widget.iconSize,
+        initialValue: widget.current,
+      ),
       isScrollControlled: true,
     );
 
@@ -85,11 +84,10 @@ class _SelectFlowIconSheetState extends State<SelectFlowIconSheet>
   void _selectImage() async {
     final FlowIconData? result = await showModalBottomSheet<ImageFlowIcon>(
       context: context,
-      builder:
-          (context) => SelectImageFlowIconSheet(
-            iconSize: widget.iconSize,
-            initialValue: widget.current,
-          ),
+      builder: (context) => SelectImageFlowIconSheet(
+        iconSize: widget.iconSize,
+        initialValue: widget.current,
+      ),
     );
 
     if (mounted) {

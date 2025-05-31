@@ -51,38 +51,37 @@ class DescriptionSection extends StatelessWidget {
           ),
         ],
       ),
-      child:
-          noContent
-              ? ListTile(
-                onTap: () => showEditModal(context),
-                title: Text("transaction.description.add".t(context)),
-                leading: Icon(Symbols.add_notes_rounded),
-                trailing: const DirectionalChevron(),
-              )
-              : Stack(
-                children: [
-                  MarkdownView(
-                    controller: controller,
-                    onChanged: onChanged,
-                    focusNode: focusNode,
-                    allowTogglingCheckboxes: true,
-                  ),
-                  Positioned.directional(
-                    end: 24.0,
-                    top: 8.0,
-                    textDirection: textDirection,
-                    child: IconButton(
-                      isSelected: true,
-                      icon: Icon(
-                        Symbols.edit_rounded,
-                        textDirection: textDirection,
-                      ),
-                      onPressed: () => showEditModal(context),
-                      tooltip: "general.edit".t(context),
+      child: noContent
+          ? ListTile(
+              onTap: () => showEditModal(context),
+              title: Text("transaction.description.add".t(context)),
+              leading: Icon(Symbols.add_notes_rounded),
+              trailing: const DirectionalChevron(),
+            )
+          : Stack(
+              children: [
+                MarkdownView(
+                  controller: controller,
+                  onChanged: onChanged,
+                  focusNode: focusNode,
+                  allowTogglingCheckboxes: true,
+                ),
+                Positioned.directional(
+                  end: 24.0,
+                  top: 8.0,
+                  textDirection: textDirection,
+                  child: IconButton(
+                    isSelected: true,
+                    icon: Icon(
+                      Symbols.edit_rounded,
+                      textDirection: textDirection,
                     ),
+                    onPressed: () => showEditModal(context),
+                    tooltip: "general.edit".t(context),
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
     );
   }
 

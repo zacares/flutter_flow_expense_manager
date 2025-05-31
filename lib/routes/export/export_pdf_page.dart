@@ -155,11 +155,10 @@ class _ExportPdfPageState extends State<ExportPdfPage> {
   void _selectAccounts() async {
     final List<Account>? selected = await showModalBottomSheet(
       context: context,
-      builder:
-          (context) => SelectMultiAccountSheet(
-            accounts: _accounts,
-            selectedUuids: _selectedAccounts.toList(),
-          ),
+      builder: (context) => SelectMultiAccountSheet(
+        accounts: _accounts,
+        selectedUuids: _selectedAccounts.toList(),
+      ),
       isScrollControlled: true,
     );
 
@@ -184,19 +183,15 @@ class _ExportPdfPageState extends State<ExportPdfPage> {
   void _selectPaperSize() async {
     final bool? useA4 = await showModalBottomSheet(
       context: context,
-      builder:
-          (context) => ModalSheet.scrollable(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(title: Text("A4"), onTap: () => context.pop(true)),
-                ListTile(
-                  title: Text("Letter"),
-                  onTap: () => context.pop(false),
-                ),
-              ],
-            ),
-          ),
+      builder: (context) => ModalSheet.scrollable(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(title: Text("A4"), onTap: () => context.pop(true)),
+            ListTile(title: Text("Letter"), onTap: () => context.pop(false)),
+          ],
+        ),
+      ),
       isScrollControlled: true,
     );
 
@@ -221,10 +216,9 @@ class _ExportPdfPageState extends State<ExportPdfPage> {
       "/export/pdf",
       extra: ExportPdfOptions(
         timeRange: _range,
-        whitelistedAccounts:
-            _accounts
-                .where((account) => _selectedAccounts.contains(account.uuid))
-                .toList(),
+        whitelistedAccounts: _accounts
+            .where((account) => _selectedAccounts.contains(account.uuid))
+            .toList(),
         useA4: _useA4,
       ),
     );

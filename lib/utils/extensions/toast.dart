@@ -10,8 +10,8 @@ extension ToastHelper on BuildContext {
   ToastificationItem showErrorToast({required dynamic error, Widget? icon}) =>
       showToast(
         text: switch (error) {
-          LocalizedException localizedException => localizedException
-              .localizedString(this),
+          LocalizedException localizedException =>
+            localizedException.localizedString(this),
           String errorText => errorText,
           _ => error.toString(),
         },

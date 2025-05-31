@@ -186,8 +186,9 @@ class TransitiveLocalPreferences {
   }
 
   Future<void> _reevaluateCategoryFrecency() async {
-    final List<Category> categories =
-        await ObjectBox().box<Category>().getAllAsync();
+    final List<Category> categories = await ObjectBox()
+        .box<Category>()
+        .getAllAsync();
 
     if (categories.isEmpty) {
       return;

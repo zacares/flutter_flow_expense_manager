@@ -105,13 +105,13 @@ class _MoneyTextBuilderState extends State<MoneyTextBuilder> {
     return widget.builder!(context, text, widget.money);
   }
 
-  _privacyModeUpdate() {
+  void _privacyModeUpdate() {
     globalPrivacyMode = TransitiveLocalPreferences().sessionPrivacyMode.get();
     if (!mounted) return;
     setState(() {});
   }
 
-  _useCurrencySymbolUpdate() {
+  void _useCurrencySymbolUpdate() {
     globalUseCurrencySymbol = LocalPreferences().useCurrencySymbol.get();
     if (!mounted) return;
     setState(() {});

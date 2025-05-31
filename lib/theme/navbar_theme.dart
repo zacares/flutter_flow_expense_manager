@@ -48,20 +48,21 @@ class NavbarTheme extends ThemeExtension<NavbarTheme> {
     return NavbarTheme(
       backgroundColor: Color.lerp(backgroundColor, other.backgroundColor, t)!,
       activeIconColor: Color.lerp(activeIconColor, other.activeIconColor, t)!,
-      inactiveIconOpacity:
-          lerpDouble(inactiveIconOpacity, other.inactiveIconOpacity, t)!,
-      transactionButtonBackgroundColor:
-          Color.lerp(
-            transactionButtonBackgroundColor,
-            other.transactionButtonBackgroundColor,
-            t,
-          )!,
-      transactionButtonForegroundColor:
-          Color.lerp(
-            transactionButtonForegroundColor,
-            other.transactionButtonForegroundColor,
-            t,
-          )!,
+      inactiveIconOpacity: lerpDouble(
+        inactiveIconOpacity,
+        other.inactiveIconOpacity,
+        t,
+      )!,
+      transactionButtonBackgroundColor: Color.lerp(
+        transactionButtonBackgroundColor,
+        other.transactionButtonBackgroundColor,
+        t,
+      )!,
+      transactionButtonForegroundColor: Color.lerp(
+        transactionButtonForegroundColor,
+        other.transactionButtonForegroundColor,
+        t,
+      )!,
     );
   }
 }

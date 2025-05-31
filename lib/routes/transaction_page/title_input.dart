@@ -46,13 +46,12 @@ class TitleInput extends StatelessWidget {
         itemBuilder: (context, value) => ListTile(title: Text(value.title)),
         // TODO fix loading indicator appearing everytime i type
         debounceDuration: const Duration(milliseconds: 180),
-        decorationBuilder:
-            (context, child) => Material(
-              clipBehavior: Clip.hardEdge,
-              elevation: 1.0,
-              borderRadius: BorderRadius.circular(16.0),
-              child: child,
-            ),
+        decorationBuilder: (context, child) => Material(
+          clipBehavior: Clip.hardEdge,
+          elevation: 1.0,
+          borderRadius: BorderRadius.circular(16.0),
+          child: child,
+        ),
         onSelected: (option) => controller.text = option.title,
         suggestionsCallback: (query) => getAutocompleteOptions(query),
         builder: (context, controller, focusNode) {
@@ -91,11 +90,8 @@ class TitleInput extends StatelessWidget {
             limit: 5,
           )
           .then(
-            (results) =>
-                results
-                    .where(
-                      (item) => item.title != "transaction.fallbackTitle".tr(),
-                    )
-                    .toList(),
+            (results) => results
+                .where((item) => item.title != "transaction.fallbackTitle".tr())
+                .toList(),
           );
 }

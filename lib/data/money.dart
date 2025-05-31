@@ -175,13 +175,12 @@ class Money {
       );
     }
 
-    final String? symbol =
-        useCurrencySymbol
-            ? NumberFormat.simpleCurrency(
-              locale: Intl.defaultLocale,
-              name: currencyToFormat,
-            ).currencySymbol
-            : null;
+    final String? symbol = useCurrencySymbol
+        ? NumberFormat.simpleCurrency(
+            locale: Intl.defaultLocale,
+            name: currencyToFormat,
+          ).currencySymbol
+        : null;
 
     if (compact) {
       return NumberFormat.compactCurrency(
