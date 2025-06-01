@@ -62,6 +62,10 @@ class RangeForecastReport extends FlowReport {
       _showMissingExchangeRatesWarning = true;
     }
 
+    if (currentSpannedRange == null) {
+      return;
+    }
+
     final SingleCurrencyFlow previousMergedFlow = previousRangeData
         .multiCurrencyFlow
         .merge(primaryCurrency, rates);
@@ -73,7 +77,7 @@ class RangeForecastReport extends FlowReport {
         (previousMergedFlow.totalExpense.amount +
             currentMergedFlow.totalExpense.amount) /
         (previousRangeData.range.duration.inSeconds +
-            currentSpannedRange!.duration.inSeconds);
+            currentSpannedRange.duration.inSeconds);
     final double previousIncomePerSecond =
         (previousMergedFlow.totalIncome.amount +
             currentMergedFlow.totalIncome.amount) /

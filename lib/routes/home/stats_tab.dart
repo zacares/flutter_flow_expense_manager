@@ -188,10 +188,11 @@ class _StatsTabState extends State<StatsTab>
                                             "tabs.stats.intervalReport.averages.expense"
                                                 .t(context),
                                         autoSizeGroup: autoSizeGroup,
-                                        money: intervalFlowReport!.totalExpense,
+                                        money:
+                                            intervalFlowReport!.averageExpense,
                                         previousMoney:
                                             previousIntervalFlowReport
-                                                ?.totalExpense,
+                                                ?.averageExpense,
                                         invertDelta: true,
                                       ),
                                     ),
@@ -201,10 +202,11 @@ class _StatsTabState extends State<StatsTab>
                                             "tabs.stats.intervalReport.averages.income"
                                                 .t(context),
                                         autoSizeGroup: autoSizeGroup,
-                                        money: intervalFlowReport!.totalIncome,
+                                        money:
+                                            intervalFlowReport!.averageIncome,
                                         previousMoney:
                                             previousIntervalFlowReport
-                                                ?.totalIncome,
+                                                ?.averageIncome,
                                       ),
                                     ),
                                   ],
@@ -215,9 +217,9 @@ class _StatsTabState extends State<StatsTab>
                                       "tabs.stats.intervalReport.averages.flow"
                                           .t(context),
                                   autoSizeGroup: autoSizeGroup,
-                                  money: intervalFlowReport!.totalFlow,
+                                  money: intervalFlowReport!.averageFlow,
                                   previousMoney:
-                                      previousIntervalFlowReport?.totalFlow,
+                                      previousIntervalFlowReport?.averageFlow,
                                 ),
                               ],
                             ),
