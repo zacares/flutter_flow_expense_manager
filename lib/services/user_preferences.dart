@@ -3,6 +3,7 @@ import "dart:math";
 import "package:flow/data/currencies.dart";
 import "package:flow/data/flow_notification_payload.dart";
 import "package:flow/entity/account.dart";
+import "package:flow/entity/transaction/type.dart";
 import "package:flow/entity/transaction_filter_preset.dart";
 import "package:flow/entity/user_preferences.dart";
 import "package:flow/objectbox.dart";
@@ -108,12 +109,11 @@ class UserPreferencesService {
     late final String? firstAccountCurency;
 
     try {
-      final Query<Account> firstAccountQuery =
-          ObjectBox()
-              .box<Account>()
-              .query()
-              .order(Account_.createdDate)
-              .build();
+      final Query<Account> firstAccountQuery = ObjectBox()
+          .box<Account>()
+          .query()
+          .order(Account_.createdDate)
+          .build();
 
       firstAccountCurency = firstAccountQuery.findFirst()?.currency;
 
@@ -153,6 +153,13 @@ class UserPreferencesService {
     ObjectBox().box<UserPreferences>().put(value);
   }
 
+  List<TransactionType> get transactionButtonOrder =>
+      value.transactionButtonOrder;
+  set transactionButtonOrder(List<TransactionType> order) {
+    value.transactionButtonOrder = order;
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
   Duration? get remindDailyAt => value.remindDailyAt;
   set remindDailyAt(Duration? duration) {
     value.remindDailyAt = duration?.abs();
@@ -171,13 +178,10 @@ class UserPreferencesService {
       return null;
     }
 
-    final Query<TransactionFilterPreset> query =
-        ObjectBox()
-            .box<TransactionFilterPreset>()
-            .query(
-              TransactionFilterPreset_.uuid.equals(defaultFilterPresetUuid!),
-            )
-            .build();
+    final Query<TransactionFilterPreset> query = ObjectBox()
+        .box<TransactionFilterPreset>()
+        .query(TransactionFilterPreset_.uuid.equals(defaultFilterPresetUuid!))
+        .build();
 
     final TransactionFilterPreset? preset = query.findFirst();
 

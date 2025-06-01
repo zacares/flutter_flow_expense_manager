@@ -17,27 +17,26 @@ class AddCategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Surface(
       shape: RoundedRectangleBorder(borderRadius: borderRadius),
-      builder:
-          (context) => InkWell(
-            borderRadius: borderRadius,
-            onTap: onTapOverride ?? (() => context.push("/category/new")),
-            child: Row(
-              children: [
-                FlowIcon(
-                  FlowIconData.icon(Symbols.add_rounded),
-                  size: 32.0,
-                  plated: true,
-                ),
-                const SizedBox(width: 12.0),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [Text("category.new".t(context))],
-                ),
-                const Spacer(),
-              ],
+      builder: (context) => InkWell(
+        borderRadius: borderRadius,
+        onTap: onTapOverride ?? (() => context.push("/category/new")),
+        child: Row(
+          children: [
+            FlowIcon(
+              FlowIconData.icon(Symbols.add_rounded),
+              size: 32.0,
+              plated: true,
             ),
-          ),
+            const SizedBox(width: 12.0),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [Text("category.new".t(context))],
+            ),
+            const Spacer(),
+          ],
+        ),
+      ),
     );
   }
 }

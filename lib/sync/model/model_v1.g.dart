@@ -11,18 +11,15 @@ SyncModelV1 _$SyncModelV1FromJson(Map<String, dynamic> json) => SyncModelV1(
   exportDate: DateTime.parse(json['exportDate'] as String),
   username: json['username'] as String,
   appVersion: json['appVersion'] as String,
-  transactions:
-      (json['transactions'] as List<dynamic>)
-          .map((e) => Transaction.fromJson(e as Map<String, dynamic>))
-          .toList(),
-  accounts:
-      (json['accounts'] as List<dynamic>)
-          .map((e) => Account.fromJson(e as Map<String, dynamic>))
-          .toList(),
-  categories:
-      (json['categories'] as List<dynamic>)
-          .map((e) => Category.fromJson(e as Map<String, dynamic>))
-          .toList(),
+  transactions: (json['transactions'] as List<dynamic>)
+      .map((e) => Transaction.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  accounts: (json['accounts'] as List<dynamic>)
+      .map((e) => Account.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  categories: (json['categories'] as List<dynamic>)
+      .map((e) => Category.fromJson(e as Map<String, dynamic>))
+      .toList(),
 );
 
 Map<String, dynamic> _$SyncModelV1ToJson(SyncModelV1 instance) =>

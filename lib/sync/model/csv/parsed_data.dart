@@ -43,15 +43,14 @@ class CSVParsedData {
       );
     }
 
-    transactions =
-        data
-            .sublist(1)
-            .indexed
-            .map(
-              (row) =>
-                  CSVParsedTransaction.parse(row.$2, orderedParserList, row.$1),
-            )
-            .toList();
+    transactions = data
+        .sublist(1)
+        .indexed
+        .map(
+          (row) =>
+              CSVParsedTransaction.parse(row.$2, orderedParserList, row.$1),
+        )
+        .toList();
   }
 
   /// This methods recognizes the promised format headers, and prepares parsers

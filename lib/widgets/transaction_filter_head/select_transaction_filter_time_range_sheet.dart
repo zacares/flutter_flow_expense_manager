@@ -23,49 +23,45 @@ Future<TransactionFilterTimeRange?> showTransactionFilterTimeRangeSelectorSheet(
     TimeRangeMode.thisMonth => TransactionFilterTimeRange.thisMonth,
     TimeRangeMode.thisYear => TransactionFilterTimeRange.thisYear,
     TimeRangeMode.allTime => TransactionFilterTimeRange.allTime,
-    TimeRangeMode.byYear when context.mounted => await showYearPickerSheet(
-      context,
-      initialDate:
-          initialValue?.range is YearTimeRange
-              ? initialValue!.range!.from
-              : null,
-    ).then(
-      (value) =>
-          value == null
-              ? null
-              : TransactionFilterTimeRange.fromTimeRange(
+    TimeRangeMode.byYear when context.mounted =>
+      await showYearPickerSheet(
+        context,
+        initialDate: initialValue?.range is YearTimeRange
+            ? initialValue!.range!.from
+            : null,
+      ).then(
+        (value) => value == null
+            ? null
+            : TransactionFilterTimeRange.fromTimeRange(
                 YearTimeRange.fromDateTime(value),
               ),
-    ),
-    TimeRangeMode.byMonth when context.mounted => await showMonthPickerSheet(
-      context,
-    ).then(
-      (value) =>
-          value == null
-              ? null
-              : TransactionFilterTimeRange.fromTimeRange(
+      ),
+    TimeRangeMode.byMonth when context.mounted =>
+      await showMonthPickerSheet(context).then(
+        (value) => value == null
+            ? null
+            : TransactionFilterTimeRange.fromTimeRange(
                 MonthTimeRange.fromDateTime(value),
               ),
-    ),
-    TimeRangeMode.custom when context.mounted => await showDateRangePicker(
-      context: context,
-      firstDate: DateTime.fromMicrosecondsSinceEpoch(0),
-      lastDate: DateTime(4000),
-      initialDateRange:
-          initialValue?.range is CustomTimeRange
-              ? DateTimeRange(
+      ),
+    TimeRangeMode.custom when context.mounted =>
+      await showDateRangePicker(
+        context: context,
+        firstDate: DateTime.fromMicrosecondsSinceEpoch(0),
+        lastDate: DateTime(4000),
+        initialDateRange: initialValue?.range is CustomTimeRange
+            ? DateTimeRange(
                 start: initialValue!.range!.from,
                 end: initialValue.range!.to,
               )
-              : null,
-    ).then(
-      (value) =>
-          value == null
-              ? null
-              : TransactionFilterTimeRange.fromTimeRange(
+            : null,
+      ).then(
+        (value) => value == null
+            ? null
+            : TransactionFilterTimeRange.fromTimeRange(
                 CustomTimeRange(value.start.startOfDay(), value.end.endOfDay()),
               ),
-    ),
+      ),
     _ => null, // context.mounted == true
   };
 }

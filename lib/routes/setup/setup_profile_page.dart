@@ -151,8 +151,10 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
   }
 
   void _updateProfile() {
-    final Query<Profile> profileQuery =
-        ObjectBox().box<Profile>().query().build();
+    final Query<Profile> profileQuery = ObjectBox()
+        .box<Profile>()
+        .query()
+        .build();
 
     _currentlyEditing = profileQuery.findFirst();
 

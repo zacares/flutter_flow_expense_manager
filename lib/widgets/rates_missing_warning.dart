@@ -49,11 +49,11 @@ class _RatesMissingWarningState extends State<RatesMissingWarning> {
             busy
                 ? SizedBox(width: 24.0, height: 24.0, child: Spinner())
                 : Icon(
-                  Symbols.refresh_rounded,
-                  fill: 0,
-                  size: 24.0,
-                  color: context.colorScheme.error,
-                ),
+                    Symbols.refresh_rounded,
+                    fill: 0,
+                    size: 24.0,
+                    color: context.colorScheme.error,
+                  ),
           ],
         ),
       ),

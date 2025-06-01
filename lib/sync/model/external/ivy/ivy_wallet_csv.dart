@@ -44,61 +44,58 @@ class IvyWalletCsv {
       throw Exception("CSV data must have all the required headers");
     }
 
-    transactions =
-        data
-            .map((row) {
-              if (row.isEmpty) {
-                return null;
-              }
+    transactions = data
+        .map((row) {
+          if (row.isEmpty) {
+            return null;
+          }
 
-              final type = switch (parseRequiredString(
-                row[headerMap["Type"]!]?.toString().toUpperCase(),
-              )) {
-                "EXPENSE" => TransactionType.expense,
-                "INCOME" => TransactionType.income,
-                "TRANSFER" => TransactionType.transfer,
-                _ => throw Exception("Unknown transaction type"),
-              };
+          final type = switch (parseRequiredString(
+            row[headerMap["Type"]!]?.toString().toUpperCase(),
+          )) {
+            "EXPENSE" => TransactionType.expense,
+            "INCOME" => TransactionType.income,
+            "TRANSFER" => TransactionType.transfer,
+            _ => throw Exception("Unknown transaction type"),
+          };
 
-              final bool isTransfer = type == TransactionType.transfer;
+          final bool isTransfer = type == TransactionType.transfer;
 
-              dynamic amount =
-                  row[headerMap[isTransfer ? "Transfer Amount" : "Amount"]!]!;
+          dynamic amount =
+              row[headerMap[isTransfer ? "Transfer Amount" : "Amount"]!]!;
 
-              if (amount is String) {
-                amount = double.tryParse(amount);
-              }
+          if (amount is String) {
+            amount = double.tryParse(amount);
+          }
 
-              dynamic transferToAmount = row[headerMap["Receive Amount"]!];
-              if (transferToAmount is String) {
-                transferToAmount = double.tryParse(transferToAmount);
-              }
+          dynamic transferToAmount = row[headerMap["Receive Amount"]!];
+          if (transferToAmount is String) {
+            transferToAmount = double.tryParse(transferToAmount);
+          }
 
-              return IvyWalletTransaction(
-                uuid: parseUuid(row[headerMap["ID"]!]),
-                title: parseOptionalString(row[headerMap["Title"]!]),
-                note: row[headerMap["Description"]!],
-                amount: amount,
-                currency: parseRequiredString(
-                  row[headerMap[isTransfer
-                      ? "Transfer Currency"
-                      : "Currency"]!],
-                ),
-                type: type,
-                account: parseRequiredString(row[headerMap["Account"]!]),
-                category: parseOptionalString(row[headerMap["Category"]!]),
-                transferToAccount: parseOptionalString(
-                  row[headerMap["To Account"]!],
-                ),
-                transferToCurrency: parseOptionalString(
-                  row[headerMap["Receive Currency"]!],
-                ),
-                transferToAmount: transferToAmount,
-                transactionDate: parseDate(row[headerMap["Date"]!]),
-              );
-            })
-            .nonNulls
-            .toList();
+          return IvyWalletTransaction(
+            uuid: parseUuid(row[headerMap["ID"]!]),
+            title: parseOptionalString(row[headerMap["Title"]!]),
+            note: row[headerMap["Description"]!],
+            amount: amount,
+            currency: parseRequiredString(
+              row[headerMap[isTransfer ? "Transfer Currency" : "Currency"]!],
+            ),
+            type: type,
+            account: parseRequiredString(row[headerMap["Account"]!]),
+            category: parseOptionalString(row[headerMap["Category"]!]),
+            transferToAccount: parseOptionalString(
+              row[headerMap["To Account"]!],
+            ),
+            transferToCurrency: parseOptionalString(
+              row[headerMap["Receive Currency"]!],
+            ),
+            transferToAmount: transferToAmount,
+            transactionDate: parseDate(row[headerMap["Date"]!]),
+          );
+        })
+        .nonNulls
+        .toList();
   }
 
   static Future<IvyWalletCsv> fromFile(File file) async {

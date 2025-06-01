@@ -48,17 +48,15 @@ class _SelectGroupRangeSheetState extends State<SelectGroupRangeSheet> {
             child: Wrap(
               spacing: 12.0,
               runSpacing: 12.0,
-              children:
-                  TransactionGroupRange.values
-                      .map(
-                        (range) => ChoiceChip(
-                          label: Text(range.localizedNameContext(context)),
-                          selected: _selected == range,
-                          onSelected:
-                              (value) => _updateRange(value ? range : null),
-                        ),
-                      )
-                      .toList(),
+              children: TransactionGroupRange.values
+                  .map(
+                    (range) => ChoiceChip(
+                      label: Text(range.localizedNameContext(context)),
+                      selected: _selected == range,
+                      onSelected: (value) => _updateRange(value ? range : null),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
         ),

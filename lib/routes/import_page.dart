@@ -41,47 +41,45 @@ class _ImportPageState extends State<ImportPage> {
     return Scaffold(
       appBar: AppBar(title: Text("sync.import".t(context))),
       body: SafeArea(
-        child:
-            busy
-                ? const Spinner.center()
-                : SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      FileSelectArea(
-                        onFileDropped: initiateImportFromDroppedFile,
-                        onTap: initiateImport,
-                      ),
-                      const SizedBox(height: 16.0),
-                      ListHeader("sync.import.other".t(context)),
-                      const SizedBox(height: 8.0),
-                      ListTile(
-                        leading: ClipRRect(
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(4.0),
-                          ),
-                          child: Image.asset(
-                            "assets/images/external/ivy_wallet.png",
-                            width: IconTheme.of(context).size,
-                            height: IconTheme.of(context).size,
-                          ),
+        child: busy
+            ? const Spinner.center()
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FileSelectArea(
+                      onFileDropped: initiateImportFromDroppedFile,
+                      onTap: initiateImport,
+                    ),
+                    const SizedBox(height: 16.0),
+                    ListHeader("sync.import.other".t(context)),
+                    const SizedBox(height: 8.0),
+                    ListTile(
+                      leading: ClipRRect(
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(4.0),
                         ),
-                        trailing: Icon(Symbols.chevron_right_rounded),
-                        title: Text("Ivy Wallet (CSV)"),
-                        onTap:
-                            () => initiateImport(
-                              externalFormat: ImportExternalFormat.ivyWallet,
-                            ),
+                        child: Image.asset(
+                          "assets/images/external/ivy_wallet.png",
+                          width: IconTheme.of(context).size,
+                          height: IconTheme.of(context).size,
+                        ),
                       ),
-                      ListTile(
-                        leading: Icon(SimpleIcons.googlesheets),
-                        trailing: Icon(Symbols.chevron_right_rounded),
-                        title: Text("sync.import.getCSVTemplate".t(context)),
-                        onTap: () => openUrl(csvImportTemplateUrl),
+                      trailing: Icon(Symbols.chevron_right_rounded),
+                      title: Text("Ivy Wallet (CSV)"),
+                      onTap: () => initiateImport(
+                        externalFormat: ImportExternalFormat.ivyWallet,
                       ),
-                    ],
-                  ),
+                    ),
+                    ListTile(
+                      leading: Icon(SimpleIcons.googlesheets),
+                      trailing: Icon(Symbols.chevron_right_rounded),
+                      title: Text("sync.import.getCSVTemplate".t(context)),
+                      onTap: () => openUrl(csvImportTemplateUrl),
+                    ),
+                  ],
                 ),
+              ),
       ),
     );
   }

@@ -33,47 +33,37 @@ class _DebugLogsPageState extends State<DebugLogsPage> {
     return Scaffold(
       appBar: AppBar(title: Text("Debug logs")),
       body: SingleChildScrollView(
-        child:
-            files?.isNotEmpty == true
-                ? Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children:
-                      files!
-                          .map(
-                            (file) => ListTile(
-                              title: Text(path.basename(file.path)),
-                              subtitle: Text(
-                                [
-                                  file
-                                      .lastModifiedSync()
-                                      .toLocal()
-                                      .toMoment()
-                                      .llll,
-                                  file.statSync().size.humanReadableBinarySize,
-                                ].join(" • "),
+        child: files?.isNotEmpty == true
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: files!
+                    .map(
+                      (file) => ListTile(
+                        title: Text(path.basename(file.path)),
+                        subtitle: Text(
+                          [
+                            file.lastModifiedSync().toLocal().toMoment().llll,
+                            file.statSync().size.humanReadableBinarySize,
+                          ].join(" • "),
+                        ),
+                        onLongPress: () =>
+                            context.push("/_debug/logs/view", extra: file.path),
+                        trailing: Builder(
+                          builder: (context) {
+                            return IconButton(
+                              onPressed: () => showShareSheet(
+                                file.path,
+                                context.findRenderObject(),
                               ),
-                              onLongPress:
-                                  () => context.push(
-                                    "/_debug/logs/view",
-                                    extra: file.path,
-                                  ),
-                              trailing: Builder(
-                                builder: (context) {
-                                  return IconButton(
-                                    onPressed:
-                                        () => showShareSheet(
-                                          file.path,
-                                          context.findRenderObject(),
-                                        ),
-                                    icon: Icon(Symbols.share_rounded),
-                                  );
-                                },
-                              ),
-                            ),
-                          )
-                          .toList(),
-                )
-                : Center(child: Text("No log files found")),
+                              icon: Icon(Symbols.share_rounded),
+                            );
+                          },
+                        ),
+                      ),
+                    )
+                    .toList(),
+              )
+            : Center(child: Text("No log files found")),
       ),
     );
   }

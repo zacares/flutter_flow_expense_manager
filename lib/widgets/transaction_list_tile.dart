@@ -89,8 +89,9 @@ class TransactionListTile extends StatelessWidget {
                 : null) ??
             "transaction.fallbackTitle".t(context));
 
-    final Transfer? transfer =
-        transaction.isTransfer ? transaction.extensions.transfer : null;
+    final Transfer? transfer = transaction.isTransfer
+        ? transaction.extensions.transfer
+        : null;
 
     final TextDirection textDirection = Directionality.of(context);
 
@@ -98,7 +99,7 @@ class TransactionListTile extends StatelessWidget {
       (transaction.isTransfer && combineTransfers)
           ? "${AccountsProvider.of(context).getName(transfer!.fromAccountUuid)} → ${AccountsProvider.of(context).getName(transfer.toAccountUuid)}"
           : (AccountsProvider.of(context).getName(transaction.accountUuid) ??
-              transaction.account.target?.name),
+                transaction.account.target?.name),
       if (showCategory && transaction.category.target != null)
         transaction.category.target!.name,
       dateString,
@@ -108,27 +109,26 @@ class TransactionListTile extends StatelessWidget {
             : "transaction.pending.preapproved".t(context),
     ];
 
-    final String subtitle = (textDirection == TextDirection.ltr
-            ? subtitleParts
-            : subtitleParts.reversed)
-        .nonNulls
-        .join(" • ");
+    final String subtitle =
+        (textDirection == TextDirection.ltr
+                ? subtitleParts
+                : subtitleParts.reversed)
+            .nonNulls
+            .join(" • ");
 
-    final WidgetSpan? titleLeadingIconSpan =
-        transaction.isRecurring
-            ? titleIconSpan(context, Symbols.repeat_rounded)
-            : (transaction.transactionDate.isFutureAnchored(
-                  Moment.now().startOfNextMinute(),
-                )
-                ? titleIconSpan(
+    final WidgetSpan? titleLeadingIconSpan = transaction.isRecurring
+        ? titleIconSpan(context, Symbols.repeat_rounded)
+        : (transaction.transactionDate.isFutureAnchored(
+                Moment.now().startOfNextMinute(),
+              )
+              ? titleIconSpan(
                   context,
                   Symbols.search_activity_rounded,
-                  color:
-                      transaction.isPending == true
-                          ? context.colorScheme.onSurface.withAlpha(0xc0)
-                          : context.flowColors.income,
+                  color: transaction.isPending == true
+                      ? context.colorScheme.onSurface.withAlpha(0xc0)
+                      : context.flowColors.income,
                 )
-                : null);
+              : null);
 
     final Widget listTile = Material(
       type: MaterialType.card,

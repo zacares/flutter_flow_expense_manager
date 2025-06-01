@@ -29,21 +29,25 @@ Future<String> generateBackupJSONContentV2() async {
   );
   syncLogger.fine("Finished fetching transactions");
 
-  final List<RecurringTransaction> recurringTransactions =
-      await ObjectBox().box<RecurringTransaction>().getAllAsync();
+  final List<RecurringTransaction> recurringTransactions = await ObjectBox()
+      .box<RecurringTransaction>()
+      .getAllAsync();
   syncLogger.fine("Finished fetching recurring transactions");
 
   final List<Account> accounts = await ObjectBox().box<Account>().getAllAsync();
   syncLogger.fine("Finished fetching accounts");
 
-  final List<Category> categories =
-      await ObjectBox().box<Category>().getAllAsync();
+  final List<Category> categories = await ObjectBox()
+      .box<Category>()
+      .getAllAsync();
   syncLogger.fine("Finished fetching categories");
 
   final DateTime exportDate = DateTime.now().toUtc();
 
-  final Query<Profile> firstProfileQuery =
-      ObjectBox().box<Profile>().query().build();
+  final Query<Profile> firstProfileQuery = ObjectBox()
+      .box<Profile>()
+      .query()
+      .build();
 
   final Profile? profile = firstProfileQuery.findFirst();
 
@@ -51,11 +55,13 @@ Future<String> generateBackupJSONContentV2() async {
 
   firstProfileQuery.close();
 
-  final Query<UserPreferences> firstUserPreferencesQuery =
-      ObjectBox().box<UserPreferences>().query().build();
+  final Query<UserPreferences> firstUserPreferencesQuery = ObjectBox()
+      .box<UserPreferences>()
+      .query()
+      .build();
 
-  final UserPreferences? userPreferences =
-      firstUserPreferencesQuery.findFirst();
+  final UserPreferences? userPreferences = firstUserPreferencesQuery
+      .findFirst();
 
   firstUserPreferencesQuery.close();
 
@@ -109,11 +115,10 @@ Future<File> generateBackupZipV2({Function(double)? onProgress}) async {
     final List<FileSystemEntity> filesList = Directory(
       ObjectBox.imagesDirectory,
     ).listSync(followLinks: false, recursive: false);
-    final List<File> pngsList =
-        filesList
-            .where((file) => path.extension(file.path).toLowerCase() == ".png")
-            .map((file) => File(file.path))
-            .toList();
+    final List<File> pngsList = filesList
+        .where((file) => path.extension(file.path).toLowerCase() == ".png")
+        .map((file) => File(file.path))
+        .toList();
 
     await Future.wait(
       pngsList.map(

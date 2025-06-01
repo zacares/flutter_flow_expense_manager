@@ -30,10 +30,9 @@ class _SelectIconFlowIconSheetState extends State<SelectIconFlowIconSheet>
   void initState() {
     super.initState();
 
-    value =
-        widget.initialValue is IconFlowIcon
-            ? widget.initialValue as IconFlowIcon
-            : null;
+    value = widget.initialValue is IconFlowIcon
+        ? widget.initialValue as IconFlowIcon
+        : null;
 
     _controller = TabController(length: 2, vsync: this);
   }
@@ -94,24 +93,22 @@ class _SelectIconFlowIconSheetState extends State<SelectIconFlowIconSheet>
         controller: _controller,
         children: [
           GridView.builder(
-            itemBuilder:
-                (context, index) => IconButton(
-                  onPressed: () => updateIcon(simpleIconsResult[index]),
-                  icon: Icon(simpleIconsResult[index]),
-                  iconSize: 48.0,
-                ),
+            itemBuilder: (context, index) => IconButton(
+              onPressed: () => updateIcon(simpleIconsResult[index]),
+              icon: Icon(simpleIconsResult[index]),
+              iconSize: 48.0,
+            ),
             itemCount: simpleIconsResult.length,
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 72.0,
             ),
           ),
           GridView.builder(
-            itemBuilder:
-                (context, index) => IconButton(
-                  onPressed: () => updateIcon(materialSymbolsResult[index]),
-                  icon: Icon(materialSymbolsResult[index]),
-                  iconSize: 48.0,
-                ),
+            itemBuilder: (context, index) => IconButton(
+              onPressed: () => updateIcon(materialSymbolsResult[index]),
+              icon: Icon(materialSymbolsResult[index]),
+              iconSize: 48.0,
+            ),
             itemCount: materialSymbolsResult.length,
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 72.0,
