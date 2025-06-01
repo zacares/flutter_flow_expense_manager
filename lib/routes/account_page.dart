@@ -1,6 +1,7 @@
 import "package:auto_size_text/auto_size_text.dart";
 import "package:flow/data/exchange_rates.dart";
-import "package:flow/data/money_flow.dart";
+import "package:flow/data/multi_currency_flow.dart";
+import "package:flow/data/single_currency_flow.dart";
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/account.dart";
@@ -12,13 +13,14 @@ import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/routes/error_page.dart";
 import "package:flow/services/exchange_rates.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/category/transactions_info.dart";
 import "package:flow/widgets/flow_card.dart";
 import "package:flow/widgets/general/pending_transactions_header.dart";
 import "package:flow/widgets/general/spinner.dart";
 import "package:flow/widgets/general/wavy_divider.dart";
-import "package:flow/widgets/grouped_transaction_list.dart";
+import "package:flow/widgets/grouped_transactions_list_view.dart";
 import "package:flow/widgets/no_result.dart";
 import "package:flow/widgets/rates_missing_warning.dart";
 import "package:flow/widgets/time_range_selector.dart";
@@ -59,13 +61,12 @@ class _AccountPageState extends State<AccountPage> {
 
   bool busy = false;
 
-  QueryBuilder<Transaction> qb(TimeRange range) =>
-      TransactionFilter(
-        accounts: [account!.uuid],
-        range: TransactionFilterTimeRange.fromTimeRange(range),
-        sortBy: TransactionSortField.transactionDate,
-        sortDescending: true,
-      ).queryBuilder();
+  QueryBuilder<Transaction> qb(TimeRange range) => TransactionFilter(
+    accounts: [account!.uuid],
+    range: TransactionFilterTimeRange.fromTimeRange(range),
+    sortBy: TransactionSortField.transactionDate,
+    sortDescending: true,
+  ).queryBuilder();
 
   late Account? account;
 
@@ -84,9 +85,9 @@ class _AccountPageState extends State<AccountPage> {
     if (this.account == null) return const ErrorPage();
 
     final Account account = this.account!;
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
-    final ExchangeRates? rates =
-        ExchangeRatesService().getPrimaryCurrencyRates();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
+    final ExchangeRates? rates = ExchangeRatesService()
+        .getPrimaryCurrencyRates();
     final bool showMissingExchangeRatesWarning =
         rates == null &&
         TransitiveLocalPreferences().usesNonPrimaryCurrency.get();
@@ -122,19 +123,22 @@ class _AccountPageState extends State<AccountPage> {
                 .toList() ??
             [];
 
-        final int actionNeededCount =
-            pendingTransactions
-                .where((transaction) => transaction.confirmable())
-                .length;
+        final int actionNeededCount = pendingTransactions
+            .where((transaction) => transaction.confirmable())
+            .length;
 
         final Map<TimeRange, List<Transaction>> pendingTransactionsGrouped =
             pendingTransactions.groupByRange(
-              rangeFn:
-                  (transaction) =>
-                      CustomTimeRange(Moment.minValue, Moment.maxValue),
+              rangeFn: (transaction) =>
+                  CustomTimeRange(Moment.minValue, Moment.maxValue),
             );
 
-        final MoneyFlow flow = transactions?.nonPending.flow ?? MoneyFlow();
+        final MultiCurrencyFlow flow =
+            transactions?.nonPending.flow ?? MultiCurrencyFlow();
+        final SingleCurrencyFlow mergedFlow = flow.merge(
+          primaryCurrency,
+          rates,
+        );
 
         const double firstHeaderTopPadding = 0.0;
 
@@ -145,10 +149,7 @@ class _AccountPageState extends State<AccountPage> {
             const SizedBox(height: 8.0),
             TransactionsInfo(
               count: transactions?.nonPending.length,
-              flow:
-                  rates == null
-                      ? flow.getFlowByCurrency(primaryCurrency)
-                      : flow.getTotalFlow(rates, primaryCurrency),
+              flow: mergedFlow.totalFlow,
               icon: account.icon,
             ),
             const SizedBox(height: 12.0),
@@ -156,10 +157,7 @@ class _AccountPageState extends State<AccountPage> {
               children: [
                 Expanded(
                   child: FlowCard(
-                    flow:
-                        rates == null
-                            ? flow.getIncomeByCurrency(primaryCurrency)
-                            : flow.getTotalIncome(rates, primaryCurrency),
+                    flow: mergedFlow.totalIncome,
                     type: TransactionType.income,
                     autoSizeGroup: autoSizeGroup,
                   ),
@@ -167,10 +165,7 @@ class _AccountPageState extends State<AccountPage> {
                 const SizedBox(width: 12.0),
                 Expanded(
                   child: FlowCard(
-                    flow:
-                        rates == null
-                            ? flow.getExpenseByCurrency(primaryCurrency)
-                            : flow.getTotalExpense(rates, primaryCurrency),
+                    flow: mergedFlow.totalExpense,
                     type: TransactionType.expense,
                     autoSizeGroup: autoSizeGroup,
                   ),
@@ -205,17 +200,23 @@ class _AccountPageState extends State<AccountPage> {
               true => Padding(
                 padding: headerPaddingOutOfList,
                 child: Column(
-                  children: [header, const Expanded(child: Spinner.center())],
+                  children: [
+                    header,
+                    const Expanded(child: Spinner.center()),
+                  ],
                 ),
               ),
               false when noTransactions => Padding(
                 padding: headerPaddingOutOfList,
                 child: Column(
-                  children: [header, const Expanded(child: NoResult())],
+                  children: [
+                    header,
+                    const Expanded(child: NoResult()),
+                  ],
                 ),
               ),
-              _ => GroupedTransactionList(
-                listType: GroupedTransactionListType.reorderable,
+              _ => GroupedTransactionsListView(
+                listType: GroupedTransactionsListViewType.reorderable,
                 mainHeader: header,
                 transactions: grouped,
                 pendingTransactions: pendingTransactionsGrouped,

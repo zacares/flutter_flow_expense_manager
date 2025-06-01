@@ -22,36 +22,32 @@ class InfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Surface(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-      builder:
-          (BuildContext context) => Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 12.0,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+      builder: (BuildContext context) => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Text(
-                      title,
-                      style: context.textTheme.bodyMedium,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (icon != null) ...[
-                      const SizedBox(width: 4.0),
-                      IconTheme(data: IconThemeData(size: 20.0), child: icon!),
-                    ],
-                  ],
+                Text(
+                  title,
+                  style: context.textTheme.bodyMedium,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                if (money != null) money!,
-                if (delta != null) delta!,
+                if (icon != null) ...[
+                  const SizedBox(width: 4.0),
+                  IconTheme(data: IconThemeData(size: 20.0), child: icon!),
+                ],
               ],
             ),
-          ),
+            if (money != null) money!,
+            if (delta != null) delta!,
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,5 +1,6 @@
 import "dart:convert";
 
+import "package:flow/l10n/supported_languages.dart";
 import "package:flutter/services.dart";
 import "package:flutter/widgets.dart";
 import "package:logging/logging.dart";
@@ -29,10 +30,10 @@ class FlowLocalizations {
     _localizedValues = await _loadLocale(locale);
 
     if (_enUS.isEmpty) {
-      if (locale.code == supportedLanguages.first.code) {
+      if (locale.code == "en") {
         _enUS = {..._localizedValues};
       } else {
-        _enUS = await _loadLocale(supportedLanguages.first);
+        _enUS = await _loadLocale(Locale("en"));
       }
     }
   }
@@ -74,24 +75,16 @@ class FlowLocalizations {
   String get(String? key, {dynamic replace}) =>
       getTransalation(key, replace: replace);
 
-  static const List<Locale> supportedLanguages = [
-    Locale("en", "US"), // Will fallback to this for unsupported locales
-    Locale("mn", "MN"),
-    Locale("it", "IT"),
-    Locale("tr", "TR"),
-    Locale("fr", "FR"),
-    Locale("de", "DE"),
-    Locale("ar"),
-  ];
+  static List<Locale> get supportedLocales => supportedLanguages.keys.toList();
 
   static FlowLocalizations of(BuildContext context) =>
       Localizations.of<FlowLocalizations>(context, FlowLocalizations)!;
 
-  static int supportedLanguagesCount = supportedLanguages.length;
+  static int supportedLanguagesCount = supportedLocales.length;
 
   static void printMissingKeys() async {
     final Map<String, Map<String, String>> languages = {};
-    for (Locale locale in supportedLanguages) {
+    for (Locale locale in supportedLocales) {
       String value = await rootBundle.loadString(
         "assets/l10n/${locale.code}.json",
       );
@@ -133,15 +126,15 @@ class _FlowLocalizationDelegate
 
   @override
   bool isSupported(Locale locale) {
-    return FlowLocalizations.supportedLanguages.contains(locale);
+    return FlowLocalizations.supportedLocales.contains(locale);
   }
 
   @override
   Future<FlowLocalizations> load(Locale locale) async {
     FlowLocalizations localization = FlowLocalizations(
-      FlowLocalizations.supportedLanguages.contains(locale)
+      FlowLocalizations.supportedLocales.contains(locale)
           ? locale
-          : FlowLocalizations.supportedLanguages[1],
+          : FlowLocalizations.supportedLocales[1],
     );
     await localization.load();
     return localization;

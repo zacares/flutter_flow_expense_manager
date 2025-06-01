@@ -31,8 +31,8 @@ class _RemindersPreferencesPageState extends State<RemindersPreferencesPage> {
 
     _listener = AppLifecycleListener(
       onShow: () {
-        _notificationsPermissionGranted =
-            NotificationsService().hasPermissions();
+        _notificationsPermissionGranted = NotificationsService()
+            .hasPermissions();
         if (mounted) {
           setState(() {});
         }
@@ -168,10 +168,9 @@ class _RemindersPreferencesPageState extends State<RemindersPreferencesPage> {
   }
 
   void updateRemindDailyAt([int? h, int? m]) async {
-    final TimeOfDay initialTime =
-        (h != null && m != null)
-            ? TimeOfDay(hour: h, minute: m)
-            : TimeOfDay.now();
+    final TimeOfDay initialTime = (h != null && m != null)
+        ? TimeOfDay(hour: h, minute: m)
+        : TimeOfDay.now();
 
     final TimeOfDay? newTod = await showTimePicker(
       context: context,

@@ -77,11 +77,10 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
         height: MediaQuery.of(context).size.height * .75,
         child: OSMap(
           center: center,
-          onTap:
-              (pos) => setState(() {
-                useCurrentLocationWhenAvailable = false;
-                center = pos;
-              }),
+          onTap: (pos) => setState(() {
+            useCurrentLocationWhenAvailable = false;
+            center = pos;
+          }),
         ),
       ),
     );

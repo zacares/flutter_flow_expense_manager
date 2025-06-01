@@ -14,7 +14,7 @@ import "package:flow/widgets/general/flow_icon.dart";
 import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/general/spinner.dart";
 import "package:flow/widgets/general/wavy_divider.dart";
-import "package:flow/widgets/grouped_transaction_list.dart";
+import "package:flow/widgets/grouped_transactions_list_view.dart";
 import "package:flow/widgets/rates_missing_warning.dart";
 import "package:flow/widgets/time_range_selector.dart";
 import "package:flow/widgets/transactions_date_header.dart";
@@ -221,16 +221,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             previousValue + element.length,
                       );
 
-                  return GroupedTransactionList(
+                  return GroupedTransactionsListView(
                     transactions: transactions,
                     pendingTransactions: pendingTransactions,
-                    headerBuilder:
-                        (pendingGroup, range, transactions) =>
-                            TransactionListDateHeader(
-                              pendingGroup: pendingGroup,
-                              range: range,
-                              transactions: transactions,
-                            ),
+                    headerBuilder: (pendingGroup, range, transactions) =>
+                        TransactionListDateHeader(
+                          pendingGroup: pendingGroup,
+                          range: range,
+                          transactions: transactions,
+                        ),
                     pendingDivider: WavyDivider(),
                     mainHeader: Frame(
                       child: Text(

@@ -137,6 +137,15 @@ void main() async {
     );
   }
 
+  try {
+    Moment.minValue = DateTime(0);
+    Moment.maxValue = DateTime(4000);
+    Moment.minValueUtc = DateTime.utc(0);
+    Moment.maxValueUtc = DateTime.utc(4000);
+  } catch (e) {
+    // Silent fail
+  }
+
   startupLog.fine("Finally telling Flutter to run the app widget");
   runApp(const Flow());
 }
@@ -154,7 +163,7 @@ class Flow extends StatefulWidget {
 class FlowState extends State<Flow> {
   late final AppLifecycleListener _appLifeCycleListener;
 
-  Locale _locale = FlowLocalizations.supportedLanguages.first;
+  Locale _locale = FlowLocalizations.supportedLocales.first;
   ThemeMode _themeMode = ThemeMode.system;
 
   ThemeFactory _themeFactory = ThemeFactory.fromThemeName(null);
@@ -163,10 +172,9 @@ class FlowState extends State<Flow> {
 
   late bool _tempLock;
 
-  bool get useDarkTheme =>
-      (_themeMode == ThemeMode.system
-          ? (PlatformDispatcher.instance.platformBrightness == Brightness.dark)
-          : (_themeMode == ThemeMode.dark));
+  bool get useDarkTheme => (_themeMode == ThemeMode.system
+      ? (PlatformDispatcher.instance.platformBrightness == Brightness.dark)
+      : (_themeMode == ThemeMode.dark));
 
   @override
   void initState() {
@@ -190,6 +198,7 @@ class FlowState extends State<Flow> {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       migrateRemoveTitleFromUntitledTransactions();
       migrateExtraKeyIndexing();
+      migratePrimaryCurrencyToDb();
     });
 
     _tryUnlockTempLock();
@@ -237,7 +246,7 @@ class FlowState extends State<Flow> {
         GlobalWidgetsLocalizations.delegate,
         FlowLocalizations.delegate,
       ],
-      supportedLocales: FlowLocalizations.supportedLanguages,
+      supportedLocales: FlowLocalizations.supportedLocales,
       locale: _locale,
       routerConfig: router,
       theme: _themeFactory.materialTheme,
@@ -247,10 +256,9 @@ class FlowState extends State<Flow> {
         return AccountsProviderScope(
           child: CategoriesProviderScope(
             child: GestureDetector(
-              behavior:
-                  _tempLock
-                      ? HitTestBehavior.opaque
-                      : HitTestBehavior.deferToChild,
+              behavior: _tempLock
+                  ? HitTestBehavior.opaque
+                  : HitTestBehavior.deferToChild,
               onTap: _tryUnlockTempLock,
               child: IgnorePointer(
                 ignoring: _tempLock,
@@ -298,16 +306,14 @@ class FlowState extends State<Flow> {
     final List<Locale> systemLocales =
         WidgetsBinding.instance.platformDispatcher.locales;
 
-    final List<Locale> favorableLocales =
-        systemLocales
-            .where(
-              (locale) => FlowLocalizations.supportedLanguages.any(
-                (flowSupportedLocalization) =>
-                    flowSupportedLocalization.languageCode ==
-                    locale.languageCode,
-              ),
-            )
-            .toList();
+    final List<Locale> favorableLocales = systemLocales
+        .where(
+          (locale) => FlowLocalizations.supportedLocales.any(
+            (flowSupportedLocalization) =>
+                flowSupportedLocalization.languageCode == locale.languageCode,
+          ),
+        )
+        .toList();
 
     final Locale overriddenLocale =
         LocalPreferences().localeOverride.value ??
@@ -341,7 +347,7 @@ class FlowState extends State<Flow> {
 
   void _refreshExchangeRates() {
     ExchangeRatesService().tryFetchRates(
-      LocalPreferences().getPrimaryCurrency(),
+      UserPreferencesService().primaryCurrency,
     );
   }
 
@@ -396,6 +402,7 @@ void initializeFileLogger() async {
           logsDir,
           flowDebugMode ? "flow_debug.log" : "flow.log",
         ),
+        rotateAtSizeBytes: 2 * 1024 * 1024,
         keepRotateCount: 5,
       )..attachToLogger(Logger.root);
     } catch (e) {

@@ -36,13 +36,12 @@ class _SelectCurrencySheetState extends State<SelectCurrencySheet> {
     final List<CurrencyData> queryResults =
         (normalizedQuery.isNotEmpty
                 ? extractTop<CurrencyData>(
-                  query: normalizedQuery,
-                  choices: iso4217Currencies,
-                  limit: iso4217Currencies.length,
-                  getter:
-                      (currencyData) =>
-                          "${currencyData.code} ${currencyData.name} ${currencyData.country}",
-                ).map((result) => result.choice)
+                    query: normalizedQuery,
+                    choices: iso4217Currencies,
+                    limit: iso4217Currencies.length,
+                    getter: (currencyData) =>
+                        "${currencyData.code} ${currencyData.name} ${currencyData.country}",
+                  ).map((result) => result.choice)
                 : iso4217Currencies)
             .groupBy((resultItem) => resultItem.code)
             .values

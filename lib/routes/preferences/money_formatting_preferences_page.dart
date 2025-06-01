@@ -34,7 +34,7 @@ class _MoneyFormattingPreferencesPageState
               const SizedBox(height: 16.0),
               Center(
                 child: MoneyText(
-                  Money(12345678.90, LocalPreferences().getPrimaryCurrency()),
+                  Money(12345678.90, UserPreferencesService().primaryCurrency),
                   initiallyAbbreviated: !preferFullAmounts,
                   tapToToggleAbbreviation: false,
                   style: context.textTheme.displaySmall,

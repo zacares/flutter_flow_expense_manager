@@ -50,12 +50,10 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
             final List<Category> categories = snapshot.requireData;
 
-            final bool showPresetsButton =
-                !getCategoryPresets().every(
-                  (preset) => categories.any(
-                    (category) => category.uuid == preset.uuid,
-                  ),
-                );
+            final bool showPresetsButton = !getCategoryPresets().every(
+              (preset) =>
+                  categories.any((category) => category.uuid == preset.uuid),
+            );
 
             return switch (categories.length) {
               0 => const NoCategories(),
@@ -68,7 +66,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       final bool excludeTransfersInTotal =
                           userPreferences.excludeTransfersFromFlow;
                       final String primaryCurrency =
-                          LocalPreferences().getPrimaryCurrency();
+                          UserPreferencesService().primaryCurrency;
 
                       return SingleChildScrollView(
                         padding: const EdgeInsets.all(16.0),

@@ -37,13 +37,12 @@ class ThemePetalPainter extends CustomPainter {
 
     final double r = size.width * 0.5;
 
-    final Paint ringPaint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round
-          ..strokeWidth = 2.0
-          ..color = selectedColor;
+    final Paint ringPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..strokeWidth = 2.0
+      ..color = selectedColor;
 
     final double petalCenterDistance =
         r * (petalRadiusProc + centerSpaceRadiusProc);
@@ -65,10 +64,9 @@ class ThemePetalPainter extends CustomPainter {
           petalCenterDistance *
           localProgress;
 
-      paint.color =
-          i == hoveringIndex
-              ? Color.alphaBlend(selectedColor.withAlpha(0x80), colors[i])
-              : colors[i];
+      paint.color = i == hoveringIndex
+          ? Color.alphaBlend(selectedColor.withAlpha(0x80), colors[i])
+          : colors[i];
       canvas.drawCircle(center, petalRadius * localProgress, paint);
 
       if (localProgress == 1 && selectedIndex == i) {

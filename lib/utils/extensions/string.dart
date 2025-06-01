@@ -34,10 +34,9 @@ extension Casings on String {
 
     return split(whitespaceMatcher)
         .map(
-          (e) =>
-              titleCaseLowercaseWords.contains(e.toLowerCase())
-                  ? e.toLowerCase()
-                  : e.capitalize(),
+          (e) => titleCaseLowercaseWords.contains(e.toLowerCase())
+              ? e.toLowerCase()
+              : e.capitalize(),
         )
         .join(" ");
   }

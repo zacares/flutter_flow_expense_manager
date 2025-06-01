@@ -53,9 +53,9 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
   Widget build(BuildContext context) {
     final Widget? counterOverride =
         (widget.maxLength != null &&
-                _controller.text.length < (widget.maxLength! * 0.9))
-            ? SizedBox.shrink()
-            : null;
+            _controller.text.length < (widget.maxLength! * 0.9))
+        ? SizedBox.shrink()
+        : null;
 
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -156,7 +156,7 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
     return _controller.text != widget.initialValue;
   }
 
-  _bold() {
+  void _bold() {
     if (_controller.selection.isCollapsed) {
       _insert("****", -2);
     } else {
@@ -164,7 +164,7 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
     }
   }
 
-  _italic() {
+  void _italic() {
     if (_controller.selection.isCollapsed) {
       _insert("**", -1);
     } else {
@@ -172,7 +172,7 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
     }
   }
 
-  _checklist() {
+  void _checklist() {
     if (_controller.selection.isCollapsed) {
       _insertChecklist();
     } else {
@@ -180,7 +180,11 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
     }
   }
 
-  _alterUncollapsed(String prefix, String postfix, [int cursorOffset = 0]) {
+  void _alterUncollapsed(
+    String prefix,
+    String postfix, [
+    int cursorOffset = 0,
+  ]) {
     try {
       final TextSelection selection = _controller.selection;
       final String text = _controller.text;
@@ -203,7 +207,7 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
     }
   }
 
-  _insertChecklist() {
+  void _insertChecklist() {
     try {
       final TextSelection selection = _controller.selection;
       final String text = _controller.text;
@@ -213,8 +217,9 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
       final bool currentlyAtBegginingOfLine =
           selection.start == 0 || text[selection.start - 1] == "\n";
 
-      final String payload =
-          currentlyAtBegginingOfLine ? "- [ ] \n" : "\n- [ ] \n";
+      final String payload = currentlyAtBegginingOfLine
+          ? "- [ ] \n"
+          : "\n- [ ] \n";
       final int cursorOffset = -1;
 
       _controller.value = TextEditingValue(
@@ -230,7 +235,7 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
     }
   }
 
-  _insert(String payload, [int cursorOffset = 0]) {
+  void _insert(String payload, [int cursorOffset = 0]) {
     try {
       final TextSelection selection = _controller.selection;
       final String text = _controller.text;
@@ -250,7 +255,7 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
     }
   }
 
-  _handleFocusChange() {
+  void _handleFocusChange() {
     setState(() {
       focused = _focusNode.hasFocus;
     });

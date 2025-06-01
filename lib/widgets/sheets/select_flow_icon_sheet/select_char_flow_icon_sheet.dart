@@ -34,10 +34,9 @@ class _SelectCharFlowIconSheetState extends State<SelectCharFlowIconSheet> {
   @override
   void initState() {
     super.initState();
-    value =
-        widget.initialValue is CharacterFlowIcon
-            ? widget.initialValue as CharacterFlowIcon
-            : null;
+    value = widget.initialValue is CharacterFlowIcon
+        ? widget.initialValue as CharacterFlowIcon
+        : null;
     _characterTextController = TextEditingController(text: value?.character);
   }
 
@@ -72,43 +71,42 @@ class _SelectCharFlowIconSheetState extends State<SelectCharFlowIconSheet> {
                 side: BorderSide(
                   color:
                       (_textFieldFocusNode.hasPrimaryFocus ||
-                              _textFieldFocusNode.hasFocus)
-                          ? context.colorScheme.primary
-                          : kTransparent,
+                          _textFieldFocusNode.hasFocus)
+                      ? context.colorScheme.primary
+                      : kTransparent,
                   width: 2.0,
                 ),
               ),
-              builder:
-                  (context) => Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SizedBox.square(
-                      dimension: widget.iconSize,
-                      child: Center(
-                        child: TextField(
-                          autofocus: true,
-                          focusNode: _textFieldFocusNode,
-                          showCursor: false,
-                          cursorWidth: 0.0,
-                          controller: _characterTextController,
-                          onChanged: (_) => updateCharacter(),
-                          style: TextStyle(
-                            fontSize: widget.iconSize * 0.5,
-                            height: 1.0,
-                            fontWeight: FontWeight.w500,
-                            color: context.colorScheme.onSecondary,
-                            decoration: null,
-                          ),
-                          textAlign: TextAlign.center,
-                          decoration: const InputDecoration(
-                            hintText: "?",
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                          ),
-                        ),
+              builder: (context) => Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SizedBox.square(
+                  dimension: widget.iconSize,
+                  child: Center(
+                    child: TextField(
+                      autofocus: true,
+                      focusNode: _textFieldFocusNode,
+                      showCursor: false,
+                      cursorWidth: 0.0,
+                      controller: _characterTextController,
+                      onChanged: (_) => updateCharacter(),
+                      style: TextStyle(
+                        fontSize: widget.iconSize * 0.5,
+                        height: 1.0,
+                        fontWeight: FontWeight.w500,
+                        color: context.colorScheme.onSecondary,
+                        decoration: null,
+                      ),
+                      textAlign: TextAlign.center,
+                      decoration: const InputDecoration(
+                        hintText: "?",
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
                       ),
                     ),
                   ),
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 16.0),

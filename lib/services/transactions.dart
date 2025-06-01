@@ -29,7 +29,7 @@ class TransactionsService {
     _listeners.remove(listener);
   }
 
-  _onChange() {
+  void _onChange() {
     if (disableUpdates) return;
 
     for (final listener in _listeners) {
@@ -408,16 +408,15 @@ class TransactionsService {
       return;
     }
 
-    final Query<Transaction> staleTrashBinTxns =
-        ObjectBox()
-            .box<Transaction>()
-            .query(
-              Transaction_.isDeleted.equals(true) &
-                  Transaction_.deletedDate.lessOrEqualDate(
-                    Moment.now().subtract(Duration(days: keepDays)),
-                  ),
-            )
-            .build();
+    final Query<Transaction> staleTrashBinTxns = ObjectBox()
+        .box<Transaction>()
+        .query(
+          Transaction_.isDeleted.equals(true) &
+              Transaction_.deletedDate.lessOrEqualDate(
+                Moment.now().subtract(Duration(days: keepDays)),
+              ),
+        )
+        .build();
 
     final int deletedCount = await staleTrashBinTxns.removeAsync();
 

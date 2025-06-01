@@ -25,8 +25,10 @@ class AccountsService {
     }
 
     if (identifier case String uuid) {
-      final q =
-          ObjectBox().box<Account>().query(Account_.uuid.equals(uuid)).build();
+      final q = ObjectBox()
+          .box<Account>()
+          .query(Account_.uuid.equals(uuid))
+          .build();
 
       final Account? result = await q.findFirstAsync();
 

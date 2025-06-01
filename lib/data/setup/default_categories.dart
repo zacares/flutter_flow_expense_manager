@@ -28,8 +28,9 @@ List<Category> getCategoryPresets() {
     Category.preset(
       uuid: "39bfdc73-4cba-4980-ba0d-c200f903cc97",
       name: "setup.categories.preset.health".tr(),
-      iconCode:
-          const IconFlowIcon(Symbols.health_and_safety_rounded).toString(),
+      iconCode: const IconFlowIcon(
+        Symbols.health_and_safety_rounded,
+      ).toString(),
     ),
     Category.preset(
       uuid: "1a67735a-561a-48c0-bf86-f19dab4b95b5",
@@ -39,8 +40,9 @@ List<Category> getCategoryPresets() {
     Category.preset(
       uuid: "92e5e684-0bbf-4456-b731-2ad945d5773b",
       name: "setup.categories.preset.petrol".tr(),
-      iconCode:
-          const IconFlowIcon(Symbols.local_gas_station_rounded).toString(),
+      iconCode: const IconFlowIcon(
+        Symbols.local_gas_station_rounded,
+      ).toString(),
     ),
     Category.preset(
       uuid: "c04b893b-bea8-4df3-804c-8b14e3e65c6d",
@@ -50,8 +52,9 @@ List<Category> getCategoryPresets() {
     Category.preset(
       uuid: "4c75d6c4-aed2-4f60-9d28-4b3ae55b4498",
       name: "setup.categories.preset.entertainment".tr(),
-      iconCode:
-          const IconFlowIcon(Symbols.sports_basketball_rounded).toString(),
+      iconCode: const IconFlowIcon(
+        Symbols.sports_basketball_rounded,
+      ).toString(),
     ),
     Category.preset(
       uuid: "9555eecf-7570-4118-89b0-e7343ece6572",
@@ -61,10 +64,9 @@ List<Category> getCategoryPresets() {
     Category.preset(
       uuid: "e8cf1c76-cdf7-41e1-9343-923b86cd9ea2",
       name: "setup.categories.preset.gifts".tr(),
-      iconCode:
-          const IconFlowIcon(
-            Symbols.featured_seasonal_and_gifts_rounded,
-          ).toString(),
+      iconCode: const IconFlowIcon(
+        Symbols.featured_seasonal_and_gifts_rounded,
+      ).toString(),
     ),
     Category.preset(
       uuid: "f442d114-b8c0-4f7e-befd-70844ad16fb4",
@@ -144,8 +146,9 @@ List<Category> getCategoryPresets() {
     Category.preset(
       uuid: "6fa81abb-5cfb-400b-8325-2f81adfa64d1",
       name: "setup.categories.preset.donations".tr(),
-      iconCode:
-          const IconFlowIcon(Symbols.volunteer_activism_rounded).toString(),
+      iconCode: const IconFlowIcon(
+        Symbols.volunteer_activism_rounded,
+      ).toString(),
     ),
     Category.preset(
       uuid: "e32462d9-9ade-4739-8acb-a437a69a4d5d",

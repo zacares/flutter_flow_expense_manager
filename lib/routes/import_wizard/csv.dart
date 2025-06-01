@@ -35,32 +35,31 @@ class _CSVImportWizardPageState extends State<CSVImportWizardPage> {
       body: SafeArea(
         child: ValueListenableBuilder(
           valueListenable: importer.progressNotifier,
-          builder:
-              (context, value, child) => switch (value) {
-                ImportCSVProgress.waitingConfirmation => BackupInfo(
-                  importer: importer,
-                  onClickStart: _start,
-                ),
-                ImportCSVProgress.error => Text(error.toString()),
-                ImportCSVProgress.success => ImportSuccess(
-                  setupMode: widget.setupMode,
-                ),
-                _ => Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Spinner.center(),
-                      const SizedBox(height: 8.0),
-                      Center(
-                        child: Text(
-                          value.localizedNameContext(context),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
+          builder: (context, value, child) => switch (value) {
+            ImportCSVProgress.waitingConfirmation => BackupInfo(
+              importer: importer,
+              onClickStart: _start,
+            ),
+            ImportCSVProgress.error => Text(error.toString()),
+            ImportCSVProgress.success => ImportSuccess(
+              setupMode: widget.setupMode,
+            ),
+            _ => Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Spinner.center(),
+                  const SizedBox(height: 8.0),
+                  Center(
+                    child: Text(
+                      value.localizedNameContext(context),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                ),
-              },
+                ],
+              ),
+            ),
+          },
         ),
       ),
     );

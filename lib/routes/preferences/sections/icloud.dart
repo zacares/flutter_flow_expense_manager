@@ -26,8 +26,9 @@ class _ICloudState extends State<ICloud> {
 
     final dynamic error = ICloudSyncService().lastError;
 
-    final DateTime? lastSuccessfulICloudSyncAt =
-        TransitiveLocalPreferences().lastSuccessfulICloudSyncAt.get();
+    final DateTime? lastSuccessfulICloudSyncAt = TransitiveLocalPreferences()
+        .lastSuccessfulICloudSyncAt
+        .get();
 
     return Column(
       mainAxisSize: MainAxisSize.min,

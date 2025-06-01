@@ -47,8 +47,9 @@ class NavbarButton extends StatelessWidget {
                 child: Icon(
                   icon,
                   color: navbarTheme.activeIconColor,
-                  fill:
-                      (isActive && icon != Symbols.circle_rounded) ? 1.0 : 0.0,
+                  fill: (isActive && icon != Symbols.circle_rounded)
+                      ? 1.0
+                      : 0.0,
                   weight: isActive ? 600.0 : 400.0,
                 ),
               ),

@@ -5,6 +5,7 @@ import "package:flow/prefs/local_preferences.dart";
 import "package:flow/routes/transaction_page/amount_text.dart";
 import "package:flow/routes/transaction_page/input_amount_sheet/calculator_button.dart";
 import "package:flow/routes/transaction_page/input_amount_sheet/input_value.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/general/modal_sheet.dart";
@@ -86,7 +87,7 @@ class _InputAmountSheetState extends State<InputAmountSheet>
     _numberOfDecimals =
         widget.overrideDecimalPrecision ??
         NumberFormat.simpleCurrency(
-          name: widget.currency ?? LocalPreferences().getPrimaryCurrency(),
+          name: widget.currency ?? UserPreferencesService().primaryCurrency,
         ).decimalDigits ??
         2;
     if (_numberOfDecimals <= 0) {
@@ -153,23 +154,22 @@ class _InputAmountSheetState extends State<InputAmountSheet>
                           ..._getNumberRow(0),
                           _calculatorMode
                               ? CalculatorButton(
-                                operation: CalculatorOperation.multiply,
-                                onTap: setCalculatorOperation,
-                                currentOperation: _currentOperation,
-                              )
+                                  operation: CalculatorOperation.multiply,
+                                  onTap: setCalculatorOperation,
+                                  currentOperation: _currentOperation,
+                                )
                               : NumpadButton(
-                                onTap: () => removeDigit(),
-                                onLongPress: () => _reset(),
-                                mainAxisCellCount: widget.lockSign ? 2 : 1,
-                                child: const Icon(Symbols.backspace_rounded),
-                              ),
+                                  onTap: () => removeDigit(),
+                                  onLongPress: () => _reset(),
+                                  mainAxisCellCount: widget.lockSign ? 2 : 1,
+                                  child: const Icon(Symbols.backspace_rounded),
+                                ),
                           ..._getNumberRow(1),
                           if (!widget.lockSign && !_calculatorMode)
                             NumpadButton(
-                              child:
-                                  widget.allowNegative
-                                      ? const Icon(Symbols.remove_rounded)
-                                      : const Icon(Symbols.add_rounded),
+                              child: widget.allowNegative
+                                  ? const Icon(Symbols.remove_rounded)
+                                  : const Icon(Symbols.add_rounded),
                               onTap: () => _negate(),
                             ),
                           if (_calculatorMode)
@@ -181,17 +181,17 @@ class _InputAmountSheetState extends State<InputAmountSheet>
                           ..._getNumberRow(2),
                           widget.hasCalculator
                               ? (_calculatorMode
-                                  ? CalculatorButton(
-                                    operation: CalculatorOperation.subtract,
-                                    onTap: setCalculatorOperation,
-                                    currentOperation: _currentOperation,
-                                  )
-                                  : NumpadButton(
-                                    onTap: () => calculatorMode(),
-                                    child: const Icon(
-                                      Symbols.calculate_rounded,
-                                    ),
-                                  ))
+                                    ? CalculatorButton(
+                                        operation: CalculatorOperation.subtract,
+                                        onTap: setCalculatorOperation,
+                                        currentOperation: _currentOperation,
+                                      )
+                                    : NumpadButton(
+                                        onTap: () => calculatorMode(),
+                                        child: const Icon(
+                                          Symbols.calculate_rounded,
+                                        ),
+                                      ))
                               : _doneButton(context),
                           NumpadButton(
                             onTap: () => insertDigit(0),
@@ -304,10 +304,9 @@ class _InputAmountSheetState extends State<InputAmountSheet>
     if (_inputtingDecimal) {
       final bool hasAvailableDigits = value.decimalLength < _numberOfDecimals;
 
-      final bool canAppendZero =
-          (n == 0 && value.decimalPart == 0)
-              ? (value.decimalLength + 1 < _numberOfDecimals)
-              : true;
+      final bool canAppendZero = (n == 0 && value.decimalPart == 0)
+          ? (value.decimalLength + 1 < _numberOfDecimals)
+          : true;
 
       if (hasAvailableDigits && canAppendZero) {
         value = value.appendDecimal(n);
@@ -562,8 +561,8 @@ class _InputAmountSheetState extends State<InputAmountSheet>
     const SingleActivator(LogicalKeyboardKey.digit0): () => insertDigit(0),
     const SingleActivator(LogicalKeyboardKey.numpad0): () => insertDigit(0),
     const SingleActivator(LogicalKeyboardKey.period): () => decimalMode(),
-    const SingleActivator(LogicalKeyboardKey.numpadDecimal):
-        () => decimalMode(),
+    const SingleActivator(LogicalKeyboardKey.numpadDecimal): () =>
+        decimalMode(),
     const SingleActivator(LogicalKeyboardKey.enter): () => _saveOrPop(),
     const SingleActivator(LogicalKeyboardKey.numpadEnter): () => _saveOrPop(),
     const SingleActivator(LogicalKeyboardKey.backspace): () => removeDigit(),

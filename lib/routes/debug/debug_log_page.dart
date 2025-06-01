@@ -36,21 +36,20 @@ class _DebugLogPageState extends State<DebugLogPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(path.basename(widget.path))),
-      body:
-          _ready
-              ? DefaultTextStyle(
-                style: TextStyle(
-                  fontFamily: "monospace",
-                  fontFamilyFallback: ["Poppins"],
-                ),
-                child: ListView.builder(
-                  itemCount: _lines.length,
-                  itemBuilder: (context, i) => Text(_lines[i]),
-                  controller: _controller,
-                  padding: EdgeInsets.all(16.0),
-                ),
-              )
-              : const Center(child: CircularProgressIndicator()),
+      body: _ready
+          ? DefaultTextStyle(
+              style: TextStyle(
+                fontFamily: "monospace",
+                fontFamilyFallback: ["Poppins"],
+              ),
+              child: ListView.builder(
+                itemCount: _lines.length,
+                itemBuilder: (context, i) => Text(_lines[i]),
+                controller: _controller,
+                padding: EdgeInsets.all(16.0),
+              ),
+            )
+          : const Center(child: CircularProgressIndicator()),
     );
   }
 

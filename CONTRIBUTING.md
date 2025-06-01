@@ -47,8 +47,11 @@ When translating Flow to your language, the translation coverage must be 100%.
 You can follow the same steps in [Developing](#developing), and you can safely
 skip lints and tests (step 6 and 7).
 
-It's highly recommended to copy [en_US.json](./assets/l10n/en_US.json) or
+It's highly recommended to copy [en_US.json](./assets/l10n/en.json) or
 any other existing translations with full coverage, and work on top of it.
+
+Make sure you add the your language in the list of supported languages. See
+[lib/l10n/supported_languages.dart](./lib/l10n/supported_languages.dart).
 
 ## License
 

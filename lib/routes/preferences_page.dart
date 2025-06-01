@@ -10,11 +10,11 @@ import "package:flow/routes/preferences/sections/lock_app.dart";
 import "package:flow/routes/preferences/sections/privacy.dart";
 import "package:flow/services/local_auth.dart";
 import "package:flow/services/notifications.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/color_themes/registry.dart";
 import "package:flow/theme/flow_color_scheme.dart";
 import "package:flow/theme/names.dart";
 import "package:flow/widgets/general/directional_chevron.dart";
-import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/general/list_header.dart";
 import "package:flow/widgets/general/rtl_flipper.dart";
 import "package:flow/widgets/sheets/select_currency_sheet.dart";
@@ -66,10 +66,16 @@ class PreferencesPageState extends State<PreferencesPage> {
     );
 
     final bool enableGeo = LocalPreferences().enableGeo.get();
-    final bool autoAttachTransactionGeo =
-        LocalPreferences().autoAttachTransactionGeo.get();
-    final bool pendingTransactionsRequireConfrimation =
-        LocalPreferences().pendingTransactions.requireConfrimation.get();
+    final bool autoAttachTransactionGeo = LocalPreferences()
+        .autoAttachTransactionGeo
+        .get();
+    final bool pendingTransactionsRequireConfrimation = LocalPreferences()
+        .pendingTransactions
+        .requireConfrimation
+        .get();
+
+    final String currentPrimaryCurrency =
+        UserPreferencesService().primaryCurrency;
 
     return Scaffold(
       appBar: AppBar(title: Text("preferences".t(context))),
@@ -103,7 +109,7 @@ class PreferencesPageState extends State<PreferencesPage> {
 
               leading: const Icon(Symbols.universal_currency_alt_rounded),
               onTap: () => _updatePrimaryCurrency(),
-              subtitle: Text(LocalPreferences().getPrimaryCurrency()),
+              subtitle: Text(currentPrimaryCurrency),
               trailing: DirectionalChevron(),
             ),
             ListTile(
@@ -140,9 +146,8 @@ class PreferencesPageState extends State<PreferencesPage> {
                     : "general.disabled".t(context),
               ),
               leading: const Icon(Symbols.search_activity_rounded),
-              onTap:
-                  () =>
-                      _pushAndRefreshAfter("/preferences/pendingTransactions"),
+              onTap: () =>
+                  _pushAndRefreshAfter("/preferences/pendingTransactions"),
               trailing: DirectionalChevron(),
             ),
             ListTile(
@@ -152,8 +157,10 @@ class PreferencesPageState extends State<PreferencesPage> {
               subtitle: Text(
                 enableGeo
                     ? (autoAttachTransactionGeo
-                        ? "preferences.transactions.geo.auto.enabled".t(context)
-                        : "general.enabled".t(context))
+                          ? "preferences.transactions.geo.auto.enabled".t(
+                              context,
+                            )
+                          : "general.enabled".t(context))
                     : "general.disabled".t(context),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -163,10 +170,9 @@ class PreferencesPageState extends State<PreferencesPage> {
             ListTile(
               leading: const Icon(Symbols.list_rounded),
               title: Text("preferences.transactions.listTile".t(context)),
-              onTap:
-                  () => _pushAndRefreshAfter(
-                    "/preferences/transactionListItemAppearance",
-                  ),
+              onTap: () => _pushAndRefreshAfter(
+                "/preferences/transactionListItemAppearance",
+              ),
               trailing: DirectionalChevron(),
             ),
             const SizedBox(height: 24.0),
@@ -174,10 +180,9 @@ class PreferencesPageState extends State<PreferencesPage> {
             const SizedBox(height: 8.0),
             ListTile(
               title: Text("preferences.theme".t(context)),
-              leading:
-                  currentTheme.isDark
-                      ? const Icon(Symbols.dark_mode_rounded)
-                      : const Icon(Symbols.light_mode_rounded),
+              leading: currentTheme.isDark
+                  ? const Icon(Symbols.dark_mode_rounded)
+                  : const Icon(Symbols.light_mode_rounded),
               subtitle: Text(
                 themeNames[currentTheme.name] ?? currentTheme.name,
               ),
@@ -198,10 +203,8 @@ class PreferencesPageState extends State<PreferencesPage> {
             ListTile(
               title: Text("preferences.transactionButtonOrder".t(context)),
               leading: const Icon(Symbols.action_key_rounded),
-              onTap:
-                  () => _pushAndRefreshAfter(
-                    "/preferences/transactionButtonOrder",
-                  ),
+              onTap: () =>
+                  _pushAndRefreshAfter("/preferences/transactionButtonOrder"),
               subtitle: Text(
                 "preferences.transactionButtonOrder.description".t(context),
                 maxLines: 1,
@@ -218,15 +221,14 @@ class PreferencesPageState extends State<PreferencesPage> {
             ListHeader("preferences.hapticFeedback".t(context)),
             const SizedBox(height: 8.0),
             const Haptics(),
-            const SizedBox(height: 16.0),
-            Frame(
-              child: Align(
-                alignment: Alignment.topRight,
-                child: TextButton(
-                  onPressed: () => context.push("/_debug/logs"),
-                  child: Text("View debug logs"),
-                ),
-              ),
+            const SizedBox(height: 24.0),
+            ListHeader("preferences.feedback".t(context)),
+            const SizedBox(height: 8.0),
+            ListTile(
+              title: Text("preferences.feedback.debugLogs".t(context)),
+              leading: const Icon(Symbols.bug_report_rounded),
+              onTap: () => context.push("/_debug/logs"),
+              trailing: DirectionalChevron(),
             ),
             const SizedBox(height: 16.0),
           ],
@@ -264,7 +266,7 @@ class PreferencesPageState extends State<PreferencesPage> {
     try {
       Locale current =
           LocalPreferences().localeOverride.get() ??
-          FlowLocalizations.supportedLanguages.first;
+          FlowLocalizations.supportedLocales.first;
 
       final selected = await showModalBottomSheet<Locale>(
         context: context,
@@ -288,7 +290,7 @@ class PreferencesPageState extends State<PreferencesPage> {
     });
 
     try {
-      String current = LocalPreferences().getPrimaryCurrency();
+      final String current = UserPreferencesService().primaryCurrency;
 
       final selected = await showModalBottomSheet<String>(
         context: context,
@@ -296,7 +298,7 @@ class PreferencesPageState extends State<PreferencesPage> {
       );
 
       if (selected != null) {
-        await LocalPreferences().primaryCurrency.set(selected);
+        UserPreferencesService().primaryCurrency = selected;
       }
     } finally {
       _currencyBusy = false;
@@ -317,8 +319,10 @@ class PreferencesPageState extends State<PreferencesPage> {
   void _openTheme() async {
     await context.push("/preferences/theme");
 
-    final bool themeChangesAppIcon =
-        LocalPreferences().theme.themeChangesAppIcon.get();
+    final bool themeChangesAppIcon = LocalPreferences()
+        .theme
+        .themeChangesAppIcon
+        .get();
 
     trySetAppIcon(
       themeChangesAppIcon

@@ -75,21 +75,17 @@ class _SelectRecurrenceState extends State<SelectRecurrence> {
                   isDense: true,
                   icon: Icon(Symbols.arrow_drop_down_rounded),
                   alignment: AlignmentDirectional.topEnd,
-                  items:
-                      RecurrenceMode.values
-                          .where((mode) => mode != RecurrenceMode.custom)
-                          .map(
-                            (mode) => DropdownMenuItem<RecurrenceMode>(
-                              value: mode,
-                              child: Text(
-                                mode.localizedNameContext(
-                                  context,
-                                  l10nEnumPayload,
-                                ),
-                              ),
-                            ),
-                          )
-                          .toList(),
+                  items: RecurrenceMode.values
+                      .where((mode) => mode != RecurrenceMode.custom)
+                      .map(
+                        (mode) => DropdownMenuItem<RecurrenceMode>(
+                          value: mode,
+                          child: Text(
+                            mode.localizedNameContext(context, l10nEnumPayload),
+                          ),
+                        ),
+                      )
+                      .toList(),
                   onChanged: _updateMode,
                 ),
               ),
@@ -171,9 +167,9 @@ class _SelectRecurrenceState extends State<SelectRecurrence> {
 
   void _selectFrom() async {
     final DateTime initialDate =
-        _recurrence.range.from.isBefore(DateTime(0))
-            ? DateTime.now()
-            : _recurrence.range.from;
+        _recurrence.range.from.isBefore(Moment.minValue)
+        ? DateTime.now()
+        : _recurrence.range.from;
 
     final DateTime? result = await context.pickDate(
       initialDate,
@@ -201,10 +197,9 @@ class _SelectRecurrenceState extends State<SelectRecurrence> {
   }
 
   void _selectUntil() async {
-    final DateTime initialDate =
-        _recurrence.range.to.isAfter(DateTime(4000))
-            ? DateTime.now()
-            : _recurrence.range.to;
+    final DateTime initialDate = _recurrence.range.to.isAfter(DateTime(4000))
+        ? DateTime.now()
+        : _recurrence.range.to;
 
     final DateTime? result = await context.pickDate(initialDate);
 

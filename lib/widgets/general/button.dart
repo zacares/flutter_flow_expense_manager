@@ -53,26 +53,24 @@ class Button extends StatelessWidget {
 
     return Surface(
       shape: RoundedRectangleBorder(borderRadius: borderRadius),
-      color:
-          onTap == null && onLongPress == null
-              ? context.colorScheme.onSurface.withAlpha(0x61)
-              : backgroundColor,
-      builder:
-          (context) => InkWell(
-            onTap: onTap,
-            onLongPress: onLongPress,
-            borderRadius: borderRadius,
-            child: Padding(
-              padding: padding,
-              child: DefaultTextStyle.merge(
-                style: context.textTheme.labelLarge?.copyWith(
-                  color: context.colorScheme.onSurface,
-                  fontWeight: FontWeight.w500,
-                ),
-                child: child,
-              ),
+      color: onTap == null && onLongPress == null
+          ? context.colorScheme.onSurface.withAlpha(0x61)
+          : backgroundColor,
+      builder: (context) => InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        borderRadius: borderRadius,
+        child: Padding(
+          padding: padding,
+          child: DefaultTextStyle.merge(
+            style: context.textTheme.labelLarge?.copyWith(
+              color: context.colorScheme.onSurface,
+              fontWeight: FontWeight.w500,
             ),
+            child: child,
           ),
+        ),
+      ),
     );
   }
 }

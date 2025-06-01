@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flow/data/exchange_rates.dart";
 import "package:flow/data/internal_nofications/internal_notification.dart";
+import "package:flow/data/single_currency_flow.dart";
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/transaction.dart";
@@ -18,7 +19,7 @@ import "package:flow/widgets/default_transaction_filter_head.dart";
 import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/general/pending_transactions_header.dart";
 import "package:flow/widgets/general/wavy_divider.dart";
-import "package:flow/widgets/grouped_transaction_list.dart";
+import "package:flow/widgets/grouped_transactions_list_view.dart";
 import "package:flow/widgets/home/greetings_bar.dart";
 import "package:flow/widgets/home/home/flow_cards.dart";
 import "package:flow/widgets/home/home/no_transactions.dart";
@@ -52,10 +53,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   late TransactionFilter currentFilter;
 
   TransactionFilter get currentFilterWithPlanned {
-    final DateTime plannedTransactionTo =
-        Moment.now()
-            .add(Duration(days: _plannedTransactionsNextNDays))
-            .startOfNextDay();
+    final DateTime plannedTransactionTo = Moment.now()
+        .add(Duration(days: _plannedTransactionsNextNDays))
+        .startOfNextDay();
 
     final TimeRange? timeRange = currentFilter.range?.range;
 
@@ -139,10 +139,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           ),
       builder: (context, snapshot) {
         final DateTime now = Moment.now().startOfNextMinute();
-        final DateTime cutoffPlanned =
-            now
-                .add(Duration(days: _plannedTransactionsNextNDays))
-                .startOfNextDay();
+        final DateTime cutoffPlanned = now
+            .add(Duration(days: _plannedTransactionsNextNDays))
+            .startOfNextDay();
         final List<Transaction>? transactions = snapshot.data;
 
         if (currentFilter.range?.range?.contains(now) == true) {
@@ -203,7 +202,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       valueListenable: ExchangeRatesService().exchangeRatesCache,
       builder: (context, ratesSet, _) {
         final ExchangeRates? rates = ratesSet?.get(
-          LocalPreferences().getPrimaryCurrency(),
+          UserPreferencesService().primaryCurrency,
         );
 
         final bool showMissingExchangeRatesWarning =
@@ -218,32 +217,39 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             )
             .groupByRange(rangeFn: currentFilter.groupBy.fromTransaction);
 
-        final List<Transaction> pendingTransactions =
-            transactions
-                .where(
-                  (transaction) =>
-                      transaction.transactionDate.isAfter(now) ||
-                      transaction.isPending == true,
-                )
-                .toList();
+        final List<Transaction> pendingTransactions = transactions
+            .where(
+              (transaction) =>
+                  transaction.transactionDate.isAfter(now) ||
+                  transaction.isPending == true,
+            )
+            .toList();
 
-        final int actionNeededCount =
-            pendingTransactions
-                .where((transaction) => transaction.confirmable())
-                .length;
+        final int actionNeededCount = pendingTransactions
+            .where((transaction) => transaction.confirmable())
+            .length;
 
         final Map<TimeRange, List<Transaction>> pendingTransactionsGrouped =
             pendingTransactions.groupByRange(
-              rangeFn:
-                  (transaction) =>
-                      CustomTimeRange(Moment.minValue, Moment.maxValue),
+              rangeFn: (transaction) =>
+                  CustomTimeRange(Moment.minValue, Moment.maxValue),
             );
 
         final bool shouldCombineTransferIfNeeded =
             currentFilter.accounts?.isNotEmpty != true;
 
-        return GroupedTransactionList(
-          listType: GroupedTransactionListType.sliverReorderable,
+        final String primaryCurrency = UserPreferencesService().primaryCurrency;
+
+        final SingleCurrencyFlow combinedFlow =
+            SingleCurrencyFlow(currency: primaryCurrency)..addAll(
+              transactions
+                  .where((transaction) => !transaction.isTransfer)
+                  .map((t) => t.money),
+              rates,
+            );
+
+        return GroupedTransactionsListView(
+          listType: GroupedTransactionsListViewType.sliverReorderable,
           mainHeader: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -252,10 +258,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                 SlidableAutoCloseBehavior(
                   child: InternalNotificationSection(
                     notification: _internalNotification!,
-                    onDismiss:
-                        () => setState(() {
-                          _internalNotification = null;
-                        }),
+                    onDismiss: () => setState(() {
+                      _internalNotification = null;
+                    }),
                   ),
                 ),
                 SizedBox(height: 8.0),
@@ -271,7 +276,10 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
               //   Text("transactions.count".t(context, transactions.length)),
               //   const SizedBox(height: 4.0),
               // ],
-              FlowCards(transactions: transactions, rates: rates),
+              FlowCards(
+                totalExpense: combinedFlow.totalExpense,
+                totalIncome: combinedFlow.totalIncome,
+              ),
               SizedBox(height: 8.0),
               Align(
                 alignment: AlignmentDirectional.topStart,
