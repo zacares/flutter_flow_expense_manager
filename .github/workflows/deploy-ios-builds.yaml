@@ -7,7 +7,7 @@ on:
       - "internal"
 jobs:
   build:
-    runs-on: "macos-latest"
+    runs-on: "macos-15"
     env:
       APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
       APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
