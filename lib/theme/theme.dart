@@ -52,8 +52,9 @@ class ThemeFactory {
       menuAlignment: Alignment.center,
     );
 
-    final Color bottomNavigationBarItemColor =
-        isDark ? colorScheme.onSurface : colorScheme.primary;
+    final Color bottomNavigationBarItemColor = isDark
+        ? colorScheme.onSurface
+        : colorScheme.primary;
 
     final TextTheme textTheme = flowTextTheme.apply(
       fontFamily: fontFamily,

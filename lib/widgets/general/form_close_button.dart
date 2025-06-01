@@ -17,7 +17,7 @@ class FormCloseButton extends StatefulWidget {
   @override
   State<FormCloseButton> createState() => _FormCloseButtonState();
 
-  static _pop(BuildContext context) {
+  static void _pop(BuildContext context) {
     context.pop();
   }
 }

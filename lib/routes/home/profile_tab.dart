@@ -94,12 +94,11 @@ class _ProfileTabState extends State<ProfileTab> {
             onTap: () => context.push("/community/contributors"),
           ),
           Builder(
-            builder:
-                (context) => ListTile(
-                  title: Text("tabs.profile.recommend".t(context)),
-                  leading: const Icon(Symbols.share_rounded),
-                  onTap: () => context.showUriShareSheet(uri: website),
-                ),
+            builder: (context) => ListTile(
+              title: Text("tabs.profile.recommend".t(context)),
+              leading: const Icon(Symbols.share_rounded),
+              onTap: () => context.showUriShareSheet(uri: website),
+            ),
           ),
           ListTile(
             title: Text("visitGitHubRepo".t(context)),
@@ -144,11 +143,10 @@ class _ProfileTabState extends State<ProfileTab> {
               title: const Text("Show debug notification"),
               leading: const Icon(Symbols.notifications_rounded),
               onTap: () => NotificationsService().debugShow(),
-              onLongPress:
-                  () => Future.delayed(
-                    const Duration(seconds: 3),
-                    () => NotificationsService().debugShow(),
-                  ),
+              onLongPress: () => Future.delayed(
+                const Duration(seconds: 3),
+                () => NotificationsService().debugShow(),
+              ),
             ),
             ListTile(
               title: const Text("Clear exchange rates cache"),
@@ -212,20 +210,16 @@ class _ProfileTabState extends State<ProfileTab> {
 
     final bool? confirm = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("[dev] Reset database?"),
-            actions: [
-              Button(
-                onTap: () => context.pop(true),
-                child: const Text("Confirm delete"),
-              ),
-              Button(
-                onTap: () => context.pop(false),
-                child: const Text("Cancel"),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text("[dev] Reset database?"),
+        actions: [
+          Button(
+            onTap: () => context.pop(true),
+            child: const Text("Confirm delete"),
           ),
+          Button(onTap: () => context.pop(false), child: const Text("Cancel")),
+        ],
+      ),
     );
 
     setState(() {
@@ -256,20 +250,16 @@ class _ProfileTabState extends State<ProfileTab> {
     });
     final bool? confirm = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("[dev] Purge iCloud debug folder?"),
-            actions: [
-              Button(
-                onTap: () => context.pop(true),
-                child: const Text("Confirm delete"),
-              ),
-              Button(
-                onTap: () => context.pop(false),
-                child: const Text("Cancel"),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text("[dev] Purge iCloud debug folder?"),
+        actions: [
+          Button(
+            onTap: () => context.pop(true),
+            child: const Text("Confirm delete"),
           ),
+          Button(onTap: () => context.pop(false), child: const Text("Cancel")),
+        ],
+      ),
     );
 
     if (confirm != true) return;
@@ -289,20 +279,16 @@ class _ProfileTabState extends State<ProfileTab> {
 
     final bool? confirm = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("[dev] Clear Shared Preferences?"),
-            actions: [
-              Button(
-                onTap: () => context.pop(true),
-                child: const Text("Confirm clear"),
-              ),
-              Button(
-                onTap: () => context.pop(false),
-                child: const Text("Cancel"),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text("[dev] Clear Shared Preferences?"),
+        actions: [
+          Button(
+            onTap: () => context.pop(true),
+            child: const Text("Confirm clear"),
           ),
+          Button(onTap: () => context.pop(false), child: const Text("Cancel")),
+        ],
+      ),
     );
 
     setState(() {

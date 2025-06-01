@@ -73,8 +73,9 @@ class _GroupPieChartState<T> extends State<GroupPieChart<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final ChartData<T>? selectedSection =
-        selectedKey == null ? null : data[selectedKey!];
+    final ChartData<T>? selectedSection = selectedKey == null
+        ? null
+        : data[selectedKey!];
 
     final Money? selectedSectionTotal = selectedSection?.money;
 
@@ -122,8 +123,9 @@ class _GroupPieChartState<T> extends State<GroupPieChart<T>> {
                                   response.touchedSection!.touchedSectionIndex;
 
                               if (index > -1) {
-                                final String newSelectedKey =
-                                    data.entries.elementAt(index).key;
+                                final String newSelectedKey = data.entries
+                                    .elementAt(index)
+                                    .key;
 
                                 // if (!usingMouse &&
                                 //     newSelectedKey == selectedKey) {
@@ -139,17 +141,16 @@ class _GroupPieChartState<T> extends State<GroupPieChart<T>> {
                           sectionsSpace: 1.0,
                           centerSpaceRadius: centerHoleDiameter / 2,
                           startDegreeOffset: -90.0,
-                          sections:
-                              data.entries.indexed
-                                  .map(
-                                    (e) => sectionData(
-                                      data[e.$2.key]!,
-                                      selected: e.$2.key == selectedKey,
-                                      index: e.$1,
-                                      radius: radius,
-                                    ),
-                                  )
-                                  .toList(),
+                          sections: data.entries.indexed
+                              .map(
+                                (e) => sectionData(
+                                  data[e.$2.key]!,
+                                  selected: e.$2.key == selectedKey,
+                                  index: e.$1,
+                                  radius: radius,
+                                ),
+                              )
+                              .toList(),
                         ),
                       ),
                       Positioned.fill(
@@ -202,12 +203,12 @@ class _GroupPieChartState<T> extends State<GroupPieChart<T>> {
   }) {
     final bool usingDarkTheme = Flow.of(context).useDarkTheme;
 
-    final Color color =
-        (usingDarkTheme ? accentColors : primaryColors)[index %
-            primaryColors.length];
-    final Color backgroundColor =
-        (usingDarkTheme ? primaryColors : accentColors)[index %
-            primaryColors.length];
+    final Color color = (usingDarkTheme
+        ? accentColors
+        : primaryColors)[index % primaryColors.length];
+    final Color backgroundColor = (usingDarkTheme
+        ? primaryColors
+        : accentColors)[index % primaryColors.length];
 
     return PieChartSectionData(
       color: color,
@@ -215,18 +216,18 @@ class _GroupPieChartState<T> extends State<GroupPieChart<T>> {
       value: data.displayTotal,
       title: resolveName(data.associatedData),
       showTitle: false,
-      badgeWidget:
-          selected
-              ? resolveBadgeWidget(
-                data.associatedData,
-                color: color,
-                backgroundColor: backgroundColor,
-                percent: data.displayTotal / totalAmount.amount,
-              )
-              : null,
+      badgeWidget: selected
+          ? resolveBadgeWidget(
+              data.associatedData,
+              color: color,
+              backgroundColor: backgroundColor,
+              percent: data.displayTotal / totalAmount.amount,
+            )
+          : null,
       badgePositionPercentageOffset: 0.8,
-      borderSide:
-          selected ? BorderSide(color: backgroundColor, width: 3.0) : null,
+      borderSide: selected
+          ? BorderSide(color: backgroundColor, width: 3.0)
+          : null,
     );
   }
 

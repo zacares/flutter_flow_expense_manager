@@ -38,15 +38,14 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
 
-    final Query<Profile> profileQuery =
-        ObjectBox()
-            .box<Profile>()
-            .query(
-              widget.profileId != null
-                  ? Profile_.id.equals(widget.profileId!)
-                  : null,
-            )
-            .build();
+    final Query<Profile> profileQuery = ObjectBox()
+        .box<Profile>()
+        .query(
+          widget.profileId != null
+              ? Profile_.id.equals(widget.profileId!)
+              : null,
+        )
+        .build();
 
     _profile = profileQuery.findFirst();
 
@@ -58,7 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      onPopInvokedWithResult: (_, __) => save(),
+      onPopInvokedWithResult: (_, _) => save(),
       child: Scaffold(
         appBar: AppBar(
           actions: [
@@ -70,36 +69,35 @@ class _ProfilePageState extends State<ProfilePage> {
           leadingWidth: 40.0,
         ),
         body: SafeArea(
-          child:
-              _profile == null
-                  ? const Center(child: Text("Impossible state"))
-                  : Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Hero(
-                          tag: "pfp",
-                          child: ProfilePicture(
-                            key: ValueKey(_profilePictureUpdateCounter),
-                            filePath: _profile.imagePath,
-                            onTap: changeProfilePicture,
-                            showOverlayUponHover: true,
-                          ),
+          child: _profile == null
+              ? const Center(child: Text("Impossible state"))
+              : Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Hero(
+                        tag: "pfp",
+                        child: ProfilePicture(
+                          key: ValueKey(_profilePictureUpdateCounter),
+                          filePath: _profile.imagePath,
+                          onTap: changeProfilePicture,
+                          showOverlayUponHover: true,
                         ),
-                        const SizedBox(height: 16.0),
-                        TextField(
-                          controller: _nameController,
-                          onSubmitted: (_) => save(),
-                          maxLength: Profile.maxNameLength,
-                          decoration: InputDecoration(
-                            counter: SizedBox.shrink(),
-                            labelText: "profile.name".t(context),
-                          ),
+                      ),
+                      const SizedBox(height: 16.0),
+                      TextField(
+                        controller: _nameController,
+                        onSubmitted: (_) => save(),
+                        maxLength: Profile.maxNameLength,
+                        decoration: InputDecoration(
+                          counter: SizedBox.shrink(),
+                          labelText: "profile.name".t(context),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+                ),
         ),
       ),
     );

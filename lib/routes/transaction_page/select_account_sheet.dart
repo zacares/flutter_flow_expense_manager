@@ -54,31 +54,29 @@ class _SelectAccountSheetState extends State<SelectAccountSheet> {
       title: Text(
         widget.titleOverride ?? "transaction.edit.selectAccount".t(context),
       ),
-      trailing:
-          widget.accounts.isEmpty
-              ? ModalOverflowBar(
-                alignment: MainAxisAlignment.end,
-                children: [
-                  Button(
-                    onTap: () => context.pop(),
-                    child: Text("general.cancel".t(context)),
-                  ),
-                ],
-              )
-              : null,
-      leading:
-          showSearchBar
-              ? Frame(
-                child: TextField(
-                  onChanged: (value) => setState(() => _query = value),
-                  textInputAction: TextInputAction.done,
-                  decoration: InputDecoration(
-                    hintText: "general.search".t(context),
-                    prefixIcon: const Icon(Symbols.search_rounded),
-                  ),
+      trailing: widget.accounts.isEmpty
+          ? ModalOverflowBar(
+              alignment: MainAxisAlignment.end,
+              children: [
+                Button(
+                  onTap: () => context.pop(),
+                  child: Text("general.cancel".t(context)),
                 ),
-              )
-              : null,
+              ],
+            )
+          : null,
+      leading: showSearchBar
+          ? Frame(
+              child: TextField(
+                onChanged: (value) => setState(() => _query = value),
+                textInputAction: TextInputAction.done,
+                decoration: InputDecoration(
+                  hintText: "general.search".t(context),
+                  prefixIcon: const Icon(Symbols.search_rounded),
+                ),
+              ),
+            )
+          : null,
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -96,15 +94,14 @@ class _SelectAccountSheetState extends State<SelectAccountSheet> {
               (account) => ListTile(
                 key: ValueKey(account.uuid),
                 title: Text(account.name),
-                subtitle:
-                    widget.showBalance
-                        ? MoneyText(
-                          account.balance,
-                          initiallyAbbreviated: false,
-                          autoSize: true,
-                          overrideObscure: false,
-                        )
-                        : null,
+                subtitle: widget.showBalance
+                    ? MoneyText(
+                        account.balance,
+                        initiallyAbbreviated: false,
+                        autoSize: true,
+                        overrideObscure: false,
+                      )
+                    : null,
                 leading: FlowIcon(account.icon),
                 trailing: widget.showTrailing ? DirectionalChevron() : null,
                 onTap: () => context.pop(account),

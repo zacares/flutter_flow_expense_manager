@@ -368,10 +368,9 @@ class TransactionFilter implements Jasonable {
       categories: categories == null ? this.categories : categories.value,
       accounts: accounts == null ? this.accounts : accounts.value,
       sortBy: sortBy ?? this.sortBy,
-      groupBy:
-          (groupBy == null || groupBy.value == null)
-              ? this.groupBy
-              : groupBy.value!,
+      groupBy: (groupBy == null || groupBy.value == null)
+          ? this.groupBy
+          : groupBy.value!,
       sortDescending: sortDescending ?? this.sortDescending,
       isPending: isPending == null ? this.isPending : isPending.value,
       minAmount: minAmount == null ? this.minAmount : minAmount.value,

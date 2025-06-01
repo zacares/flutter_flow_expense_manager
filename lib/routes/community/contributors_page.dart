@@ -76,13 +76,11 @@ class _ContributorsPageState extends State<ContributorsPage> {
             child: Wrap(
               spacing: 12.0,
               runSpacing: 12.0,
-              children:
-                  contributors
-                      .map(
-                        (contributor) =>
-                            ContributorCard(contributor: contributor),
-                      )
-                      .toList(),
+              children: contributors
+                  .map(
+                    (contributor) => ContributorCard(contributor: contributor),
+                  )
+                  .toList(),
             ),
           );
         },

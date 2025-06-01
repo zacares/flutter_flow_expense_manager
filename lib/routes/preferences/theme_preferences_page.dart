@@ -45,8 +45,10 @@ class _ThemePreferencesPageState extends State<ThemePreferencesPage> {
     final String currentTheme = LocalPreferences().getCurrentTheme();
     final String? currentThemeName = themeNames[currentTheme];
 
-    final bool themeChangesAppIcon =
-        LocalPreferences().theme.themeChangesAppIcon.get();
+    final bool themeChangesAppIcon = LocalPreferences()
+        .theme
+        .themeChangesAppIcon
+        .get();
 
     return Scaffold(
       appBar: AppBar(title: Text("preferences.theme.choose".t(context))),
@@ -60,21 +62,20 @@ class _ThemePreferencesPageState extends State<ThemePreferencesPage> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     spacing: 12.0,
-                    children:
-                        groups.keys
-                            .map(
-                              (group) => FilterChip(
-                                label: Text(group),
-                                selected: group == selectedGroup,
-                                onSelected: (selected) {
-                                  if (!selected) return;
-                                  setState(() {
-                                    selectedGroup = group;
-                                  });
-                                },
-                              ),
-                            )
-                            .toList(),
+                    children: groups.keys
+                        .map(
+                          (group) => FilterChip(
+                            label: Text(group),
+                            selected: group == selectedGroup,
+                            onSelected: (selected) {
+                              if (!selected) return;
+                              setState(() {
+                                selectedGroup = group;
+                              });
+                            },
+                          ),
+                        )
+                        .toList(),
                   ),
                 ),
               ),

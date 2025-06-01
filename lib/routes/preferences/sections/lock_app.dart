@@ -25,8 +25,9 @@ class _LockAppState extends State<LockApp> {
   @override
   Widget build(BuildContext context) {
     final bool requireLocalAuth = LocalPreferences().requireLocalAuth.get();
-    final bool requireLocalAuthOnBlur =
-        LocalPreferences().requireLocalAuthOnBlur.get();
+    final bool requireLocalAuthOnBlur = LocalPreferences()
+        .requireLocalAuthOnBlur
+        .get();
 
     return Column(
       mainAxisSize: MainAxisSize.min,

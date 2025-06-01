@@ -81,10 +81,9 @@ class _HomePageState extends State<HomePage>
       try {
         if (NotificationsService().ready &&
             NotificationsService().notificationAppLaunchDetails != null) {
-          final NotificationResponse? response =
-              NotificationsService()
-                  .notificationAppLaunchDetails!
-                  .notificationResponse;
+          final NotificationResponse? response = NotificationsService()
+              .notificationAppLaunchDetails!
+              .notificationResponse;
 
           if (response == null || response.payload == null) {
             throw "No notification payload";
@@ -128,8 +127,8 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     return CallbackShortcuts(
       bindings: {
-        osSingleActivator(LogicalKeyboardKey.keyN):
-            () => _newTransactionPage(null),
+        osSingleActivator(LogicalKeyboardKey.keyN): () =>
+            _newTransactionPage(null),
         osSingleActivator(LogicalKeyboardKey.digit1): () => _navigateTo(0),
         osSingleActivator(LogicalKeyboardKey.digit2): () => _navigateTo(1),
         osSingleActivator(LogicalKeyboardKey.digit3): () => _navigateTo(2),
@@ -144,20 +143,19 @@ class _HomePageState extends State<HomePage>
             offset: 16.0,
             barColor: const Color.fromARGB(0, 86, 75, 75),
             borderRadius: BorderRadius.circular(32.0),
-            body:
-                (context, scrollControler) => Scaffold(
-                  body: SafeArea(
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        HomeTab(scrollController: _homeTabScrollController),
-                        const StatsTab(),
-                        const AccountsTab(),
-                        const ProfileTab(),
-                      ],
-                    ),
-                  ),
+            body: (context, scrollControler) => Scaffold(
+              body: SafeArea(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    HomeTab(scrollController: _homeTabScrollController),
+                    const StatsTab(),
+                    const AccountsTab(),
+                    const ProfileTab(),
+                  ],
                 ),
+              ),
+            ),
             child: Stack(
               alignment: Alignment.center,
               children: [

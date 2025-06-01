@@ -74,13 +74,9 @@ class _TrashBinPreferencesPageState extends State<TrashBinPreferencesPage> {
                                 dropPrefixOrSuffix: true,
                               ),
                             ),
-                            onSelected:
-                                (bool selected) =>
-                                    selected
-                                        ? updateTrashBinRetentionDays(
-                                          value.inDays,
-                                        )
-                                        : null,
+                            onSelected: (bool selected) => selected
+                                ? updateTrashBinRetentionDays(value.inDays)
+                                : null,
                             selected: value.inDays == trashBinRetentionDays,
                           ),
                         ),
@@ -88,11 +84,9 @@ class _TrashBinPreferencesPageState extends State<TrashBinPreferencesPage> {
                           label: Text(
                             "preferences.trashBin.retention.forever".t(context),
                           ),
-                          onSelected:
-                              (bool selected) =>
-                                  selected
-                                      ? updateTrashBinRetentionDays(null)
-                                      : null,
+                          onSelected: (bool selected) => selected
+                              ? updateTrashBinRetentionDays(null)
+                              : null,
                           selected: trashBinRetentionDays == null,
                         ),
                       ],

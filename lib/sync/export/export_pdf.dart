@@ -62,8 +62,9 @@ Future<Uint8List> generatePDFContent({
   };
 
   final TransactionFilter filter = TransactionFilter(
-    accounts:
-        options.whitelistedAccounts?.map((account) => account.uuid).toList(),
+    accounts: options.whitelistedAccounts
+        ?.map((account) => account.uuid)
+        .toList(),
     range: TransactionFilterTimeRange.fromTimeRange(options.timeRange),
   );
 
@@ -79,15 +80,14 @@ Future<Uint8List> generatePDFContent({
   //   "arabic": false,
   // };
 
-  final List<String?> resultingAccounts =
-      transactions
-          .map((transaction) {
-            // TODO @sadespresso check if there's any CJK, Arabic, or other characters in the title
+  final List<String?> resultingAccounts = transactions
+      .map((transaction) {
+        // TODO @sadespresso check if there's any CJK, Arabic, or other characters in the title
 
-            return transaction.accountUuid;
-          })
-          .toSet()
-          .toList();
+        return transaction.accountUuid;
+      })
+      .toSet()
+      .toList();
 
   final pw.TextStyle defaultTextStyle = pw.TextStyle(
     font: defaultFont,
@@ -122,24 +122,23 @@ Future<Uint8List> generatePDFContent({
         transaction.title ??
         (transaction.isTransfer
             ? "transaction.transfer.fromToTitle".tr({
-              "from":
-                  accountNames[transaction
-                      .extensions
-                      .transfer
-                      ?.fromAccountUuid] ??
-                  "~",
-              "to":
-                  accountNames[transaction
-                      .extensions
-                      .transfer
-                      ?.toAccountUuid] ??
-                  "~",
-            })
+                "from":
+                    accountNames[transaction
+                        .extensions
+                        .transfer
+                        ?.fromAccountUuid] ??
+                    "~",
+                "to":
+                    accountNames[transaction
+                        .extensions
+                        .transfer
+                        ?.toAccountUuid] ??
+                    "~",
+              })
             : "transaction.fallbackTitle".tr());
-    final String accountName =
-        (transaction.isTransfer)
-            ? "${accountNames[transaction.extensions.transfer!.fromAccountUuid] ?? "~"} -> ${accountNames[transaction.extensions.transfer!.toAccountUuid] ?? "~"}"
-            : (accountNames[transaction.accountUuid] ?? "~");
+    final String accountName = (transaction.isTransfer)
+        ? "${accountNames[transaction.extensions.transfer!.fromAccountUuid] ?? "~"} -> ${accountNames[transaction.extensions.transfer!.toAccountUuid] ?? "~"}"
+        : (accountNames[transaction.accountUuid] ?? "~");
 
     return pw.TableRow(
       decoration: (even = !even) ? rowEvenDeco : rowOddDeco,
@@ -192,82 +191,76 @@ Future<Uint8List> generatePDFContent({
         },
         margin: pw.EdgeInsets.all(32.0),
       ),
-      header:
-          (context) => pw.Container(
-            width: double.infinity,
-            child: pw.Text(
-              "sync.export.pdf.header".tr({
-                "range": options.timeRange.format(useRelative: false),
-              }),
-            ),
-          ),
-      footer:
-          (context) => pw.Container(
-            width: double.infinity,
-            margin: pw.EdgeInsets.only(top: 16.0),
-            child: pw.RichText(
-              text: pw.TextSpan(
-                style: fineTextStyle,
-                children: [
-                  pw.TextSpan(text: "sync.export.pdf.notice[0]".tr()),
-                  pw.WidgetSpan(
-                    child: pw.UrlLink(
-                      child: pw.Text("Flow", style: fineTextStyle),
-                      destination: "https://flow.gege.mn",
-                    ),
-                  ),
-                  pw.TextSpan(text: "sync.export.pdf.notice[1]".tr()),
-                ],
+      header: (context) => pw.Container(
+        width: double.infinity,
+        child: pw.Text(
+          "sync.export.pdf.header".tr({
+            "range": options.timeRange.format(useRelative: false),
+          }),
+        ),
+      ),
+      footer: (context) => pw.Container(
+        width: double.infinity,
+        margin: pw.EdgeInsets.only(top: 16.0),
+        child: pw.RichText(
+          text: pw.TextSpan(
+            style: fineTextStyle,
+            children: [
+              pw.TextSpan(text: "sync.export.pdf.notice[0]".tr()),
+              pw.WidgetSpan(
+                child: pw.UrlLink(
+                  child: pw.Text("Flow", style: fineTextStyle),
+                  destination: "https://flow.gege.mn",
+                ),
               ),
-            ),
+              pw.TextSpan(text: "sync.export.pdf.notice[1]".tr()),
+            ],
           ),
-      build:
-          (context) => [
-            pw.Row(
-              children: [
-                pw.SvgImage(
-                  svg: logoSvg,
-                  height: defaultTextStyle.fontSize,
-                  width: defaultTextStyle.fontSize,
-                ),
-                pw.Text("Flow"),
-              ],
+        ),
+      ),
+      build: (context) => [
+        pw.Row(
+          children: [
+            pw.SvgImage(
+              svg: logoSvg,
+              height: defaultTextStyle.fontSize,
+              width: defaultTextStyle.fontSize,
             ),
-            pw.Row(
-              children: [
-                pw.Text(
-                  "Statement for: ${resultingAccounts.nonNulls.map((account) => accountNames[account] ?? "~").join(", ")}",
-                ),
-                pw.Text(options.timeRange.format(useRelative: false)),
-              ],
-            ),
-            pw.Divider(),
-            pw.Text("transactions.title".tr()),
-            pw.SizedBox(height: 20),
-            pw.Table(
-              defaultColumnWidth: pw.FlexColumnWidth(),
-              children: [
-                pw.TableRow(
-                  decoration: pw.BoxDecoration(
-                    color: PdfColor.fromInt(0xFFF5CCFF),
-                  ),
-                  children:
-                      PDFHeader.values
-                          .map(
-                            (header) => pw.Padding(
-                              padding: pw.EdgeInsets.symmetric(
-                                horizontal: 4.0,
-                                vertical: 2.0,
-                              ),
-                              child: pw.Text(header.localizedName),
-                            ),
-                          )
-                          .toList(),
-                ),
-                ...transactions.map(generateRow),
-              ],
-            ),
+            pw.Text("Flow"),
           ],
+        ),
+        pw.Row(
+          children: [
+            pw.Text(
+              "Statement for: ${resultingAccounts.nonNulls.map((account) => accountNames[account] ?? "~").join(", ")}",
+            ),
+            pw.Text(options.timeRange.format(useRelative: false)),
+          ],
+        ),
+        pw.Divider(),
+        pw.Text("transactions.title".tr()),
+        pw.SizedBox(height: 20),
+        pw.Table(
+          defaultColumnWidth: pw.FlexColumnWidth(),
+          children: [
+            pw.TableRow(
+              decoration: pw.BoxDecoration(color: PdfColor.fromInt(0xFFF5CCFF)),
+              children: PDFHeader.values
+                  .map(
+                    (header) => pw.Padding(
+                      padding: pw.EdgeInsets.symmetric(
+                        horizontal: 4.0,
+                        vertical: 2.0,
+                      ),
+                      child: pw.Text(header.localizedName),
+                    ),
+                  )
+                  .toList(),
+            ),
+            ...transactions.map(generateRow),
+          ],
+        ),
+      ],
     ),
   );
 

@@ -61,9 +61,8 @@ class ExportSuccess extends StatelessWidget {
                     ),
                     TextSpan(
                       text: '"$filePath"',
-                      recognizer:
-                          TapGestureRecognizer()
-                            ..onTap = () => copyPath(context),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () => copyPath(context),
                       style: const TextStyle(fontWeight: FontWeight.w500),
                     ),
                     TextSpan(

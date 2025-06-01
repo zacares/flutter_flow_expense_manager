@@ -334,7 +334,7 @@
     },
     {
       "id": "10:7829328581176695647",
-      "lastPropertyId": "16:4857491171331889557",
+      "lastPropertyId": "17:5034425281728425226",
       "name": "UserPreferences",
       "properties": [
         {
@@ -408,6 +408,11 @@
         {
           "id": "16:4857491171331889557",
           "name": "primaryCurrency",
+          "type": 9
+        },
+        {
+          "id": "17:5034425281728425226",
+          "name": "transactionButtonOrderJoined",
           "type": 9
         }
       ],

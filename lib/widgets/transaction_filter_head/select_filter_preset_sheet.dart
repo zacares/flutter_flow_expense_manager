@@ -70,10 +70,12 @@ class _SelectFilterPresetSheetState extends State<SelectFilterPresetSheet> {
               final List<TransactionFilterPreset> presets =
                   presetsSnapshot.requireData;
 
-              final List<Account> accounts =
-                  AccountsProvider.of(context).activeAccounts;
-              final List<Category> categories =
-                  CategoriesProvider.of(context).categories;
+              final List<Account> accounts = AccountsProvider.of(
+                context,
+              ).activeAccounts;
+              final List<Category> categories = CategoriesProvider.of(
+                context,
+              ).categories;
 
               final bool flowDefaultSelected =
                   widget.selected?.calculateDifferentFieldCount(
@@ -91,10 +93,9 @@ class _SelectFilterPresetSheetState extends State<SelectFilterPresetSheet> {
                         selected: flowDefaultSelected,
                         makeDefault: () => makeDefault(null),
                         isDefault: defaultPreset == null,
-                        onTap:
-                            () => context.pop(
-                              Optional(TransactionFilterPreset.defaultFilter),
-                            ),
+                        onTap: () => context.pop(
+                          Optional(TransactionFilterPreset.defaultFilter),
+                        ),
                       ),
                       ...presets.map((preset) {
                         final int? differenceCount = widget.selected
@@ -122,21 +123,23 @@ class _SelectFilterPresetSheetState extends State<SelectFilterPresetSheet> {
                       if (widget.onSaveAsNew != null)
                         (hasSelected
                             ? Frame.standalone(
-                              child: InfoText(
-                                child: Text(
-                                  "transactionFilterPreset.saveAsNew.guide".t(
+                                child: InfoText(
+                                  child: Text(
+                                    "transactionFilterPreset.saveAsNew.guide".t(
+                                      context,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : ListTile(
+                                onTap: () => widget.onSaveAsNew!(),
+                                title: Text(
+                                  "transactionFilterPreset.saveAsNew".t(
                                     context,
                                   ),
                                 ),
-                              ),
-                            )
-                            : ListTile(
-                              onTap: () => widget.onSaveAsNew!(),
-                              title: Text(
-                                "transactionFilterPreset.saveAsNew".t(context),
-                              ),
-                              trailing: Icon(Symbols.add_rounded),
-                            )),
+                                trailing: Icon(Symbols.add_rounded),
+                              )),
                     ],
                   ),
                 ),

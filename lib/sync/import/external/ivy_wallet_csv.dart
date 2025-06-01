@@ -99,11 +99,10 @@ class IvyWalletCsvImporter extends Importer<IvyWalletCsv> {
                 (name) => Category.preset(
                   name: name,
                   uuid: categoryNameUuidMapping[name]!,
-                  iconCode:
-                      guessPresetIcon(
-                        name,
-                        fallback: IconFlowIcon(Symbols.category_rounded),
-                      ).toString(),
+                  iconCode: guessPresetIcon(
+                    name,
+                    fallback: IconFlowIcon(Symbols.category_rounded),
+                  ).toString(),
                 ),
               )
               .toList(),
@@ -131,11 +130,10 @@ class IvyWalletCsvImporter extends Importer<IvyWalletCsv> {
                 (name) => Account.preset(
                   name: name,
                   uuid: accountNameUuidMapping[name]!,
-                  iconCode:
-                      guessPresetIcon(
-                        name,
-                        fallback: IconFlowIcon(Symbols.wallet),
-                      ).toString(),
+                  iconCode: guessPresetIcon(
+                    name,
+                    fallback: IconFlowIcon(Symbols.wallet),
+                  ).toString(),
                   currency: accountCurrencies[name]!,
                 ),
               )

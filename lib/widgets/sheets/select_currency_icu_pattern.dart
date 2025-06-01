@@ -42,8 +42,8 @@ class _SelectCurrencyIcuPatternState extends State<SelectCurrencyIcuPattern> {
     super.initState();
     selectedPattern =
         UserPreferencesService().icuCurrencyFormattingPattern == null
-            ? null
-            : Optional(UserPreferencesService().icuCurrencyFormattingPattern);
+        ? null
+        : Optional(UserPreferencesService().icuCurrencyFormattingPattern);
   }
 
   @override
@@ -93,35 +93,33 @@ class _SelectCurrencyIcuPatternState extends State<SelectCurrencyIcuPattern> {
       ),
       child: SingleChildScrollView(
         child: Column(
-          children:
-              SelectCurrencyIcuPattern.patterns
-                  .map(
-                    (pattern) => RadioListTile<String?>(
-                      title: Text(
-                        Money(123456.78, primaryCurrency).formatMoney(
-                          customIcuPattern:
-                              pattern == null
-                                  ? Optional<String?>(null)
-                                  : Optional(pattern),
-                        ),
-                      ),
-                      subtitle:
-                          pattern == null
-                              ? Text(
-                                "preferences.moneyFormatting.setICUPattern.default"
-                                    .t(context),
-                              )
-                              : null,
-                      value: pattern,
-                      groupValue: selectedPattern?.value,
-                      onChanged: (value) {
-                        setState(() {
-                          selectedPattern = Optional(value);
-                        });
-                      },
+          children: SelectCurrencyIcuPattern.patterns
+              .map(
+                (pattern) => RadioListTile<String?>(
+                  title: Text(
+                    Money(123456.78, primaryCurrency).formatMoney(
+                      customIcuPattern: pattern == null
+                          ? Optional<String?>(null)
+                          : Optional(pattern),
                     ),
-                  )
-                  .toList(),
+                  ),
+                  subtitle: pattern == null
+                      ? Text(
+                          "preferences.moneyFormatting.setICUPattern.default".t(
+                            context,
+                          ),
+                        )
+                      : null,
+                  value: pattern,
+                  groupValue: selectedPattern?.value,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedPattern = Optional(value);
+                    });
+                  },
+                ),
+              )
+              .toList(),
         ),
       ),
     );

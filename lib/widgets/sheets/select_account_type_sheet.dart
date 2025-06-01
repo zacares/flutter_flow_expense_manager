@@ -17,18 +17,17 @@ class SelectAccountTypeSheet extends StatelessWidget {
       title: Text("account.type".t(context)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children:
-            AccountType.values
-                .where((value) => value != AccountType.creditLine)
-                .map(
-                  (value) => ListTile(
-                    title: Text(value.localizedNameContext(context)),
-                    selected: currentlySelected == value,
-                    trailing: const DirectionalChevron(),
-                    onTap: () => context.pop(value),
-                  ),
-                )
-                .toList(),
+        children: AccountType.values
+            .where((value) => value != AccountType.creditLine)
+            .map(
+              (value) => ListTile(
+                title: Text(value.localizedNameContext(context)),
+                selected: currentlySelected == value,
+                trailing: const DirectionalChevron(),
+                onTap: () => context.pop(value),
+              ),
+            )
+            .toList(),
       ),
     );
   }

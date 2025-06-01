@@ -14,9 +14,8 @@ class PrivacyToggler extends StatelessWidget {
         final bool obscure = snapshot == true;
 
         return IconButton(
-          onPressed:
-              () =>
-                  TransitiveLocalPreferences().sessionPrivacyMode.set(!obscure),
+          onPressed: () =>
+              TransitiveLocalPreferences().sessionPrivacyMode.set(!obscure),
           icon: Icon(
             obscure
                 ? Symbols.visibility_rounded

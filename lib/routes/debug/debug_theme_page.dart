@@ -102,21 +102,20 @@ class DebugThemePage extends StatelessWidget {
             WavyDivider(),
             Column(
               mainAxisSize: MainAxisSize.min,
-              children:
-                  _demoTransactions
-                      .map(
-                        (transaction) => TransactionListTile(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 4.0,
-                          ),
-                          transaction: transaction,
-                          moveToTrashFn: null,
-                          recoverFromTrashFn: null,
-                          combineTransfers: false,
-                        ),
-                      )
-                      .toList(),
+              children: _demoTransactions
+                  .map(
+                    (transaction) => TransactionListTile(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 4.0,
+                      ),
+                      transaction: transaction,
+                      moveToTrashFn: null,
+                      recoverFromTrashFn: null,
+                      combineTransfers: false,
+                    ),
+                  )
+                  .toList(),
             ),
             const SizedBox(height: 24.0),
             ListHeader("ListTiles"),

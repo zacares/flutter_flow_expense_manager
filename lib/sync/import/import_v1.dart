@@ -90,31 +90,30 @@ class ImportV1 extends Importer {
     //
     // Resolve ToOne<T> [account] and [category] by `uuid`.
     progressNotifier.value = ImportV1Progress.resolvingTransactions;
-    final transformedTransactions =
-        data.transactions
-            .map((transaction) {
-              try {
-                transaction = _resolveAccountForTransaction(transaction);
-              } catch (e) {
-                if (e is ImportException) {
-                  _log.warning(e.toString());
-                }
-                return null;
-              }
+    final transformedTransactions = data.transactions
+        .map((transaction) {
+          try {
+            transaction = _resolveAccountForTransaction(transaction);
+          } catch (e) {
+            if (e is ImportException) {
+              _log.warning(e.toString());
+            }
+            return null;
+          }
 
-              try {
-                transaction = _resolveCategoryForTransaction(transaction);
-              } catch (e) {
-                if (e is ImportException) {
-                  _log.warning(e.toString());
-                }
-                // Still proceed without category
-              }
+          try {
+            transaction = _resolveCategoryForTransaction(transaction);
+          } catch (e) {
+            if (e is ImportException) {
+              _log.warning(e.toString());
+            }
+            // Still proceed without category
+          }
 
-              return transaction;
-            })
-            .nonNulls
-            .toList();
+          return transaction;
+        })
+        .nonNulls
+        .toList();
 
     progressNotifier.value = ImportV1Progress.writingTransactions;
     await TransactionsService().upsertMany(transformedTransactions);
@@ -142,11 +141,10 @@ class ImportV1 extends Importer {
 
     // If the `id` is 0, we've already encountered it
     if (memoizeAccounts[accountUuid] != 0) {
-      final Query<Account> accountQuery =
-          ObjectBox()
-              .box<Account>()
-              .query(Account_.uuid.equals(accountUuid))
-              .build();
+      final Query<Account> accountQuery = ObjectBox()
+          .box<Account>()
+          .query(Account_.uuid.equals(accountUuid))
+          .build();
 
       memoizeAccounts[accountUuid] ??= accountQuery.findFirst()?.id ?? 0;
 
@@ -174,11 +172,10 @@ class ImportV1 extends Importer {
 
     // If the `id` is 0, we've already encountered it
     if (memoizeCategories[categoryUuid] != 0) {
-      final Query<Category> categoryQuery =
-          ObjectBox()
-              .box<Category>()
-              .query(Category_.uuid.equals(categoryUuid))
-              .build();
+      final Query<Category> categoryQuery = ObjectBox()
+          .box<Category>()
+          .query(Category_.uuid.equals(categoryUuid))
+          .build();
 
       memoizeCategories[categoryUuid] ??= categoryQuery.findFirst()?.id ?? 0;
 

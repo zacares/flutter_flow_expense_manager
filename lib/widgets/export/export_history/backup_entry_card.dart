@@ -121,13 +121,12 @@ class BackupEntryCard extends StatelessWidget {
                           filePath: entry.filePath,
                         );
                       },
-                      icon:
-                          fileSize != null
-                              ? const Icon(Symbols.save_alt_rounded)
-                              : Icon(
-                                Symbols.error_circle_rounded,
-                                color: context.flowColors.expense,
-                              ),
+                      icon: fileSize != null
+                          ? const Icon(Symbols.save_alt_rounded)
+                          : Icon(
+                              Symbols.error_circle_rounded,
+                              color: context.flowColors.expense,
+                            ),
                     );
                   },
                 ),

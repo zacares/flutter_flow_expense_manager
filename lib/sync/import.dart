@@ -94,15 +94,14 @@ Future<Importer> _importZip({required File file}) async {
   late final String? jsonRelativePath;
 
   try {
-    jsonRelativePath =
-        zip.files
-            .singleWhere(
-              (archiveFile) =>
-                  archiveFile.isFile &&
-                  !archiveFile.isSymbolicLink &&
-                  path.extension(archiveFile.name).toLowerCase() == ".json",
-            )
-            .name;
+    jsonRelativePath = zip.files
+        .singleWhere(
+          (archiveFile) =>
+              archiveFile.isFile &&
+              !archiveFile.isSymbolicLink &&
+              path.extension(archiveFile.name).toLowerCase() == ".json",
+        )
+        .name;
   } catch (e) {
     jsonRelativePath = null;
     throw ImportException(

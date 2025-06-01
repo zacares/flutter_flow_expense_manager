@@ -23,8 +23,11 @@ import "package:path_provider/path_provider.dart";
 import "package:pdf/widgets.dart" as pw;
 import "package:share_plus/share_plus.dart";
 
-typedef ExportResult =
-    ({bool shareDialogSucceeded, String filePath, Future<int?> objectBoxId});
+typedef ExportResult = ({
+  bool shareDialogSucceeded,
+  String filePath,
+  Future<int?> objectBoxId,
+});
 
 /// Exports all user data (except for profile for now) in the format specified.
 ///

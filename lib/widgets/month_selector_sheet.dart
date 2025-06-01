@@ -37,12 +37,11 @@ class _MonthSelectorSheetState extends State<MonthSelectorSheet> {
         alignment: MainAxisAlignment.end,
         children: [
           TextButton(
-            onPressed:
-                () => setState(() {
-                  final DateTime now = DateTime.now();
-                  year = now.year;
-                  month = now.month;
-                }),
+            onPressed: () => setState(() {
+              final DateTime now = DateTime.now();
+              year = now.year;
+              month = now.month;
+            }),
             child: Text("select.time.now".t(context)),
           ),
           Button(onTap: pop, child: Text("general.done".t(context))),

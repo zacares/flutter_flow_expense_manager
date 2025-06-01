@@ -41,15 +41,13 @@ class _SetupAccountsPageState extends State<SetupAccountsPage> {
 
     existingAccountsQuery.close();
 
-    presetAccounts =
-        getAccountPresets(primaryCurrency)
-            .where(
-              (account) =>
-                  !existingAccounts.any(
-                    (existingAccount) => existingAccount.uuid == account.uuid,
-                  ),
-            )
-            .toList();
+    presetAccounts = getAccountPresets(primaryCurrency)
+        .where(
+          (account) => !existingAccounts.any(
+            (existingAccount) => existingAccount.uuid == account.uuid,
+          ),
+        )
+        .toList();
   }
 
   @override
@@ -92,27 +90,25 @@ class _SetupAccountsPageState extends State<SetupAccountsPage> {
                     curve: Curves.easeOut,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
-                      children:
-                          presetAccounts
-                              .map(
-                                (preset) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 16.0),
-                                  child: LocalHero(
-                                    key: ValueKey(preset.uuid),
-                                    tag: preset.uuid,
-                                    child: AccountPresetCard(
-                                      key: ValueKey(preset.uuid),
-                                      account: preset,
-                                      onSelect:
-                                          (selected) =>
-                                              select(preset.uuid, selected),
-                                      selected: preset.id == 0,
-                                      preexisting: false,
-                                    ),
-                                  ),
+                      children: presetAccounts
+                          .map(
+                            (preset) => Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: LocalHero(
+                                key: ValueKey(preset.uuid),
+                                tag: preset.uuid,
+                                child: AccountPresetCard(
+                                  key: ValueKey(preset.uuid),
+                                  account: preset,
+                                  onSelect: (selected) =>
+                                      select(preset.uuid, selected),
+                                  selected: preset.id == 0,
+                                  preexisting: false,
                                 ),
-                              )
-                              .toList(),
+                              ),
+                            ),
+                          )
+                          .toList(),
                     ),
                   ),
                 ],
@@ -162,8 +158,9 @@ class _SetupAccountsPageState extends State<SetupAccountsPage> {
     });
 
     try {
-      final List<Account> selectedAccounts =
-          presetAccounts.where((element) => element.id == 0).toList();
+      final List<Account> selectedAccounts = presetAccounts
+          .where((element) => element.id == 0)
+          .toList();
 
       for (final e in selectedAccounts.indexed) {
         e.$2.sortOrder = e.$1;

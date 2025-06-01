@@ -24,8 +24,9 @@ class ExchangeRatesService {
   ExchangeRatesService._internal();
 
   void init() {
-    final ExchangeRatesSet? exchangeRates =
-        LocalPreferences().exchangeRatesCache.get();
+    final ExchangeRatesSet? exchangeRates = LocalPreferences()
+        .exchangeRatesCache
+        .get();
 
     if (exchangeRates != null) {
       exchangeRatesCache.value = exchangeRates;
@@ -51,8 +52,9 @@ class ExchangeRatesService {
       throw FormatException("Invalid currency code: $baseCurrency");
     }
 
-    final String dateParam =
-        dateTime == null ? "latest" : dateTime.format(payload: "yyyy-MM-dd");
+    final String dateParam = dateTime == null
+        ? "latest"
+        : dateTime.format(payload: "yyyy-MM-dd");
 
     Map<String, dynamic>? jsonResponse;
 
