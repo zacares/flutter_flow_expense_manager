@@ -193,7 +193,7 @@ class RecurringTransactionsService {
       } else {
         final (int fromObjectId, int toObjectId) = from.transferTo(
           targetAccount: to,
-          amount: template.amount,
+          amount: template.amount.abs(),
           title: template.title,
           description: template.description,
           transactionDate: nextOccurence,
