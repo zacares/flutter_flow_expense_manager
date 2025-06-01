@@ -1,10 +1,15 @@
 # Changelog
 
-## 0.14.4
+## Next
 
 ### New features
 
 * Now you can export transactions history in PDF format. Closes [#516](https://github.com/flow-mn/flow/issues/516)
+
+## 0.14.4
+
+### New features
+
 * Now you can filter transactions by type in the home tab
 * Added support for Spanish and Russian (Thanks to Gemini Pro 2.5)
 
