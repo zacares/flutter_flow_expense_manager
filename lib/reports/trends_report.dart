@@ -97,7 +97,7 @@ class TrendsReport extends FlowReport {
       primaryCurrency,
     );
     averageExpensePerTransaction = Money(
-      expenses.reduce((a, b) => a + b) / expenses.length,
+      expenses.fold(0.0, (a, b) => a + b) / expenses.length,
       primaryCurrency,
     );
   }
