@@ -34,7 +34,7 @@ jobs:
         run: cd ios
       - name: Fetch signing files
         run: |
-          app-store-connect fetch-signing-files $(xcode-project detect-bundle-id) \
+          app-store-connect fetch-signing-files "mn.flow.flow" \
           --type IOS_APP_STORE \
           --create
       - name: Set up signing certificate
