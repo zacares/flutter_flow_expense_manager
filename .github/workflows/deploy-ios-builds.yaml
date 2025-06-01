@@ -30,9 +30,11 @@ jobs:
         run: pip install codemagic-cli-tools
       - name: Set up keychain
         run: keychain initialize
+      - name: Change directory to ios folder
+        run: cd ios
       - name: Fetch signing files
         run: |
-          app-store-connect fetch-signing-files "mn.flow.flow" \
+          app-store-connect fetch-signing-files $(xcode-project detect-bundle-id) \
           --type IOS_APP_STORE \
           --create
       - name: Set up signing certificate
@@ -43,7 +45,7 @@ jobs:
         run: xcode-project use-profiles
       - name: Build ipa for distribution
         run: |
-          flutter build ipa --release --export-options-plist=$HOME/export_options.plist    
+          flutter build ipa --release --no-tree-shake-icons --export-options-plist=$HOME/export_options.plist    
       - name: Publish the app to App Store Connect
         run: |
           APP_FILE=$(find $(pwd) -name "*.ipa")
