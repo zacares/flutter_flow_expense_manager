@@ -5,6 +5,7 @@
 ### New features
 
 * Now you can export transactions history in PDF format. Closes [#516](https://github.com/flow-mn/flow/issues/516)
+* Added support for Spanish and Russian (Thanks to Gemini Pro 2.5)
 
 ### Changes and improvements
 
