@@ -60,6 +60,9 @@ Future<ExportResult> export({
           await rootBundle.load("assets/fonts/NotoSansHebrew-Regular.ttf"),
         ),
       ],
+      "imageBytes": await rootBundle
+          .load("assets/images/flow.png")
+          .then((value) => value.buffer.asUint8List()),
     },
     _ => null,
   };
@@ -187,6 +190,7 @@ Future<Object> getBackupContent({
       options: options,
       defaultFont: extra["default"],
       fontFallbacks: extra["fallbacks"],
+      imageBytes: extra["imageBytes"],
     ),
     (ExportMode.json, 1) => generateBackupContentV1(),
     (ExportMode.json, 2) => generateBackupJSONContentV2(),

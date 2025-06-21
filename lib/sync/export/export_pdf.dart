@@ -1,4 +1,3 @@
-import "package:flow/constants.dart";
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/account.dart";
@@ -15,7 +14,6 @@ import "package:flutter/services.dart";
 import "package:moment_dart/moment_dart.dart";
 import "package:pdf/pdf.dart";
 import "package:pdf/widgets.dart" as pw;
-import "package:http/http.dart" as http;
 
 class ExportPdfOptions {
   final TimeRange timeRange;
@@ -33,24 +31,14 @@ Future<Uint8List> generatePDFContent({
   required ExportPdfOptions options,
   List<pw.Font>? fontFallbacks,
   required pw.Font defaultFont,
+  required Uint8List imageBytes,
 }) async {
   final [
     List<Account> accounts,
     List<Category> categories,
-    String logoSvg,
   ] = await Future.wait<dynamic>([
     AccountsService().getAll(),
     ObjectBox().box<Category>().getAllAsync(),
-    http
-        .get(
-          Uri.parse("https://flow.gege.mn/flow.svg"),
-          headers: {
-            "Accept": "image/svg+xml",
-            "User-Agent": "Flow ($appVersion)",
-          },
-        )
-        .then((res) => res.body)
-        .catchError((_) => ""),
   ]);
 
   final Map<String, String> accountNames = {
@@ -221,8 +209,8 @@ Future<Uint8List> generatePDFContent({
       build: (context) => [
         pw.Row(
           children: [
-            pw.SvgImage(
-              svg: logoSvg,
+            pw.Image(
+              pw.MemoryImage(imageBytes),
               height: defaultTextStyle.fontSize,
               width: defaultTextStyle.fontSize,
             ),
