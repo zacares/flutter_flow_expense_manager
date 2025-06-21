@@ -1,10 +1,14 @@
 # Changelog
 
-## Next
+## 0.14.5
 
 ### New features
 
 * Now you can export transactions history in PDF format. Closes [#516](https://github.com/flow-mn/flow/issues/516)
+
+### Fixes
+
+* Transaction reminder text no longer reverses the ago/in.
 
 ## 0.14.4
 
