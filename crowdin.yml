@@ -1,0 +1,3 @@
+files:
+  - source: /assets/l10n/*.json
+    translation: '%locale_with_underscore%.json'
