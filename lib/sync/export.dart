@@ -16,11 +16,9 @@ import "package:flow/sync/export/mode.dart";
 import "package:flow/sync/sync.dart";
 import "package:flow/utils/utils.dart";
 import "package:flutter/foundation.dart";
-import "package:flutter/services.dart";
 import "package:moment_dart/moment_dart.dart";
 import "package:path/path.dart" as path;
 import "package:path_provider/path_provider.dart";
-import "package:pdf/widgets.dart" as pw;
 import "package:share_plus/share_plus.dart";
 
 typedef ExportResult = ({
@@ -45,38 +43,22 @@ Future<ExportResult> export({
   final Directory appSupportDirectory = await getApplicationSupportDirectory();
 
   final dynamic extra = switch (mode) {
-    ExportMode.pdf => {
-      "default": pw.Font.ttf(
-        await rootBundle.load("assets/fonts/NotoSans-Regular.ttf"),
-      ),
-      "fallbacks": [
-        pw.Font.ttf(
-          await rootBundle.load("assets/fonts/NotoEmoji-Regular.ttf"),
-        ),
-        pw.Font.ttf(
-          await rootBundle.load("assets/fonts/NotoSansArabic-Regular.ttf"),
-        ),
-        pw.Font.ttf(
-          await rootBundle.load("assets/fonts/NotoSansHebrew-Regular.ttf"),
-        ),
-      ],
-    },
     _ => null,
   };
 
-  final backupContent = await compute(
-    (_) => getBackupContent(
-      mode: mode,
-      options: options,
-      appSupportDirectory: appSupportDirectory,
-      extra: extra,
+  final backupContent = await switch (mode) {
+    ExportMode.pdf => generatePDFContent(options: options),
+    _ => compute(
+      (_) => getBackupContent(
+        mode: mode,
+        options: options,
+        appSupportDirectory: appSupportDirectory,
+        extra: extra,
+      ),
+      null,
     ),
-    null,
-  );
-  // final backupContent = await compute(
-  //   (args) => getBackupContent(mode: args.mode, options: args.options),
-  //   (mode: mode, options: options),
-  // );
+  };
+
   final savedFilePath = await saveBackupFile(
     backupContent,
     fileExt: mode.fileExt,
@@ -183,14 +165,12 @@ Future<Object> getBackupContent({
 
   return await switch ((mode, latestSyncModelVersion)) {
     (ExportMode.csv, _) => generateCSVContent(),
-    (ExportMode.pdf, _) => generatePDFContent(
-      options: options,
-      defaultFont: extra["default"],
-      fontFallbacks: extra["fallbacks"],
-    ),
     (ExportMode.json, 1) => generateBackupContentV1(),
     (ExportMode.json, 2) => generateBackupJSONContentV2(),
     (ExportMode.zip, 2) => generateBackupZipV2(),
+    (ExportMode.pdf, _) => throw UnimplementedError(
+      "Exporting PDF in a separate isolate isn't supported yet",
+    ),
     _ => throw UnimplementedError(),
   };
 }

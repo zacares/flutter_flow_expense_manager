@@ -7,7 +7,7 @@ on:
       - "internal"
 jobs:
   build:
-    runs-on: "macos-latest"
+    runs-on: "ubuntu-latest"
     environment: Android release
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +43,7 @@ jobs:
         run: rm -rf ./android/key.properties ./android/flow-upload-keystore.jks
   build-fat-apk:
     if: github.ref_type == 'branch' && github.ref == 'refs/heads/internal'
-    runs-on: "macos-latest"
+    runs-on: "ubuntu-latest"
     environment: Android private testing build
     steps:
       - uses: actions/checkout@v4
