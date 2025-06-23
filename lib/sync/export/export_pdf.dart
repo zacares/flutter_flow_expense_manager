@@ -29,10 +29,23 @@ class ExportPdfOptions {
 
 Future<Uint8List> generatePDFContent({
   required ExportPdfOptions options,
-  List<pw.Font>? fontFallbacks,
-  required pw.Font defaultFont,
-  required Uint8List imageBytes,
 }) async {
+  final List<pw.Font> fontFallbacks = [
+    pw.Font.ttf(await rootBundle.load("assets/fonts/NotoEmoji-Regular.ttf")),
+    pw.Font.ttf(
+      await rootBundle.load("assets/fonts/NotoSansArabic-Regular.ttf"),
+    ),
+    pw.Font.ttf(
+      await rootBundle.load("assets/fonts/NotoSansHebrew-Regular.ttf"),
+    ),
+  ];
+  final pw.Font defaultFont = pw.Font.ttf(
+    await rootBundle.load("assets/fonts/NotoSans-Regular.ttf"),
+  );
+  final Uint8List imageBytes = await rootBundle
+      .load("assets/images/flow.png")
+      .then((value) => value.buffer.asUint8List());
+
   final [
     List<Account> accounts,
     List<Category> categories,
@@ -81,9 +94,7 @@ Future<Uint8List> generatePDFContent({
     font: defaultFont,
     color: PdfColor.fromInt(0xFF050505),
     fontSize: 10.0,
-    fontFallback:
-        fontFallbacks ??
-        [pw.Font.courier(), pw.Font.helvetica(), pw.Font.times()],
+    fontFallback: fontFallbacks,
   );
 
   final pw.TextStyle fineTextStyle = defaultTextStyle.copyWith(
@@ -190,9 +201,11 @@ Future<Uint8List> generatePDFContent({
       footer: (context) => pw.Container(
         width: double.infinity,
         margin: pw.EdgeInsets.only(top: 16.0),
+        color: PdfColor.fromInt(0x00ffffff),
         child: pw.RichText(
           text: pw.TextSpan(
             style: fineTextStyle,
+            baseline: 0.0,
             children: [
               pw.TextSpan(text: "sync.export.pdf.notice[0]".tr()),
               pw.WidgetSpan(
@@ -226,7 +239,6 @@ Future<Uint8List> generatePDFContent({
           ],
         ),
         pw.Divider(),
-        pw.Text("transactions.title".tr()),
         pw.SizedBox(height: 20),
         pw.Table(
           defaultColumnWidth: pw.FlexColumnWidth(),
