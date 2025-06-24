@@ -13,5 +13,6 @@ final Map<Locale, (String, String)> supportedLanguages = {
   const Locale("de", "DE"): ("German (Germany)", "Deutsch (Deutschland)"),
   const Locale("ru", "RU"): ("Russian (Russia)", "Русский (Россия)"),
   const Locale("es", "ES"): ("Spanish (Spain)", "Español (España)"),
+  const Locale("uk", "UA"): ("Ukrainian (Ukraine)", "Українська (Україна)"),
   const Locale("ar"): ("Arabic", "العربية"),
 };

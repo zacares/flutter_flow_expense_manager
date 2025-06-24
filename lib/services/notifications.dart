@@ -243,7 +243,7 @@ class NotificationsService {
         await pluginInstance.zonedSchedule(
           _getNextId(),
           transaction.title ?? "transaction.fallbackTitle".tr(),
-          "${transaction.money.formatMoney()}, ${earlyDateTime.toMoment().from(dateTime)}",
+          "${transaction.money.formatMoney()}, ${dateTime.toMoment().from(earlyDateTime)}",
           earlyDateTime,
           details,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,

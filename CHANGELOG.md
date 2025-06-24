@@ -1,10 +1,19 @@
 # Changelog
 
-## Next
+## 0.14.5
 
 ### New features
 
 * Now you can export transactions history in PDF format. Closes [#516](https://github.com/flow-mn/flow/issues/516)
+
+### Changes and improvements
+
+* Range selector now remembers the last value, closes [#542](https://github.com/flow-mn/flow/issues/542)
+* No longer shows year 4000 in some places in transaction page :O
+
+### Fixes
+
+* Transaction reminder text no longer reverses the ago/in.
 
 ## 0.14.4
 

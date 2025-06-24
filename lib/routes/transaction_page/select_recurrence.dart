@@ -49,7 +49,7 @@ class _SelectRecurrenceState extends State<SelectRecurrence> {
 
   @override
   Widget build(BuildContext context) {
-    final bool runsForever = _recurrence.range.to.isAfter(DateTime(4000));
+    final bool runsForever = _recurrence.range.to >= Moment.maxValue;
 
     final Map<String, String> l10nEnumPayload = {
       "weekday": _recurrence.range.from.format(payload: "dddd"),
@@ -197,7 +197,7 @@ class _SelectRecurrenceState extends State<SelectRecurrence> {
   }
 
   void _selectUntil() async {
-    final DateTime initialDate = _recurrence.range.to.isAfter(DateTime(4000))
+    final DateTime initialDate = _recurrence.range.to >= Moment.maxValue
         ? DateTime.now()
         : _recurrence.range.to;
 

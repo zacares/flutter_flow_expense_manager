@@ -1,4 +1,3 @@
-import "package:flow/constants.dart";
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/account.dart";
@@ -8,6 +7,7 @@ import "package:flow/entity/transaction.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/l10n/named_enum.dart";
 import "package:flow/objectbox.dart";
+import "package:flow/objectbox/actions.dart";
 import "package:flow/services/accounts.dart";
 import "package:flow/services/transactions.dart";
 import "package:flow/sync/export/export_pdf/headers.dart";
@@ -15,7 +15,6 @@ import "package:flutter/services.dart";
 import "package:moment_dart/moment_dart.dart";
 import "package:pdf/pdf.dart";
 import "package:pdf/widgets.dart" as pw;
-import "package:http/http.dart" as http;
 
 class ExportPdfOptions {
   final TimeRange timeRange;
@@ -31,26 +30,29 @@ class ExportPdfOptions {
 
 Future<Uint8List> generatePDFContent({
   required ExportPdfOptions options,
-  List<pw.Font>? fontFallbacks,
-  required pw.Font defaultFont,
 }) async {
+  final List<pw.Font> fontFallbacks = [
+    pw.Font.ttf(await rootBundle.load("assets/fonts/NotoEmoji-Regular.ttf")),
+    pw.Font.ttf(
+      await rootBundle.load("assets/fonts/NotoSansArabic-Regular.ttf"),
+    ),
+    pw.Font.ttf(
+      await rootBundle.load("assets/fonts/NotoSansHebrew-Regular.ttf"),
+    ),
+  ];
+  final pw.Font defaultFont = pw.Font.ttf(
+    await rootBundle.load("assets/fonts/NotoSans-Regular.ttf"),
+  );
+  final Uint8List imageBytes = await rootBundle
+      .load("assets/images/flow.png")
+      .then((value) => value.buffer.asUint8List());
+
   final [
     List<Account> accounts,
     List<Category> categories,
-    String logoSvg,
   ] = await Future.wait<dynamic>([
     AccountsService().getAll(),
     ObjectBox().box<Category>().getAllAsync(),
-    http
-        .get(
-          Uri.parse("https://flow.gege.mn/flow.svg"),
-          headers: {
-            "Accept": "image/svg+xml",
-            "User-Agent": "Flow ($appVersion)",
-          },
-        )
-        .then((res) => res.body)
-        .catchError((_) => ""),
   ]);
 
   final Map<String, String> accountNames = {
@@ -93,9 +95,7 @@ Future<Uint8List> generatePDFContent({
     font: defaultFont,
     color: PdfColor.fromInt(0xFF050505),
     fontSize: 10.0,
-    fontFallback:
-        fontFallbacks ??
-        [pw.Font.courier(), pw.Font.helvetica(), pw.Font.times()],
+    fontFallback: fontFallbacks,
   );
 
   final pw.TextStyle fineTextStyle = defaultTextStyle.copyWith(
@@ -103,13 +103,21 @@ Future<Uint8List> generatePDFContent({
     color: PdfColor.fromInt(0xa0050505),
   );
 
+  final PdfColor dividerColor = PdfColor(
+    204.0 / 255.0,
+    204.0 / 255.0,
+    204.0 / 255.0,
+  );
+
   bool even = true;
 
   final pw.BoxDecoration rowEvenDeco = pw.BoxDecoration(
-    color: PdfColor.fromInt(0xFFEFEFEF),
+    color: PdfColor.fromInt(0xFFF5F6FA),
+    border: pw.Border(bottom: pw.BorderSide(color: dividerColor, width: 0.5)),
   );
   final pw.BoxDecoration rowOddDeco = pw.BoxDecoration(
     color: PdfColor.fromInt(0xFFFFFFFF),
+    border: pw.Border(bottom: pw.BorderSide(color: dividerColor, width: 0.5)),
   );
 
   pw.TableRow generateRow(Transaction transaction) {
@@ -160,7 +168,7 @@ Future<Uint8List> generatePDFContent({
                 (cell) => pw.Padding(
                   padding: const pw.EdgeInsets.symmetric(
                     horizontal: 4.0,
-                    vertical: 2.0,
+                    vertical: 4.0,
                   ),
                   child: cell,
                 ),
@@ -171,6 +179,8 @@ Future<Uint8List> generatePDFContent({
 
   final String author =
       ObjectBox().box<Profile>().getAll().firstOrNull?.name ?? "Flow";
+
+  final TimeRange? realTimeRange = transactions.range;
 
   final pw.Document pdf = pw.Document(
     theme: pw.ThemeData(defaultTextStyle: defaultTextStyle),
@@ -187,24 +197,30 @@ Future<Uint8List> generatePDFContent({
         clip: true,
         pageFormat: options.useA4 ? PdfPageFormat.a4 : PdfPageFormat.letter,
         buildBackground: (context) {
-          return pw.Container(height: 4.0, color: PdfColor.fromInt(0xFF8500a6));
+          return pw.FullPage(
+            ignoreMargins: true,
+            child: pw.Container(
+              decoration: pw.BoxDecoration(
+                border: pw.Border(
+                  top: pw.BorderSide(
+                    color: PdfColor.fromInt(0xFFF5CCFF),
+                    width: 16.0,
+                  ),
+                ),
+              ),
+            ),
+          );
         },
         margin: pw.EdgeInsets.all(32.0),
-      ),
-      header: (context) => pw.Container(
-        width: double.infinity,
-        child: pw.Text(
-          "sync.export.pdf.header".tr({
-            "range": options.timeRange.format(useRelative: false),
-          }),
-        ),
       ),
       footer: (context) => pw.Container(
         width: double.infinity,
         margin: pw.EdgeInsets.only(top: 16.0),
+        color: PdfColor.fromInt(0x00ffffff),
         child: pw.RichText(
           text: pw.TextSpan(
             style: fineTextStyle,
+            baseline: 0.0,
             children: [
               pw.TextSpan(text: "sync.export.pdf.notice[0]".tr()),
               pw.WidgetSpan(
@@ -214,45 +230,80 @@ Future<Uint8List> generatePDFContent({
                 ),
               ),
               pw.TextSpan(text: "sync.export.pdf.notice[1]".tr()),
+              pw.TextSpan(text: " "),
+              pw.TextSpan(
+                text: "sync.export.pdf.header".tr({
+                  "range": (realTimeRange ?? options.timeRange).format(
+                    useRelative: false,
+                  ),
+                }),
+              ),
+              pw.TextSpan(text: " "),
+              pw.TextSpan(
+                text: resultingAccounts
+                    .map((uuid) => accountNames[uuid])
+                    .nonNulls
+                    .join(", "),
+              ),
             ],
           ),
         ),
       ),
       build: (context) => [
-        pw.Row(
-          children: [
-            pw.SvgImage(
-              svg: logoSvg,
-              height: defaultTextStyle.fontSize,
-              width: defaultTextStyle.fontSize,
-            ),
-            pw.Text("Flow"),
-          ],
+        pw.Padding(
+          padding: pw.EdgeInsets.symmetric(vertical: 12.0),
+          child: pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Row(
+                mainAxisSize: pw.MainAxisSize.min,
+                children: [
+                  pw.Image(
+                    pw.MemoryImage(imageBytes),
+                    height: defaultTextStyle.fontSize! * 2,
+                    width: defaultTextStyle.fontSize! * 2,
+                  ),
+                  pw.SizedBox(width: 6.0),
+                  pw.Text("Flow"),
+                ],
+              ),
+              pw.Column(
+                mainAxisSize: pw.MainAxisSize.min,
+                children: [
+                  pw.Opacity(
+                    opacity: 0.5,
+                    child: pw.Text(
+                      "sync.export.pdf.timeRange".tr(),
+                      style: fineTextStyle.copyWith(),
+                    ),
+                  ),
+                  pw.Text(options.timeRange.format(useRelative: false)),
+                ],
+              ),
+            ],
+          ),
         ),
-        pw.Row(
-          children: [
-            pw.Text(
-              "Statement for: ${resultingAccounts.nonNulls.map((account) => accountNames[account] ?? "~").join(", ")}",
-            ),
-            pw.Text(options.timeRange.format(useRelative: false)),
-          ],
-        ),
-        pw.Divider(),
-        pw.Text("transactions.title".tr()),
+        pw.Divider(color: dividerColor, height: 0.5),
         pw.SizedBox(height: 20),
         pw.Table(
           defaultColumnWidth: pw.FlexColumnWidth(),
           children: [
             pw.TableRow(
-              decoration: pw.BoxDecoration(color: PdfColor.fromInt(0xFFF5CCFF)),
+              decoration: rowOddDeco,
               children: PDFHeader.values
                   .map(
                     (header) => pw.Padding(
                       padding: pw.EdgeInsets.symmetric(
                         horizontal: 4.0,
-                        vertical: 2.0,
+                        vertical: 4.0,
                       ),
-                      child: pw.Text(header.localizedName),
+                      child: pw.Text(
+                        header.localizedName,
+                        style: pw.TextStyle(
+                          color: PdfColor.fromInt(0xff33004f),
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
                     ),
                   )
                   .toList(),

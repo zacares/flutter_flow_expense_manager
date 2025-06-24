@@ -68,6 +68,7 @@ indirectly contributed 🤍
 * Russian (Russia)
 * Spanish (Spain)
 * Turkish (Turkiye) - thanks to [NoRiskNoViski](https://github.com/NoRiskNoViski)
+* Ukranian (Ukrain)
 
 > See [Translation guide](./CONTRIBUTING.md#translating) if you want to make
 > Flow available to your language
