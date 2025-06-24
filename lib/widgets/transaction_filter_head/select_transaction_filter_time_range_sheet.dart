@@ -26,9 +26,7 @@ Future<TransactionFilterTimeRange?> showTransactionFilterTimeRangeSelectorSheet(
     TimeRangeMode.byYear when context.mounted =>
       await showYearPickerSheet(
         context,
-        initialDate: initialValue?.range is YearTimeRange
-            ? initialValue!.range!.from
-            : null,
+        initialDate: initialValue?.range?.from,
       ).then(
         (value) => value == null
             ? null
@@ -37,7 +35,10 @@ Future<TransactionFilterTimeRange?> showTransactionFilterTimeRangeSelectorSheet(
               ),
       ),
     TimeRangeMode.byMonth when context.mounted =>
-      await showMonthPickerSheet(context).then(
+      await showMonthPickerSheet(
+        context,
+        initialDate: initialValue?.range?.from,
+      ).then(
         (value) => value == null
             ? null
             : TransactionFilterTimeRange.fromTimeRange(

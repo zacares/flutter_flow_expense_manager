@@ -6,6 +6,10 @@
 
 * Now you can export transactions history in PDF format. Closes [#516](https://github.com/flow-mn/flow/issues/516)
 
+### Changes and improvements
+
+* Range selector now remembers the last value, closes [#542](https://github.com/flow-mn/flow/issues/542)
+
 ### Fixes
 
 * Transaction reminder text no longer reverses the ago/in.
