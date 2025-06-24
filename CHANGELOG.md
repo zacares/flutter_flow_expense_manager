@@ -9,6 +9,7 @@
 ### Changes and improvements
 
 * Range selector now remembers the last value, closes [#542](https://github.com/flow-mn/flow/issues/542)
+* No longer shows year 4000 in some places in transaction page :O
 
 ### Fixes
 
