@@ -1,3 +1,5 @@
+import "package:flow/data/currencies.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:moment_dart/moment_dart.dart";
 
 /// Uses endpoints from here:
@@ -27,6 +29,17 @@ class ExchangeRates {
   }
 
   double? getRate(String currency) {
+    final CurrencyData? currencyData =
+        CurrencyRegistryService().groupedCurrencies[currency];
+
+    if (currencyData == null) {
+      return null;
+    }
+
+    if (currencyData is CustomCurrencyData) {
+      return currencyData.rateFor(baseCurrency.toUpperCase());
+    }
+
     return rates[currency.toLowerCase()]?.toDouble();
   }
 }

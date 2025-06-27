@@ -1,6 +1,5 @@
 import "dart:math";
 
-import "package:flow/data/currencies.dart";
 import "package:flow/data/flow_notification_payload.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/transaction/type.dart";
@@ -8,6 +7,7 @@ import "package:flow/entity/transaction_filter_preset.dart";
 import "package:flow/entity/user_preferences.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:flow/services/notifications.dart";
 import "package:flow/services/sync.dart";
 import "package:flutter/material.dart";
@@ -138,7 +138,7 @@ class UserPreferencesService {
 
   set primaryCurrency(String? newPrimaryCurrency) {
     if (newPrimaryCurrency == null ||
-        !isCurrencyCodeValid(newPrimaryCurrency)) {
+        !CurrencyRegistryService().isCurrencyCodeValid(newPrimaryCurrency)) {
       throw ArgumentError("Invalid currency code: $newPrimaryCurrency");
     }
 

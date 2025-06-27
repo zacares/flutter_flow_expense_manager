@@ -1,5 +1,6 @@
 import "package:flow/data/currencies.dart";
 import "package:flow/l10n/extensions.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/general/modal_sheet.dart";
@@ -37,12 +38,12 @@ class _SelectCurrencySheetState extends State<SelectCurrencySheet> {
         (normalizedQuery.isNotEmpty
                 ? extractTop<CurrencyData>(
                     query: normalizedQuery,
-                    choices: iso4217Currencies,
-                    limit: iso4217Currencies.length,
+                    choices: CurrencyRegistryService().allCurrencies,
+                    limit: CurrencyRegistryService().allCurrencies.length,
                     getter: (currencyData) =>
                         "${currencyData.code} ${currencyData.name} ${currencyData.country}",
                   ).map((result) => result.choice)
-                : iso4217Currencies)
+                : CurrencyRegistryService().allCurrencies)
             .groupBy((resultItem) => resultItem.code)
             .values
             .map((e) => e.firstOrNull)
@@ -81,8 +82,8 @@ class _SelectCurrencySheetState extends State<SelectCurrencySheet> {
       child: ListView.builder(
         controller: _scrollController,
         itemBuilder: (context, i) {
-          final CurrencyData transformedCurrencyData =
-              iso4217CurrenciesGrouped[queryResults[i].code]!;
+          final CurrencyData transformedCurrencyData = CurrencyRegistryService()
+              .groupedCurrencies[queryResults[i].code]!;
 
           return ListTile(
             selected: widget.currentlySelected == transformedCurrencyData.code,

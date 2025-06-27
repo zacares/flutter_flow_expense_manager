@@ -31,6 +31,7 @@ import "package:flow/prefs/local_preferences.dart";
 import "package:flow/providers/accounts_provider.dart";
 import "package:flow/providers/categories.dart";
 import "package:flow/routes.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:flow/services/exchange_rates.dart";
 import "package:flow/services/local_auth.dart";
 import "package:flow/services/notifications.dart";
@@ -111,6 +112,8 @@ void main() async {
 
   startupLog.fine("Initializing exchange rates service");
   ExchangeRatesService().init();
+
+  CurrencyRegistryService();
 
   try {
     startupLog.fine("Initializing user preferences service");

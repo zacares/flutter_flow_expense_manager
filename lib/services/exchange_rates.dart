@@ -1,9 +1,9 @@
 import "dart:convert";
 
-import "package:flow/data/currencies.dart";
 import "package:flow/data/exchange_rates.dart";
 import "package:flow/data/exchange_rates_set.dart";
 import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flutter/widgets.dart";
 import "package:http/http.dart" as http;
@@ -48,7 +48,9 @@ class ExchangeRatesService {
   ]) async {
     final String normalizedCurrency = baseCurrency.trim().toLowerCase();
 
-    if (!isCurrencyCodeValid(normalizedCurrency.toUpperCase())) {
+    if (!CurrencyRegistryService().isCurrencyCodeValid(
+      normalizedCurrency.toUpperCase(),
+    )) {
       throw FormatException("Invalid currency code: $baseCurrency");
     }
 
