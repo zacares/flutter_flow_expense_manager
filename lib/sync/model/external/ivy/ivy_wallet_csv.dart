@@ -4,6 +4,7 @@ import "package:flow/entity/transaction.dart";
 import "package:flow/sync/model/external/ivy/ivy_wallet_transaction.dart";
 import "package:flow/sync/model/external/ivy/parsers.dart";
 import "package:flow/utils/csv_parser.dart";
+import "package:intl/intl.dart";
 
 class IvyWalletCsv {
   static const Set<String> supportedHeaders = {
@@ -62,10 +63,15 @@ class IvyWalletCsv {
           final bool isTransfer = type == TransactionType.transfer;
 
           dynamic amount =
-              row[headerMap[isTransfer ? "Transfer Amount" : "Amount"]!]!;
+              row[headerMap[isTransfer ? "Transfer Amount" : "Amount"]!] ?? 0.0;
 
           if (amount is String) {
-            amount = double.tryParse(amount);
+            amount =
+                NumberFormat(null, "en_US").tryParse(amount)?.toDouble() ??
+                double.tryParse(amount) ??
+                0.0;
+          } else {
+            amount = (amount as num).toDouble();
           }
 
           dynamic transferToAmount = row[headerMap["Receive Amount"]!];

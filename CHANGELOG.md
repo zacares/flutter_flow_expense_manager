@@ -1,10 +1,26 @@
 # Changelog
 
+## (optimistic) 0.14.6
+
+### New features
+
+* Now supports following cryptocurrencies: BTC, ETH, USDT, XRP, BNB, SOL, USDC, DOGE, ADA, BCH, AVAX, TON, SHIB, LTC,
+  HBAR, XMR, DAI, DOT, UNI, PEPE, AAVE, APT, OKB, NEAR, ICP, CRO, ETC
+
+### Fixes
+
+* Now has more loose parsing for Ivy Wallet CSV option, closes #547
+
 ## 0.14.5
 
 ### New features
 
 * Now you can export transactions history in PDF format. Closes [#516](https://github.com/flow-mn/flow/issues/516)
+
+### Changes and improvements
+
+* Range selector now remembers the last value, closes [#542](https://github.com/flow-mn/flow/issues/542)
+* No longer shows year 4000 in some places in transaction page :O
 
 ### Fixes
 

@@ -1,7 +1,6 @@
 import "dart:async";
 import "dart:io";
 
-import "package:flow/data/currencies.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/backup_entry.dart";
 import "package:flow/entity/category.dart";
@@ -14,6 +13,7 @@ import "package:flow/l10n/named_enum.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:flow/services/transactions.dart";
 import "package:flow/sync/exception.dart";
 import "package:flow/sync/import/base.dart";
@@ -169,7 +169,7 @@ class ImportV2 extends Importer {
     }
 
     if (data.primaryCurrency != null &&
-        isCurrencyCodeValid(data.primaryCurrency!)) {
+        CurrencyRegistryService().isCurrencyCodeValid(data.primaryCurrency!)) {
       progressNotifier.value = ImportV2Progress.settingPrimaryCurrency;
       try {
         await LocalPreferences().primaryCurrency.set(data.primaryCurrency!);
