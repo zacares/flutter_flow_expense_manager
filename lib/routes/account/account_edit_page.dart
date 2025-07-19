@@ -12,9 +12,9 @@ import "package:flow/l10n/named_enum.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/objectbox/objectbox.g.dart";
-import "package:flow/prefs/local_preferences.dart";
 import "package:flow/routes/transaction_page/input_amount_sheet.dart";
 import "package:flow/services/transactions.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/sync/export.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/utils.dart";
@@ -87,10 +87,9 @@ class _AccountEditPageState extends State<AccountEditPage> {
   void initState() {
     super.initState();
 
-    _currentlyEditing =
-        widget.isNewAccount
-            ? null
-            : ObjectBox().box<Account>().get(widget.accountId);
+    _currentlyEditing = widget.isNewAccount
+        ? null
+        : ObjectBox().box<Account>().get(widget.accountId);
 
     if (!widget.isNewAccount && _currentlyEditing == null) {
       error = "Account with id ${widget.accountId} was not found";
@@ -102,7 +101,7 @@ class _AccountEditPageState extends State<AccountEditPage> {
       _creditLimit = _currentlyEditing?.creditLimit ?? 0.0;
       _currency =
           _currentlyEditing?.currency ??
-          LocalPreferences().getPrimaryCurrency();
+          UserPreferencesService().primaryCurrency;
       _iconData = _currentlyEditing?.icon;
       _excludeFromTotalBalance =
           _currentlyEditing?.excludeFromTotalBalance ?? false;
@@ -290,14 +289,13 @@ class _AccountEditPageState extends State<AccountEditPage> {
   void inputCreditLimit() async {
     final double? result = await showModalBottomSheet<double>(
       context: context,
-      builder:
-          (context) => InputAmountSheet(
-            initialAmount: _creditLimit.abs(),
-            currency: _currency,
-            title: "account.creditLimit".t(context),
-            allowNegative: false,
-            lockSign: true,
-          ),
+      builder: (context) => InputAmountSheet(
+        initialAmount: _creditLimit.abs(),
+        currency: _currency,
+        title: "account.creditLimit".t(context),
+        allowNegative: false,
+        lockSign: true,
+      ),
       isScrollControlled: true,
     );
 
@@ -336,9 +334,8 @@ class _AccountEditPageState extends State<AccountEditPage> {
 
     final result = await showModalBottomSheet<double>(
       context: context,
-      builder:
-          (context) =>
-              InputAmountSheet(initialAmount: _balance, currency: _currency),
+      builder: (context) =>
+          InputAmountSheet(initialAmount: _balance, currency: _currency),
       isScrollControlled: true,
     );
 
@@ -483,7 +480,7 @@ class _AccountEditPageState extends State<AccountEditPage> {
 
     return _nameTextController.text.trim().isNotEmpty ||
         _iconData != null ||
-        _currency != LocalPreferences().getPrimaryCurrency() ||
+        _currency != UserPreferencesService().primaryCurrency ||
         _balance != 0.0 ||
         _creditLimit != 0.0 ||
         _accountType != AccountType.debit ||
@@ -518,15 +515,14 @@ class _AccountEditPageState extends State<AccountEditPage> {
 
     final String trimmed = value!.trim();
 
-    final Query<Account> sameNameQuery =
-        ObjectBox()
-            .box<Account>()
-            .query(
-              Account_.name
-                  .equals(trimmed)
-                  .and(Account_.id.notEquals(_currentlyEditing?.id ?? 0)),
-            )
-            .build();
+    final Query<Account> sameNameQuery = ObjectBox()
+        .box<Account>()
+        .query(
+          Account_.name
+              .equals(trimmed)
+              .and(Account_.id.notEquals(_currentlyEditing?.id ?? 0)),
+        )
+        .build();
 
     final bool isNameUnique = sameNameQuery.count() == 0;
 

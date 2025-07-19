@@ -2,7 +2,6 @@ import "dart:async";
 
 import "package:flow/data/exchange_rates_set.dart";
 import "package:flow/entity/account.dart";
-import "package:flow/entity/transaction.dart";
 import "package:flow/logging.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
@@ -35,8 +34,6 @@ class LocalPreferences {
 
   /// Whether to enable haptic feedback upon certain actions
   late final BoolSettingsEntry enableHapticFeedback;
-
-  late final JsonListSettingsEntry<TransactionType> transactionButtonOrder;
 
   late final BoolSettingsEntry completedInitialSetup;
 
@@ -84,15 +81,6 @@ class LocalPreferences {
       key: "enableHapticFeedback",
       preferences: _prefs,
       initialValue: true,
-    );
-    transactionButtonOrder = JsonListSettingsEntry<TransactionType>(
-      key: "transactionButtonOrder",
-      preferences: _prefs,
-      removeDuplicates: true,
-      initialValue: TransactionType.values,
-      fromJson:
-          (json) => TransactionType.fromJson(json) ?? TransactionType.expense,
-      toJson: (transactionType) => transactionType.toJson(),
     );
 
     completedInitialSetup = BoolSettingsEntry(
@@ -173,6 +161,7 @@ class LocalPreferences {
     transitive = TransitiveLocalPreferences.initialize(_prefs);
   }
 
+  @Deprecated("Use UserPreferencesService().primaryCurrency instead")
   String getPrimaryCurrency() {
     String? primaryCurrencyName = primaryCurrency.value;
 
@@ -180,12 +169,11 @@ class LocalPreferences {
       late final String? firstAccountCurency;
 
       try {
-        final Query<Account> firstAccountQuery =
-            ObjectBox()
-                .box<Account>()
-                .query()
-                .order(Account_.createdDate)
-                .build();
+        final Query<Account> firstAccountQuery = ObjectBox()
+            .box<Account>()
+            .query()
+            .order(Account_.createdDate)
+            .build();
 
         firstAccountCurency = firstAccountQuery.findFirst()?.currency;
 

@@ -45,12 +45,13 @@ class MarkdownView extends StatelessWidget {
 
             return Checkbox(
               value: value,
-              onChanged:
-                  (newValue) => {tryFlipCheckbox(index, newValue ?? !value)},
+              onChanged: (newValue) => {
+                tryFlipCheckbox(index, newValue ?? !value),
+              },
             );
           },
-          onTapLink:
-              (text, href, title) => onTapLink(context, text, href, title),
+          onTapLink: (text, href, title) =>
+              onTapLink(context, text, href, title),
         ),
       ),
     );

@@ -1,8 +1,8 @@
-import "package:flow/data/currencies.dart";
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/category.dart";
+import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction_filter_preset.dart";
 import "package:flow/l10n/named_enum.dart";
 import "package:flow/objectbox.dart";
@@ -11,9 +11,11 @@ import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/providers/accounts_provider.dart";
 import "package:flow/providers/categories.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:flow/utils/extensions.dart";
 import "package:flow/utils/optional.dart";
 import "package:flow/widgets/sheets/select_multi_currency_sheet.dart";
+import "package:flow/widgets/sheets/select_multi_transaction_type_sheet.dart";
 import "package:flow/widgets/transaction_filter_head.dart";
 import "package:flow/widgets/transaction_filter_head/create_filter_preset_sheet.dart";
 import "package:flow/widgets/transaction_filter_head/select_filter_preset_sheet.dart";
@@ -68,8 +70,8 @@ class _DefaultTransactionsFilterHeadState
     TransitiveLocalPreferences().usesMultipleCurrencies.addListener(
       _updateShowCurrencyFilterChip,
     );
-    showCurrencyFilterChip =
-        TransitiveLocalPreferences().usesMultipleCurrencies.get();
+    showCurrencyFilterChip = TransitiveLocalPreferences().usesMultipleCurrencies
+        .get();
   }
 
   @override
@@ -104,12 +106,12 @@ class _DefaultTransactionsFilterHeadState
 
           final List<Account>? activeAccounts =
               AccountsProvider.of(context).ready
-                  ? AccountsProvider.of(context).activeAccounts
-                  : null;
+              ? AccountsProvider.of(context).activeAccounts
+              : null;
           final List<Category>? categories =
               CategoriesProvider.of(context).ready
-                  ? CategoriesProvider.of(context).categories
-                  : null;
+              ? CategoriesProvider.of(context).categories
+              : null;
 
           if (activeAccounts != null &&
               categories != null &&
@@ -134,10 +136,9 @@ class _DefaultTransactionsFilterHeadState
                   label: Text(differentFieldCount.toString()),
                   selected: differentFieldCount > 0,
                   avatar: const Icon(Symbols.filter_list_rounded),
-                  onSelected:
-                      (_) => _showFilterPresetSelectionSheet(
-                        transactionPresetsSnapshot.requireData,
-                      ),
+                  onSelected: (_) => _showFilterPresetSelectionSheet(
+                    transactionPresetsSnapshot.requireData,
+                  ),
                 ),
               TransactionFilterChip<TransactionSearchData>(
                 translationKey: "transactions.query.filter.keyword",
@@ -159,63 +160,68 @@ class _DefaultTransactionsFilterHeadState
                   translationKey: "transactions.query.filter.accounts",
                   avatar: const Icon(Symbols.wallet_rounded),
                   onSelect: onSelectAccounts,
-                  defaultValue:
-                      widget.defaultFilter.accounts
-                          ?.map(
-                            (uuid) => activeAccounts.firstWhere(
-                              (account) => account.uuid == uuid,
-                            ),
-                          )
-                          .toSet(),
-                  value:
-                      _filter.accounts?.isNotEmpty == true
-                          ? _filter.accounts
-                              ?.map(
-                                (uuid) => AccountsProvider.of(
-                                  context,
-                                ).activeAccounts.firstWhereOrNull(
-                                  (account) => account.uuid == uuid,
-                                ),
-                              )
-                              .nonNulls
-                              .toSet()
-                          : null,
+                  defaultValue: widget.defaultFilter.accounts
+                      ?.map(
+                        (uuid) => activeAccounts.firstWhere(
+                          (account) => account.uuid == uuid,
+                        ),
+                      )
+                      .toSet(),
+                  value: _filter.accounts?.isNotEmpty == true
+                      ? _filter.accounts
+                            ?.map(
+                              (uuid) => AccountsProvider.of(context)
+                                  .activeAccounts
+                                  .firstWhereOrNull(
+                                    (account) => account.uuid == uuid,
+                                  ),
+                            )
+                            .nonNulls
+                            .toSet()
+                      : null,
                 ),
               if (categories != null)
                 TransactionFilterChip<Set<Category>>(
                   translationKey: "transactions.query.filter.categories",
                   avatar: const Icon(Symbols.category_rounded),
                   onSelect: onSelectCategories,
-                  defaultValue:
-                      widget.defaultFilter.categories
-                          ?.map(
-                            (uuid) => categories.firstWhere(
-                              (category) => category.uuid == uuid,
-                            ),
-                          )
-                          .toSet(),
-                  value:
-                      _filter.categories?.isNotEmpty == true
-                          ? _filter.categories
-                              ?.map(
-                                (uuid) => categories.firstWhereOrNull(
-                                  (category) => category.uuid == uuid,
-                                ),
-                              )
-                              .nonNulls
-                              .toSet()
-                          : null,
+                  defaultValue: widget.defaultFilter.categories
+                      ?.map(
+                        (uuid) => categories.firstWhere(
+                          (category) => category.uuid == uuid,
+                        ),
+                      )
+                      .toSet(),
+                  value: _filter.categories?.isNotEmpty == true
+                      ? _filter.categories
+                            ?.map(
+                              (uuid) => categories.firstWhereOrNull(
+                                (category) => category.uuid == uuid,
+                              ),
+                            )
+                            .nonNulls
+                            .toSet()
+                      : null,
                 ),
+
+              TransactionFilterChip<List<TransactionType>>(
+                translationKey: "transactions.query.filter.transactionType",
+                avatar: const Icon(Symbols.swap_horiz_rounded),
+                onSelect: onSelectType,
+                defaultValue: null,
+                value: _filter.types?.isNotEmpty == true
+                    ? _filter.types!
+                    : null,
+              ),
               if (showCurrencyFilterChip)
                 TransactionFilterChip<List<String>>(
                   translationKey: "transactions.query.filter.currency",
                   avatar: const Icon(Symbols.universal_currency_alt_rounded),
                   onSelect: onSelectCurrency,
                   defaultValue: widget.defaultFilter.currencies,
-                  value:
-                      _filter.currencies?.isNotEmpty == true
-                          ? _filter.currencies
-                          : null,
+                  value: _filter.currencies?.isNotEmpty == true
+                      ? _filter.currencies
+                      : null,
                 ),
               TransactionFilterChip<TransactionGroupRange>(
                 translationKey: "transactions.query.filter.groupBy",
@@ -235,9 +241,8 @@ class _DefaultTransactionsFilterHeadState
     final TransactionSearchData? searchData =
         await showModalBottomSheet<TransactionSearchData>(
           context: context,
-          builder:
-              (context) =>
-                  TransactionSearchSheet(searchData: filter.searchData),
+          builder: (context) =>
+              TransactionSearchSheet(searchData: filter.searchData),
           isScrollControlled: true,
         );
 
@@ -251,11 +256,10 @@ class _DefaultTransactionsFilterHeadState
   void onSelectAccounts() async {
     final List<Account>? accounts = await showModalBottomSheet<List<Account>>(
       context: context,
-      builder:
-          (context) => SelectMultiAccountSheet(
-            accounts: ObjectBox().getAccounts(),
-            selectedUuids: filter.accounts,
-          ),
+      builder: (context) => SelectMultiAccountSheet(
+        accounts: ObjectBox().getAccounts(),
+        selectedUuids: filter.accounts,
+      ),
       isScrollControlled: true,
     );
 
@@ -272,11 +276,10 @@ class _DefaultTransactionsFilterHeadState
     final List<Category>? categories =
         await showModalBottomSheet<List<Category>>(
           context: context,
-          builder:
-              (context) => SelectMultiCategorySheet(
-                categories: ObjectBox().getCategories(),
-                selectedUuids: filter.categories,
-              ),
+          builder: (context) => SelectMultiCategorySheet(
+            categories: ObjectBox().getCategories(),
+            selectedUuids: filter.categories,
+          ),
           isScrollControlled: true,
         );
 
@@ -291,22 +294,40 @@ class _DefaultTransactionsFilterHeadState
     }
   }
 
+  void onSelectType() async {
+    final List<TransactionType>? types =
+        await showModalBottomSheet<List<TransactionType>>(
+          context: context,
+          builder: (context) =>
+              SelectMultiTransactionTypeSheet(currentlySelected: filter.types),
+          isScrollControlled: true,
+        );
+
+    if (types != null) {
+      setState(() {
+        filter = filter.copyWithOptional(types: Optional(types));
+      });
+    }
+  }
+
   void onSelectCurrency() async {
-    final Set<String> possibleCurrencies =
-        ObjectBox().getAccounts().map((account) => account.currency).toSet();
+    final Set<String> possibleCurrencies = ObjectBox()
+        .getAccounts()
+        .map((account) => account.currency)
+        .toSet();
 
     final List<String>? newCurrencies =
         await showModalBottomSheet<List<String>>(
           context: context,
-          builder:
-              (context) => SelectMultiCurrencySheet(
-                currencies:
-                    possibleCurrencies
-                        .map((code) => iso4217CurrenciesGrouped[code])
-                        .nonNulls
-                        .toList(),
-                currentlySelected: filter.currencies,
-              ),
+          builder: (context) => SelectMultiCurrencySheet(
+            currencies: possibleCurrencies
+                .map(
+                  (code) => CurrencyRegistryService().groupedCurrencies[code],
+                )
+                .nonNulls
+                .toList(),
+            currentlySelected: filter.currencies,
+          ),
           isScrollControlled: true,
         );
 
@@ -350,19 +371,19 @@ class _DefaultTransactionsFilterHeadState
 
   void _updateShowCurrencyFilterChip() {
     setState(() {
-      showCurrencyFilterChip =
-          TransitiveLocalPreferences().usesMultipleCurrencies.get();
+      showCurrencyFilterChip = TransitiveLocalPreferences()
+          .usesMultipleCurrencies
+          .get();
     });
   }
 
   void _saveNewFilterPreset() async {
     await showModalBottomSheet<int>(
       context: context,
-      builder:
-          (context) => CreateFilterPresetSheet(
-            filter: _filter,
-            initialName: _filter.range?.preset?.localizedNameContext(context),
-          ),
+      builder: (context) => CreateFilterPresetSheet(
+        filter: _filter,
+        initialName: _filter.range?.preset?.localizedNameContext(context),
+      ),
       isScrollControlled: true,
     );
   }
@@ -373,11 +394,10 @@ class _DefaultTransactionsFilterHeadState
     final Optional<TransactionFilter>? selected =
         await showModalBottomSheet<Optional<TransactionFilter>>(
           context: context,
-          builder:
-              (context) => SelectFilterPresetSheet(
-                selected: _filter,
-                onSaveAsNew: _saveNewFilterPreset,
-              ),
+          builder: (context) => SelectFilterPresetSheet(
+            selected: _filter,
+            onSaveAsNew: _saveNewFilterPreset,
+          ),
           isScrollControlled: true,
         );
 

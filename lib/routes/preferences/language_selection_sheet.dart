@@ -27,7 +27,7 @@ class LanguageSelectionSheet extends StatelessWidget {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            ...FlowLocalizations.supportedLanguages.map(
+            ...FlowLocalizations.supportedLocales.map(
               (locale) => RadioListTile<Locale>(
                 title: Text(locale.endonym),
                 subtitle: Text(locale.name),

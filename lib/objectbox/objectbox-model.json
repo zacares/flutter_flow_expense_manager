@@ -334,7 +334,7 @@
     },
     {
       "id": "10:7829328581176695647",
-      "lastPropertyId": "13:6826663530484570285",
+      "lastPropertyId": "17:5034425281728425226",
       "name": "UserPreferences",
       "properties": [
         {
@@ -399,6 +399,21 @@
           "id": "13:6826663530484570285",
           "name": "enableICloudSync",
           "type": 1
+        },
+        {
+          "id": "14:8617478279582680424",
+          "name": "icuCurrencyFormattingPattern",
+          "type": 9
+        },
+        {
+          "id": "16:4857491171331889557",
+          "name": "primaryCurrency",
+          "type": 9
+        },
+        {
+          "id": "17:5034425281728425226",
+          "name": "transactionButtonOrderJoined",
+          "type": 9
         }
       ],
       "relations": []
@@ -570,7 +585,8 @@
     9125625889304953158,
     4341960036397140355,
     420551111786793892,
-    3842898167150913136
+    3842898167150913136,
+    1701734084880256388
   ],
   "retiredRelationUids": [],
   "version": 1

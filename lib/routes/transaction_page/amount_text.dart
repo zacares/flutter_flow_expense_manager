@@ -3,8 +3,8 @@ import "dart:math" as math;
 import "package:auto_size_text/auto_size_text.dart";
 import "package:flow/data/money.dart";
 import "package:flow/l10n/extensions.dart";
-import "package:flow/prefs/local_preferences.dart";
 import "package:flow/routes/transaction_page/input_amount_sheet/input_value.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/general/context_menu.dart";
@@ -57,12 +57,13 @@ class _AmountTextState extends State<AmountText>
   void initState() {
     super.initState();
 
-    _amountTextAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 60),
-    )..addListener(() {
-      setState(() {});
-    });
+    _amountTextAnimationController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 60),
+        )..addListener(() {
+          setState(() {});
+        });
 
     _amountTextScaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
       CurvedAnimation(
@@ -122,18 +123,16 @@ class _AmountTextState extends State<AmountText>
 
   String amountText() {
     final String currency =
-        widget.currency ?? LocalPreferences().getPrimaryCurrency();
+        widget.currency ?? UserPreferencesService().primaryCurrency;
 
-    final String formatted = Money(
-      currentValue.currentAmount,
-      currency,
-    ).formatMoney(
-      decimalDigits: math.max(
-        currentValue.decimalLength,
-        _inputtingDecimal ? 1 : 0,
-      ),
-      includeCurrency: !widget.hideCurrencySymbol,
-    );
+    final String formatted = Money(currentValue.currentAmount, currency)
+        .formatMoney(
+          decimalDigits: math.max(
+            currentValue.decimalLength,
+            _inputtingDecimal ? 1 : 0,
+          ),
+          includeCurrency: !widget.hideCurrencySymbol,
+        );
 
     if (currentValue.decimalLength == 0) {
       final String decimalSeparator = getDecimalSeparatorForCurrency(

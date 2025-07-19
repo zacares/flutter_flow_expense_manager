@@ -53,16 +53,12 @@ class FlowIcon extends StatelessWidget {
     final plateColor = this.plateColor ?? context.colorScheme.secondary;
 
     return Surface(
-      builder:
-          (BuildContext context) => InkWell(
-            borderRadius: borderRadius,
-            onTap: onTap,
-            onLongPress: onLongPress,
-            child: Padding(
-              padding: platePadding,
-              child: buildChild(context, data),
-            ),
-          ),
+      builder: (BuildContext context) => InkWell(
+        borderRadius: borderRadius,
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: Padding(padding: platePadding, child: buildChild(context, data)),
+      ),
       color: plateColor,
       iconColor: context.colorScheme.primary,
       shape: RoundedRectangleBorder(borderRadius: borderRadius),
@@ -88,12 +84,11 @@ class FlowIcon extends StatelessWidget {
           File(join(ObjectBox.appDataDirectory, image.imagePath)),
           width: size,
           height: size,
-          errorBuilder:
-              (context, error, stackTrace) => Icon(
-                Symbols.error_rounded,
-                color: context.flowColors.expense,
-                size: size,
-              ),
+          errorBuilder: (context, error, stackTrace) => Icon(
+            Symbols.error_rounded,
+            color: context.flowColors.expense,
+            size: size,
+          ),
         ),
       ),
       CharacterFlowIcon character => SizedBox.square(

@@ -1,5 +1,7 @@
-import "package:flow/data/currencies.dart";
 import "package:flow/data/exchange_rates.dart";
+import "package:flow/services/currency_registry.dart";
+import "package:flow/services/user_preferences.dart";
+import "package:flow/utils/optional.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 
@@ -21,7 +23,7 @@ class Money {
   factory Money(double amount, String currency) {
     currency = currency.toUpperCase();
 
-    if (!isCurrencyCodeValid(currency)) {
+    if (!CurrencyRegistryService().isCurrencyCodeValid(currency)) {
       throw MoneyException("Invalid or unsupported currency code: $currency");
     }
 
@@ -39,7 +41,8 @@ class Money {
 
     if (from == to) return amount;
 
-    if (!isCurrencyCodeValid(from) || !isCurrencyCodeValid(to)) {
+    if (!CurrencyRegistryService().isCurrencyCodeValid(from) ||
+        !CurrencyRegistryService().isCurrencyCodeValid(to)) {
       throw const MoneyException("Invalid or unsupported currency code");
     }
 
@@ -50,7 +53,7 @@ class Money {
   Money convert(String newCurrency, ExchangeRates rates) {
     newCurrency = newCurrency.toUpperCase();
 
-    if (!isCurrencyCodeValid(newCurrency)) {
+    if (!CurrencyRegistryService().isCurrencyCodeValid(newCurrency)) {
       throw MoneyException("Invalid or unsupported currency code: $currency");
     }
 
@@ -157,19 +160,28 @@ class Money {
     bool useCurrencySymbol = true,
     bool compact = false,
     bool takeAbsoluteValue = false,
+    Optional<String?>? customIcuPattern,
     int? decimalDigits,
   }) {
     final num amountToFormat = takeAbsoluteValue ? amount.abs() : amount;
     final String currencyToFormat = !includeCurrency ? "" : currency;
     useCurrencySymbol = useCurrencySymbol && includeCurrency;
 
-    final String? symbol =
-        useCurrencySymbol
-            ? NumberFormat.simpleCurrency(
-              locale: Intl.defaultLocale,
-              name: currencyToFormat,
-            ).currencySymbol
-            : null;
+    Optional<String?>? formatterPattern = customIcuPattern;
+
+    if (formatterPattern == null &&
+        UserPreferencesService().icuCurrencyFormattingPattern != null) {
+      formatterPattern = Optional(
+        UserPreferencesService().icuCurrencyFormattingPattern!,
+      );
+    }
+
+    final String? symbol = useCurrencySymbol
+        ? NumberFormat.simpleCurrency(
+            locale: Intl.defaultLocale,
+            name: currencyToFormat,
+          ).currencySymbol
+        : null;
 
     if (compact) {
       return NumberFormat.compactCurrency(
@@ -183,6 +195,7 @@ class Money {
       locale: Intl.defaultLocale,
       name: currencyToFormat,
       symbol: symbol,
+      customPattern: formatterPattern?.value,
       decimalDigits: decimalDigits,
     ).format(amountToFormat);
   }
@@ -212,7 +225,7 @@ class Money {
 
   String toSemanticLabel() {
     final String currencyName =
-        iso4217CurrenciesGrouped[currency]?.name ?? currency;
+        CurrencyRegistryService().groupedCurrencies[currency]?.name ?? currency;
 
     return "$formattedNoMarker $currencyName";
   }

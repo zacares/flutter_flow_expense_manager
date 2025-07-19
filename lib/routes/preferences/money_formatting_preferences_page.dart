@@ -1,8 +1,12 @@
 import "package:flow/data/money.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/helpers.dart";
+import "package:flow/utils/optional.dart";
+import "package:flow/widgets/general/directional_chevron.dart";
 import "package:flow/widgets/general/money_text.dart";
+import "package:flow/widgets/sheets/select_currency_icu_pattern.dart";
 import "package:flutter/material.dart";
 
 class MoneyFormattingPreferencesPage extends StatefulWidget {
@@ -30,7 +34,7 @@ class _MoneyFormattingPreferencesPageState
               const SizedBox(height: 16.0),
               Center(
                 child: MoneyText(
-                  Money(12345678.90, LocalPreferences().getPrimaryCurrency()),
+                  Money(12345678.90, UserPreferencesService().primaryCurrency),
                   initiallyAbbreviated: !preferFullAmounts,
                   tapToToggleAbbreviation: false,
                   style: context.textTheme.displaySmall,
@@ -61,6 +65,13 @@ class _MoneyFormattingPreferencesPageState
                 value: useCurrencySymbol,
                 onChanged: updateUseCurrencySymbol,
               ),
+              ListTile(
+                title: Text(
+                  "preferences.moneyFormatting.setICUPattern".t(context),
+                ),
+                onTap: updateCustomICUCurrencyFormatter,
+                trailing: const DirectionalChevron(),
+              ),
             ],
           ),
         ),
@@ -82,5 +93,19 @@ class _MoneyFormattingPreferencesPageState
     await LocalPreferences().useCurrencySymbol.set(newUseCurrencySymbol);
 
     if (mounted) setState(() {});
+  }
+
+  void updateCustomICUCurrencyFormatter() async {
+    final Optional<String?>? result = await showModalBottomSheet(
+      context: context,
+      builder: (context) => SelectCurrencyIcuPattern(),
+      isScrollControlled: true,
+    );
+
+    if (result == null) return;
+
+    UserPreferencesService().icuCurrencyFormattingPattern = result.value;
+
+    setState(() {});
   }
 }

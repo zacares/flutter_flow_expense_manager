@@ -72,11 +72,10 @@ class _ExportHistoryPageState extends State<ExportHistoryPage> {
                           (iCloudFile) => BackupEntry(
                             filePath: iCloudFile.relativePath,
                             type: BackupEntryType.other.value,
-                            fileExt:
-                                path
-                                    .extension(iCloudFile.relativePath)
-                                    .replaceAll(r"^\.", "")
-                                    .toLowerCase(),
+                            fileExt: path
+                                .extension(iCloudFile.relativePath)
+                                .replaceAll(r"^\.", "")
+                                .toLowerCase(),
                           ),
                         ),
                   );
@@ -98,8 +97,9 @@ class _ExportHistoryPageState extends State<ExportHistoryPage> {
                           entry: entry,
                           dismissibleKey: ValueKey(entry.id),
                           onUpload: canUpload ? (() => upload(entry)) : null,
-                          uploadProgress:
-                              uploading?.$1 == entry.id ? uploading?.$2 : null,
+                          uploadProgress: uploading?.$1 == entry.id
+                              ? uploading?.$2
+                              : null,
                           existsOnCloud: entry.correspondingFile != null,
                         );
                       },

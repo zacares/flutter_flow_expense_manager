@@ -10,7 +10,7 @@ import "package:flutter/material.dart";
 import "package:flutter_slidable/flutter_slidable.dart";
 import "package:moment_dart/moment_dart.dart";
 
-enum GroupedTransactionListType {
+enum GroupedTransactionsListViewType {
   list(false),
   sliver(true),
   reorderable(false),
@@ -18,10 +18,10 @@ enum GroupedTransactionListType {
 
   final bool isSliver;
 
-  const GroupedTransactionListType(this.isSliver);
+  const GroupedTransactionsListViewType(this.isSliver);
 }
 
-class GroupedTransactionList extends StatefulWidget {
+class GroupedTransactionsListView extends StatefulWidget {
   final EdgeInsets itemPadding;
 
   /// When null, same as [itemPadding]
@@ -71,9 +71,9 @@ class GroupedTransactionList extends StatefulWidget {
   /// Set this to [null] to use the default behavior
   final bool? overrideObscure;
 
-  final GroupedTransactionListType listType;
+  final GroupedTransactionsListViewType listType;
 
-  const GroupedTransactionList({
+  const GroupedTransactionsListView({
     super.key,
     required this.transactions,
     required this.headerBuilder,
@@ -92,14 +92,16 @@ class GroupedTransactionList extends StatefulWidget {
     ),
     this.mainHeaderPadding,
     this.shouldCombineTransferIfNeeded = false,
-    this.listType = GroupedTransactionListType.list,
+    this.listType = GroupedTransactionsListViewType.list,
   });
 
   @override
-  State<GroupedTransactionList> createState() => _GroupedTransactionListState();
+  State<GroupedTransactionsListView> createState() =>
+      _GroupedTransactionsListViewState();
 }
 
-class _GroupedTransactionListState extends State<GroupedTransactionList> {
+class _GroupedTransactionsListViewState
+    extends State<GroupedTransactionsListView> {
   late bool globalPrivacyMode;
 
   Widget? get header => widget.mainHeader;
@@ -168,10 +170,9 @@ class _GroupedTransactionListState extends State<GroupedTransactionList> {
           ),
           (Widget header) => Padding(
             key: ValueKey("header-$index-${header.hashCode}"),
-            padding:
-                index == 0
-                    ? (widget.mainHeaderPadding ?? headerPadding)
-                    : headerPadding,
+            padding: index == 0
+                ? (widget.mainHeaderPadding ?? headerPadding)
+                : headerPadding,
             child: header,
           ),
           (Transaction transaction) => ReorderableDelayedDragStartListener(
@@ -185,11 +186,10 @@ class _GroupedTransactionListState extends State<GroupedTransactionList> {
               moveToTrashFn: () => transaction.moveToTrashBin(context),
               recoverFromTrashFn: () => transaction.recoverFromTrashBin(),
               confirmFn: ([bool confirm = true]) {
-                final bool updateTransactionDate =
-                    LocalPreferences()
-                        .pendingTransactions
-                        .updateDateUponConfirmation
-                        .get();
+                final bool updateTransactionDate = LocalPreferences()
+                    .pendingTransactions
+                    .updateDateUponConfirmation
+                    .get();
 
                 transaction.confirm(confirm, updateTransactionDate);
               },
@@ -206,32 +206,34 @@ class _GroupedTransactionListState extends State<GroupedTransactionList> {
         };
 
     final Widget list = switch (widget.listType) {
-      GroupedTransactionListType.list => ListView.builder(
+      GroupedTransactionsListViewType.list => ListView.builder(
         controller: widget.controller,
         itemBuilder: itemBuilder,
         itemCount: flattened.length,
       ),
-      GroupedTransactionListType.sliver => SliverList.builder(
+      GroupedTransactionsListViewType.sliver => SliverList.builder(
         itemBuilder: itemBuilder,
         itemCount: flattened.length,
       ),
-      GroupedTransactionListType.reorderable => ReorderableListView.builder(
-        itemBuilder: itemBuilder,
-        buildDefaultDragHandles: false,
-        itemCount: flattened.length,
-        onReorder: (i, j) => _onReorder(i, j, flattened),
-      ),
-      GroupedTransactionListType.sliverReorderable => SliverReorderableList(
-        itemBuilder: itemBuilder,
-        itemCount: flattened.length,
-        onReorder: (i, j) => _onReorder(i, j, flattened),
-      ),
+      GroupedTransactionsListViewType.reorderable =>
+        ReorderableListView.builder(
+          itemBuilder: itemBuilder,
+          buildDefaultDragHandles: false,
+          itemCount: flattened.length,
+          onReorder: (i, j) => _onReorder(i, j, flattened),
+        ),
+      GroupedTransactionsListViewType.sliverReorderable =>
+        SliverReorderableList(
+          itemBuilder: itemBuilder,
+          itemCount: flattened.length,
+          onReorder: (i, j) => _onReorder(i, j, flattened),
+        ),
     };
 
     return SlidableAutoCloseBehavior(child: list);
   }
 
-  _privacyModeUpdate() {
+  void _privacyModeUpdate() {
     globalPrivacyMode = TransitiveLocalPreferences().sessionPrivacyMode.get();
     if (!mounted) return;
     setState(() {});
@@ -270,7 +272,7 @@ class _GroupedTransactionListState extends State<GroupedTransactionList> {
     }
   }
 
-  _rerender() {
+  void _rerender() {
     if (!mounted) return;
     setState(() {});
   }

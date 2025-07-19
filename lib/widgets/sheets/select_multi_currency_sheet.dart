@@ -1,5 +1,6 @@
 import "package:flow/data/currencies.dart";
 import "package:flow/l10n/extensions.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/general/modal_overflow_bar.dart";
@@ -66,31 +67,29 @@ class _SelectMultiCurrencySheetState extends State<SelectMultiCurrencySheet> {
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children:
-              widget.currencies.map((currency) {
-                final CurrencyData transformedCurrencyData =
-                    iso4217CurrenciesGrouped[currency.code]!;
+          children: widget.currencies.map((currency) {
+            final CurrencyData transformedCurrencyData =
+                CurrencyRegistryService().groupedCurrencies[currency.code]!;
 
-                return CheckboxListTile(
-                  value: selectedUuids.contains(transformedCurrencyData.code),
-                  title: Text(transformedCurrencyData.name),
-                  subtitle: Text(
-                    transformedCurrencyData.country.titleCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  secondary: Text(
-                    transformedCurrencyData.code,
-                    style: context.textTheme.bodyLarge?.copyWith(
-                      fontFeatures: [const FontFeature.tabularFigures()],
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  onChanged:
-                      (value) => select(transformedCurrencyData.code, value),
-                );
-              }).toList(),
+            return CheckboxListTile(
+              value: selectedUuids.contains(transformedCurrencyData.code),
+              title: Text(transformedCurrencyData.name),
+              subtitle: Text(
+                transformedCurrencyData.country.titleCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              secondary: Text(
+                transformedCurrencyData.code,
+                style: context.textTheme.bodyLarge?.copyWith(
+                  fontFeatures: [const FontFeature.tabularFigures()],
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              onChanged: (value) => select(transformedCurrencyData.code, value),
+            );
+          }).toList(),
         ),
       ),
     );

@@ -67,16 +67,15 @@ class _BackupInfoCSVState extends State<BackupInfoCSV> {
             padding: const EdgeInsets.only(left: 16.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children:
-                  widget.importer.data.accountNames.map((name) {
-                    final String? currency =
-                        widget.importer.accountCurrencies[name];
-                    return AccountCurrencyListTile(
-                      name: name,
-                      currency: currency,
-                      onTap: () => _setCurrencyFor(name),
-                    );
-                  }).toList(),
+              children: widget.importer.data.accountNames.map((name) {
+                final String? currency =
+                    widget.importer.accountCurrencies[name];
+                return AccountCurrencyListTile(
+                  name: name,
+                  currency: currency,
+                  onTap: () => _setCurrencyFor(name),
+                );
+              }).toList(),
             ),
           ),
           const SizedBox(height: 8.0),
@@ -105,10 +104,9 @@ class _BackupInfoCSVState extends State<BackupInfoCSV> {
           InfoText(child: Text("sync.import.emergencyBackup".t(context))),
           const SizedBox(height: 16.0),
           Button(
-            onTap:
-                widget.importer.ready
-                    ? widget.onClickStart
-                    : _showIncompleteToast,
+            onTap: widget.importer.ready
+                ? widget.onClickStart
+                : _showIncompleteToast,
             leading: FlowIcon(FlowIconData.icon(Symbols.download_rounded)),
             child: Text("sync.import.start".t(context)),
           ),

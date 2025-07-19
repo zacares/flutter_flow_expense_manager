@@ -22,43 +22,41 @@ extension CustomPopups on BuildContext {
   }) async {
     final bool? result = await showModalBottomSheet(
       context: this,
-      builder:
-          (context) => ModalSheet(
-            title: Text(title ?? "general.areYouSure".t(context)),
-            trailing: ModalOverflowBar(
-              alignment: MainAxisAlignment.end,
-              children: [
-                Button(
-                  onTap: () => context.pop(false),
-                  child: Text("general.cancel".t(context)),
-                ),
-                Button(
-                  onTap: () => context.pop(true),
-                  child: Text(
-                    mainActionLabelOverride ??
-                        (isDeletionConfirmation
-                            ? "general.delete".t(context)
-                            : "general.confirm".t(context)),
-                    style:
-                        isDeletionConfirmation
-                            ? TextStyle(color: context.flowColors.expense)
-                            : null,
-                  ),
-                ),
-              ],
+      builder: (context) => ModalSheet(
+        title: Text(title ?? "general.areYouSure".t(context)),
+        trailing: ModalOverflowBar(
+          alignment: MainAxisAlignment.end,
+          children: [
+            Button(
+              onTap: () => context.pop(false),
+              child: Text("general.cancel".t(context)),
             ),
-            child:
-                child ??
-                (isDeletionConfirmation
-                    ? Text(
-                      "general.delete.permanentWarning".t(context),
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: context.flowColors.expense,
-                      ),
-                      textAlign: TextAlign.center,
-                    )
-                    : null),
-          ),
+            Button(
+              onTap: () => context.pop(true),
+              child: Text(
+                mainActionLabelOverride ??
+                    (isDeletionConfirmation
+                        ? "general.delete".t(context)
+                        : "general.confirm".t(context)),
+                style: isDeletionConfirmation
+                    ? TextStyle(color: context.flowColors.expense)
+                    : null,
+              ),
+            ),
+          ],
+        ),
+        child:
+            child ??
+            (isDeletionConfirmation
+                ? Text(
+                    "general.delete.permanentWarning".t(context),
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: context.flowColors.expense,
+                    ),
+                    textAlign: TextAlign.center,
+                  )
+                : null),
+      ),
     );
 
     if (callback != null) {
@@ -89,10 +87,9 @@ extension CustomPopups on BuildContext {
 
     final RenderBox? renderBox = findRenderObject() as RenderBox?;
 
-    final origin =
-        renderBox == null
-            ? Rect.zero
-            : renderBox.localToGlobal(Offset.zero) & renderBox.size;
+    final origin = renderBox == null
+        ? Rect.zero
+        : renderBox.localToGlobal(Offset.zero) & renderBox.size;
 
     await SharePlus.instance.share(
       ShareParams(
@@ -107,10 +104,9 @@ extension CustomPopups on BuildContext {
 
   Future<ShareResult> showUriShareSheet({required Uri uri}) async {
     final RenderBox? renderBox = findRenderObject() as RenderBox?;
-    final origin =
-        renderBox == null
-            ? Rect.zero
-            : renderBox.localToGlobal(Offset.zero) & renderBox.size;
+    final origin = renderBox == null
+        ? Rect.zero
+        : renderBox.localToGlobal(Offset.zero) & renderBox.size;
 
     if (Platform.isIOS || Platform.isAndroid) {
       return await SharePlus.instance.share(

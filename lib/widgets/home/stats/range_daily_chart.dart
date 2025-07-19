@@ -4,7 +4,7 @@ import "package:auto_size_text/auto_size_text.dart";
 import "package:fl_chart/fl_chart.dart";
 import "package:flow/data/flow_standard_report.dart";
 import "package:flow/data/money.dart";
-import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/widgets/chart_legend.dart";
 import "package:flow/widgets/general/money_text.dart";
@@ -64,10 +64,9 @@ class _RangeDailyChartState extends State<RangeDailyChart> {
     final Widget child = Container(
       height: widget.height,
       padding: EdgeInsets.all(16.0),
-      child:
-          dailyExpenditureChartData == null
-              ? Spinner.center()
-              : LineChart(dailyExpenditureChartData!),
+      child: dailyExpenditureChartData == null
+          ? Spinner.center()
+          : LineChart(dailyExpenditureChartData!),
     );
 
     final String? previousLabel = widget.report.previous?.format();
@@ -105,7 +104,7 @@ class _RangeDailyChartState extends State<RangeDailyChart> {
     final int maxDays = calculateMaxDays(report.current);
     final bool hasPrevious = report.previousFlowByDay != null;
 
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
     final Color currentPeriod = context.colorScheme.primary;
     final Color previousPeriod = context.colorScheme.primary.withAlpha(0x40);
@@ -129,8 +128,10 @@ class _RangeDailyChartState extends State<RangeDailyChart> {
                 fontWeight: FontWeight.bold,
                 fontSize: 14.0,
               );
-              final String amount =
-                  Money(touchedSpot.y, primaryCurrency).formattedCompact;
+              final String amount = Money(
+                touchedSpot.y,
+                primaryCurrency,
+              ).formattedCompact;
               return LineTooltipItem(amount, textStyle);
             }).toList();
           },
@@ -141,15 +142,14 @@ class _RangeDailyChartState extends State<RangeDailyChart> {
         leftTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            getTitlesWidget:
-                (value, meta) => MoneyText(
-                  Money(value, primaryCurrency),
-                  initiallyAbbreviated: true,
-                  tapToToggleAbbreviation: false,
-                  autoSize: true,
-                  autoSizeGroup: autoSizeGroup,
-                  displayAbsoluteAmount: true,
-                ),
+            getTitlesWidget: (value, meta) => MoneyText(
+              Money(value, primaryCurrency),
+              initiallyAbbreviated: true,
+              tapToToggleAbbreviation: false,
+              autoSize: true,
+              autoSizeGroup: autoSizeGroup,
+              displayAbsoluteAmount: true,
+            ),
             reservedSize: 48.0,
           ),
         ),
@@ -168,8 +168,8 @@ class _RangeDailyChartState extends State<RangeDailyChart> {
                 fontSize: 12.0,
               ),
               alignment: Alignment.topRight,
-              labelResolver:
-                  (p0) => Money(p0.y, primaryCurrency).formattedCompact,
+              labelResolver: (p0) =>
+                  Money(p0.y, primaryCurrency).formattedCompact,
               show: true,
             ),
           ),
@@ -229,7 +229,7 @@ class _RangeDailyChartState extends State<RangeDailyChart> {
       range.from.endOfMonth().day,
       range.last.from.endOfMonth().day,
     ),
-    TimeRange other => other.duration.inDays,
+    TimeRange other => other.duration.inDays.abs(),
   };
 
   FlGridData gridData(FlowStandardReport report) {
@@ -253,8 +253,8 @@ class _RangeDailyChartState extends State<RangeDailyChart> {
     return switch (report.current) {
       MonthTimeRange() => SideTitles(
         showTitles: true,
-        getTitlesWidget:
-            (value, meta) => Text((value + 1.0).toStringAsFixed(0)),
+        getTitlesWidget: (value, meta) =>
+            Text((value + 1.0).toStringAsFixed(0)),
         interval: 3,
         minIncluded: true,
         maxIncluded: false,
@@ -262,36 +262,35 @@ class _RangeDailyChartState extends State<RangeDailyChart> {
       YearTimeRange yearTimeRange => SideTitles(
         showTitles: true,
         getTitlesWidget: (value, meta) {
-          final int month =
-              yearTimeRange.from.isLeapYear
-                  ? [
-                    0,
-                    31,
-                    60,
-                    91,
-                    121,
-                    152,
-                    182,
-                    213,
-                    244,
-                    274,
-                    303,
-                    333,
-                  ].indexOf(value.toInt())
-                  : [
-                    0,
-                    31,
-                    59,
-                    90,
-                    120,
-                    151,
-                    181,
-                    212,
-                    243,
-                    273,
-                    302,
-                    332,
-                  ].indexOf(value.toInt());
+          final int month = yearTimeRange.from.isLeapYear
+              ? [
+                  0,
+                  31,
+                  60,
+                  91,
+                  121,
+                  152,
+                  182,
+                  213,
+                  244,
+                  274,
+                  303,
+                  333,
+                ].indexOf(value.toInt())
+              : [
+                  0,
+                  31,
+                  59,
+                  90,
+                  120,
+                  151,
+                  181,
+                  212,
+                  243,
+                  273,
+                  302,
+                  332,
+                ].indexOf(value.toInt());
 
           if (month < 0) return const SizedBox.shrink();
 

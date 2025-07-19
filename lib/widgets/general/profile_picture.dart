@@ -36,22 +36,20 @@ class _ProfilePictureState extends State<ProfilePicture> {
 
   @override
   Widget build(BuildContext context) {
-    final file =
-        widget.filePath == null
-            ? null
-            : File(path.join(ObjectBox.imagesDirectory, widget.filePath!));
+    final file = widget.filePath == null
+        ? null
+        : File(path.join(ObjectBox.imagesDirectory, widget.filePath!));
 
     final child = ClipOval(
       child: Container(
         color: context.colorScheme.primary,
-        child:
-            file?.existsSync() == true
-                ? Image.file(file!, width: widget.size, height: widget.size)
-                : FlowIcon(
-                  const IconFlowIcon(Symbols.person_rounded),
-                  size: widget.size,
-                  color: context.colorScheme.onPrimary,
-                ),
+        child: file?.existsSync() == true
+            ? Image.file(file!, width: widget.size, height: widget.size)
+            : FlowIcon(
+                const IconFlowIcon(Symbols.person_rounded),
+                size: widget.size,
+                color: context.colorScheme.onPrimary,
+              ),
       ),
     );
 
@@ -60,15 +58,13 @@ class _ProfilePictureState extends State<ProfilePicture> {
     }
 
     return MouseRegion(
-      onEnter:
-          widget.showOverlayUponHover
-              ? (event) =>
-                  setState(() => showOverlay = event.distance <= widget.size)
-              : null,
-      onExit:
-          widget.showOverlayUponHover
-              ? (event) => setState(() => showOverlay = false)
-              : null,
+      onEnter: widget.showOverlayUponHover
+          ? (event) =>
+                setState(() => showOverlay = event.distance <= widget.size)
+          : null,
+      onExit: widget.showOverlayUponHover
+          ? (event) => setState(() => showOverlay = false)
+          : null,
       child: Stack(
         children: [
           child,
@@ -76,8 +72,9 @@ class _ProfilePictureState extends State<ProfilePicture> {
             onTap: widget.onTap,
             borderRadius: BorderRadius.circular(999.9),
             child: AnimatedOpacity(
-              opacity:
-                  widget.showOverlayUponHover ? (showOverlay ? 1.0 : 0.5) : 0.0,
+              opacity: widget.showOverlayUponHover
+                  ? (showOverlay ? 1.0 : 0.5)
+                  : 0.0,
               duration: const Duration(milliseconds: 200),
               child: DecoratedBox(
                 decoration: const BoxDecoration(

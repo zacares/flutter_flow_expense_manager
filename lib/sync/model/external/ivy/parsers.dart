@@ -1,3 +1,4 @@
+import "package:moment_dart/moment_dart.dart";
 import "package:uuid/uuid.dart";
 
 String? parseOptionalString(dynamic x) {
@@ -41,6 +42,10 @@ String parseUuid(dynamic x) {
 }
 
 DateTime parseDate(dynamic x) {
+  if (x is DateTime) {
+    return x;
+  }
+
   if (x is! String) {
     throw Exception("Expected a string");
   }
@@ -52,9 +57,19 @@ DateTime parseDate(dynamic x) {
   }
 
   try {
-    final RegExpMatch? match = RegExp(
-      r"(?<day>[0123]?\d)[\/-](?<month>[01]?\d)[\/-](?<year>\d\d\d\d)\s+(?<hour>[012]?\d)[:-](?<minute>[012345]?\d)[^\d]*",
-    ).firstMatch(x);
+    return Moment.parse(x);
+  } catch (e) {
+    // Silent fail
+  }
+
+  try {
+    final RegExpMatch? match =
+        RegExp(
+          r"(?<day>[0123]?\d)[\/-](?<month>[01]?\d)[\/-](?<year>\d\d\d\d)\s+(?<hour>[012]?\d)[:-](?<minute>[012345]?\d)[^\d]*",
+        ).firstMatch(x) ??
+        RegExp(
+          r"(?<year>\d\d\d\d)[\/-](?<month>\d?\d)[\/-](?<day>[0123]+)[\sT]+(?<hour>\d+)[:-](?<minute>\d+)[:-](?<second>\d+)",
+        ).firstMatch(x);
 
     if (match == null) {
       throw Exception("Failed to parse date");
@@ -66,8 +81,9 @@ DateTime parseDate(dynamic x) {
       int.parse(match.namedGroup("day")!),
       int.parse(match.namedGroup("hour") ?? "0"),
       int.parse(match.namedGroup("minute") ?? "0"),
+      int.parse(match.namedGroup("second") ?? "0"),
     );
   } catch (e) {
-    throw Exception("Failed to parse date: $e");
+    throw Exception("Failed to parse date ($x): $e");
   }
 }

@@ -16,8 +16,7 @@ Future<File?> pickImportFile({String? dialogTitle}) async {
     initialDirectory: await getApplicationDocumentsDirectory()
         .then<String?>((value) => value.path)
         .catchError((_) => null),
-    allowedExtensions: ["json", "zip", "csv"],
-    type: FileType.custom,
+    type: FileType.any,
     allowMultiple: false,
   );
 

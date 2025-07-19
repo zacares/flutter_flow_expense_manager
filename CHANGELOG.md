@@ -1,11 +1,49 @@
 # Changelog
 
-## Next
+## (optimistic) 0.14.6
+
+### New features
+
+* Now supports following cryptocurrencies: BTC, ETH, USDT, XRP, BNB, SOL, USDC, DOGE, ADA, BCH, AVAX, TON, SHIB, LTC,
+  HBAR, XMR, DAI, DOT, UNI, PEPE, AAVE, APT, OKB, NEAR, ICP, CRO, ETC
 
 ### Fixes
 
+* Now has more loose parsing for Ivy Wallet CSV option, closes #547
+
+## 0.14.5
+
+### New features
+
+* Now you can export transactions history in PDF format. Closes [#516](https://github.com/flow-mn/flow/issues/516)
+
+### Changes and improvements
+
+* Range selector now remembers the last value, closes [#542](https://github.com/flow-mn/flow/issues/542)
+* No longer shows year 4000 in some places in transaction page :O
+
+### Fixes
+
+* Transaction reminder text no longer reverses the ago/in.
+
+## 0.14.4
+
+### New features
+
+* Now you can filter transactions by type in the home tab
+* Added support for Spanish and Russian (Thanks to Gemini Pro 2.5)
+
+### Changes and improvements
+
+* Primary currency, and transaction button orders now persists with backups.
+* Exports now run in a different [Isolate](https://dart.dev/language/isolates)
+
+## 0.14.3
+
 * Fixed permenantly deleting a part of transfer transaction from the trash bin
   would result in a stale transaction, that is unable to be opened
+* Now you can customize money formats. Closes [#179](https://github.com/flow-mn/flow/issues/179)
+* German language support thanks to [@MarkusWangler](https://github.com/MarkusWangler)
 
 ## 0.14.2
 

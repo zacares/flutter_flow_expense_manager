@@ -114,10 +114,10 @@ class _TimeRangeSelectorState extends State<TimeRangeSelector> {
                               monthTimeRange.from.format(
                                 payload:
                                     monthTimeRange.from.isAtSameYearAs(
-                                          DateTime.now(),
-                                        )
-                                        ? "MMMM"
-                                        : "MMMM YYYY",
+                                      DateTime.now(),
+                                    )
+                                    ? "MMMM"
+                                    : "MMMM YYYY",
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -132,8 +132,8 @@ class _TimeRangeSelectorState extends State<TimeRangeSelector> {
                           _ => Button(
                             onTap: pickRange,
                             child: Text(
-                              (_timeRange.from <= DateTime(0) &&
-                                      _timeRange.to >= DateTime(4000))
+                              (_timeRange.from <= Moment.minValue &&
+                                      _timeRange.to >= Moment.maxValue)
                                   ? "select.timeRange.allTime".t(context)
                                   : "${_timeRange.from.toMoment().ll} -> ${_timeRange.to.toMoment().ll}",
                               textAlign: TextAlign.center,
@@ -190,13 +190,12 @@ class _TimeRangeSelectorState extends State<TimeRangeSelector> {
       context: context,
       firstDate: DateTime.fromMicrosecondsSinceEpoch(0),
       lastDate: DateTime(4000),
-      initialDateRange:
-          _timeRange is CustomTimeRange
-              ? DateTimeRange(
-                start: (_timeRange as CustomTimeRange).from,
-                end: (_timeRange as CustomTimeRange).to,
-              )
-              : null,
+      initialDateRange: _timeRange is CustomTimeRange
+          ? DateTimeRange(
+              start: (_timeRange as CustomTimeRange).from,
+              end: (_timeRange as CustomTimeRange).to,
+            )
+          : null,
     );
 
     if (range != null) {

@@ -45,29 +45,30 @@ class ICloudSyncService {
 
     late final StreamSubscription<List<ICloudFile>> subscription;
 
-    final List<ICloudFile> files = await ICloudStorage.gather(
-      containerId: containerId,
-      onUpdate: (Stream<List<ICloudFile>> stream) {
-        _listeningToMetadataChanges = true;
-        subscription = stream.listen(
-          (data) => _filesCache.value = data,
-          onDone: () {
-            _log.info("ICloud metadata stream closed");
-            subscription.cancel();
-            _listeningToMetadataChanges = false;
+    final List<ICloudFile> files =
+        await ICloudStorage.gather(
+          containerId: containerId,
+          onUpdate: (Stream<List<ICloudFile>> stream) {
+            _listeningToMetadataChanges = true;
+            subscription = stream.listen(
+              (data) => _filesCache.value = data,
+              onDone: () {
+                _log.info("ICloud metadata stream closed");
+                subscription.cancel();
+                _listeningToMetadataChanges = false;
+              },
+              onError: (error) {
+                _log.severe("ICloud metadata stream error", error);
+                subscription.cancel();
+                _listeningToMetadataChanges = false;
+              },
+            );
           },
-          onError: (error) {
-            _log.severe("ICloud metadata stream error", error);
-            subscription.cancel();
-            _listeningToMetadataChanges = false;
-          },
-        );
-      },
-    ).catchError((e, stackTrace) {
-      lastError = e;
-      _log.warning("Error gathering iCloud files", e, stackTrace);
-      return <ICloudFile>[];
-    });
+        ).catchError((e, stackTrace) {
+          lastError = e;
+          _log.warning("Error gathering iCloud files", e, stackTrace);
+          return <ICloudFile>[];
+        });
 
     _log.fine("Gathered iCloud files: ${files.length}");
 
@@ -222,8 +223,9 @@ class ICloudSyncService {
 
   Future<void> debugPurge() async {
     final List<ICloudFile> files = await gather();
-    final List<ICloudFile> debugFiles =
-        files.where((file) => file.relativePath.startsWith("debug/")).toList();
+    final List<ICloudFile> debugFiles = files
+        .where((file) => file.relativePath.startsWith("debug/"))
+        .toList();
 
     _log.info("Deleting ${debugFiles.length} debug files");
     for (ICloudFile file in debugFiles) {

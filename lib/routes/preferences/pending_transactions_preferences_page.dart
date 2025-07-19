@@ -33,8 +33,8 @@ class _PendingTransactionPreferencesPageState
 
     _listener = AppLifecycleListener(
       onShow: () {
-        _notificationsPermissionGranted =
-            NotificationsService().hasPermissions();
+        _notificationsPermissionGranted = NotificationsService()
+            .hasPermissions();
         if (mounted) {
           setState(() {});
         }
@@ -56,13 +56,17 @@ class _PendingTransactionPreferencesPageState
     final int pendingTransactionsHomeTimeframe =
         LocalPreferences().pendingTransactions.homeTimeframe.get() ??
         PendingTransactionsLocalPreferences.homeTimeframeDefault;
-    final bool pendingTransactionsRequireConfrimation =
-        LocalPreferences().pendingTransactions.requireConfrimation.get();
+    final bool pendingTransactionsRequireConfrimation = LocalPreferences()
+        .pendingTransactions
+        .requireConfrimation
+        .get();
     final bool pendingTransactionsUpdateDateUponConfirmation =
         LocalPreferences().pendingTransactions.updateDateUponConfirmation.get();
     final bool notify = LocalPreferences().pendingTransactions.notify.get();
-    final int? earlyReminderInSeconds =
-        LocalPreferences().pendingTransactions.earlyReminderInSeconds.get();
+    final int? earlyReminderInSeconds = LocalPreferences()
+        .pendingTransactions
+        .earlyReminderInSeconds
+        .get();
 
     return Scaffold(
       appBar: AppBar(
@@ -92,27 +96,19 @@ class _PendingTransactionPreferencesPageState
                 child: Wrap(
                   spacing: 12.0,
                   runSpacing: 8.0,
-                  children:
-                      [1, 2, 3, 5, 7, 14, 30]
-                          .map(
-                            (value) => FilterChip(
-                              showCheckmark: false,
-                              key: ValueKey(value),
-                              label: Text(
-                                "general.nextNDays".t(context, value),
-                              ),
-                              onSelected:
-                                  (bool selected) =>
-                                      selected
-                                          ? updatePendingTransactionsHomeTimeframe(
-                                            value,
-                                          )
-                                          : null,
-                              selected:
-                                  value == pendingTransactionsHomeTimeframe,
-                            ),
-                          )
-                          .toList(),
+                  children: [1, 2, 3, 5, 7, 14, 30]
+                      .map(
+                        (value) => FilterChip(
+                          showCheckmark: false,
+                          key: ValueKey(value),
+                          label: Text("general.nextNDays".t(context, value)),
+                          onSelected: (bool selected) => selected
+                              ? updatePendingTransactionsHomeTimeframe(value)
+                              : null,
+                          selected: value == pendingTransactionsHomeTimeframe,
+                        ),
+                      )
+                      .toList(),
                 ),
               ),
               const SizedBox(height: 16.0),
@@ -158,15 +154,15 @@ class _PendingTransactionPreferencesPageState
                       children: [
                         notificationsPermissionGranted
                             ? CheckboxListTile(
-                              title: Text(
-                                "preferences.transactions.pending.notify".t(
-                                  context,
+                                title: Text(
+                                  "preferences.transactions.pending.notify".t(
+                                    context,
+                                  ),
                                 ),
-                              ),
-                              enabled: notificationsPermissionGranted,
-                              value: notificationsPermissionGranted && notify,
-                              onChanged: updateNotify,
-                            )
+                                enabled: notificationsPermissionGranted,
+                                value: notificationsPermissionGranted && notify,
+                                onChanged: updateNotify,
+                              )
                             : NotificationPermissionMissingReminder(),
                         if (showSchedulingUnsupportedNotice) ...[
                           const SizedBox(height: 8.0),
@@ -221,13 +217,12 @@ class _PendingTransactionPreferencesPageState
                                                 "preferences.transactions.pending.notify.earlyReminder.none"
                                                     .t(context),
                                           ),
-                                          onSelected:
-                                              (bool selected) =>
-                                                  selected
-                                                      ? updateEarlyReminderInSeconds(
-                                                        value,
-                                                      )
-                                                      : null,
+                                          onSelected: (bool selected) =>
+                                              selected
+                                              ? updateEarlyReminderInSeconds(
+                                                  value,
+                                                )
+                                              : null,
                                           selected:
                                               (value?.inSeconds ?? 0) ==
                                               (earlyReminderInSeconds ?? 0),

@@ -419,7 +419,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(10, 7829328581176695647),
     name: 'UserPreferences',
-    lastPropertyId: const obx_int.IdUid(13, 6826663530484570285),
+    lastPropertyId: const obx_int.IdUid(17, 5034425281728425226),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -493,6 +493,24 @@ final _entities = <obx_int.ModelEntity>[
         id: const obx_int.IdUid(13, 6826663530484570285),
         name: 'enableICloudSync',
         type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(14, 8617478279582680424),
+        name: 'icuCurrencyFormattingPattern',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(16, 4857491171331889557),
+        name: 'primaryCurrency',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(17, 5034425281728425226),
+        name: 'transactionButtonOrderJoined',
+        type: 9,
         flags: 0,
       ),
     ],
@@ -721,6 +739,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
       4341960036397140355,
       420551111786793892,
       3842898167150913136,
+      1701734084880256388,
     ],
     retiredRelationUids: const [],
     modelVersion: 5,
@@ -732,15 +751,13 @@ obx_int.ModelDefinition getObjectBoxModel() {
     Account: obx_int.EntityDefinition<Account>(
       model: _entities[0],
       toOneRelations: (Account object) => [],
-      toManyRelations:
-          (Account object) => {
-            obx_int.RelInfo<Transaction>.toOneBacklink(
-                  11,
-                  object.id,
-                  (Transaction srcObject) => srcObject.account,
-                ):
-                object.transactions,
-          },
+      toManyRelations: (Account object) => {
+        obx_int.RelInfo<Transaction>.toOneBacklink(
+          11,
+          object.id,
+          (Transaction srcObject) => srcObject.account,
+        ): object.transactions,
+      },
       getId: (Account object) => object.id,
       setId: (Account object, int id) {
         object.id = id;
@@ -813,21 +830,22 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final createdDateParam = DateTime.fromMillisecondsSinceEpoch(
           const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0),
         );
-        final object = Account(
-            id: idParam,
-            name: nameParam,
-            currency: currencyParam,
-            iconCode: iconCodeParam,
-            creditLimit: creditLimitParam,
-            excludeFromTotalBalance: excludeFromTotalBalanceParam,
-            archived: archivedParam,
-            sortOrder: sortOrderParam,
-            type: typeParam,
-            createdDate: createdDateParam,
-          )
-          ..uuid = const fb.StringReader(
-            asciiOptimization: true,
-          ).vTableGet(buffer, rootOffset, 6, '');
+        final object =
+            Account(
+                id: idParam,
+                name: nameParam,
+                currency: currencyParam,
+                iconCode: iconCodeParam,
+                creditLimit: creditLimitParam,
+                excludeFromTotalBalance: excludeFromTotalBalanceParam,
+                archived: archivedParam,
+                sortOrder: sortOrderParam,
+                type: typeParam,
+                createdDate: createdDateParam,
+              )
+              ..uuid = const fb.StringReader(
+                asciiOptimization: true,
+              ).vTableGet(buffer, rootOffset, 6, '');
         obx_int.InternalToManyAccess.setRelInfo<Account>(
           object.transactions,
           store,
@@ -843,15 +861,13 @@ obx_int.ModelDefinition getObjectBoxModel() {
     Category: obx_int.EntityDefinition<Category>(
       model: _entities[1],
       toOneRelations: (Category object) => [],
-      toManyRelations:
-          (Category object) => {
-            obx_int.RelInfo<Transaction>.toOneBacklink(
-                  10,
-                  object.id,
-                  (Transaction srcObject) => srcObject.category,
-                ):
-                object.transactions,
-          },
+      toManyRelations: (Category object) => {
+        obx_int.RelInfo<Transaction>.toOneBacklink(
+          10,
+          object.id,
+          (Transaction srcObject) => srcObject.category,
+        ): object.transactions,
+      },
       getId: (Category object) => object.id,
       setId: (Category object, int id) {
         object.id = id;
@@ -887,15 +903,16 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final createdDateParam = DateTime.fromMillisecondsSinceEpoch(
           const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0),
         );
-        final object = Category(
-            id: idParam,
-            name: nameParam,
-            iconCode: iconCodeParam,
-            createdDate: createdDateParam,
-          )
-          ..uuid = const fb.StringReader(
-            asciiOptimization: true,
-          ).vTableGet(buffer, rootOffset, 6, '');
+        final object =
+            Category(
+                id: idParam,
+                name: nameParam,
+                iconCode: iconCodeParam,
+                createdDate: createdDateParam,
+              )
+              ..uuid = const fb.StringReader(
+                asciiOptimization: true,
+              ).vTableGet(buffer, rootOffset, 6, '');
         obx_int.InternalToManyAccess.setRelInfo<Category>(
           object.transactions,
           store,
@@ -942,14 +959,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final nameParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGet(buffer, rootOffset, 8, '');
-        final object = Profile(
-            id: idParam,
-            createdDate: createdDateParam,
-            name: nameParam,
-          )
-          ..uuid = const fb.StringReader(
-            asciiOptimization: true,
-          ).vTableGet(buffer, rootOffset, 6, '');
+        final object =
+            Profile(id: idParam, createdDate: createdDateParam, name: nameParam)
+              ..uuid = const fb.StringReader(
+                asciiOptimization: true,
+              ).vTableGet(buffer, rootOffset, 6, '');
 
         return object;
       },
@@ -966,10 +980,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final filePathOffset = fbb.writeString(object.filePath);
         final typeOffset = fbb.writeString(object.type);
         final fileExtOffset = fbb.writeString(object.fileExt);
-        final iCloudRelativePathOffset =
-            object.iCloudRelativePath == null
-                ? null
-                : fbb.writeString(object.iCloudRelativePath!);
+        final iCloudRelativePathOffset = object.iCloudRelativePath == null
+            ? null
+            : fbb.writeString(object.iCloudRelativePath!);
         fbb.startTable(9);
         fbb.addInt64(0, object.id);
         fbb.addInt64(1, object.syncModelVersion);
@@ -1017,17 +1030,17 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final iCloudRelativePathParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGetNullable(buffer, rootOffset, 16);
-        final object = BackupEntry(
-            id: idParam,
-            filePath: filePathParam,
-            createdDate: createdDateParam,
-            syncModelVersion: syncModelVersionParam,
-            type: typeParam,
-            fileExt: fileExtParam,
-            iCloudRelativePath: iCloudRelativePathParam,
-          )
-          ..iCloudChangeDate =
-              iCloudChangeDateValue == null
+        final object =
+            BackupEntry(
+                id: idParam,
+                filePath: filePathParam,
+                createdDate: createdDateParam,
+                syncModelVersion: syncModelVersionParam,
+                type: typeParam,
+                fileExt: fileExtParam,
+                iCloudRelativePath: iCloudRelativePathParam,
+              )
+              ..iCloudChangeDate = iCloudChangeDateValue == null
                   ? null
                   : DateTime.fromMillisecondsSinceEpoch(iCloudChangeDateValue);
 
@@ -1044,25 +1057,25 @@ obx_int.ModelDefinition getObjectBoxModel() {
       },
       objectToFB: (Transaction object, fb.Builder fbb) {
         final uuidOffset = fbb.writeString(object.uuid);
-        final titleOffset =
-            object.title == null ? null : fbb.writeString(object.title!);
+        final titleOffset = object.title == null
+            ? null
+            : fbb.writeString(object.title!);
         final currencyOffset = fbb.writeString(object.currency);
-        final subtypeOffset =
-            object.subtype == null ? null : fbb.writeString(object.subtype!);
-        final extraOffset =
-            object.extra == null ? null : fbb.writeString(object.extra!);
-        final categoryUuidOffset =
-            object.categoryUuid == null
-                ? null
-                : fbb.writeString(object.categoryUuid!);
-        final accountUuidOffset =
-            object.accountUuid == null
-                ? null
-                : fbb.writeString(object.accountUuid!);
-        final descriptionOffset =
-            object.description == null
-                ? null
-                : fbb.writeString(object.description!);
+        final subtypeOffset = object.subtype == null
+            ? null
+            : fbb.writeString(object.subtype!);
+        final extraOffset = object.extra == null
+            ? null
+            : fbb.writeString(object.extra!);
+        final categoryUuidOffset = object.categoryUuid == null
+            ? null
+            : fbb.writeString(object.categoryUuid!);
+        final accountUuidOffset = object.accountUuid == null
+            ? null
+            : fbb.writeString(object.accountUuid!);
+        final descriptionOffset = object.description == null
+            ? null
+            : fbb.writeString(object.description!);
         final extraTagsOffset = fbb.writeList(
           object.extraTags.map(fbb.writeString).toList(growable: false),
         );
@@ -1166,10 +1179,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 rootOffset,
                 38,
               )
-              ..deletedDate =
-                  deletedDateValue == null
-                      ? null
-                      : DateTime.fromMillisecondsSinceEpoch(deletedDateValue);
+              ..deletedDate = deletedDateValue == null
+                  ? null
+                  : DateTime.fromMillisecondsSinceEpoch(deletedDateValue);
         object.category.targetId = const fb.Int64Reader().vTableGet(
           buffer,
           rootOffset,
@@ -1228,15 +1240,16 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final nameParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGet(buffer, rootOffset, 8, '');
-        final object = TransactionFilterPreset(
-            id: idParam,
-            createdDate: createdDateParam,
-            jsonTransactionFilter: jsonTransactionFilterParam,
-            name: nameParam,
-          )
-          ..uuid = const fb.StringReader(
-            asciiOptimization: true,
-          ).vTableGet(buffer, rootOffset, 6, '');
+        final object =
+            TransactionFilterPreset(
+                id: idParam,
+                createdDate: createdDateParam,
+                jsonTransactionFilter: jsonTransactionFilterParam,
+                name: nameParam,
+              )
+              ..uuid = const fb.StringReader(
+                asciiOptimization: true,
+              ).vTableGet(buffer, rootOffset, 6, '');
 
         return object;
       },
@@ -1251,11 +1264,21 @@ obx_int.ModelDefinition getObjectBoxModel() {
       },
       objectToFB: (UserPreferences object, fb.Builder fbb) {
         final uuidOffset = fbb.writeString(object.uuid);
-        final defaultFilterPresetOffset =
-            object.defaultFilterPreset == null
-                ? null
-                : fbb.writeString(object.defaultFilterPreset!);
-        fbb.startTable(14);
+        final defaultFilterPresetOffset = object.defaultFilterPreset == null
+            ? null
+            : fbb.writeString(object.defaultFilterPreset!);
+        final icuCurrencyFormattingPatternOffset =
+            object.icuCurrencyFormattingPattern == null
+            ? null
+            : fbb.writeString(object.icuCurrencyFormattingPattern!);
+        final primaryCurrencyOffset = object.primaryCurrency == null
+            ? null
+            : fbb.writeString(object.primaryCurrency!);
+        final transactionButtonOrderJoinedOffset =
+            object.transactionButtonOrderJoined == null
+            ? null
+            : fbb.writeString(object.transactionButtonOrderJoined!);
+        fbb.startTable(18);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uuidOffset);
         fbb.addBool(2, object.combineTransfers);
@@ -1268,6 +1291,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addBool(10, object.transactionListTileShowCategoryName);
         fbb.addBool(11, object.transactionListTileShowAccountForLeading);
         fbb.addBool(12, object.enableICloudSync);
+        fbb.addOffset(13, icuCurrencyFormattingPatternOffset);
+        fbb.addOffset(15, primaryCurrencyOffset);
+        fbb.addOffset(16, transactionButtonOrderJoinedOffset);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -1311,6 +1337,17 @@ obx_int.ModelDefinition getObjectBoxModel() {
         );
         final autoBackupIntervalInHoursParam = const fb.Int64Reader()
             .vTableGetNullable(buffer, rootOffset, 22);
+        final icuCurrencyFormattingPatternParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 30);
+        final primaryCurrencyParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 34);
+        final transactionButtonOrderJoinedParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 36);
+        final remindDailyAtRelativeSecondsParam = const fb.Int64Reader()
+            .vTableGetNullable(buffer, rootOffset, 16);
         final object =
             UserPreferences(
                 id: idParam,
@@ -1326,12 +1363,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 defaultFilterPreset: defaultFilterPresetParam,
                 enableICloudSync: enableICloudSyncParam,
                 autoBackupIntervalInHours: autoBackupIntervalInHoursParam,
+                icuCurrencyFormattingPattern: icuCurrencyFormattingPatternParam,
+                primaryCurrency: primaryCurrencyParam,
+                transactionButtonOrderJoined: transactionButtonOrderJoinedParam,
+                remindDailyAtRelativeSeconds: remindDailyAtRelativeSecondsParam,
               )
               ..uuid = const fb.StringReader(
                 asciiOptimization: true,
-              ).vTableGet(buffer, rootOffset, 6, '')
-              ..remindDailyAtRelativeSeconds = const fb.Int64Reader()
-                  .vTableGetNullable(buffer, rootOffset, 16);
+              ).vTableGet(buffer, rootOffset, 6, '');
 
         return object;
       },
@@ -1348,10 +1387,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final uuidOffset = fbb.writeString(object.uuid);
         final nameOffset = fbb.writeString(object.name);
         final currencyOffset = fbb.writeString(object.currency);
-        final categoryUuidOffset =
-            object.categoryUuid == null
-                ? null
-                : fbb.writeString(object.categoryUuid!);
+        final categoryUuidOffset = object.categoryUuid == null
+            ? null
+            : fbb.writeString(object.categoryUuid!);
         final rangeOffset = fbb.writeString(object.range);
         fbb.startTable(10);
         fbb.addInt64(0, object.id);
@@ -1435,10 +1473,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final rulesOffset = fbb.writeList(
           object.rules.map(fbb.writeString).toList(growable: false),
         );
-        final transferToAccountUuidOffset =
-            object.transferToAccountUuid == null
-                ? null
-                : fbb.writeString(object.transferToAccountUuid!);
+        final transferToAccountUuidOffset = object.transferToAccountUuid == null
+            ? null
+            : fbb.writeString(object.transferToAccountUuid!);
         fbb.startTable(12);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uuidOffset);
@@ -1487,10 +1524,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
         ).vTableGetNullable(buffer, rootOffset, 20);
         final lastGeneratedTransactionDateParam =
             lastGeneratedTransactionDateValue == null
-                ? null
-                : DateTime.fromMillisecondsSinceEpoch(
-                  lastGeneratedTransactionDateValue,
-                );
+            ? null
+            : DateTime.fromMillisecondsSinceEpoch(
+                lastGeneratedTransactionDateValue,
+              );
         final createdDateParam = DateTime.fromMillisecondsSinceEpoch(
           const fb.Int64Reader().vTableGet(buffer, rootOffset, 14, 0),
         );
@@ -1855,6 +1892,19 @@ class UserPreferences_ {
   static final enableICloudSync = obx.QueryBooleanProperty<UserPreferences>(
     _entities[6].properties[11],
   );
+
+  /// See [UserPreferences.icuCurrencyFormattingPattern].
+  static final icuCurrencyFormattingPattern =
+      obx.QueryStringProperty<UserPreferences>(_entities[6].properties[12]);
+
+  /// See [UserPreferences.primaryCurrency].
+  static final primaryCurrency = obx.QueryStringProperty<UserPreferences>(
+    _entities[6].properties[13],
+  );
+
+  /// See [UserPreferences.transactionButtonOrderJoined].
+  static final transactionButtonOrderJoined =
+      obx.QueryStringProperty<UserPreferences>(_entities[6].properties[14]);
 }
 
 /// [Budget] entity fields to define ObjectBox queries.

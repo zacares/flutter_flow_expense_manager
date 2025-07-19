@@ -128,8 +128,9 @@ class SupportPage extends StatelessWidget {
     final InAppReview inAppReview = InAppReview.instance;
 
     try {
-      final DateTime? lastRequested =
-          LocalPreferences().lastRequestedAppStoreReview.get();
+      final DateTime? lastRequested = LocalPreferences()
+          .lastRequestedAppStoreReview
+          .get();
       final DateTime now = DateTime.now();
 
       if (lastRequested != null &&

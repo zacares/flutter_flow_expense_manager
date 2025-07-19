@@ -1,4 +1,5 @@
 import "package:flow/data/exchange_rates.dart";
+import "package:flow/services/currency_registry.dart";
 
 class ExchangeRatesSet {
   final Map<String, ExchangeRates> rates;
@@ -6,10 +7,18 @@ class ExchangeRatesSet {
   ExchangeRatesSet(this.rates);
 
   void set(String baseCurrency, ExchangeRates exchangeRates) {
+    if (!CurrencyRegistryService().isCurrencyCodeValid(baseCurrency)) {
+      throw ArgumentError("Invalid currency code: $baseCurrency");
+    }
+
     rates[baseCurrency] = exchangeRates;
   }
 
   ExchangeRates? get(String baseCurrency) {
+    if (!CurrencyRegistryService().isCurrencyCodeValid(baseCurrency)) {
+      throw ArgumentError("Invalid currency code: $baseCurrency");
+    }
+
     return rates[baseCurrency];
   }
 

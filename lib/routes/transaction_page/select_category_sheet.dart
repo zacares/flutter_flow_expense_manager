@@ -55,19 +55,18 @@ class _SelectCategorySheetState extends State<SelectCategorySheet> {
           ),
         ],
       ),
-      leading:
-          showSearchBar
-              ? Frame(
-                child: TextField(
-                  onChanged: (value) => setState(() => _query = value),
-                  textInputAction: TextInputAction.done,
-                  decoration: InputDecoration(
-                    hintText: "general.search".t(context),
-                    prefixIcon: const Icon(Symbols.search_rounded),
-                  ),
+      leading: showSearchBar
+          ? Frame(
+              child: TextField(
+                onChanged: (value) => setState(() => _query = value),
+                textInputAction: TextInputAction.done,
+                decoration: InputDecoration(
+                  hintText: "general.search".t(context),
+                  prefixIcon: const Icon(Symbols.search_rounded),
                 ),
-              )
-              : null,
+              ),
+            )
+          : null,
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

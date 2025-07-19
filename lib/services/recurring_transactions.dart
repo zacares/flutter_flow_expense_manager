@@ -75,10 +75,9 @@ class RecurringTransactionsService {
             microsecond: 0,
           );
 
-      final DateTime? nextOccurence =
-          recurringTransaction.recurrence
-              .nextAbsoluteOccurrence(nextOccurenceAnchor, subrange: range)
-              ?.startOfMillisecond();
+      final DateTime? nextOccurence = recurringTransaction.recurrence
+          .nextAbsoluteOccurrence(nextOccurenceAnchor, subrange: range)
+          ?.startOfMillisecond();
 
       if (nextOccurence == null) {
         _log.fine(
@@ -111,15 +110,14 @@ class RecurringTransactionsService {
         ),
       );
 
-      final DateTime lastGeneratedTransactionDate =
-          relatedTransactions.isEmpty
-              ? Moment.minValue
-              : relatedTransactions
-                  .last
-                  .extensions
-                  .recurring!
-                  .initialTransactionDate
-                  .startOfMillisecond();
+      final DateTime lastGeneratedTransactionDate = relatedTransactions.isEmpty
+          ? Moment.minValue
+          : relatedTransactions
+                .last
+                .extensions
+                .recurring!
+                .initialTransactionDate
+                .startOfMillisecond();
 
       if (lastGeneratedTransactionDate >= nextOccurence) {
         _log.fine(
@@ -138,19 +136,17 @@ class RecurringTransactionsService {
       final Account? from = await AccountsService().findOne(
         template.accountUuid,
       );
-      final Account? to =
-          transferToAccountUuid != null
-              ? await AccountsService().findOne(transferToAccountUuid)
-              : null;
+      final Account? to = transferToAccountUuid != null
+          ? await AccountsService().findOne(transferToAccountUuid)
+          : null;
 
       late final Category? category;
 
       if (template.categoryUuid != null) {
-        final categoryQuery =
-            ObjectBox()
-                .box<Category>()
-                .query(Category_.uuid.equals(template.categoryUuid!))
-                .build();
+        final categoryQuery = ObjectBox()
+            .box<Category>()
+            .query(Category_.uuid.equals(template.categoryUuid!))
+            .build();
 
         category = categoryQuery.findFirst();
 
@@ -168,10 +164,9 @@ class RecurringTransactionsService {
         );
       }
 
-      final bool isPending =
-          nextOccurence.isAfter(anchor)
-              ? PendingTransactionsLocalPreferences().requireConfrimation.get()
-              : false;
+      final bool isPending = nextOccurence.isAfter(anchor)
+          ? PendingTransactionsLocalPreferences().requireConfrimation.get()
+          : false;
 
       if (to == null) {
         from.createAndSaveTransaction(
@@ -198,7 +193,7 @@ class RecurringTransactionsService {
       } else {
         final (int fromObjectId, int toObjectId) = from.transferTo(
           targetAccount: to,
-          amount: template.amount,
+          amount: template.amount.abs(),
           title: template.title,
           description: template.description,
           transactionDate: nextOccurence,
@@ -316,14 +311,13 @@ class RecurringTransactionsService {
     }
 
     if (identifier case String uuid) {
-      final Query<RecurringTransaction> query =
-          ObjectBox()
-              .box<RecurringTransaction>()
-              .query(RecurringTransaction_.uuid.equals(uuid))
-              .build();
+      final Query<RecurringTransaction> query = ObjectBox()
+          .box<RecurringTransaction>()
+          .query(RecurringTransaction_.uuid.equals(uuid))
+          .build();
 
-      final RecurringTransaction? recurringTransaction =
-          await query.findFirstAsync();
+      final RecurringTransaction? recurringTransaction = await query
+          .findFirstAsync();
 
       query.close();
 
@@ -339,11 +333,10 @@ class RecurringTransactionsService {
     }
 
     if (identifier case String uuid) {
-      final Query<RecurringTransaction> query =
-          ObjectBox()
-              .box<RecurringTransaction>()
-              .query(RecurringTransaction_.uuid.equals(uuid))
-              .build();
+      final Query<RecurringTransaction> query = ObjectBox()
+          .box<RecurringTransaction>()
+          .query(RecurringTransaction_.uuid.equals(uuid))
+          .build();
 
       final RecurringTransaction? recurringTransaction = query.findFirst();
 
@@ -435,12 +428,11 @@ class RecurringTransactionsService {
     final List<Transaction> transactions = await TransactionsService().findMany(
       TransactionFilter(
         extraTag: recurringTransaction.extensionIdentifierTag,
-        range:
-            mode == RecurringUpdateMode.all
-                ? null
-                : TransactionFilterTimeRange.fromTimeRange(
-                  transaction.transactionDate.rangeToMax(),
-                ),
+        range: mode == RecurringUpdateMode.all
+            ? null
+            : TransactionFilterTimeRange.fromTimeRange(
+                transaction.transactionDate.rangeToMax(),
+              ),
       ),
     );
 

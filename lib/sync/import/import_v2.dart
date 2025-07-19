@@ -1,7 +1,6 @@
 import "dart:async";
 import "dart:io";
 
-import "package:flow/data/currencies.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/backup_entry.dart";
 import "package:flow/entity/category.dart";
@@ -14,6 +13,7 @@ import "package:flow/l10n/named_enum.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:flow/services/transactions.dart";
 import "package:flow/sync/exception.dart";
 import "package:flow/sync/import/base.dart";
@@ -111,31 +111,30 @@ class ImportV2 extends Importer {
     //
     // Resolve ToOne<T> [account] and [category] by `uuid`.
     progressNotifier.value = ImportV2Progress.resolvingTransactions;
-    final transformedTransactions =
-        data.transactions
-            .map((transaction) {
-              try {
-                transaction = _resolveAccountForTransaction(transaction);
-              } catch (e) {
-                if (e is ImportException) {
-                  _log.warning(e.toString());
-                }
-                return null;
-              }
+    final transformedTransactions = data.transactions
+        .map((transaction) {
+          try {
+            transaction = _resolveAccountForTransaction(transaction);
+          } catch (e) {
+            if (e is ImportException) {
+              _log.warning(e.toString());
+            }
+            return null;
+          }
 
-              try {
-                transaction = _resolveCategoryForTransaction(transaction);
-              } catch (e) {
-                if (e is ImportException) {
-                  _log.warning(e.toString());
-                }
-                // Still proceed without category
-              }
+          try {
+            transaction = _resolveCategoryForTransaction(transaction);
+          } catch (e) {
+            if (e is ImportException) {
+              _log.warning(e.toString());
+            }
+            // Still proceed without category
+          }
 
-              return transaction;
-            })
-            .nonNulls
-            .toList();
+          return transaction;
+        })
+        .nonNulls
+        .toList();
 
     progressNotifier.value = ImportV2Progress.writingTransactions;
     await TransactionsService().upsertMany(transformedTransactions);
@@ -170,7 +169,7 @@ class ImportV2 extends Importer {
     }
 
     if (data.primaryCurrency != null &&
-        isCurrencyCodeValid(data.primaryCurrency!)) {
+        CurrencyRegistryService().isCurrencyCodeValid(data.primaryCurrency!)) {
       progressNotifier.value = ImportV2Progress.settingPrimaryCurrency;
       try {
         await LocalPreferences().primaryCurrency.set(data.primaryCurrency!);
@@ -244,11 +243,10 @@ class ImportV2 extends Importer {
 
     // If the `id` is 0, we've already encountered it
     if (memoizeAccounts[accountUuid] != 0) {
-      final Query<Account> accountQuery =
-          ObjectBox()
-              .box<Account>()
-              .query(Account_.uuid.equals(accountUuid))
-              .build();
+      final Query<Account> accountQuery = ObjectBox()
+          .box<Account>()
+          .query(Account_.uuid.equals(accountUuid))
+          .build();
 
       memoizeAccounts[accountUuid] ??= accountQuery.findFirst()?.id ?? 0;
 
@@ -275,11 +273,10 @@ class ImportV2 extends Importer {
 
     // If the `id` is 0, we've already encountered it
     if (memoizeCategories[categoryUuid] != 0) {
-      final Query<Category> categoryQuery =
-          ObjectBox()
-              .box<Category>()
-              .query(Category_.uuid.equals(categoryUuid))
-              .build();
+      final Query<Category> categoryQuery = ObjectBox()
+          .box<Category>()
+          .query(Category_.uuid.equals(categoryUuid))
+          .build();
 
       memoizeCategories[categoryUuid] ??= categoryQuery.findFirst()?.id ?? 0;
 

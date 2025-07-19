@@ -48,10 +48,9 @@ extension TransactionHelpers on Transaction {
 
     final RecurringUpdateMode? mode = await showModalBottomSheet(
       context: context,
-      builder:
-          (context) => SelectRecurringUpdateModeSheet(
-            title: Text("transaction.recurring.delete".t(context)),
-          ),
+      builder: (context) => SelectRecurringUpdateModeSheet(
+        title: Text("transaction.recurring.delete".t(context)),
+      ),
       isScrollControlled: true,
     );
 

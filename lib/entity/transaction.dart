@@ -3,12 +3,15 @@ import "package:flow/entity/_base.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/category.dart";
 import "package:flow/entity/transaction/extensions/base.dart";
+import "package:flow/entity/transaction/subtype.dart";
+import "package:flow/entity/transaction/type.dart";
 import "package:flow/entity/transaction/wrapper.dart";
-import "package:flow/l10n/named_enum.dart";
-import "package:flow/utils/extensions.dart";
 import "package:flow/utils/json/utc_datetime_converter.dart";
 import "package:json_annotation/json_annotation.dart";
 import "package:objectbox/objectbox.dart";
+
+export "transaction/type.dart";
+export "transaction/subtype.dart";
 
 part "transaction.g.dart";
 
@@ -61,12 +64,11 @@ class Transaction implements EntityBase {
 
   @Transient()
   @JsonKey(includeFromJson: false, includeToJson: false)
-  TransactionSubtype? get transactionSubtype =>
-      subtype == null
-          ? null
-          : TransactionSubtype.values
-              .where((element) => element.value == (subtype!))
-              .firstOrNull;
+  TransactionSubtype? get transactionSubtype => subtype == null
+      ? null
+      : TransactionSubtype.values
+            .where((element) => element.value == (subtype!))
+            .firstOrNull;
 
   @Transient()
   set transactionSubtype(TransactionSubtype? value) {
@@ -91,22 +93,20 @@ class Transaction implements EntityBase {
   @Transient()
   set extensions(ExtensionsWrapper newValue) {
     extra = newValue.serialize();
-    extraTags =
-        <String>{
-          ...extraTags.where((tag) => !tag.startsWith("hasExtension:")),
-          ...newValue.data.map((ext) => ext.extensionExistenceTag),
-          ...newValue.data.map((ext) => ext.extensionIdentifierTag),
-        }.toList();
+    extraTags = <String>{
+      ...extraTags.where((tag) => !tag.startsWith("hasExtension:")),
+      ...newValue.data.map((ext) => ext.extensionExistenceTag),
+      ...newValue.data.map((ext) => ext.extensionIdentifierTag),
+    }.toList();
   }
 
   void addExtensions(Iterable<TransactionExtension> newExtensions) {
     extensions = extensions.getMerged(newExtensions.toList());
-    extraTags =
-        <String>{
-          ...extraTags,
-          ...newExtensions.map((e) => e.extensionIdentifierTag),
-          ...newExtensions.map((e) => e.extensionExistenceTag),
-        }.toList();
+    extraTags = <String>{
+      ...extraTags,
+      ...newExtensions.map((e) => e.extensionIdentifierTag),
+      ...newExtensions.map((e) => e.extensionExistenceTag),
+    }.toList();
   }
 
   @Transient()
@@ -186,45 +186,4 @@ class Transaction implements EntityBase {
   factory Transaction.fromJson(Map<String, dynamic> json) =>
       _$TransactionFromJson(json);
   Map<String, dynamic> toJson() => _$TransactionToJson(this);
-}
-
-@JsonEnum(valueField: "value")
-enum TransactionType implements LocalizedEnum {
-  transfer("transfer"),
-  income("income"),
-  expense("expense");
-
-  final String value;
-
-  const TransactionType(this.value);
-
-  @override
-  String get localizationEnumValue => name;
-  @override
-  String get localizationEnumName => "TransactionType";
-
-  static TransactionType? fromJson(Map json) {
-    return TransactionType.values.firstWhereOrNull(
-      (element) => element.value == json["value"],
-    );
-  }
-
-  Map<String, dynamic> toJson() => {"value": value};
-}
-
-@JsonEnum(valueField: "value")
-enum TransactionSubtype implements LocalizedEnum {
-  transactionFee("transactionFee"),
-  givenLoan("loan.given"),
-  receivedLoan("loan.received"),
-  updateBalance("updateBalance");
-
-  final String value;
-
-  const TransactionSubtype(this.value);
-
-  @override
-  String get localizationEnumValue => name;
-  @override
-  String get localizationEnumName => "TransactionSubtype";
 }

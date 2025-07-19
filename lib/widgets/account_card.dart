@@ -1,4 +1,4 @@
-import "package:flow/data/money_flow.dart";
+import "package:flow/data/multi_currency_flow.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/l10n/extensions.dart";
@@ -44,97 +44,91 @@ class AccountCard extends StatelessWidget {
         .nonDeleted
         .where((x) => x.transactionDate.isAtSameMonthAs(now));
 
-    final MoneyFlow flow =
-        MoneyFlow()..addAll(
-          (excludeTransfersInTotal ? transactions.nonTransfers : transactions)
-              .map((transaction) => transaction.money),
-        );
+    final MultiCurrencyFlow flow = MultiCurrencyFlow()
+      ..addAll(
+        (excludeTransfersInTotal ? transactions.nonTransfers : transactions)
+            .map((transaction) => transaction.money),
+      );
 
     final child = Surface(
       shape: RoundedRectangleBorder(borderRadius: borderRadius),
-      builder:
-          (context) => InkWell(
-            onTap:
-                onTapOverride == null
-                    ? () => context.push("/account/${account.id}")
-                    : onTapOverride!.value,
-            borderRadius: borderRadius,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
+      builder: (context) => InkWell(
+        onTap: onTapOverride == null
+            ? () => context.push("/account/${account.id}")
+            : onTapOverride!.value,
+        borderRadius: borderRadius,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
                 children: [
-                  Row(
+                  FlowIcon(account.icon, size: 60.0),
+                  const SizedBox(width: 8.0),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      FlowIcon(account.icon, size: 60.0),
-                      const SizedBox(width: 8.0),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            account.name +
-                                (account.archived
-                                    ? " (${"account.archived".t(context)})"
-                                    : ""),
-                            style: context.textTheme.titleSmall,
-                          ),
-                          MoneyText(
-                            account.balance,
-                            style: context.textTheme.displaySmall,
-                          ),
-                        ],
+                      Text(
+                        account.name +
+                            (account.archived
+                                ? " (${"account.archived".t(context)})"
+                                : ""),
+                        style: context.textTheme.titleSmall,
+                      ),
+                      MoneyText(
+                        account.balance,
+                        style: context.textTheme.displaySmall,
                       ),
                     ],
                   ),
-                  if (!account.archived) ...[
-                    const SizedBox(height: 24.0),
-                    Text(
-                      "account.thisMonth".t(context),
-                      style: context.textTheme.bodyLarge,
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            TransactionType.income.localizedNameContext(
-                              context,
-                            ),
-                            style: context.textTheme.labelSmall?.semi(context),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            TransactionType.expense.localizedNameContext(
-                              context,
-                            ),
-                            style: context.textTheme.labelSmall?.semi(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: MoneyText(
-                            flow.getIncomeByCurrency(account.currency),
-                            style: context.textTheme.bodyLarge,
-                          ),
-                        ),
-                        Expanded(
-                          child: MoneyText(
-                            flow.getExpenseByCurrency(account.currency),
-                            style: context.textTheme.bodyLarge,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
                 ],
               ),
-            ),
+              if (!account.archived) ...[
+                const SizedBox(height: 24.0),
+                Text(
+                  "account.thisMonth".t(context),
+                  style: context.textTheme.bodyLarge,
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        TransactionType.income.localizedNameContext(context),
+                        style: context.textTheme.labelSmall?.semi(context),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        TransactionType.expense.localizedNameContext(context),
+                        style: context.textTheme.labelSmall?.semi(context),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: MoneyText(
+                        flow.getIncomeByCurrency(account.currency),
+                        style: context.textTheme.bodyLarge,
+                      ),
+                    ),
+                    Expanded(
+                      child: MoneyText(
+                        flow.getExpenseByCurrency(account.currency),
+                        style: context.textTheme.bodyLarge,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
           ),
+        ),
+      ),
     );
 
     if (!useCupertinoContextMenu) return child;
@@ -155,10 +149,9 @@ class AccountCard extends StatelessWidget {
           child: Text("account.edit".t(context)),
         ),
         CupertinoContextMenuAction(
-          onPressed:
-              () => context.push(
-                "/account/${account.id}/transactions?title=${"account.transactions.title".t(context, account.name)}",
-              ),
+          onPressed: () => context.push(
+            "/account/${account.id}/transactions?title=${"account.transactions.title".t(context, account.name)}",
+          ),
           isDefaultAction: true,
           trailingIcon: CupertinoIcons.square_list,
           child: Text("account.transactions".t(context)),

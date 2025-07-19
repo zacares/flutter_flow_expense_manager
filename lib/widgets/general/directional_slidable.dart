@@ -22,10 +22,12 @@ class DirectionalSlidable extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isLtr = context.isLtr;
 
-    final List<SlidableAction>? directinalStartActions =
-        (isLtr ? startActions : endActions);
-    final List<SlidableAction>? directinalEndActions =
-        (isLtr ? endActions : startActions);
+    final List<SlidableAction>? directinalStartActions = (isLtr
+        ? startActions
+        : endActions);
+    final List<SlidableAction>? directinalEndActions = (isLtr
+        ? endActions
+        : startActions);
 
     return Slidable(
       key: dismissibleKey,

@@ -21,7 +21,7 @@ class _AccountsProviderScopeState extends State<AccountsProviderScope> {
 
   @override
   Widget build(BuildContext context) => TransactionWatcher(
-    builder: (context, _, __) {
+    builder: (context, _, _) {
       return StreamBuilder<Query<Account>>(
         stream: _queryBuilder().watch(triggerImmediately: true),
         builder: (context, snapshot) {

@@ -1,6 +1,6 @@
 import "package:flow/l10n/extensions.dart";
-import "package:flow/prefs/local_preferences.dart";
 import "package:flow/services/exchange_rates.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/extensions/toast.dart";
 import "package:flow/widgets/general/frame.dart";
@@ -49,11 +49,11 @@ class _RatesMissingWarningState extends State<RatesMissingWarning> {
             busy
                 ? SizedBox(width: 24.0, height: 24.0, child: Spinner())
                 : Icon(
-                  Symbols.refresh_rounded,
-                  fill: 0,
-                  size: 24.0,
-                  color: context.colorScheme.error,
-                ),
+                    Symbols.refresh_rounded,
+                    fill: 0,
+                    size: 24.0,
+                    color: context.colorScheme.error,
+                  ),
           ],
         ),
       ),
@@ -69,7 +69,7 @@ class _RatesMissingWarningState extends State<RatesMissingWarning> {
 
     try {
       await ExchangeRatesService().fetchRates(
-        LocalPreferences().getPrimaryCurrency(),
+        UserPreferencesService().primaryCurrency,
       );
     } catch (e) {
       if (mounted) {

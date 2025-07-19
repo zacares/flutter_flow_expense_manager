@@ -9,12 +9,6 @@ import "package:flutter/services.dart";
 class MoneyText extends StatefulWidget {
   final Money? money;
 
-  final String Function(
-    Money money,
-    ({bool abbreviate, bool obscure, bool useCurrencySymbol}) options,
-  )?
-  customFormatter;
-
   /// Defaults to [false]
   final bool initiallyAbbreviated;
 
@@ -67,7 +61,6 @@ class MoneyText extends StatefulWidget {
     this.autoSizeGroup,
     this.style,
     this.textAlign,
-    this.customFormatter,
     this.onTap,
   });
 
@@ -97,7 +90,6 @@ class _MoneyTextState extends State<MoneyText> {
   Widget build(BuildContext context) {
     return MoneyTextBuilder(
       money: widget.money,
-      customFormatter: widget.customFormatter,
       abbreviate: abbreviate,
       overrideObscure: widget.overrideObscure,
       overrideUseCurrencySymbol: widget.overrideUseCurrencySymbol,

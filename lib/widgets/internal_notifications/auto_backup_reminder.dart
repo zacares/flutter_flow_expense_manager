@@ -45,11 +45,10 @@ class AutoBackupReminderNotification extends StatelessWidget {
               context.showFileShareSheet(
                 subject: "sync.export.save.shareTitle".t(context, {
                   "type": notification.payload!.type,
-                  "date":
-                      notification.payload!.createdDate
-                          .toLocal()
-                          .toMoment()
-                          .lll,
+                  "date": notification.payload!.createdDate
+                      .toLocal()
+                      .toMoment()
+                      .lll,
                 }),
                 filePath: notification.payload!.filePath,
               );

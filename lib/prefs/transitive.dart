@@ -10,6 +10,7 @@ import "package:flow/objectbox.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/services/accounts.dart";
 import "package:flow/services/transactions.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:local_settings/local_settings.dart";
 import "package:logging/logging.dart";
 import "package:moment_dart/moment_dart.dart";
@@ -112,7 +113,7 @@ class TransitiveLocalPreferences {
     try {
       final accounts = await AccountsService().getAll();
 
-      final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+      final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
       final bool hasAnyNonPrimaryCurrencyAccount = accounts.any(
         (account) => account.currency != primaryCurrency,
@@ -185,8 +186,9 @@ class TransitiveLocalPreferences {
   }
 
   Future<void> _reevaluateCategoryFrecency() async {
-    final List<Category> categories =
-        await ObjectBox().box<Category>().getAllAsync();
+    final List<Category> categories = await ObjectBox()
+        .box<Category>()
+        .getAllAsync();
 
     if (categories.isEmpty) {
       return;

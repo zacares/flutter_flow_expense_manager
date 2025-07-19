@@ -73,8 +73,9 @@ class ImportSuccess extends StatelessWidget {
             child: Button(
               onTap: () => onDone(context),
               leading: setupMode ? null : const Icon(Symbols.check_rounded),
-              trailing:
-                  setupMode ? const Icon(Symbols.chevron_right_rounded) : null,
+              trailing: setupMode
+                  ? const Icon(Symbols.chevron_right_rounded)
+                  : null,
               child: Text(
                 setupMode ? "setup.next".t(context) : "general.done".t(context),
               ),

@@ -1,7 +1,6 @@
 import "dart:async";
 import "dart:io";
 import "dart:math";
-import "dart:typed_data";
 
 import "package:flow/entity/backup_entry.dart";
 import "package:flow/logging.dart";
@@ -10,17 +9,23 @@ import "package:flow/services/icloud_sync.dart";
 import "package:flow/services/sync.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flow/sync/export/export_csv.dart";
+import "package:flow/sync/export/export_pdf.dart";
 import "package:flow/sync/export/export_v1.dart";
 import "package:flow/sync/export/export_v2.dart";
 import "package:flow/sync/export/mode.dart";
 import "package:flow/sync/sync.dart";
 import "package:flow/utils/utils.dart";
+import "package:flutter/foundation.dart";
 import "package:moment_dart/moment_dart.dart";
 import "package:path/path.dart" as path;
+import "package:path_provider/path_provider.dart";
 import "package:share_plus/share_plus.dart";
 
-typedef ExportResult =
-    ({bool shareDialogSucceeded, String filePath, Future<int?> objectBoxId});
+typedef ExportResult = ({
+  bool shareDialogSucceeded,
+  String filePath,
+  Future<int?> objectBoxId,
+});
 
 /// Exports all user data (except for profile for now) in the format specified.
 ///
@@ -33,22 +38,29 @@ Future<ExportResult> export({
   ExportMode mode = ExportMode.zip,
   bool showShareDialog = true,
   String? subfolder,
+  dynamic options,
 }) async {
-  // Sharing [XFile]s aren't supported yet on Linux.
-  //
-  // https://pub.dev/packages/share_plus#platform-support
-  final bool isShareSupported = !(Platform.isLinux || Platform.isFuchsia);
+  final Directory appSupportDirectory = await getApplicationSupportDirectory();
 
-  final backupContent = switch ((mode, latestSyncModelVersion)) {
-    (ExportMode.csv, _) => await generateCSVContent(),
-    (ExportMode.json, 1) => await generateBackupContentV1(),
-    (ExportMode.json, 2) => await generateBackupJSONContentV2(),
-    (ExportMode.zip, 2) => await generateBackupZipV2(),
-    _ => throw UnimplementedError(),
+  final dynamic extra = switch (mode) {
+    _ => null,
   };
+
+  final backupContent = await switch (mode) {
+    ExportMode.pdf => generatePDFContent(options: options),
+    _ => compute(
+      (_) => getBackupContent(
+        mode: mode,
+        options: options,
+        appSupportDirectory: appSupportDirectory,
+        extra: extra,
+      ),
+      null,
+    ),
+  };
+
   final savedFilePath = await saveBackupFile(
     backupContent,
-    isShareSupported,
     fileExt: mode.fileExt,
     subfolder: subfolder,
     type: type,
@@ -117,13 +129,32 @@ Future<ExportResult> export({
     );
   }
 
-  return await showFileSaveDialog(savedFilePath, isShareSupported, objectBoxId);
+  return await showFileSaveDialog(savedFilePath, objectBoxId);
+}
+
+Future<Object> getBackupContent({
+  required ExportMode mode,
+  required Directory appSupportDirectory,
+  dynamic options,
+  dynamic extra,
+}) async {
+  await ObjectBox.initialize(appSupportDirectory: appSupportDirectory);
+
+  return await switch ((mode, latestSyncModelVersion)) {
+    (ExportMode.csv, _) => generateCSVContent(),
+    (ExportMode.json, 1) => generateBackupContentV1(),
+    (ExportMode.json, 2) => generateBackupJSONContentV2(),
+    (ExportMode.zip, 2) => generateBackupZipV2(),
+    (ExportMode.pdf, _) => throw UnimplementedError(
+      "Exporting PDF in a separate isolate isn't supported yet",
+    ),
+    _ => throw UnimplementedError(),
+  };
 }
 
 /// Returns file path after successfully saving it
 Future<String> saveBackupFile(
-  dynamic backupContent,
-  bool isShareSupported, {
+  dynamic backupContent, {
   required String fileExt,
   required BackupEntryType type,
   String? subfolder,
@@ -162,9 +193,13 @@ Future<String> saveBackupFile(
 /// Returns whether the file was saved/revealed successfully
 Future<ExportResult> showFileSaveDialog(
   String savedFilePath,
-  bool isShareSupported,
   Future<int?> objectBoxId,
 ) async {
+  // Sharing [XFile]s aren't supported yet on Linux.
+  //
+  // https://pub.dev/packages/share_plus#platform-support
+  final bool isShareSupported = !(Platform.isLinux || Platform.isFuchsia);
+
   bool shareSuccess;
 
   if (isShareSupported) {
