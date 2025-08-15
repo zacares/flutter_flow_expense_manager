@@ -154,17 +154,10 @@ class DebugThemePage extends StatelessWidget {
               value: false,
               onChanged: (_) => {},
             ),
-            RadioListTile(
-              title: const Text("With Radio Selected"),
-              value: "a",
-              groupValue: "a",
-              onChanged: (_) {},
-            ),
+            RadioListTile(title: const Text("With Radio Selected"), value: "a"),
             RadioListTile(
               title: const Text("With Radio Unselected"),
               value: "b",
-              groupValue: "a",
-              onChanged: (_) {},
             ),
             const SizedBox(height: 240.0),
           ],
