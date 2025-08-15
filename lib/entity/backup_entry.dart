@@ -2,10 +2,10 @@ import "dart:io";
 
 import "package:flow/data/flow_icon.dart";
 import "package:flow/l10n/named_enum.dart";
+import "package:flow/sync/sync.dart";
 import "package:json_annotation/json_annotation.dart";
 import "package:material_symbols_icons/symbols.dart";
 import "package:objectbox/objectbox.dart";
-import "package:flow/sync/sync.dart";
 
 @Entity()
 class BackupEntry {
@@ -22,16 +22,6 @@ class BackupEntry {
   ///
   /// See [ExportMode]
   String fileExt;
-
-  /// For iCloud files. This does not guarantee that the file is
-  /// actually in iCloud.
-  ///
-  /// This is set after a successful upload to iCloud, and never touched again.
-  String? iCloudRelativePath;
-
-  /// The date when the file was last changed in iCloud.
-  @Property(type: PropertyType.date)
-  DateTime? iCloudChangeDate;
 
   @Property()
   String type;
@@ -74,7 +64,6 @@ class BackupEntry {
     this.syncModelVersion = latestSyncModelVersion,
     required this.type,
     required this.fileExt,
-    this.iCloudRelativePath,
   }) : createdDate = createdDate ?? DateTime.now();
 }
 
