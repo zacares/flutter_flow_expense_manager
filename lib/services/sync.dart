@@ -4,16 +4,13 @@ import "package:flow/data/transaction_filter.dart";
 import "package:flow/entity/backup_entry.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/prefs/local_preferences.dart";
-import "package:flow/services/icloud_sync.dart";
+import "package:flow/services/sync/icloud_syncer.dart";
 import "package:flow/services/transactions.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flow/sync/export.dart";
-import "package:flow/utils/extensions/iterables.dart";
 import "package:flow/widgets/utils/should_execute_scheduled_task.dart";
 import "package:logging/logging.dart";
 import "package:moment_dart/moment_dart.dart";
-import "package:objectbox/objectbox.dart";
-import "package:path/path.dart" as path;
 
 final Logger _log = Logger("SyncService");
 
@@ -26,9 +23,29 @@ class SyncService {
 
   factory SyncService() => _instance ??= SyncService._internal();
 
+  int get activeSyncersCount {
+    int value = 0;
+
+    try {
+      if (ICloudSyncer.supported &&
+          ICloudSyncer().syncing &&
+          UserPreferencesService().enableICloudSync) {
+        value++;
+      }
+    } catch (e) {
+      _log.warning("Failed to get active syncers count", e);
+    }
+
+    return value;
+  }
+
+  bool get working => activeSyncersCount > 0;
+
   SyncService._internal() {
     triggerAutoBackup();
-    unawaited(ICloudSyncService.initialize());
+    if (ICloudSyncer.supported) {
+      ICloudSyncer();
+    }
   }
 
   Future<void> triggerAutoBackup() async {
@@ -79,7 +96,7 @@ class SyncService {
           throw Exception("Failed to get BackupEntry from objectBoxId: $id");
         }
 
-        unawaited(saveBackupToICloud(entry: entry));
+        unawaited(putToAll(entry));
       } catch (e, stackTrace) {
         _log.warning(
           "Failed to upload backup to iCloud: ${result.filePath}",
@@ -100,101 +117,21 @@ class SyncService {
     }
   }
 
-  Future<void> saveBackupToICloud({
-    required BackupEntry entry,
-    String? parent,
-    Function(Stream<double>)? onProgress,
+  // TODO @sadespresso - enable multi-syncer support
+  Future<bool> putToAll(
+    BackupEntry entry, {
+    Function(double)? onProgress,
   }) async {
-    if (!ICloudSyncService.supported) {
-      return;
-    }
-
-    if (!UserPreferencesService().enableICloudSync) {
-      _log.info("Cancelling iCloud upload since user hasn't enabled it");
-      return;
-    }
-
-    parent ??= path.join(SyncService.cloudBackupsFolder, entry.type);
-
-    final bool hasNewerBackup = ICloudSyncService().filesCache.value.any((
-      iCloudFile,
-    ) {
-      if (!path.equals(path.dirname(iCloudFile.relativePath), parent!)) {
-        return false;
-      }
-
-      if (path.extension(iCloudFile.relativePath) !=
-          path.extension(entry.filePath)) {
-        return false;
-      }
-
-      return iCloudFile.contentChangeDate.isAfter(
-        entry.createdDate.startOfSecond(),
-      );
-    });
-
-    if (hasNewerBackup) {
-      _log.info(
-        "Cancelling iCloud upload since user has newer backup for this parent folder, and type.",
-      );
-      throw Exception(
-        "User has newer backup for this parent folder, and type.",
-      );
-    }
-
-    if (entry.iCloudRelativePath != null &&
-        ICloudSyncService().filesCache.value.firstWhereOrNull(
-              (file) =>
-                  path.dirname(file.relativePath) == parent &&
-                  path.extension(file.relativePath) ==
-                      path.extension(entry.filePath) &&
-                  file.contentChangeDate.startOfSecond() ==
-                      entry.iCloudChangeDate?.startOfSecond(),
-            ) !=
-            null) {
-      _log.info(
-        "Backup (${entry.iCloudRelativePath}) already uploaded to iCloud",
-      );
-      return;
-    }
-
-    try {
-      final DateTime now = DateTime.now();
-
-      final String iCloudRelativePath = await ICloudSyncService().upload(
-        filePath: entry.filePath,
-        destinationRelativePath: "$parent/$cloudFileBaseName.${entry.fileExt}",
+    if (ICloudSyncer.supported) {
+      final bool result = await ICloudSyncer().put(
+        entry,
         onProgress: onProgress,
-        modifiedDate: now,
       );
-
-      _log.info(
-        "Auto backup successfully uploaded to iCloud -> ${entry.filePath}",
-      );
-
-      try {
-        unawaited(
-          TransitiveLocalPreferences().lastSuccessfulICloudSyncAt.set(now),
-        );
-      } catch (e) {
-        _log.warning("Failed to set lastSuccessfulICloudSyncAt", e);
-      }
-
-      try {
-        entry.iCloudRelativePath = iCloudRelativePath;
-        entry.iCloudChangeDate = now;
-
-        _log.info(
-          "BackupEntry updated with iCloud information: ${entry.iCloudRelativePath}",
-        );
-
-        ObjectBox().box<BackupEntry>().put(entry, mode: PutMode.update);
-      } catch (e, stackTrace) {
-        _log.warning("Failed to amend BackupEntry", e, stackTrace);
-      }
-    } catch (e, stackTrace) {
-      _log.severe("Failed to upload backup to iCloud", e, stackTrace);
-      return;
+      _log.info("Uploaded backup to iCloud: ${entry.filePath}");
+      return result;
+    } else {
+      _log.warning("ICloudSyncer is not supported, skipping upload");
+      return false;
     }
   }
 }

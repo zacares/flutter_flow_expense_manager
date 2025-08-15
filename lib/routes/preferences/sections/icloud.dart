@@ -1,7 +1,7 @@
 import "package:flow/l10n/extensions.dart";
 import "package:flow/prefs/transitive.dart";
-import "package:flow/services/icloud_sync.dart";
 import "package:flow/services/local_auth.dart";
+import "package:flow/services/sync/icloud_syncer.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/extensions/custom_popups.dart";
@@ -24,7 +24,7 @@ class _ICloudState extends State<ICloud> {
   Widget build(BuildContext context) {
     final bool enableICloudSync = UserPreferencesService().enableICloudSync;
 
-    final dynamic error = ICloudSyncService().lastError;
+    final dynamic error = ICloudSyncer().lastError;
 
     final DateTime? lastSuccessfulICloudSyncAt = TransitiveLocalPreferences()
         .lastSuccessfulICloudSyncAt

@@ -2,7 +2,7 @@ import "package:flow/entity/backup_entry.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/l10n/named_enum.dart";
 import "package:flow/objectbox/actions.dart";
-import "package:flow/services/icloud_sync.dart";
+import "package:flow/services/sync/icloud_syncer.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/extensions/backup_entry.dart";
 import "package:flow/utils/utils.dart";
@@ -200,16 +200,12 @@ class BackupEntryCard extends StatelessWidget {
       return localFileSize;
     }
 
-    if (!ICloudSyncService.supported) {
+    if (!ICloudSyncer.supported) {
       return null;
     }
 
     try {
-      return ICloudSyncService().filesCache.value
-          .firstWhereOrNull(
-            (file) => file.relativePath == entry.iCloudRelativePath,
-          )
-          ?.sizeInBytes;
+      return entry.correspondingFile?.sizeInBytes;
     } catch (e) {
       return null;
     }

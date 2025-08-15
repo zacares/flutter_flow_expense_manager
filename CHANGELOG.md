@@ -1,15 +1,16 @@
 # Changelog
 
-## (optimistic) 0.14.6
+## 0.15.0
 
 ### New features
 
+* Now supports backups to iCloud
 * Now supports following cryptocurrencies: BTC, ETH, USDT, XRP, BNB, SOL, USDC, DOGE, ADA, BCH, AVAX, TON, SHIB, LTC,
   HBAR, XMR, DAI, DOT, UNI, PEPE, AAVE, APT, OKB, NEAR, ICP, CRO, ETC
 
 ### Fixes
 
-* Now has more loose parsing for Ivy Wallet CSV option, closes #547
+* Now has more loose parsing for Ivy Wallet CSV option, closes [#547](https://github.com/flow-mn/flow/issues/547)
 
 ## 0.14.5
 

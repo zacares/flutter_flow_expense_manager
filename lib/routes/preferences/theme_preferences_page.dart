@@ -110,13 +110,22 @@ class _ThemePreferencesPageState extends State<ThemePreferencesPage> {
               ],
               ListHeader("preferences.theme.other".t(context)),
               const SizedBox(height: 8.0),
-              ...standaloneThemes.entries.map(
-                (entry) => RadioListTile(
-                  title: Text(themeNames[entry.value.name] ?? entry.value.name),
-                  value: entry.key,
-                  groupValue: currentTheme,
-                  onChanged: (value) => handleChange(value),
-                  activeColor: context.colorScheme.primary,
+              RadioGroup(
+                groupValue: currentTheme,
+                onChanged: (value) => handleChange(value),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: standaloneThemes.entries
+                      .map(
+                        (entry) => RadioListTile(
+                          title: Text(
+                            themeNames[entry.value.name] ?? entry.value.name,
+                          ),
+                          value: entry.key,
+                          activeColor: context.colorScheme.primary,
+                        ),
+                      )
+                      .toList(),
                 ),
               ),
             ],

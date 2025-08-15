@@ -25,19 +25,21 @@ class LanguageSelectionSheet extends StatelessWidget {
         ],
       ),
       child: SingleChildScrollView(
-        child: Column(
-          children: [
-            ...FlowLocalizations.supportedLocales.map(
-              (locale) => RadioListTile<Locale>(
-                title: Text(locale.endonym),
-                subtitle: Text(locale.name),
-                selected: currentLocale == locale,
-                value: locale,
-                groupValue: currentLocale,
-                onChanged: (value) => context.pop(value),
+        child: RadioGroup(
+          groupValue: currentLocale,
+          onChanged: (value) => context.pop(value),
+          child: Column(
+            children: [
+              ...FlowLocalizations.supportedLocales.map(
+                (locale) => RadioListTile<Locale>(
+                  title: Text(locale.endonym),
+                  subtitle: Text(locale.name),
+                  selected: currentLocale == locale,
+                  value: locale,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
