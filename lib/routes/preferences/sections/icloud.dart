@@ -32,7 +32,7 @@ class _ICloudState extends State<ICloud> {
         .get();
 
     final int iCloudBackupsToKeep =
-        UserPreferencesService().iCloudBackupsToKeep ?? 3;
+        UserPreferencesService().iCloudBackupsToKeep ?? 5;
 
     final List<int?> options = [null, 3, 5, 10, 20, -1];
 

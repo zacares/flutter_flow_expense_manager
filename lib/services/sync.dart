@@ -44,7 +44,9 @@ class SyncService {
   SyncService._internal() {
     triggerAutoBackup();
     if (ICloudSyncer.supported) {
-      ICloudSyncer();
+      ICloudSyncer().purge(
+        keepCount: UserPreferencesService().iCloudBackupsToKeep ?? 5,
+      );
     }
   }
 
