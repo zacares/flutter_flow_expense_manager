@@ -29,6 +29,9 @@ class ICloudSyncer implements Syncer {
       ValueNotifier<List<ICloudFile>>([]);
   ValueListenable<List<ICloudFile>> get filesCache => _filesCache;
 
+  final ValueNotifier<bool> _initialUpdateReceived = ValueNotifier<bool>(false);
+  ValueListenable<bool> get initialUpdateReceived => _initialUpdateReceived;
+
   ICloudSyncer._internal() {
     _listenToMetadataChanges();
   }
@@ -47,7 +50,10 @@ class ICloudSyncer implements Syncer {
           onUpdate: (Stream<List<ICloudFile>> stream) {
             _listeningToMetadataChanges = true;
             subscription = stream.listen(
-              (data) => _filesCache.value = data,
+              (data) {
+                _initialUpdateReceived.value = true;
+                _filesCache.value = data;
+              },
               onDone: () {
                 _log.info("ICloud metadata stream closed");
                 subscription.cancel();

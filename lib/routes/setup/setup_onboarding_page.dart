@@ -9,6 +9,7 @@ import "package:flow/services/sync/icloud_syncer.dart";
 import "package:flow/services/sync/syncer.dart";
 import "package:flow/sync/import.dart";
 import "package:flow/sync/import/base.dart";
+import "package:flow/utils/extensions/importer.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/action_card.dart";
 import "package:flow/widgets/general/spinner.dart";
@@ -96,8 +97,48 @@ class _SetupOnboardingPageState extends State<SetupOnboardingPage> {
     );
   }
 
+  Future<void> waitForICloudInitialUpdate() async {
+    if (ICloudSyncer().initialUpdateReceived.value) {
+      return;
+    }
+
+    final Completer<void> completer = Completer<void>();
+    late final Timer timer;
+
+    void listener() {
+      if (ICloudSyncer().initialUpdateReceived.value) {
+        completer.complete();
+      }
+
+      try {
+        if (timer.isActive) {
+          timer.cancel();
+        }
+      } catch (e) {
+        // silent fail
+      }
+    }
+
+    try {
+      timer = Timer(const Duration(seconds: 15), () {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      });
+      ICloudSyncer().initialUpdateReceived.addListener(listener);
+      return await completer.future;
+    } catch (e) {
+      // silent fail
+    } finally {
+      timer.cancel();
+      ICloudSyncer().initialUpdateReceived.removeListener(listener);
+    }
+  }
+
   Future<void> checkForBackups() async {
     try {
+      await waitForICloudInitialUpdate().catchError((e) {});
+
       backups = await ICloudSyncer().list();
       backups?.sort(
         (a, b) =>
@@ -140,12 +181,9 @@ class _SetupOnboardingPageState extends State<SetupOnboardingPage> {
       }
 
       final Importer importer = await importBackup(backupFile: file);
-      await importer.execute();
 
       if (mounted) {
-        GoRouter.of(context).popUntil((route) => route.path == "/setup");
-
-        context.pushReplacement("/");
+        importer.goToRelevantPage(context, setupMode: true);
       }
 
       unawaited(LocalPreferences().completedInitialSetup.set(true));
