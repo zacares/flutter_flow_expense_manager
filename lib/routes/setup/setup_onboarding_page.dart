@@ -67,8 +67,9 @@ class _SetupOnboardingPageState extends State<SetupOnboardingPage> {
                                 .t(
                                   context,
                                   backups?.firstOrNull?.inferredbackupDate
-                                      ?.toMoment()
-                                      .lll,
+                                          ?.toMoment()
+                                          .lll ??
+                                      "-",
                                 ),
                       ),
                       const SizedBox(height: 16.0),
