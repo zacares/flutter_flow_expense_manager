@@ -18,11 +18,14 @@ import "package:flow/sync/model/external/ivy/ivy_wallet_csv.dart";
 import "package:flow/sync/model/model_v1.dart";
 import "package:flow/sync/model/model_v2.dart";
 import "package:flow/utils/utils.dart";
+import "package:logging/logging.dart";
 import "package:path/path.dart" as path;
 import "package:path_provider/path_provider.dart";
 
 export "package:flow/sync/import/import_v1.dart";
 export "package:flow/sync/model/model_v1.dart";
+
+final Logger _log = Logger("Import Backup");
 
 enum ImportExternalFormat {
   ivyWallet("Ivy Wallet");
@@ -71,19 +74,28 @@ Future<Importer> importBackup({
 
   final String ext = path.extension(file.path).toLowerCase();
 
-  switch (ext.toLowerCase()) {
-    case ".csv":
-      return await _importCsv(file: file);
-    case ".json":
-      return await _importJson(file: file);
-    case ".zip":
-      return await _importZip(file: file);
-    default:
-      throw ImportException(
-        "No file was picked to proceed with the import",
-        l10nKey: "error.input.wrongFileType",
-        l10nArgs: "JSON, ZIP, CSV",
-      );
+  _log.info("Importing backup from file: ${file.path}");
+
+  try {
+    switch (ext.toLowerCase()) {
+      case ".csv":
+        return await _importCsv(file: file);
+      case ".json":
+        return await _importJson(file: file);
+      case ".zip":
+        return await _importZip(file: file);
+      default:
+        throw ImportException(
+          "No file was picked to proceed with the import",
+          l10nKey: "error.input.wrongFileType",
+          l10nArgs: "JSON, ZIP, CSV",
+        );
+    }
+  } catch (e) {
+    _log.severe("Error importing backup: $e");
+    rethrow;
+  } finally {
+    _log.info("Import process finished");
   }
 }
 

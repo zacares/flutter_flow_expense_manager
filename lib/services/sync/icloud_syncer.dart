@@ -8,7 +8,7 @@ import "package:flow/utils/utils.dart";
 import "package:flutter/foundation.dart";
 import "package:icloud_storage/icloud_storage.dart";
 import "package:logging/logging.dart";
-import "package:path/path.dart";
+import "package:path/path.dart" as path;
 import "package:path_provider/path_provider.dart";
 import "package:uuid/uuid.dart";
 
@@ -29,6 +29,9 @@ class ICloudSyncer implements Syncer {
       ValueNotifier<List<ICloudFile>>([]);
   ValueListenable<List<ICloudFile>> get filesCache => _filesCache;
 
+  final ValueNotifier<bool> _initialUpdateReceived = ValueNotifier<bool>(false);
+  ValueListenable<bool> get initialUpdateReceived => _initialUpdateReceived;
+
   ICloudSyncer._internal() {
     _listenToMetadataChanges();
   }
@@ -47,7 +50,10 @@ class ICloudSyncer implements Syncer {
           onUpdate: (Stream<List<ICloudFile>> stream) {
             _listeningToMetadataChanges = true;
             subscription = stream.listen(
-              (data) => _filesCache.value = data,
+              (data) {
+                _initialUpdateReceived.value = true;
+                _filesCache.value = data;
+              },
               onDone: () {
                 _log.info("ICloud metadata stream closed");
                 subscription.cancel();
@@ -73,8 +79,8 @@ class ICloudSyncer implements Syncer {
     _listeningToMetadataChanges = true;
   }
 
-  String resolvePath(String path) {
-    final String file = basename(path);
+  String resolvePath(String lePath) {
+    final String file = path.basename(lePath);
 
     return ["backups", if (flowDebugMode) "debug", file].join("/");
   }
@@ -106,9 +112,13 @@ class ICloudSyncer implements Syncer {
 
     try {
       final Directory tempDir = await getTemporaryDirectory();
-      final String tempFile = join(
+      final String tempFile = path.join(
         tempDir.path,
-        basename("${Uuid().v4()}.tmp"),
+        path.basename("${Uuid().v4()}.tmp${path.extension(item.path)}"),
+      );
+
+      _log.fine(
+        "Downloading iCloud file: ${resolvePath(item.path)} to $tempFile",
       );
 
       await ICloudStorage.download(
@@ -119,9 +129,6 @@ class ICloudSyncer implements Syncer {
           subscription = progressStream.listen(
             (value) {
               _log.fine("ICloud download progress: $value");
-              if (value >= 100.0) {
-                completer.complete(File(tempFile));
-              }
             },
             onDone: () {
               completer.complete(File(tempFile));
@@ -246,22 +253,30 @@ class ICloudSyncer implements Syncer {
 
   @override
   Future<bool> put(BackupEntry entry, {Function(double p1)? onProgress}) async {
+    final Completer<bool> completer = Completer<bool>();
+
     StreamSubscription<double>? subscription;
+
     try {
       await ICloudStorage.upload(
         containerId: containerId,
         filePath: entry.filePath,
         destinationRelativePath: resolvePath(entry.filePath),
         onProgress: (progressStream) => {
-          subscription = progressStream.listen((value) {
-            if (onProgress != null) {
-              onProgress(value);
-            } else {}
-            _log.fine("ICloud upload progress: $value");
-          }),
+          subscription = progressStream.listen(
+            (value) {
+              if (onProgress != null) {
+                onProgress(value);
+              } else {}
+              _log.fine("ICloud upload progress: $value");
+            },
+            onDone: () => completer.complete(true),
+            onError: (error) => completer.completeError(error),
+            cancelOnError: true,
+          ),
         },
       );
-      return true;
+      return await completer.future;
     } catch (e) {
       _log.severe("Failed to upload iCloud file", e);
 

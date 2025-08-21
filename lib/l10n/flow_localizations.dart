@@ -4,8 +4,7 @@ import "package:flow/l10n/supported_languages.dart";
 import "package:flutter/services.dart";
 import "package:flutter/widgets.dart";
 import "package:logging/logging.dart";
-
-import "extensions.dart";
+import "package:flow/l10n/extensions.dart";
 
 export "extensions.dart";
 

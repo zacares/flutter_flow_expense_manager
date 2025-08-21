@@ -1,3 +1,4 @@
+import "dart:developer";
 import "dart:io";
 
 import "package:flow/entity/backup_entry.dart";
@@ -11,17 +12,23 @@ class SyncerItem {
     try {
       final [...rest, date, time] = basename(path).split("_");
 
-      final [year, month, day] = date
-          .split("-")
-          .map((x) => int.parse(x, radix: 10))
-          .toList();
-      final [hour, minute, second] = time
-          .split("-")
-          .map((x) => int.parse(x, radix: 10))
-          .toList();
+      final RegExpMatch ymd = RegExp(
+        r"(?<year>\d+)[-.](?<month>\d+)[-.](?<date>\d+)",
+      ).firstMatch(date)!;
+      final RegExpMatch hms = RegExp(
+        r"(?<hour>\d+)[-.](?<minute>\d+)[-.](?<second>\d+)",
+      ).firstMatch(time)!;
 
-      return DateTime(year, month, day, hour, minute, second);
+      return DateTime(
+        int.parse(ymd.namedGroup("year")!),
+        int.parse(ymd.namedGroup("month")!),
+        int.parse(ymd.namedGroup("date")!),
+        int.parse(hms.namedGroup("hour")!),
+        int.parse(hms.namedGroup("minute")!),
+        int.parse(hms.namedGroup("second")!),
+      );
     } catch (e) {
+      log("Error parsing backup date", error: e);
       return null;
     }
   }
