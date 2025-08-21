@@ -407,7 +407,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(10, 7829328581176695647),
     name: 'UserPreferences',
-    lastPropertyId: const obx_int.IdUid(17, 5034425281728425226),
+    lastPropertyId: const obx_int.IdUid(18, 5817984994810877086),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -499,6 +499,12 @@ final _entities = <obx_int.ModelEntity>[
         id: const obx_int.IdUid(17, 5034425281728425226),
         name: 'transactionButtonOrderJoined',
         type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(18, 5817984994810877086),
+        name: 'iCloudBackupsToKeep',
+        type: 6,
         flags: 0,
       ),
     ],
@@ -1250,7 +1256,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
             object.transactionButtonOrderJoined == null
             ? null
             : fbb.writeString(object.transactionButtonOrderJoined!);
-        fbb.startTable(18);
+        fbb.startTable(19);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uuidOffset);
         fbb.addBool(2, object.combineTransfers);
@@ -1266,6 +1272,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addOffset(13, icuCurrencyFormattingPatternOffset);
         fbb.addOffset(15, primaryCurrencyOffset);
         fbb.addOffset(16, transactionButtonOrderJoinedOffset);
+        fbb.addInt64(17, object.iCloudBackupsToKeep);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -1307,6 +1314,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
           28,
           false,
         );
+        final iCloudBackupsToKeepParam = const fb.Int64Reader()
+            .vTableGetNullable(buffer, rootOffset, 38);
         final autoBackupIntervalInHoursParam = const fb.Int64Reader()
             .vTableGetNullable(buffer, rootOffset, 22);
         final icuCurrencyFormattingPatternParam = const fb.StringReader(
@@ -1334,6 +1343,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 trashBinRetentionDays: trashBinRetentionDaysParam,
                 defaultFilterPreset: defaultFilterPresetParam,
                 enableICloudSync: enableICloudSyncParam,
+                iCloudBackupsToKeep: iCloudBackupsToKeepParam,
                 autoBackupIntervalInHours: autoBackupIntervalInHoursParam,
                 icuCurrencyFormattingPattern: icuCurrencyFormattingPatternParam,
                 primaryCurrency: primaryCurrencyParam,
@@ -1867,6 +1877,11 @@ class UserPreferences_ {
   /// See [UserPreferences.transactionButtonOrderJoined].
   static final transactionButtonOrderJoined =
       obx.QueryStringProperty<UserPreferences>(_entities[6].properties[14]);
+
+  /// See [UserPreferences.iCloudBackupsToKeep].
+  static final iCloudBackupsToKeep = obx.QueryIntegerProperty<UserPreferences>(
+    _entities[6].properties[15],
+  );
 }
 
 /// [Budget] entity fields to define ObjectBox queries.

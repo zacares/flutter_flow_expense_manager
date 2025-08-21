@@ -376,7 +376,7 @@
   "setup.onboarding.freshStart": "Шинээр эхлэх",
   "setup.onboarding.freshStart.description": "Цоо шинээр тохируулах",
   "setup.onboarding.recoverICloudBackup": "iCloud-с сэргээх",
-  "setup.onboarding.recoverICloudBackup.description": "iCloud-н нөөцөөс сэргээх ({lastSynced})",
+  "setup.onboarding.recoverICloudBackup.description": "iCloud-н нөөцөөс сэргээх (сүүлчийнх: {lastSynced})",
   "setup.onboarding.importExisting": "Нөөцөөс сэргээх",
   "setup.onboarding.importExisting.description": "Өмнө нь Flow-с нөөцөлж авсан өгөгдлийг сэргээх",
   "setup.primaryCurrency.choose": "Үндсэн валют сонгох",

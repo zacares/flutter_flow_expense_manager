@@ -324,7 +324,7 @@
     },
     {
       "id": "10:7829328581176695647",
-      "lastPropertyId": "17:5034425281728425226",
+      "lastPropertyId": "18:5817984994810877086",
       "name": "UserPreferences",
       "properties": [
         {
@@ -404,6 +404,11 @@
           "id": "17:5034425281728425226",
           "name": "transactionButtonOrderJoined",
           "type": 9
+        },
+        {
+          "id": "18:5817984994810877086",
+          "name": "iCloudBackupsToKeep",
+          "type": 6
         }
       ],
       "relations": []

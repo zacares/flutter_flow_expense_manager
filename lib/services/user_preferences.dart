@@ -43,6 +43,15 @@ class UserPreferencesService {
     ObjectBox().box<UserPreferences>().put(value);
   }
 
+  int? get iCloudBackupsToKeep => value.iCloudBackupsToKeep;
+  set iCloudBackupsToKeep(int? newICloudBackupsToKeep) {
+    if (newICloudBackupsToKeep == null) return;
+
+    value.trashBinRetentionDays = newICloudBackupsToKeep;
+
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
   int? get autoBackupIntervalInHours => value.autoBackupIntervalInHours;
   set autoBackupIntervalInHours(int? newAutobackupIntervalInHours) {
     if (newAutobackupIntervalInHours == null) {

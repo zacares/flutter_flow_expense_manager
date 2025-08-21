@@ -7,6 +7,7 @@ import "package:flow/theme/theme.dart";
 import "package:flow/utils/extensions/custom_popups.dart";
 import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/general/info_text.dart";
+import "package:flow/widgets/general/list_header.dart";
 import "package:flutter/material.dart";
 import "package:material_symbols_icons/symbols.dart";
 import "package:moment_dart/moment_dart.dart";
@@ -30,8 +31,14 @@ class _ICloudState extends State<ICloud> {
         .lastSuccessfulICloudSyncAt
         .get();
 
+    final int iCloudBackupsToKeep =
+        UserPreferencesService().iCloudBackupsToKeep ?? 5;
+
+    final List<int?> options = [null, 3, 5, 10, 20, -1];
+
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8.0,
       children: [
         SwitchListTile(
@@ -64,8 +71,42 @@ class _ICloudState extends State<ICloud> {
             child: Text("preferences.sync.iCloud.privacyNotice".t(context)),
           ),
         ),
+        const SizedBox(height: 16.0),
+
+        // TODO @sadespresso translation
+        ListHeader("No. iCloud of backups to keep"),
+        const SizedBox(height: 8.0),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          child: Wrap(
+            spacing: 12.0,
+            runSpacing: 8.0,
+            children: options
+                .map(
+                  (value) => FilterChip(
+                    showCheckmark: false,
+                    key: ValueKey(value),
+                    label: Text(
+                      value == -1 ? "Infinite" : "Last $value backups",
+                    ),
+                    onSelected: (bool selected) =>
+                        selected ? updateICloudBackupsToKeep(value) : null,
+                    selected: value == iCloudBackupsToKeep,
+                  ),
+                )
+                .toList(),
+          ),
+        ),
       ],
     );
+  }
+
+  void updateICloudBackupsToKeep(int? newICloudBackupsToKeep) async {
+    if (newICloudBackupsToKeep == null) return;
+
+    UserPreferencesService().iCloudBackupsToKeep = newICloudBackupsToKeep;
+
+    setState(() {});
   }
 
   void updateEnableICloudSync(bool? newEnableICloudSync) async {

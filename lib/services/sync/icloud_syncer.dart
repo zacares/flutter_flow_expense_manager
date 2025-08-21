@@ -228,27 +228,82 @@ class ICloudSyncer implements Syncer {
   }
 
   @override
-  Future<int> purge(Duration maxAge) async {
-    try {
-      final List<SyncerItem> items = await list();
+  Future<int> purge({Duration? maxAge, int? keepCount}) async {
+    final List<SyncerItem> items = await list();
 
-      int success = 0;
+    int success = 0;
 
-      await Future.wait(
-        items
-            .where(
-              (item) =>
-                  item.inferredbackupDate != null &&
-                  DateTime.now().difference(item.inferredbackupDate!) > maxAge,
-            )
-            .map((item) => delete(item.path).then((_) => success++)),
-      );
+    await Future.wait(
+      items
+          .where((item) => item.inferredbackupDate == null)
+          .map((item) => delete(item.path).then((_) => success++)),
+    );
+
+    final List<SyncerItem> remaining =
+        items.where((item) => item.inferredbackupDate != null).toList()..sort(
+          (a, b) => b.inferredbackupDate!.compareTo(a.inferredbackupDate!),
+        );
+
+    if (keepCount != null) {
+      if (keepCount <= 0) {
+        return 0;
+      }
+
+      final int deleteCount = remaining.length - keepCount;
+
+      if (deleteCount > 0) {
+        await Future.wait(
+          remaining
+              .take(deleteCount)
+              .map((item) => delete(item.path).then((_) => success++)),
+        );
+      }
       return success;
-    } catch (e) {
-      _log.warning("Error listing iCloud files", e);
+    } else if (maxAge != null) {
+      try {
+        final List<SyncerItem> items = await list();
+
+        await Future.wait(
+          items
+              .where(
+                (item) =>
+                    item.inferredbackupDate == null ||
+                    DateTime.now().difference(item.inferredbackupDate!) >
+                        maxAge,
+              )
+              .map((item) => delete(item.path).then((_) => success++)),
+        );
+        return success;
+      } catch (e) {
+        _log.warning("Error listing iCloud files", e);
+      }
     }
 
-    return 0;
+    return success;
+  }
+
+  Future<int> debugPurge() async {
+    final List<SyncerItem> items = await list();
+
+    int success = 0;
+
+    await Future.wait(
+      items
+          .where((item) => item.path.contains("/debug/"))
+          .map((item) => delete(item.path).then((_) => success++)),
+    );
+
+    return success;
+  }
+
+  Future<bool> debugDelete(String path) async {
+    try {
+      await ICloudStorage.delete(containerId: containerId, relativePath: path);
+
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   @override

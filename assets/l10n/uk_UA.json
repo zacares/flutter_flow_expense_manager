@@ -375,6 +375,8 @@
   "setup.onboarding": "Давайте почнемо",
   "setup.onboarding.freshStart": "Почати з нуля",
   "setup.onboarding.freshStart.description": "Я використовую Flow вперше",
+  "setup.onboarding.recoverICloudBackup": "Відновити з iCloud",
+  "setup.onboarding.recoverICloudBackup.description": "Відновити з iCloud (остання синхронізація: {lastSynced})",
   "setup.onboarding.importExisting": "Імпортувати з резервної копії",
   "setup.onboarding.importExisting.description": "Відновити дані з попередньої резервної копії Flow",
   "setup.primaryCurrency.choose": "Виберіть валюту",
