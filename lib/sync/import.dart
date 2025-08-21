@@ -91,8 +91,11 @@ Future<Importer> importBackup({
           l10nArgs: "JSON, ZIP, CSV",
         );
     }
+  } catch (e) {
+    _log.severe("Error importing backup: $e");
+    rethrow;
   } finally {
-    _log.info("Import process completed");
+    _log.info("Import process finished");
   }
 }
 

@@ -29,20 +29,23 @@ class _ICloudBackupPickerSheetState extends State<ICloudBackupPickerSheet> {
 
     return ModalSheet.scrollable(
       title: Text("setup.onboarding.recoverICloudBackup".t(context)),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: eligibleItems
-              .map(
-                (backup) => ListTile(
-                  leading: FlowIcon(backup.path.backupExtensionIcon),
-                  title: Text(backup.inferredbackupDate!.toMoment().lll),
-                  subtitle: Text(path.extension(backup.path).substring(1)),
-                  onTap: () => context.pop(backup),
-                  trailing: DirectionalChevron(),
-                ),
-              )
-              .toList(),
+      child: SizedBox(
+        width: double.infinity,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: eligibleItems
+                .map(
+                  (backup) => ListTile(
+                    leading: FlowIcon(backup.path.backupExtensionIcon),
+                    title: Text(backup.inferredbackupDate!.toMoment().lll),
+                    subtitle: Text(path.extension(backup.path).substring(1)),
+                    onTap: () => context.pop(backup),
+                    trailing: DirectionalChevron(),
+                  ),
+                )
+                .toList(),
+          ),
         ),
       ),
     );

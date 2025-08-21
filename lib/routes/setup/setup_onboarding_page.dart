@@ -8,6 +8,7 @@ import "package:flow/prefs/local_preferences.dart";
 import "package:flow/services/sync/icloud_syncer.dart";
 import "package:flow/services/sync/syncer.dart";
 import "package:flow/sync/import.dart";
+import "package:flow/sync/import/base.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/action_card.dart";
 import "package:flow/widgets/general/spinner.dart";
@@ -138,7 +139,8 @@ class _SetupOnboardingPageState extends State<SetupOnboardingPage> {
         throw "error.sync.fileNotFound".t(context);
       }
 
-      await importBackup(backupFile: file);
+      final Importer importer = await importBackup(backupFile: file);
+      await importer.execute();
 
       if (mounted) {
         GoRouter.of(context).popUntil((route) => route.path == "/setup");
