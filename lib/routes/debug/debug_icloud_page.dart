@@ -48,7 +48,7 @@ class _DebugICloudPageState extends State<DebugICloudPage> {
                       icon: Symbols.delete_forever_rounded,
                       backgroundColor: context.flowColors.expense,
                       onPressed: (context) =>
-                          ICloudSyncer().delete(iCloudFile.relativePath),
+                          ICloudSyncer().debugDelete(iCloudFile.relativePath),
                     ),
                   ],
                   startActions: [

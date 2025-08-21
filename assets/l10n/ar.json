@@ -375,6 +375,8 @@
   "setup.onboarding": "لنبدأ",
   "setup.onboarding.freshStart": "بدء جديد",
   "setup.onboarding.freshStart.description": "أنا أستخدم Flow لأول مرة",
+  "setup.onboarding.recoverICloudBackup": "استعادة من iCloud",
+  "setup.onboarding.recoverICloudBackup.description": "استعادة من iCloud (آخر مزامنة في {lastSynced})",
   "setup.onboarding.importExisting": "استيراد من نسخة احتياطية",
   "setup.onboarding.importExisting.description": "استعادة البيانات من نسخة احتياطية سابقة لـ Flow",
   "setup.primaryCurrency.choose": "اختر عملة",

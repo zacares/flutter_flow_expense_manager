@@ -375,6 +375,8 @@
   "setup.onboarding": "Başlayalım",
   "setup.onboarding.freshStart": "Yeni bir başlangıç yapın",
   "setup.onboarding.freshStart.description": "Flow'u ilk kez kullanıyorum",
+  "setup.onboarding.recoverICloudBackup": "iCloud'dan kurtar",
+  "setup.onboarding.recoverICloudBackup.description": "iCloud'dan kurtar (son senkronize: {lastSynced})",
   "setup.onboarding.importExisting": "Bir yedekten içeri aktarma",
   "setup.onboarding.importExisting.description": "Önceki bir Flow yedeklemesinden verileri geri yükleme",
   "setup.primaryCurrency.choose": "Bir para birimi seçin",

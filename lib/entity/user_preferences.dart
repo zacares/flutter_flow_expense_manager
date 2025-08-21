@@ -71,6 +71,14 @@ class UserPreferences implements EntityBase {
 
   bool enableICloudSync;
 
+  /// Number of iCloud backups Flow should preserve. At each startup,
+  /// Flow will remove any extra backups, sorted by time of the backup.
+  ///
+  /// Defaults to [10]
+  ///
+  /// Set to 0 or less to keep all
+  int? iCloudBackupsToKeep;
+
   String? transactionButtonOrderJoined;
 
   @Transient()
@@ -114,6 +122,7 @@ class UserPreferences implements EntityBase {
     this.trashBinRetentionDays = 30,
     this.defaultFilterPreset,
     this.enableICloudSync = false,
+    this.iCloudBackupsToKeep = 10,
     this.autoBackupIntervalInHours = 72,
     this.icuCurrencyFormattingPattern,
     this.primaryCurrency,

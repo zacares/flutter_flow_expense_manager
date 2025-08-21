@@ -41,7 +41,7 @@ abstract class Syncer {
   Future<bool> put(BackupEntry entry, {Function(double)? onProgress});
 
   /// Returns the count of files deleted
-  Future<int> purge(Duration maxAge);
+  Future<int> purge({Duration? maxAge, int? keepCount});
 
   /// Returns whether the file was deleted
   Future<bool> delete(String name);

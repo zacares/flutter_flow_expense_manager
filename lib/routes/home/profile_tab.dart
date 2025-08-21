@@ -265,7 +265,11 @@ class _ProfileTabState extends State<ProfileTab> {
     if (confirm != true) return;
 
     try {
-      await ICloudSyncer().purge(const Duration(days: 7));
+      final int deletedCount = await ICloudSyncer().debugPurge();
+
+      if (mounted) {
+        context.showToast(text: "Deleted $deletedCount debug items");
+      }
     } finally {
       _debugICloudBusy = false;
       if (mounted) {
