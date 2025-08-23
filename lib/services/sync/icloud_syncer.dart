@@ -3,11 +3,13 @@ import "dart:io";
 
 import "package:flow/constants.dart";
 import "package:flow/entity/backup_entry.dart";
+import "package:flow/prefs/transitive.dart";
 import "package:flow/services/sync/syncer.dart";
 import "package:flow/utils/utils.dart";
 import "package:flutter/foundation.dart";
 import "package:icloud_storage/icloud_storage.dart";
 import "package:logging/logging.dart";
+import "package:moment_dart/moment_dart.dart";
 import "package:path/path.dart" as path;
 import "package:path_provider/path_provider.dart";
 import "package:uuid/uuid.dart";
@@ -229,6 +231,8 @@ class ICloudSyncer implements Syncer {
 
   @override
   Future<int> purge({Duration? maxAge, int? keepCount}) async {
+    _log.fine("Purging iCloud files, maxAge: $maxAge, keepCount: $keepCount");
+
     final List<SyncerItem> items = await list();
 
     int success = 0;
@@ -246,6 +250,7 @@ class ICloudSyncer implements Syncer {
 
     if (keepCount != null) {
       if (keepCount <= 0) {
+        _log.info("keepCount is 0 or negative, skipping purge");
         return 0;
       }
 
@@ -258,6 +263,11 @@ class ICloudSyncer implements Syncer {
               .map((item) => delete(item.path).then((_) => success++)),
         );
       }
+
+      _log.info(
+        "Deleted $success out of $deleteCount stale iCloud files (keepCount $keepCount)",
+      );
+
       return success;
     } else if (maxAge != null) {
       try {
@@ -273,6 +283,11 @@ class ICloudSyncer implements Syncer {
               )
               .map((item) => delete(item.path).then((_) => success++)),
         );
+
+        _log.info(
+          "Deleted $success stale iCloud files (max age: ${maxAge.toDurationString(dropPrefixOrSuffix: true)})",
+        );
+
         return success;
       } catch (e) {
         _log.warning("Error listing iCloud files", e);
@@ -312,25 +327,78 @@ class ICloudSyncer implements Syncer {
 
     StreamSubscription<double>? subscription;
 
+    final String destinationRelativePath = resolvePath(entry.filePath);
+
+    final bool fileCurrentlyExists = _filesCache.value.any(
+      (file) => file.relativePath == destinationRelativePath,
+    );
+
+    final Timer timeoutTimer = Timer(const Duration(seconds: 300), () {
+      if (!completer.isCompleted) {
+        completer.completeError("ICloud upload timed out after 5 minutes");
+      }
+    });
+
+    void listener() {
+      if (_filesCache.value.any(
+        (file) => file.relativePath == destinationRelativePath,
+      )) {
+        _filesCache.removeListener(listener);
+        _log.fine(
+          "File $destinationRelativePath already exists, skipping upload",
+        );
+        completer.complete(true);
+      }
+    }
+
+    if (!fileCurrentlyExists) {
+      _filesCache.addListener(listener);
+    }
+
     try {
       await ICloudStorage.upload(
         containerId: containerId,
         filePath: entry.filePath,
-        destinationRelativePath: resolvePath(entry.filePath),
+        destinationRelativePath: destinationRelativePath,
         onProgress: (progressStream) => {
           subscription = progressStream.listen(
             (value) {
               if (onProgress != null) {
                 onProgress(value);
-              } else {}
+              }
               _log.fine("ICloud upload progress: $value");
+              if (value >= 100.0) {
+                completer.complete(true);
+              }
             },
-            onDone: () => completer.complete(true),
+            onDone: () {
+              _log.fine("ICloud upload completed");
+              completer.complete(true);
+            },
             onError: (error) => completer.completeError(error),
             cancelOnError: true,
           ),
         },
       );
+
+      unawaited(
+        completer.future.then((_) {
+          if (timeoutTimer.isActive) {
+            timeoutTimer.cancel();
+          }
+
+          TransitiveLocalPreferences().lastSuccessfulICloudSyncAt
+              .set(entry.createdDate)
+              .then((_) {})
+              .catchError((e) {
+                _log.finest(
+                  "Failed to set last successful iCloud sync time",
+                  e,
+                );
+              });
+        }),
+      );
+
       return await completer.future;
     } catch (e) {
       _log.severe("Failed to upload iCloud file", e);
@@ -345,6 +413,14 @@ class ICloudSyncer implements Syncer {
           ),
         ),
       );
+
+      if (fileCurrentlyExists) {
+        try {
+          _filesCache.removeListener(listener);
+        } catch (e) {
+          _log.fine("Failed to remove listener", e);
+        }
+      }
     }
   }
 }

@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flow/entity/backup_entry.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/l10n/named_enum.dart";
@@ -177,18 +179,37 @@ class BackupEntryCard extends StatelessWidget {
   Future<void> delete(BuildContext context) async {
     final String title = entry.backupEntryType.localizedNameContext(context);
 
-    final confirmation = await context.showConfirmationSheet(
-      isDeletionConfirmation: true,
-      title: "general.delete.confirmName".t(context, title),
-    );
+    final confirmation =
+        (entry.correspondingFile == null && getFileSize() == null)
+        ? true
+        : await context.showConfirmationSheet(
+            isDeletionConfirmation: true,
+            title: "general.delete.confirmName".t(context, title),
+          );
 
     if (confirmation == true) {
-      final bool deleted = await entry.delete();
+      unawaited(
+        entry.delete().then((deleted) {
+          if (context.mounted && !deleted) {
+            context.showErrorToast(
+              error: "error.sync.fileDeleteFailed".t(context),
+            );
+          }
+        }),
+      );
 
-      if (!context.mounted) return;
-
-      if (!deleted) {
-        context.showErrorToast(error: "error.sync.fileDeleteFailed".t(context));
+      if (entry.correspondingFile != null && ICloudSyncer.supported) {
+        unawaited(
+          ICloudSyncer().delete(entry.correspondingFile!.relativePath).then((
+            iCloudDeleted,
+          ) {
+            if (context.mounted && !iCloudDeleted) {
+              context.showErrorToast(
+                error: "error.sync.fileDeleteFailed".t(context),
+              );
+            }
+          }),
+        );
       }
     }
   }

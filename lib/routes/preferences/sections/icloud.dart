@@ -34,7 +34,7 @@ class _ICloudState extends State<ICloud> {
     final int iCloudBackupsToKeep =
         UserPreferencesService().iCloudBackupsToKeep ?? 5;
 
-    final List<int?> options = [null, 3, 5, 10, 20, -1];
+    final List<int?> options = [3, 5, 10, 20, 30, 100, -1];
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -46,14 +46,16 @@ class _ICloudState extends State<ICloud> {
           title: Text("preferences.sync.iCloud".t(context)),
           value: enableICloudSync,
           onChanged: updateEnableICloudSync,
+          subtitle: lastSuccessfulICloudSyncAt != null
+              ? Text(
+                  "preferences.sync.iCloud.lastSyncedAt".t(
+                    context,
+                    lastSuccessfulICloudSyncAt.toMoment().lll,
+                  ),
+                  style: context.textTheme.bodySmall,
+                )
+              : null,
         ),
-        if (lastSuccessfulICloudSyncAt != null)
-          Text(
-            "preferences.sync.iCloud.lastSyncedAt".t(
-              context,
-              lastSuccessfulICloudSyncAt.toMoment().lll,
-            ),
-          ),
         if (error != null)
           Frame(
             child: Align(
@@ -72,9 +74,7 @@ class _ICloudState extends State<ICloud> {
           ),
         ),
         const SizedBox(height: 16.0),
-
-        // TODO @sadespresso translation
-        ListHeader("No. iCloud of backups to keep"),
+        ListHeader("preferences.sync.iCloud.noOfBackupsToKeep".t(context)),
         const SizedBox(height: 8.0),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -87,7 +87,11 @@ class _ICloudState extends State<ICloud> {
                     showCheckmark: false,
                     key: ValueKey(value),
                     label: Text(
-                      value == -1 ? "Infinite" : "Last $value backups",
+                      value == -1
+                          ? "preferences.sync.iCloud.noOfBackupsToKeep.infiniteBackups"
+                                .t(context)
+                          : "preferences.sync.iCloud.noOfBackupsToKeep.nBackups"
+                                .t(context, value),
                     ),
                     onSelected: (bool selected) =>
                         selected ? updateICloudBackupsToKeep(value) : null,
@@ -95,6 +99,15 @@ class _ICloudState extends State<ICloud> {
                   ),
                 )
                 .toList(),
+          ),
+        ),
+        Frame(
+          child: InfoText(
+            child: Text(
+              "preferences.sync.iCloud.noOfBackupsToKeep.description".t(
+                context,
+              ),
+            ),
           ),
         ),
       ],

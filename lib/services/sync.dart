@@ -42,12 +42,15 @@ class SyncService {
   bool get working => activeSyncersCount > 0;
 
   SyncService._internal() {
-    triggerAutoBackup();
-    if (ICloudSyncer.supported) {
-      ICloudSyncer().purge(
-        keepCount: UserPreferencesService().iCloudBackupsToKeep ?? 5,
-      );
-    }
+    triggerAutoBackup().then((_) {
+      if (ICloudSyncer.supported) {
+        Future.delayed(const Duration(seconds: 2)).then((_) {
+          ICloudSyncer().purge(
+            keepCount: UserPreferencesService().iCloudBackupsToKeep ?? 5,
+          );
+        });
+      }
+    });
   }
 
   Future<void> triggerAutoBackup() async {
