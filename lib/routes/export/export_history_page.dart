@@ -1,12 +1,11 @@
-import "dart:async";
 import "dart:io";
 
 import "package:flow/entity/backup_entry.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
-import "package:flow/services/icloud_sync.dart";
 import "package:flow/services/sync.dart";
+import "package:flow/services/sync/icloud_syncer.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flow/utils/extensions/backup_entry.dart";
 import "package:flow/widgets/export/export_history/backup_entry_card.dart";
@@ -14,7 +13,6 @@ import "package:flow/widgets/export/export_history/no_backups.dart";
 import "package:flow/widgets/general/spinner.dart";
 import "package:flutter/material.dart";
 import "package:flutter_slidable/flutter_slidable.dart";
-import "package:icloud_storage/models/icloud_file.dart";
 import "package:path/path.dart" as path;
 
 class ExportHistoryPage extends StatefulWidget {
@@ -48,7 +46,7 @@ class _ExportHistoryPageState extends State<ExportHistoryPage> {
       appBar: AppBar(title: Text("sync.export.history".t(context))),
       body: SafeArea(
         child: ValueListenableBuilder(
-          valueListenable: ICloudSyncService().filesCache,
+          valueListenable: ICloudSyncer().filesCache,
           builder: (context, iCloudFiles, _) {
             return StreamBuilder<List<BackupEntry>>(
               stream: qb()
@@ -59,28 +57,26 @@ class _ExportHistoryPageState extends State<ExportHistoryPage> {
 
                 const Widget separator = SizedBox(height: 16.0);
 
-                if (backupEntries != null) {
-                  backupEntries.addAll(
-                    iCloudFiles
-                        .where(
-                          (iCloudFile) => backupEntries.any(
-                            (file) =>
-                                file.iCloudChangeDate ==
-                                iCloudFile.contentChangeDate,
-                          ),
-                        )
-                        .map(
-                          (iCloudFile) => BackupEntry(
-                            filePath: iCloudFile.relativePath,
-                            type: BackupEntryType.other.value,
-                            fileExt: path
-                                .extension(iCloudFile.relativePath)
-                                .replaceAll(r"^\.", "")
-                                .toLowerCase(),
-                          ),
+                backupEntries?.addAll(
+                  iCloudFiles
+                      .where(
+                        (iCloudFile) => !backupEntries.any(
+                          (file) =>
+                              ICloudSyncer().resolvePath(file.filePath) ==
+                              iCloudFile.relativePath,
                         ),
-                  );
-                }
+                      )
+                      .map(
+                        (iCloudFile) => BackupEntry(
+                          filePath: iCloudFile.relativePath,
+                          type: BackupEntryType.other.value,
+                          fileExt: path
+                              .extension(iCloudFile.relativePath)
+                              .replaceAll(r"^\.", "")
+                              .toLowerCase(),
+                        ),
+                      ),
+                );
 
                 return switch ((backupEntries?.length ?? 0, snapshot.hasData)) {
                   (0, true) => const NoBackups(),
@@ -91,7 +87,7 @@ class _ExportHistoryPageState extends State<ExportHistoryPage> {
 
                         final bool canUpload =
                             uploadEnabled &&
-                            !uploadBusy &&
+                            // !uploadBusy &&
                             entry.canUploadToCloud;
 
                         return BackupEntryCard(
@@ -101,7 +97,6 @@ class _ExportHistoryPageState extends State<ExportHistoryPage> {
                           uploadProgress: uploading?.$1 == entry.id
                               ? uploading?.$2
                               : null,
-                          existsOnCloud: entry.correspondingFile != null,
                         );
                       },
                       separatorBuilder: (context, index) => separator,
@@ -130,13 +125,10 @@ class _ExportHistoryPageState extends State<ExportHistoryPage> {
 
       if (!exists) return;
 
-      await SyncService().saveBackupToICloud(
-        entry: entry,
-        parent: path.join(SyncService.cloudBackupsFolder, entry.type),
+      await SyncService().putToAll(
+        entry,
         onProgress: (p) => onUploadProgress(entry, p),
       );
-
-      await ICloudSyncService().gather().catchError((_) => <ICloudFile>[]);
     } finally {
       uploadBusy = false;
       if (mounted) {
@@ -145,37 +137,10 @@ class _ExportHistoryPageState extends State<ExportHistoryPage> {
     }
   }
 
-  void onUploadProgress(BackupEntry entry, Stream<double> progress) {
-    late final StreamSubscription<double> subscription;
-
-    void cancel() {
-      uploading = null;
-      subscription.cancel();
-
-      if (mounted) {
-        setState(() {});
-      }
+  void onUploadProgress(BackupEntry entry, double progress) {
+    uploading = (entry.id, progress);
+    if (mounted) {
+      setState(() {});
     }
-
-    subscription = progress.listen(
-      (double progress) {
-        uploading = (entry.id, progress);
-
-        if (mounted) {
-          setState(() {});
-        }
-
-        if (progress >= 1.0) {
-          cancel();
-        }
-      },
-      onError: (_) => cancel(),
-      onDone: () => cancel(),
-      cancelOnError: true,
-    );
-
-    setState(() {
-      uploading = (entry.id, 0.0);
-    });
   }
 }

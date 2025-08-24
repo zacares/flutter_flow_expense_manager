@@ -20,6 +20,7 @@ UserPreferences _$UserPreferencesFromJson(
   trashBinRetentionDays: (json['trashBinRetentionDays'] as num?)?.toInt() ?? 30,
   defaultFilterPreset: json['defaultFilterPreset'] as String?,
   enableICloudSync: json['enableICloudSync'] as bool? ?? false,
+  iCloudBackupsToKeep: (json['iCloudBackupsToKeep'] as num?)?.toInt() ?? 10,
   autoBackupIntervalInHours:
       (json['autoBackupIntervalInHours'] as num?)?.toInt() ?? 72,
   icuCurrencyFormattingPattern: json['icuCurrencyFormattingPattern'] as String?,
@@ -47,5 +48,6 @@ Map<String, dynamic> _$UserPreferencesToJson(UserPreferences instance) =>
       'primaryCurrency': instance.primaryCurrency,
       'autoBackupIntervalInHours': instance.autoBackupIntervalInHours,
       'enableICloudSync': instance.enableICloudSync,
+      'iCloudBackupsToKeep': instance.iCloudBackupsToKeep,
       'transactionButtonOrderJoined': instance.transactionButtonOrderJoined,
     };

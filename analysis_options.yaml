@@ -5,6 +5,7 @@ linter:
     unawaited_futures: true
     prefer_double_quotes: true
     type_annotate_public_apis: true
+    always_use_package_imports: true
 analyzer:
   exclude:
     - "example/**"

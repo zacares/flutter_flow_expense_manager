@@ -66,13 +66,15 @@ class _ImportWizardV2PageState extends State<ImportWizardV2Page> {
   }
 
   void _start() async {
-    final bool? confirm = await context.showConfirmationSheet(
-      title: "sync.import.eraseWarning".t(context),
-      isDeletionConfirmation: true,
-      mainActionLabelOverride: "general.confirm".t(context),
-    );
+    if (!widget.setupMode) {
+      final bool? confirm = await context.showConfirmationSheet(
+        title: "sync.import.eraseWarning".t(context),
+        isDeletionConfirmation: true,
+        mainActionLabelOverride: "general.confirm".t(context),
+      );
 
-    if (confirm != true) return;
+      if (confirm != true) return;
+    }
 
     try {
       await importer.execute();

@@ -1,35 +1,36 @@
 import "dart:io";
 
-import "package:flow/data/internal_nofications/internal_notification.dart";
+import "package:flow/data/actionable_nofications/actionable_notification.dart";
 import "package:flow/entity/backup_entry.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/sync/icloud_syncer.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flow/widgets/utils/should_execute_scheduled_task.dart";
 import "package:flutter/foundation.dart";
 import "package:in_app_review/in_app_review.dart";
 import "package:moment_dart/moment_dart.dart";
 
-class InternalNotificationsService {
-  static InternalNotificationsService? _instance;
+class ActionableNotificationsService {
+  static ActionableNotificationsService? _instance;
 
-  final ValueNotifier<List<InternalNotification>> _notifications =
+  final ValueNotifier<List<ActionableNotification>> _notifications =
       ValueNotifier([]);
 
-  ValueListenable<List<InternalNotification>> get notifications =>
+  ValueListenable<List<ActionableNotification>> get notifications =>
       _notifications;
 
-  factory InternalNotificationsService() =>
-      _instance ??= InternalNotificationsService._internal();
+  factory ActionableNotificationsService() =>
+      _instance ??= ActionableNotificationsService._internal();
 
-  void add(InternalNotification notification) {
+  void add(ActionableNotification notification) {
     _notifications.value = [..._notifications.value, notification]
       ..sort((a, b) => b.priority.value.compareTo(a.priority.value));
   }
 
   /// Returns the most relevant notification, and deletes it from the pool
-  InternalNotification? consume() {
+  ActionableNotification? consume() {
     if (_notifications.value.isEmpty) {
       return null;
     }
@@ -108,9 +109,17 @@ class InternalNotificationsService {
     } catch (e) {
       // Silent fail
     }
+
+    if (_notifications.value.isNotEmpty) {
+      return;
+    }
+
+    if (ICloudSyncer.supported && !UserPreferencesService().enableICloudSync) {
+      add(TurnOnICloudNotification());
+    }
   }
 
-  InternalNotificationsService._internal() {
+  ActionableNotificationsService._internal() {
     checkAndAddNotifications();
   }
 

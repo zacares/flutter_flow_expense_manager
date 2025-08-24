@@ -5,15 +5,12 @@ import "package:flow/constants.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/sync/import.dart";
 import "package:flow/sync/import/base.dart";
-import "package:flow/sync/import/external/ivy_wallet_csv.dart";
-import "package:flow/sync/import/import_csv.dart";
-import "package:flow/sync/import/import_v2.dart";
+import "package:flow/utils/extensions/importer.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/general/list_header.dart";
 import "package:flow/widgets/general/spinner.dart";
 import "package:flow/widgets/import/file_select_area.dart";
 import "package:flutter/material.dart";
-import "package:go_router/go_router.dart";
 import "package:logging/logging.dart";
 import "package:material_symbols_icons/symbols.dart";
 import "package:simple_icons/simple_icons.dart";
@@ -101,41 +98,13 @@ class _ImportPageState extends State<ImportPage> {
       );
 
       if (mounted) {
-        switch (importer) {
-          case ImportV1 importV1:
-            context.pushReplacement(
-              "/import/wizard/v1?setupMode=${widget.setupMode}",
-              extra: importV1,
-            );
-            break;
-          case ImportV2 importV2:
-            context.pushReplacement(
-              "/import/wizard/v2?setupMode=${widget.setupMode}",
-              extra: importV2,
-            );
-            break;
-          case ImportCSV importCSV:
-            context.pushReplacement(
-              "/import/wizard/csv?setupMode=${widget.setupMode}",
-              extra: importCSV,
-            );
-            break;
-          case IvyWalletCsvImporter ivyWalletCsvImporter:
-            context.pushReplacement(
-              "/import/wizard/external/ivy?setupMode=${widget.setupMode}",
-              extra: ivyWalletCsvImporter,
-            );
-            break;
-          case null:
-            context.showErrorToast(
-              error: "error.input.noFilePicked".t(context),
-            );
-            break;
-          default:
-            context.showErrorToast(
-              error: "error.sync.invalidBackupFile".t(context),
-            );
-            break;
+        if (importer == null) {
+          context.showErrorToast(error: "error.input.noFilePicked".t(context));
+        } else {
+          importer!.goToRelevantPage(
+            context,
+            setupMode: widget.setupMode ?? false,
+          );
         }
       }
     } catch (e, stackTrace) {
