@@ -24,7 +24,7 @@ class _ICloudBackupPickerSheetState extends State<ICloudBackupPickerSheet> {
   @override
   Widget build(BuildContext context) {
     final List<SyncerItem> eligibleItems = widget.backups
-        .where((item) => item.inferredbackupDate != null)
+        .where((item) => item.inferredBackupDate != null)
         .toList();
 
     return ModalSheet.scrollable(
@@ -38,7 +38,7 @@ class _ICloudBackupPickerSheetState extends State<ICloudBackupPickerSheet> {
                 .map(
                   (backup) => ListTile(
                     leading: FlowIcon(backup.path.backupExtensionIcon),
-                    title: Text(backup.inferredbackupDate!.toMoment().lll),
+                    title: Text(backup.inferredBackupDate!.toMoment().lll),
                     subtitle: Text(path.extension(backup.path).substring(1)),
                     onTap: () => context.pop(backup),
                     trailing: DirectionalChevron(),

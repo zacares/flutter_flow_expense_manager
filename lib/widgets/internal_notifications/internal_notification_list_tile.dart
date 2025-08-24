@@ -6,7 +6,7 @@ import "package:flutter/material.dart";
 import "package:flutter_slidable/flutter_slidable.dart";
 import "package:material_symbols_icons/symbols.dart";
 
-class InternalNotificationListTile extends StatelessWidget {
+class ActionableNotificationListTile extends StatelessWidget {
   final FlowIconData icon;
 
   final String title;
@@ -16,7 +16,7 @@ class InternalNotificationListTile extends StatelessWidget {
 
   final VoidCallback? onDismiss;
 
-  const InternalNotificationListTile({
+  const ActionableNotificationListTile({
     super.key,
     this.subtitle,
     required this.title,

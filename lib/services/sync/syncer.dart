@@ -8,7 +8,7 @@ class SyncerItem {
   final String path;
   final DateTime? updatedAt;
 
-  DateTime? get inferredbackupDate {
+  DateTime? get inferredBackupDate {
     try {
       final [...rest, date, time] = basename(path).split("_");
 
@@ -47,7 +47,7 @@ abstract class Syncer {
   Future<bool> delete(String name);
   Future<List<SyncerItem>> list();
   Future<SyncerItem?> get(String name);
-  Future<File?> download(SyncerItem item);
+  Future<File?> download(SyncerItem item, {Function(double)? onProgress});
 
   bool get syncing;
 }

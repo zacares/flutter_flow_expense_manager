@@ -1,5 +1,5 @@
 import "package:flow/constants.dart";
-import "package:flow/data/internal_nofications/internal_notification.dart";
+import "package:flow/data/actionable_nofications/actionable_notification.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/internal_notifications/internal_notification_list_tile.dart";
@@ -18,7 +18,7 @@ class StarOnGithubNotification extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InternalNotificationListTile(
+    return ActionableNotificationListTile(
       onDismiss: onDismiss,
       icon: notification.icon,
       title: "tabs.home.reminders.starOnGitHub".t(context),
