@@ -4,7 +4,7 @@ import "package:flow/utils/utils.dart";
 import "package:icloud_storage/icloud_storage.dart";
 
 extension BackupEntryExtension on BackupEntry {
-  ICloudFile? get correspondingFile {
+  ICloudFile? get correspondingICloudFile {
     try {
       final List<ICloudFile> files = ICloudSyncer().filesCache.value;
 
@@ -18,11 +18,11 @@ extension BackupEntryExtension on BackupEntry {
 
   /// Whether the file can be uploaded to iCloud.
   bool get canUploadToCloud {
-    if (correspondingFile != null) return false;
+    if (correspondingICloudFile != null) return false;
     if (!ICloudSyncer.supported || !ICloudSyncer().syncing) return false;
 
     try {
-      return correspondingFile == null;
+      return correspondingICloudFile == null;
     } catch (e) {
       return true;
     }

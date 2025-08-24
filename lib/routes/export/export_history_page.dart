@@ -97,7 +97,6 @@ class _ExportHistoryPageState extends State<ExportHistoryPage> {
                           uploadProgress: uploading?.$1 == entry.id
                               ? uploading?.$2
                               : null,
-                          existsOnCloud: entry.correspondingFile != null,
                         );
                       },
                       separatorBuilder: (context, index) => separator,

@@ -66,7 +66,7 @@ class _SetupOnboardingPageState extends State<SetupOnboardingPage> {
                             "setup.onboarding.recoverICloudBackup.description"
                                 .t(
                                   context,
-                                  backups?.firstOrNull?.inferredbackupDate
+                                  backups?.firstOrNull?.inferredBackupDate
                                           ?.toMoment()
                                           .lll ??
                                       "-",
@@ -143,9 +143,9 @@ class _SetupOnboardingPageState extends State<SetupOnboardingPage> {
       backups = await ICloudSyncer().list();
       backups?.sort(
         (a, b) =>
-            (b.inferredbackupDate ?? DateTime.fromMicrosecondsSinceEpoch(0))
+            (b.inferredBackupDate ?? DateTime.fromMicrosecondsSinceEpoch(0))
                 .compareTo(
-                  a.inferredbackupDate ??
+                  a.inferredBackupDate ??
                       DateTime.fromMicrosecondsSinceEpoch(0),
                 ),
       );

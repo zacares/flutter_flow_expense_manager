@@ -105,7 +105,10 @@ class ICloudSyncer implements Syncer {
   }
 
   @override
-  Future<File?> download(SyncerItem item) async {
+  Future<File?> download(
+    SyncerItem item, {
+    Function(double)? onProgress,
+  }) async {
     if (!supported) throw UnimplementedError();
 
     StreamSubscription<double>? subscription;
@@ -130,6 +133,9 @@ class ICloudSyncer implements Syncer {
         onProgress: (progressStream) => {
           subscription = progressStream.listen(
             (value) {
+              if (onProgress != null) {
+                onProgress(value);
+              }
               _log.fine("ICloud download progress: $value");
             },
             onDone: () {
@@ -141,6 +147,18 @@ class ICloudSyncer implements Syncer {
             },
           ),
         },
+      );
+
+      unawaited(
+        completer.future
+            .then((_) {
+              if (onProgress != null) {
+                onProgress(1.0);
+              }
+            })
+            .catchError((error) {
+              // silent fail
+            }),
       );
 
       return await completer.future;
@@ -239,13 +257,13 @@ class ICloudSyncer implements Syncer {
 
     await Future.wait(
       items
-          .where((item) => item.inferredbackupDate == null)
+          .where((item) => item.inferredBackupDate == null)
           .map((item) => delete(item.path).then((_) => success++)),
     );
 
     final List<SyncerItem> remaining =
-        items.where((item) => item.inferredbackupDate != null).toList()..sort(
-          (a, b) => b.inferredbackupDate!.compareTo(a.inferredbackupDate!),
+        items.where((item) => item.inferredBackupDate != null).toList()..sort(
+          (a, b) => b.inferredBackupDate!.compareTo(a.inferredBackupDate!),
         );
 
     if (keepCount != null) {
@@ -277,8 +295,8 @@ class ICloudSyncer implements Syncer {
           items
               .where(
                 (item) =>
-                    item.inferredbackupDate == null ||
-                    DateTime.now().difference(item.inferredbackupDate!) >
+                    item.inferredBackupDate == null ||
+                    DateTime.now().difference(item.inferredBackupDate!) >
                         maxAge,
               )
               .map((item) => delete(item.path).then((_) => success++)),

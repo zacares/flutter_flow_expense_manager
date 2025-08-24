@@ -4,7 +4,8 @@
 
 ### New features
 
-* Now supports backups to iCloud
+* Now supports backups to iCloud.
+  * DISCLAIMER: This is not syncing. It will not sync across your devices.
 * Now supports following cryptocurrencies: BTC, ETH, USDT, XRP, BNB, SOL, USDC, DOGE, ADA, BCH, AVAX, TON, SHIB, LTC,
   HBAR, XMR, DAI, DOT, UNI, PEPE, AAVE, APT, OKB, NEAR, ICP, CRO, ETC
 
