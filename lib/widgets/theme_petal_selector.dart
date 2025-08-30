@@ -1,7 +1,7 @@
 import "dart:math" as math;
 
 import "package:flow/data/flow_icon.dart";
-import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/flow_theme_group.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/widgets/general/flow_icon.dart";
@@ -92,7 +92,7 @@ class _ThemePetalSelectorState extends State<ThemePetalSelector>
 
   @override
   Widget build(BuildContext context) {
-    final String currentTheme = LocalPreferences().getCurrentTheme();
+    final String currentTheme = UserPreferencesService().themeName;
     int groupIndex = 0;
     int themeIndex = -1;
 
@@ -256,7 +256,7 @@ class _ThemePetalSelectorState extends State<ThemePetalSelector>
           .schemes[themeIndex]
           .name;
 
-      await LocalPreferences().theme.themeName.set(themeName);
+      UserPreferencesService().themeName = themeName;
     } catch (e) {
       _log.warning("Something went wrong with the theme petal selector.", e);
     } finally {

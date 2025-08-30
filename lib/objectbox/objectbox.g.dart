@@ -407,7 +407,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(10, 7829328581176695647),
     name: 'UserPreferences',
-    lastPropertyId: const obx_int.IdUid(18, 5817984994810877086),
+    lastPropertyId: const obx_int.IdUid(20, 3170754472241464501),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -505,6 +505,18 @@ final _entities = <obx_int.ModelEntity>[
         id: const obx_int.IdUid(18, 5817984994810877086),
         name: 'iCloudBackupsToKeep',
         type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(19, 4873078044604055561),
+        name: 'themeName',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(20, 3170754472241464501),
+        name: 'themeChangesAppIcon',
+        type: 1,
         flags: 0,
       ),
     ],
@@ -1256,7 +1268,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
             object.transactionButtonOrderJoined == null
             ? null
             : fbb.writeString(object.transactionButtonOrderJoined!);
-        fbb.startTable(19);
+        final themeNameOffset = object.themeName == null
+            ? null
+            : fbb.writeString(object.themeName!);
+        fbb.startTable(21);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uuidOffset);
         fbb.addBool(2, object.combineTransfers);
@@ -1273,6 +1288,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addOffset(15, primaryCurrencyOffset);
         fbb.addOffset(16, transactionButtonOrderJoinedOffset);
         fbb.addInt64(17, object.iCloudBackupsToKeep);
+        fbb.addOffset(18, themeNameOffset);
+        fbb.addBool(19, object.themeChangesAppIcon);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -1329,6 +1346,15 @@ obx_int.ModelDefinition getObjectBoxModel() {
         ).vTableGetNullable(buffer, rootOffset, 36);
         final remindDailyAtRelativeSecondsParam = const fb.Int64Reader()
             .vTableGetNullable(buffer, rootOffset, 16);
+        final themeNameParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 40);
+        final themeChangesAppIconParam = const fb.BoolReader().vTableGet(
+          buffer,
+          rootOffset,
+          42,
+          false,
+        );
         final object =
             UserPreferences(
                 id: idParam,
@@ -1349,6 +1375,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 primaryCurrency: primaryCurrencyParam,
                 transactionButtonOrderJoined: transactionButtonOrderJoinedParam,
                 remindDailyAtRelativeSeconds: remindDailyAtRelativeSecondsParam,
+                themeName: themeNameParam,
+                themeChangesAppIcon: themeChangesAppIconParam,
               )
               ..uuid = const fb.StringReader(
                 asciiOptimization: true,
@@ -1881,6 +1909,16 @@ class UserPreferences_ {
   /// See [UserPreferences.iCloudBackupsToKeep].
   static final iCloudBackupsToKeep = obx.QueryIntegerProperty<UserPreferences>(
     _entities[6].properties[15],
+  );
+
+  /// See [UserPreferences.themeName].
+  static final themeName = obx.QueryStringProperty<UserPreferences>(
+    _entities[6].properties[16],
+  );
+
+  /// See [UserPreferences.themeChangesAppIcon].
+  static final themeChangesAppIcon = obx.QueryBooleanProperty<UserPreferences>(
+    _entities[6].properties[17],
   );
 }
 

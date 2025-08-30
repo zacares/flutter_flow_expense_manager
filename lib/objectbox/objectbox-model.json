@@ -324,7 +324,7 @@
     },
     {
       "id": "10:7829328581176695647",
-      "lastPropertyId": "18:5817984994810877086",
+      "lastPropertyId": "20:3170754472241464501",
       "name": "UserPreferences",
       "properties": [
         {
@@ -409,6 +409,16 @@
           "id": "18:5817984994810877086",
           "name": "iCloudBackupsToKeep",
           "type": 6
+        },
+        {
+          "id": "19:4873078044604055561",
+          "name": "themeName",
+          "type": 9
+        },
+        {
+          "id": "20:3170754472241464501",
+          "name": "themeChangesAppIcon",
+          "type": 1
         }
       ],
       "relations": []
