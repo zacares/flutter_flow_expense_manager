@@ -55,7 +55,7 @@ class _SetupOnboardingPageState extends State<SetupOnboardingPage> {
                 padding: EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    if (backups?.isNotEmpty != null) ...[
+                    if (backups?.isNotEmpty == true) ...[
                       ActionCard(
                         onTap: () => showICloudBackupModal(),
                         icon: FlowIconData.icon(SimpleIcons.icloud),

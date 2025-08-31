@@ -24,7 +24,7 @@ import "package:flow/widgets/home/greetings_bar.dart";
 import "package:flow/widgets/home/home/flow_cards.dart";
 import "package:flow/widgets/home/home/no_transactions.dart";
 import "package:flow/widgets/internal_notifications/internal_notification_section.dart";
-import "package:flow/widgets/rates_missing_warning.dart";
+import "package:flow/widgets/rates_missing_error_box.dart";
 import "package:flow/widgets/transactions_date_header.dart";
 import "package:flutter/material.dart";
 import "package:flutter_slidable/flutter_slidable.dart";
@@ -266,7 +266,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                 SizedBox(height: 8.0),
               ],
               if (showMissingExchangeRatesWarning) ...[
-                RatesMissingWarning(),
+                RatesMissingErrorBox(),
                 SizedBox(height: 8.0),
               ],
               // TODO @sadespresso want to analyze transactions shown in current

@@ -370,11 +370,10 @@ class _DefaultTransactionsFilterHeadState
   }
 
   void _updateShowCurrencyFilterChip() {
-    setState(() {
-      showCurrencyFilterChip = TransitiveLocalPreferences()
-          .usesMultipleCurrencies
-          .get();
-    });
+    showCurrencyFilterChip = TransitiveLocalPreferences().usesMultipleCurrencies
+        .get();
+    if (!mounted) return;
+    setState(() {});
   }
 
   void _saveNewFilterPreset() async {

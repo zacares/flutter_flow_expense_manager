@@ -22,7 +22,7 @@ import "package:flow/widgets/general/spinner.dart";
 import "package:flow/widgets/home/stats/info_card_with_delta.dart";
 import "package:flow/widgets/home/stats/most_spending_category.dart";
 import "package:flow/widgets/home/stats/no_data.dart";
-import "package:flow/widgets/rates_missing_warning.dart";
+import "package:flow/widgets/rates_missing_error_box.dart";
 import "package:flow/widgets/reports/interval_flow_report_view.dart";
 import "package:flow/widgets/time_range_selector.dart";
 import "package:flow/widgets/trend.dart";
@@ -95,7 +95,7 @@ class _StatsTabState extends State<StatsTab>
           child: TimeRangeSelector(initialValue: range, onChanged: updateRange),
         ),
         if (showMissingExchangeRatesWarning) ...[
-          RatesMissingWarning(),
+          RatesMissingErrorBox(),
           const SizedBox(height: 12.0),
         ],
         Expanded(
