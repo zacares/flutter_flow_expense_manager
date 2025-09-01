@@ -1,6 +1,7 @@
 import "package:auto_size_text/auto_size_text.dart";
 import "package:flow/data/exchange_rates.dart";
-import "package:flow/data/money_flow.dart";
+import "package:flow/data/multi_currency_flow.dart";
+import "package:flow/data/single_currency_flow.dart";
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/category.dart";
@@ -12,15 +13,16 @@ import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/routes/error_page.dart";
 import "package:flow/services/exchange_rates.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/category/transactions_info.dart";
 import "package:flow/widgets/flow_card.dart";
 import "package:flow/widgets/general/pending_transactions_header.dart";
 import "package:flow/widgets/general/spinner.dart";
 import "package:flow/widgets/general/wavy_divider.dart";
-import "package:flow/widgets/grouped_transaction_list.dart";
+import "package:flow/widgets/grouped_transactions_list_view.dart";
 import "package:flow/widgets/no_result.dart";
-import "package:flow/widgets/rates_missing_warning.dart";
+import "package:flow/widgets/rates_missing_error_box.dart";
 import "package:flow/widgets/time_range_selector.dart";
 import "package:flow/widgets/transactions_date_header.dart";
 import "package:flutter/material.dart";
@@ -40,13 +42,11 @@ class CategoryPage extends StatefulWidget {
   final TimeRange? initialRange;
 
   final EdgeInsets headerPadding;
-  final EdgeInsets listPadding;
 
   const CategoryPage({
     super.key,
     required this.categoryId,
     this.initialRange,
-    this.listPadding = const EdgeInsets.symmetric(vertical: 16.0),
     this.headerPadding = _defaultHeaderPadding,
   });
 
@@ -59,13 +59,12 @@ class _CategoryPageState extends State<CategoryPage> {
 
   bool busy = false;
 
-  QueryBuilder<Transaction> qb(TimeRange range) =>
-      TransactionFilter(
-        range: TransactionFilterTimeRange.fromTimeRange(range),
-        categories: [category!.uuid],
-        sortBy: TransactionSortField.transactionDate,
-        sortDescending: true,
-      ).queryBuilder();
+  QueryBuilder<Transaction> qb(TimeRange range) => TransactionFilter(
+    range: TransactionFilterTimeRange.fromTimeRange(range),
+    categories: [category!.uuid],
+    sortBy: TransactionSortField.transactionDate,
+    sortDescending: true,
+  ).queryBuilder();
 
   late Category? category;
 
@@ -84,12 +83,12 @@ class _CategoryPageState extends State<CategoryPage> {
     if (this.category == null) return const ErrorPage();
 
     final Category category = this.category!;
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
-    final ExchangeRates? rates =
-        ExchangeRatesService().getPrimaryCurrencyRates();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
+    final ExchangeRates? rates = ExchangeRatesService()
+        .getPrimaryCurrencyRates();
     final bool showMissingExchangeRatesWarning =
         rates == null &&
-        TransitiveLocalPreferences().transitiveUsesSingleCurrency.get();
+        TransitiveLocalPreferences().usesNonPrimaryCurrency.get();
 
     return StreamBuilder<List<Transaction>>(
       stream: qb(
@@ -122,21 +121,22 @@ class _CategoryPageState extends State<CategoryPage> {
                 .toList() ??
             [];
 
-        final int actionNeededCount =
-            pendingTransactions
-                .where((transaction) => transaction.confirmable())
-                .length;
+        final int actionNeededCount = pendingTransactions
+            .where((transaction) => transaction.confirmable())
+            .length;
 
         final Map<TimeRange, List<Transaction>> pendingTransactionsGrouped =
             pendingTransactions.groupByRange(
-              rangeFn:
-                  (transaction) =>
-                      CustomTimeRange(Moment.minValue, Moment.maxValue),
+              rangeFn: (transaction) =>
+                  CustomTimeRange(Moment.minValue, Moment.maxValue),
             );
 
-        final MoneyFlow flow = transactions?.nonPending.flow ?? MoneyFlow();
-
-        const double firstHeaderTopPadding = 0.0;
+        final MultiCurrencyFlow flow =
+            transactions?.nonPending.flow ?? MultiCurrencyFlow();
+        final SingleCurrencyFlow mergedFlow = flow.merge(
+          primaryCurrency,
+          rates,
+        );
 
         final Widget header = Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -145,10 +145,7 @@ class _CategoryPageState extends State<CategoryPage> {
             const SizedBox(height: 8.0),
             TransactionsInfo(
               count: transactions?.nonPending.length,
-              flow:
-                  rates == null
-                      ? flow.getFlowByCurrency(primaryCurrency)
-                      : flow.getTotalFlow(rates, primaryCurrency),
+              flow: mergedFlow.totalFlow,
               icon: category.icon,
             ),
             const SizedBox(height: 12.0),
@@ -156,10 +153,7 @@ class _CategoryPageState extends State<CategoryPage> {
               children: [
                 Expanded(
                   child: FlowCard(
-                    flow:
-                        rates == null
-                            ? flow.getIncomeByCurrency(primaryCurrency)
-                            : flow.getTotalIncome(rates, primaryCurrency),
+                    flow: mergedFlow.totalIncome,
                     type: TransactionType.income,
                     autoSizeGroup: autoSizeGroup,
                   ),
@@ -167,10 +161,7 @@ class _CategoryPageState extends State<CategoryPage> {
                 const SizedBox(width: 12.0),
                 Expanded(
                   child: FlowCard(
-                    flow:
-                        rates == null
-                            ? flow.getExpenseByCurrency(primaryCurrency)
-                            : flow.getTotalExpense(rates, primaryCurrency),
+                    flow: mergedFlow.totalExpense,
                     type: TransactionType.expense,
                     autoSizeGroup: autoSizeGroup,
                   ),
@@ -179,15 +170,12 @@ class _CategoryPageState extends State<CategoryPage> {
             ),
             if (showMissingExchangeRatesWarning) ...[
               const SizedBox(height: 12.0),
-              RatesMissingWarning(),
+              RatesMissingErrorBox(),
             ],
           ],
         );
 
-        final EdgeInsets headerPaddingOutOfList =
-            widget.headerPadding +
-            widget.listPadding.copyWith(bottom: 0, top: 0) +
-            const EdgeInsets.only(top: firstHeaderTopPadding);
+        final EdgeInsets headerPaddingOutOfList = widget.headerPadding;
 
         return Scaffold(
           appBar: AppBar(
@@ -205,23 +193,28 @@ class _CategoryPageState extends State<CategoryPage> {
               true => Padding(
                 padding: headerPaddingOutOfList,
                 child: Column(
-                  children: [header, const Expanded(child: Spinner.center())],
+                  children: [
+                    header,
+                    const Expanded(child: Spinner.center()),
+                  ],
                 ),
               ),
               false when noTransactions => Padding(
                 padding: headerPaddingOutOfList,
                 child: Column(
-                  children: [header, const Expanded(child: NoResult())],
+                  children: [
+                    header,
+                    const Expanded(child: NoResult()),
+                  ],
                 ),
               ),
-              _ => GroupedTransactionList(
-                header: header,
+              _ => GroupedTransactionsListView(
+                mainHeader: header,
                 transactions: grouped,
                 pendingTransactions: pendingTransactionsGrouped,
                 pendingDivider: WavyDivider(),
-                listPadding: widget.listPadding,
-                headerPadding: widget.headerPadding,
-                firstHeaderTopPadding: firstHeaderTopPadding,
+                groupHeaderPadding: widget.headerPadding,
+                mainHeaderPadding: EdgeInsets.zero,
                 headerBuilder: (pendingGroup, range, transactions) {
                   if (pendingGroup) {
                     return PendingTransactionsHeader(

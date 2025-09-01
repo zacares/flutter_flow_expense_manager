@@ -1,4 +1,5 @@
 import "package:flow/l10n/extensions.dart";
+import "package:flow/utils/extensions/custom_popups.dart";
 import "package:flow/utils/optional.dart";
 import "package:flow/widgets/general/modal_sheet.dart";
 import "package:flutter/material.dart";
@@ -13,7 +14,6 @@ class UpdateBalanceOptionsSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return ModalSheet.scrollable(
       title: Text("account.updateBalance.chooseUpdateMode".t(context)),
-      scrollableContentMaxHeight: MediaQuery.of(context).size.height * 0.5,
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -40,11 +40,7 @@ class UpdateBalanceOptionsSheet extends StatelessWidget {
   }
 
   void _selectDateAndTimeAndPop(BuildContext context) async {
-    final DateTime? dateResult = await showDatePicker(
-      context: context,
-      firstDate: DateTime.fromMicrosecondsSinceEpoch(0),
-      lastDate: DateTime(9999, 12, 31),
-    );
+    final DateTime? dateResult = await context.pickDate();
 
     if (dateResult == null) return;
     if (!context.mounted) return;

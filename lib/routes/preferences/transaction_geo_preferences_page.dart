@@ -51,8 +51,9 @@ class _TransactionGeoPreferencesPageState
     final bool geoSupported = !Platform.isLinux;
 
     final bool enableGeo = LocalPreferences().enableGeo.get();
-    final bool autoAttachTransactionGeo =
-        LocalPreferences().autoAttachTransactionGeo.get();
+    final bool autoAttachTransactionGeo = LocalPreferences()
+        .autoAttachTransactionGeo
+        .get();
 
     return Scaffold(
       appBar: AppBar(title: Text("preferences.transactions.geo".t(context))),
@@ -69,7 +70,7 @@ class _TransactionGeoPreferencesPageState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16.0),
-                  CheckboxListTile /*.adaptive*/ (
+                  CheckboxListTile(
                     title: Text(
                       "preferences.transactions.geo.enable".t(context),
                     ),
@@ -78,7 +79,7 @@ class _TransactionGeoPreferencesPageState
                   ),
                   if (geoSupported) ...[
                     const SizedBox(height: 16.0),
-                    CheckboxListTile /*.adaptive*/ (
+                    CheckboxListTile(
                       title: Text(
                         "preferences.transactions.geo.auto.enable".t(context),
                       ),

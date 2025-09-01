@@ -2,20 +2,16 @@ import "dart:async";
 
 import "package:flow/data/exchange_rates_set.dart";
 import "package:flow/entity/account.dart";
-import "package:flow/entity/transaction.dart";
 import "package:flow/logging.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/prefs/pending_transactions.dart";
-import "package:flow/prefs/theme.dart";
 import "package:flow/prefs/transitive.dart";
-import "package:flow/theme/color_themes/registry.dart";
 import "package:intl/intl.dart";
 import "package:local_settings/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 export "./pending_transactions.dart";
-export "./theme.dart";
 export "./transitive.dart";
 
 /// This class contains everything that's stored on
@@ -36,8 +32,6 @@ class LocalPreferences {
   /// Whether to enable haptic feedback upon certain actions
   late final BoolSettingsEntry enableHapticFeedback;
 
-  late final JsonListSettingsEntry<TransactionType> transactionButtonOrder;
-
   late final BoolSettingsEntry completedInitialSetup;
 
   late final DateTimeSettingsEntry lastRequestedAppStoreReview;
@@ -54,12 +48,12 @@ class LocalPreferences {
 
   /// This refers to biometric auth, passwords, pins from the operating system
   late final BoolSettingsEntry requireLocalAuth;
+  late final BoolSettingsEntry requireLocalAuthOnBlur;
 
   late final BoolSettingsEntry preferFullAmounts;
   late final BoolSettingsEntry useCurrencySymbol;
 
   late final PendingTransactionsLocalPreferences pendingTransactions;
-  late final ThemeLocalPreferences theme;
   late final TransitiveLocalPreferences transitive;
 
   /// Number of notifications issued by the app
@@ -83,15 +77,6 @@ class LocalPreferences {
       key: "enableHapticFeedback",
       preferences: _prefs,
       initialValue: true,
-    );
-    transactionButtonOrder = JsonListSettingsEntry<TransactionType>(
-      key: "transactionButtonOrder",
-      preferences: _prefs,
-      removeDuplicates: true,
-      initialValue: TransactionType.values,
-      fromJson:
-          (json) => TransactionType.fromJson(json) ?? TransactionType.expense,
-      toJson: (transactionType) => transactionType.toJson(),
     );
 
     completedInitialSetup = BoolSettingsEntry(
@@ -136,6 +121,11 @@ class LocalPreferences {
       preferences: _prefs,
       initialValue: false,
     );
+    requireLocalAuthOnBlur = BoolSettingsEntry(
+      key: "requireLocalAuthOnBlur",
+      preferences: _prefs,
+      initialValue: false,
+    );
 
     preferFullAmounts = BoolSettingsEntry(
       key: "preferFullAmounts",
@@ -163,10 +153,10 @@ class LocalPreferences {
     pendingTransactions = PendingTransactionsLocalPreferences.initialize(
       _prefs,
     );
-    theme = ThemeLocalPreferences.initialize(_prefs);
     transitive = TransitiveLocalPreferences.initialize(_prefs);
   }
 
+  @Deprecated("Use UserPreferencesService().primaryCurrency instead")
   String getPrimaryCurrency() {
     String? primaryCurrencyName = primaryCurrency.value;
 
@@ -174,12 +164,11 @@ class LocalPreferences {
       late final String? firstAccountCurency;
 
       try {
-        final Query<Account> firstAccountQuery =
-            ObjectBox()
-                .box<Account>()
-                .query()
-                .order(Account_.createdDate)
-                .build();
+        final Query<Account> firstAccountQuery = ObjectBox()
+            .box<Account>()
+            .query()
+            .order(Account_.createdDate)
+            .build();
 
         firstAccountCurency = firstAccountQuery.findFirst()?.currency;
 
@@ -205,13 +194,6 @@ class LocalPreferences {
     }
 
     return primaryCurrencyName;
-  }
-
-  String getCurrentTheme() {
-    final String? preferencesTheme = theme.themeName.get();
-    return validateThemeName(preferencesTheme)
-        ? preferencesTheme!
-        : flowLights.schemes.first.name;
   }
 
   factory LocalPreferences() {

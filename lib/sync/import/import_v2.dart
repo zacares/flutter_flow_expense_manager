@@ -1,11 +1,11 @@
 import "dart:async";
 import "dart:io";
 
-import "package:flow/data/currencies.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/backup_entry.dart";
 import "package:flow/entity/category.dart";
 import "package:flow/entity/profile.dart";
+import "package:flow/entity/recurring_transaction.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction_filter_preset.dart";
 import "package:flow/entity/user_preferences.dart";
@@ -13,6 +13,7 @@ import "package:flow/l10n/named_enum.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:flow/services/transactions.dart";
 import "package:flow/sync/exception.dart";
 import "package:flow/sync/import/base.dart";
@@ -89,44 +90,58 @@ class ImportV2 extends Importer {
     // 0. Erase current data
     progressNotifier.value = ImportV2Progress.erasing;
     await ObjectBox().eraseMainData();
+    _log.fine("Erased main data");
 
     // 1. Resurrect [Category]s
     progressNotifier.value = ImportV2Progress.writingCategories;
     await ObjectBox().box<Category>().putManyAsync(data.categories);
+    _log.fine("Imported ${data.categories.length} categories");
 
     // 2. Resurrect [Account]s
     progressNotifier.value = ImportV2Progress.writingAccounts;
     await ObjectBox().box<Account>().putManyAsync(data.accounts);
+    _log.fine("Imported ${data.accounts.length} accounts");
 
-    // 3. Resurrect [Transaction]s
+    // 3. Resurrect [RecurringTransaction]s
+    if (data.recurringTransactions?.isNotEmpty == true) {
+      progressNotifier.value = ImportV2Progress.writingRecurringTransactions;
+      await ObjectBox().box<RecurringTransaction>().putManyAsync(
+        data.recurringTransactions!,
+      );
+    }
+    _log.fine(
+      "Imported ${data.recurringTransactions?.length ?? 0} recurring transactions",
+    );
+
+    // 4. Resurrect [Transaction]s
     //
     // Resolve ToOne<T> [account] and [category] by `uuid`.
     progressNotifier.value = ImportV2Progress.resolvingTransactions;
-    final transformedTransactions =
-        data.transactions
-            .map((transaction) {
-              try {
-                transaction = _resolveAccountForTransaction(transaction);
-              } catch (e) {
-                if (e is ImportException) {
-                  _log.warning(e.toString());
-                }
-                return null;
-              }
+    final transformedTransactions = data.transactions
+        .map((transaction) {
+          try {
+            transaction = _resolveAccountForTransaction(transaction);
+          } catch (e) {
+            if (e is ImportException) {
+              _log.warning(e.toString());
+            }
+            return null;
+          }
 
-              try {
-                transaction = _resolveCategoryForTransaction(transaction);
-              } catch (e) {
-                if (e is ImportException) {
-                  _log.warning(e.toString());
-                }
-                // Still proceed without category
-              }
+          try {
+            transaction = _resolveCategoryForTransaction(transaction);
+          } catch (e) {
+            if (e is ImportException) {
+              _log.warning(e.toString());
+            }
+            // Still proceed without category
+          }
 
-              return transaction;
-            })
-            .nonNulls
-            .toList();
+          return transaction;
+        })
+        .nonNulls
+        .toList();
+    _log.fine("Resolved ${transformedTransactions.length} transactions");
 
     progressNotifier.value = ImportV2Progress.writingTransactions;
     await TransactionsService().upsertMany(transformedTransactions);
@@ -147,6 +162,7 @@ class ImportV2 extends Importer {
 
       progressNotifier.value = ImportV2Progress.writingProfile;
       await ObjectBox().box<Profile>().putAsync(data.profile!);
+      _log.fine("Imported profile");
     }
 
     if (data.userPreferences != null) {
@@ -158,13 +174,15 @@ class ImportV2 extends Importer {
 
       progressNotifier.value = ImportV2Progress.writingUserPreferences;
       await ObjectBox().box<UserPreferences>().putAsync(data.userPreferences!);
+      _log.fine("Imported user preferences");
     }
 
     if (data.primaryCurrency != null &&
-        isCurrencyCodeValid(data.primaryCurrency!)) {
+        CurrencyRegistryService().isCurrencyCodeValid(data.primaryCurrency!)) {
       progressNotifier.value = ImportV2Progress.settingPrimaryCurrency;
       try {
         await LocalPreferences().primaryCurrency.set(data.primaryCurrency!);
+        _log.fine("Imported primary currency");
       } catch (e) {
         _log.warning("Failed to set primary currency, ignoring", e);
       }
@@ -235,11 +253,10 @@ class ImportV2 extends Importer {
 
     // If the `id` is 0, we've already encountered it
     if (memoizeAccounts[accountUuid] != 0) {
-      final Query<Account> accountQuery =
-          ObjectBox()
-              .box<Account>()
-              .query(Account_.uuid.equals(accountUuid))
-              .build();
+      final Query<Account> accountQuery = ObjectBox()
+          .box<Account>()
+          .query(Account_.uuid.equals(accountUuid))
+          .build();
 
       memoizeAccounts[accountUuid] ??= accountQuery.findFirst()?.id ?? 0;
 
@@ -266,11 +283,10 @@ class ImportV2 extends Importer {
 
     // If the `id` is 0, we've already encountered it
     if (memoizeCategories[categoryUuid] != 0) {
-      final Query<Category> categoryQuery =
-          ObjectBox()
-              .box<Category>()
-              .query(Category_.uuid.equals(categoryUuid))
-              .build();
+      final Query<Category> categoryQuery = ObjectBox()
+          .box<Category>()
+          .query(Category_.uuid.equals(categoryUuid))
+          .build();
 
       memoizeCategories[categoryUuid] ??= categoryQuery.findFirst()?.id ?? 0;
 
@@ -296,6 +312,7 @@ enum ImportV2Progress implements LocalizedEnum {
   writingCategories,
   writingAccounts,
   resolvingTransactions,
+  writingRecurringTransactions,
   writingTransactions,
   writingTranscationFilterPresets,
   writingProfile,

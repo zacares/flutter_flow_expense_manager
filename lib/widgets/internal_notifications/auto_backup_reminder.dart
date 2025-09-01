@@ -1,4 +1,4 @@
-import "package:flow/data/internal_nofications/internal_notification.dart";
+import "package:flow/data/actionable_nofications/actionable_notification.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/utils/utils.dart";
@@ -19,43 +19,48 @@ class AutoBackupReminderNotification extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InternalNotificationListTile(
+    return ActionableNotificationListTile(
       onDismiss: onDismiss,
       icon: notification.icon,
       title: "tabs.home.reminders.autoBackup".t(context),
       subtitle: "tabs.home.reminders.autoBackup.subtitle".t(context),
-      action: TextButton.icon(
-        onPressed: () {
-          final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+      action: Builder(
+        builder: (context) {
+          return TextButton.icon(
+            onPressed: () {
+              if (notification.payload == null) {
+                context.showErrorToast(
+                  error: "error.sync.fileNotFound".t(context),
+                );
+                return;
+              }
 
-          if (notification.payload == null) {
-            context.showErrorToast(error: "error.sync.fileNotFound".t(context));
-            return;
-          }
+              TransitiveLocalPreferences().lastSavedAutoBackupPath
+                  .set(notification.payload!.filePath)
+                  .then((_) {})
+                  .catchError((e) {
+                    // Silent fail
+                  });
 
-          TransitiveLocalPreferences().lastSavedAutoBackupPath
-              .set(notification.payload!.filePath)
-              .then((_) {})
-              .catchError((e) {
-                // Silent fail
-              });
+              context.showFileShareSheet(
+                subject: "sync.export.save.shareTitle".t(context, {
+                  "type": notification.payload!.type,
+                  "date": notification.payload!.createdDate
+                      .toLocal()
+                      .toMoment()
+                      .lll,
+                }),
+                filePath: notification.payload!.filePath,
+              );
 
-          context.showShareSheet(
-            subject: "sync.export.save.shareTitle".t(context, {
-              "type": notification.payload!.type,
-              "date":
-                  notification.payload!.createdDate.toLocal().toMoment().lll,
-            }),
-            filePath: notification.payload!.filePath,
-            renderBox: renderBox,
+              if (onDismiss != null) {
+                onDismiss!();
+              }
+            },
+            label: Text("sync.export.save".t(context)),
+            icon: Icon(Symbols.download_rounded),
           );
-
-          if (onDismiss != null) {
-            onDismiss!();
-          }
         },
-        label: Text("sync.export.save".t(context)),
-        icon: Icon(Symbols.download_rounded),
       ),
     );
   }

@@ -102,21 +102,20 @@ class DebugThemePage extends StatelessWidget {
             WavyDivider(),
             Column(
               mainAxisSize: MainAxisSize.min,
-              children:
-                  _demoTransactions
-                      .map(
-                        (transaction) => TransactionListTile(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 4.0,
-                          ),
-                          transaction: transaction,
-                          moveToTrashFn: null,
-                          recoverFromTrashFn: null,
-                          combineTransfers: false,
-                        ),
-                      )
-                      .toList(),
+              children: _demoTransactions
+                  .map(
+                    (transaction) => TransactionListTile(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 4.0,
+                      ),
+                      transaction: transaction,
+                      moveToTrashFn: null,
+                      recoverFromTrashFn: null,
+                      combineTransfers: false,
+                    ),
+                  )
+                  .toList(),
             ),
             const SizedBox(height: 24.0),
             ListHeader("ListTiles"),
@@ -145,27 +144,20 @@ class DebugThemePage extends StatelessWidget {
               subtitle: Text("bla bla bla disclaimer yara yara"),
               onTap: () {},
             ),
-            CheckboxListTile /*.adaptive*/ (
+            CheckboxListTile(
               title: const Text("With Checkbox Selected"),
               value: true,
               onChanged: (_) => {},
             ),
-            CheckboxListTile /*.adaptive*/ (
+            CheckboxListTile(
               title: const Text("With Checkbox Unselected"),
               value: false,
               onChanged: (_) => {},
             ),
-            RadioListTile /*.adaptive*/ (
-              title: const Text("With Radio Selected"),
-              value: "a",
-              groupValue: "a",
-              onChanged: (_) {},
-            ),
-            RadioListTile /*.adaptive*/ (
+            RadioListTile(title: const Text("With Radio Selected"), value: "a"),
+            RadioListTile(
               title: const Text("With Radio Unselected"),
               value: "b",
-              groupValue: "a",
-              onChanged: (_) {},
             ),
             const SizedBox(height: 240.0),
           ],

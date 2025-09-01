@@ -27,10 +27,10 @@ class Trend extends StatelessWidget {
     final double hundredPercent = previous?.amount ?? 0;
     final double delta =
         (hundredPercent == 0 ||
-                hundredPercent.isNaN ||
-                hundredPercent.isInfinite)
-            ? 0
-            : ((current?.amount ?? 0) - hundredPercent) / hundredPercent.abs();
+            hundredPercent.isNaN ||
+            hundredPercent.isInfinite)
+        ? 0
+        : ((current?.amount ?? 0) - hundredPercent) / hundredPercent.abs();
 
     return Trend(
       key: key,
@@ -44,8 +44,9 @@ class Trend extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool downtrend = delta.isNegative;
 
-    final Color color =
-        downtrend ? context.flowColors.expense : context.flowColors.income;
+    final Color color = downtrend
+        ? context.flowColors.expense
+        : context.flowColors.income;
 
     final String deltaString = "${(delta.abs() * 100).toStringAsFixed(1)}%";
 

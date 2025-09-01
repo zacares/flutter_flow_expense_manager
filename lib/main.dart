@@ -31,9 +31,11 @@ import "package:flow/prefs/local_preferences.dart";
 import "package:flow/providers/accounts_provider.dart";
 import "package:flow/providers/categories.dart";
 import "package:flow/routes.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:flow/services/exchange_rates.dart";
 import "package:flow/services/local_auth.dart";
 import "package:flow/services/notifications.dart";
+import "package:flow/services/recurring_transactions.dart";
 import "package:flow/services/sync.dart";
 import "package:flow/services/transactions.dart";
 import "package:flow/services/user_preferences.dart";
@@ -65,6 +67,14 @@ void main() async {
   PrintAppender(formatter: ColorFormatter()).attachToLogger(Logger.root);
 
   initializeFileLogger();
+
+  FlutterError.onError = (FlutterErrorDetails details) {
+    mainLogger.severe(
+      "[Flutter Error] [${details.library ?? 'unknown'}]",
+      details.exception,
+      details.stack,
+    );
+  };
 
   if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
     startupLog.fine("Initializing window manager");
@@ -103,6 +113,8 @@ void main() async {
   startupLog.fine("Initializing exchange rates service");
   ExchangeRatesService().init();
 
+  CurrencyRegistryService();
+
   try {
     startupLog.fine("Initializing user preferences service");
     UserPreferencesService().initialize();
@@ -115,6 +127,26 @@ void main() async {
     SyncService();
   } catch (e, stackTrace) {
     startupLog.severe("Failed to initialize SyncService", e, stackTrace);
+  }
+
+  try {
+    startupLog.fine("Initializing RecurringTransactionsService");
+    RecurringTransactionsService();
+  } catch (e, stackTrace) {
+    startupLog.severe(
+      "Failed to initialize RecurringTransactionsService",
+      e,
+      stackTrace,
+    );
+  }
+
+  try {
+    Moment.minValue = DateTime(0);
+    Moment.maxValue = DateTime(4000);
+    Moment.minValueUtc = DateTime.utc(0);
+    Moment.maxValueUtc = DateTime.utc(4000);
+  } catch (e) {
+    // Silent fail
   }
 
   startupLog.fine("Finally telling Flutter to run the app widget");
@@ -132,7 +164,9 @@ class Flow extends StatefulWidget {
 }
 
 class FlowState extends State<Flow> {
-  Locale _locale = FlowLocalizations.supportedLanguages.first;
+  late final AppLifecycleListener _appLifeCycleListener;
+
+  Locale _locale = FlowLocalizations.supportedLocales.first;
   ThemeMode _themeMode = ThemeMode.system;
 
   ThemeFactory _themeFactory = ThemeFactory.fromThemeName(null);
@@ -141,10 +175,9 @@ class FlowState extends State<Flow> {
 
   late bool _tempLock;
 
-  bool get useDarkTheme =>
-      (_themeMode == ThemeMode.system
-          ? (PlatformDispatcher.instance.platformBrightness == Brightness.dark)
-          : (_themeMode == ThemeMode.dark));
+  bool get useDarkTheme => (_themeMode == ThemeMode.system
+      ? (PlatformDispatcher.instance.platformBrightness == Brightness.dark)
+      : (_themeMode == ThemeMode.dark));
 
   @override
   void initState() {
@@ -153,8 +186,9 @@ class FlowState extends State<Flow> {
     _reloadLocale();
     _reloadTheme();
 
+    UserPreferencesService().valueNotifier.addListener(_reloadTheme);
+
     LocalPreferences().localeOverride.addListener(_reloadLocale);
-    LocalPreferences().theme.themeName.addListener(_reloadTheme);
     LocalPreferences().primaryCurrency.addListener(_refreshExchangeRates);
 
     _tempLock = LocalPreferences().requireLocalAuth.get();
@@ -167,18 +201,41 @@ class FlowState extends State<Flow> {
 
     SchedulerBinding.instance.addPostFrameCallback((_) {
       migrateRemoveTitleFromUntitledTransactions();
+      migrateExtraKeyIndexing();
+      migratePrimaryCurrencyToDb();
+      migrateThemePrefsToDb();
     });
 
     _tryUnlockTempLock();
+
+    _appLifeCycleListener = AppLifecycleListener(
+      onInactive: () {
+        _tryTempLock();
+      },
+      onHide: () {
+        _tryTempLock();
+      },
+      onShow: () {
+        if (!mounted) return;
+        _tryUnlockTempLock();
+        if (LocalAuthService.platformSupported &&
+            LocalPreferences().requireLocalAuthOnBlur.get()) {
+          _tempLock = true;
+          setState(() {});
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
     LocalPreferences().localeOverride.removeListener(_reloadLocale);
-    LocalPreferences().theme.themeName.removeListener(_reloadTheme);
+    UserPreferencesService().valueNotifier.removeListener(_reloadTheme);
     LocalPreferences().primaryCurrency.removeListener(_refreshExchangeRates);
 
     TransactionsService().removeListener(_synchronizePlannedNotifications);
+
+    _appLifeCycleListener.dispose();
 
     super.dispose();
   }
@@ -194,7 +251,7 @@ class FlowState extends State<Flow> {
         GlobalWidgetsLocalizations.delegate,
         FlowLocalizations.delegate,
       ],
-      supportedLocales: FlowLocalizations.supportedLanguages,
+      supportedLocales: FlowLocalizations.supportedLocales,
       locale: _locale,
       routerConfig: router,
       theme: _themeFactory.materialTheme,
@@ -204,10 +261,9 @@ class FlowState extends State<Flow> {
         return AccountsProviderScope(
           child: CategoriesProviderScope(
             child: GestureDetector(
-              behavior:
-                  _tempLock
-                      ? HitTestBehavior.opaque
-                      : HitTestBehavior.deferToChild,
+              behavior: _tempLock
+                  ? HitTestBehavior.opaque
+                  : HitTestBehavior.deferToChild,
               onTap: _tryUnlockTempLock,
               child: IgnorePointer(
                 ignoring: _tempLock,
@@ -239,32 +295,36 @@ class FlowState extends State<Flow> {
   }
 
   void _reloadTheme() {
-    final String? themeName = LocalPreferences().theme.themeName.value;
+    final String? themeName = UserPreferencesService().value.themeName;
 
-    themeLogger.info("Reloading $themeName");
+    if (validateThemeName(themeName)) {
+      themeLogger.info("Reloading $themeName");
 
-    FlowColorScheme theme = getTheme(themeName, preferDark: useDarkTheme);
+      FlowColorScheme theme = getTheme(themeName, preferDark: useDarkTheme);
 
-    setState(() {
-      _themeMode = theme.mode;
-      _themeFactory = ThemeFactory(theme);
-    });
+      setState(() {
+        _themeMode = theme.mode;
+        _themeFactory = ThemeFactory(theme);
+      });
+    } else {
+      themeLogger.warning(
+        "Invalid theme name: $themeName, falling back to null",
+      );
+    }
   }
 
   void _reloadLocale() {
     final List<Locale> systemLocales =
         WidgetsBinding.instance.platformDispatcher.locales;
 
-    final List<Locale> favorableLocales =
-        systemLocales
-            .where(
-              (locale) => FlowLocalizations.supportedLanguages.any(
-                (flowSupportedLocalization) =>
-                    flowSupportedLocalization.languageCode ==
-                    locale.languageCode,
-              ),
-            )
-            .toList();
+    final List<Locale> favorableLocales = systemLocales
+        .where(
+          (locale) => FlowLocalizations.supportedLocales.any(
+            (flowSupportedLocalization) =>
+                flowSupportedLocalization.languageCode == locale.languageCode,
+          ),
+        )
+        .toList();
 
     final Locale overriddenLocale =
         LocalPreferences().localeOverride.value ??
@@ -298,7 +358,7 @@ class FlowState extends State<Flow> {
 
   void _refreshExchangeRates() {
     ExchangeRatesService().tryFetchRates(
-      LocalPreferences().getPrimaryCurrency(),
+      UserPreferencesService().primaryCurrency,
     );
   }
 
@@ -308,7 +368,18 @@ class FlowState extends State<Flow> {
     });
   }
 
+  void _tryTempLock() {
+    if (!LocalAuthService.platformSupported) return;
+    if (!LocalPreferences().requireLocalAuthOnBlur.get()) return;
+
+    setState(() {
+      _tempLock = true;
+    });
+  }
+
   void _tryUnlockTempLock() async {
+    if (!_tempLock) return;
+
     try {
       await LocalAuthService.initialize();
       if (!LocalAuthService.available || !LocalAuthService.platformSupported) {
@@ -342,6 +413,7 @@ void initializeFileLogger() async {
           logsDir,
           flowDebugMode ? "flow_debug.log" : "flow.log",
         ),
+        rotateAtSizeBytes: 2 * 1024 * 1024,
         keepRotateCount: 5,
       )..attachToLogger(Logger.root);
     } catch (e) {

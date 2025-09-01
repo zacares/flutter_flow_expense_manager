@@ -10,12 +10,14 @@ import "package:flow/routes/preferences/sections/lock_app.dart";
 import "package:flow/routes/preferences/sections/privacy.dart";
 import "package:flow/services/local_auth.dart";
 import "package:flow/services/notifications.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/color_themes/registry.dart";
 import "package:flow/theme/flow_color_scheme.dart";
 import "package:flow/theme/names.dart";
-import "package:flow/widgets/general/frame.dart";
+import "package:flow/widgets/general/directional_chevron.dart";
 import "package:flow/widgets/general/list_header.dart";
-import "package:flow/widgets/select_currency_sheet.dart";
+import "package:flow/widgets/general/rtl_flipper.dart";
+import "package:flow/widgets/sheets/select_currency_sheet.dart";
 import "package:flutter/material.dart" hide Flow;
 import "package:go_router/go_router.dart";
 import "package:logging/logging.dart";
@@ -60,14 +62,20 @@ class PreferencesPageState extends State<PreferencesPage> {
   @override
   Widget build(BuildContext context) {
     final FlowColorScheme currentTheme = getTheme(
-      LocalPreferences().theme.themeName.get(),
+      UserPreferencesService().themeName,
     );
 
     final bool enableGeo = LocalPreferences().enableGeo.get();
-    final bool autoAttachTransactionGeo =
-        LocalPreferences().autoAttachTransactionGeo.get();
-    final bool pendingTransactionsRequireConfrimation =
-        LocalPreferences().pendingTransactions.requireConfrimation.get();
+    final bool autoAttachTransactionGeo = LocalPreferences()
+        .autoAttachTransactionGeo
+        .get();
+    final bool pendingTransactionsRequireConfrimation = LocalPreferences()
+        .pendingTransactions
+        .requireConfrimation
+        .get();
+
+    final String currentPrimaryCurrency =
+        UserPreferencesService().primaryCurrency;
 
     return Scaffold(
       appBar: AppBar(title: Text("preferences".t(context))),
@@ -75,32 +83,34 @@ class PreferencesPageState extends State<PreferencesPage> {
         child: ListView(
           children: [
             ListTile(
-              title: Text("preferences.sync.autoBackup".t(context)),
+              title: Text("preferences.sync".t(context)),
               leading: const Icon(Symbols.sync_rounded),
-              onTap: () => _pushAndRefreshAfter("/preferences/autoBackup"),
-              trailing: const Icon(Symbols.chevron_right_rounded),
+              onTap: () => _pushAndRefreshAfter("/preferences/sync"),
+              trailing: DirectionalChevron(),
             ),
             if (flowDebugMode || NotificationsService.schedulingSupported)
               ListTile(
                 title: Text("preferences.reminders".t(context)),
                 leading: const Icon(Symbols.notifications_rounded),
                 onTap: () => _pushAndRefreshAfter("/preferences/reminders"),
-                trailing: const Icon(Symbols.chevron_right_rounded),
+                trailing: RTLFlipper(
+                  child: const Icon(Symbols.chevron_right_rounded),
+                ),
               ),
             ListTile(
               title: Text("preferences.language".t(context)),
               leading: const Icon(Symbols.language_rounded),
               onTap: () => _updateLanguage(),
               subtitle: Text(FlowLocalizations.of(context).locale.endonym),
-              trailing: const Icon(Symbols.chevron_right_rounded),
+              trailing: DirectionalChevron(),
             ),
             ListTile(
               title: Text("preferences.primaryCurrency".t(context)),
 
               leading: const Icon(Symbols.universal_currency_alt_rounded),
               onTap: () => _updatePrimaryCurrency(),
-              subtitle: Text(LocalPreferences().getPrimaryCurrency()),
-              trailing: const Icon(Symbols.chevron_right_rounded),
+              subtitle: Text(currentPrimaryCurrency),
+              trailing: DirectionalChevron(),
             ),
             ListTile(
               title: Text("preferences.transfer".t(context)),
@@ -111,19 +121,19 @@ class PreferencesPageState extends State<PreferencesPage> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              trailing: const Icon(Symbols.chevron_right_rounded),
+              trailing: DirectionalChevron(),
             ),
             ListTile(
               title: Text("preferences.trashBin".t(context)),
               leading: const Icon(Symbols.delete_rounded),
               onTap: () => _pushAndRefreshAfter("/preferences/trashBin"),
-              trailing: const Icon(Symbols.chevron_right_rounded),
+              trailing: DirectionalChevron(),
             ),
             ListTile(
               title: Text("preferences.moneyFormatting".t(context)),
               leading: const Icon(Symbols.numbers_rounded),
               onTap: () => _pushAndRefreshAfter("/preferences/moneyFormatting"),
-              trailing: const Icon(Symbols.chevron_right_rounded),
+              trailing: DirectionalChevron(),
             ),
             const SizedBox(height: 24.0),
             ListHeader("preferences.transactions".t(context)),
@@ -135,11 +145,10 @@ class PreferencesPageState extends State<PreferencesPage> {
                     ? "general.enabled".t(context)
                     : "general.disabled".t(context),
               ),
-              leading: const Icon(Symbols.schedule_rounded),
-              onTap:
-                  () =>
-                      _pushAndRefreshAfter("/preferences/pendingTransactions"),
-              trailing: const Icon(Symbols.chevron_right_rounded),
+              leading: const Icon(Symbols.search_activity_rounded),
+              onTap: () =>
+                  _pushAndRefreshAfter("/preferences/pendingTransactions"),
+              trailing: DirectionalChevron(),
             ),
             ListTile(
               title: Text("preferences.transactions.geo".t(context)),
@@ -148,37 +157,37 @@ class PreferencesPageState extends State<PreferencesPage> {
               subtitle: Text(
                 enableGeo
                     ? (autoAttachTransactionGeo
-                        ? "preferences.transactions.geo.auto.enabled".t(context)
-                        : "general.enabled".t(context))
+                          ? "preferences.transactions.geo.auto.enabled".t(
+                              context,
+                            )
+                          : "general.enabled".t(context))
                     : "general.disabled".t(context),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              trailing: const Icon(Symbols.chevron_right_rounded),
+              trailing: DirectionalChevron(),
             ),
             ListTile(
               leading: const Icon(Symbols.list_rounded),
               title: Text("preferences.transactions.listTile".t(context)),
-              onTap:
-                  () => _pushAndRefreshAfter(
-                    "/preferences/transactionListItemAppearance",
-                  ),
-              trailing: const Icon(Symbols.chevron_right_rounded),
+              onTap: () => _pushAndRefreshAfter(
+                "/preferences/transactionListItemAppearance",
+              ),
+              trailing: DirectionalChevron(),
             ),
             const SizedBox(height: 24.0),
             ListHeader("preferences.appearance".t(context)),
             const SizedBox(height: 8.0),
             ListTile(
               title: Text("preferences.theme".t(context)),
-              leading:
-                  currentTheme.isDark
-                      ? const Icon(Symbols.dark_mode_rounded)
-                      : const Icon(Symbols.light_mode_rounded),
+              leading: currentTheme.isDark
+                  ? const Icon(Symbols.dark_mode_rounded)
+                  : const Icon(Symbols.light_mode_rounded),
               subtitle: Text(
                 themeNames[currentTheme.name] ?? currentTheme.name,
               ),
               onTap: _openTheme,
-              trailing: const Icon(Symbols.chevron_right_rounded),
+              trailing: DirectionalChevron(),
             ),
             ListTile(
               title: Text("preferences.numpad".t(context)),
@@ -189,21 +198,19 @@ class PreferencesPageState extends State<PreferencesPage> {
                     ? "preferences.numpad.layout.modern".t(context)
                     : "preferences.numpad.layout.classic".t(context),
               ),
-              trailing: const Icon(Symbols.chevron_right_rounded),
+              trailing: DirectionalChevron(),
             ),
             ListTile(
               title: Text("preferences.transactionButtonOrder".t(context)),
               leading: const Icon(Symbols.action_key_rounded),
-              onTap:
-                  () => _pushAndRefreshAfter(
-                    "/preferences/transactionButtonOrder",
-                  ),
+              onTap: () =>
+                  _pushAndRefreshAfter("/preferences/transactionButtonOrder"),
               subtitle: Text(
                 "preferences.transactionButtonOrder.description".t(context),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              trailing: const Icon(Symbols.chevron_right_rounded),
+              trailing: DirectionalChevron(),
             ),
             const SizedBox(height: 24.0),
             ListHeader("preferences.privacy".t(context)),
@@ -214,15 +221,14 @@ class PreferencesPageState extends State<PreferencesPage> {
             ListHeader("preferences.hapticFeedback".t(context)),
             const SizedBox(height: 8.0),
             const Haptics(),
-            const SizedBox(height: 16.0),
-            Frame(
-              child: Align(
-                alignment: Alignment.topRight,
-                child: TextButton(
-                  onPressed: () => context.push("/_debug/logs"),
-                  child: Text("View debug logs"),
-                ),
-              ),
+            const SizedBox(height: 24.0),
+            ListHeader("preferences.feedback".t(context)),
+            const SizedBox(height: 8.0),
+            ListTile(
+              title: Text("preferences.feedback.debugLogs".t(context)),
+              leading: const Icon(Symbols.bug_report_rounded),
+              onTap: () => context.push("/_debug/logs"),
+              trailing: DirectionalChevron(),
             ),
             const SizedBox(height: 16.0),
           ],
@@ -260,7 +266,7 @@ class PreferencesPageState extends State<PreferencesPage> {
     try {
       Locale current =
           LocalPreferences().localeOverride.get() ??
-          FlowLocalizations.supportedLanguages.first;
+          FlowLocalizations.supportedLocales.first;
 
       final selected = await showModalBottomSheet<Locale>(
         context: context,
@@ -284,15 +290,16 @@ class PreferencesPageState extends State<PreferencesPage> {
     });
 
     try {
-      String current = LocalPreferences().getPrimaryCurrency();
+      final String current = UserPreferencesService().primaryCurrency;
 
       final selected = await showModalBottomSheet<String>(
         context: context,
         builder: (context) => SelectCurrencySheet(currentlySelected: current),
+        isScrollControlled: true,
       );
 
       if (selected != null) {
-        await LocalPreferences().primaryCurrency.set(selected);
+        UserPreferencesService().primaryCurrency = selected;
       }
     } finally {
       _currencyBusy = false;
@@ -314,11 +321,11 @@ class PreferencesPageState extends State<PreferencesPage> {
     await context.push("/preferences/theme");
 
     final bool themeChangesAppIcon =
-        LocalPreferences().theme.themeChangesAppIcon.get();
+        UserPreferencesService().themeChangesAppIcon;
 
     trySetAppIcon(
       themeChangesAppIcon
-          ? allThemes[LocalPreferences().theme.themeName.get()]?.iconName
+          ? allThemes[UserPreferencesService().themeName]?.iconName
           : null,
     );
 

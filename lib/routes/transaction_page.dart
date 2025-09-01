@@ -5,25 +5,33 @@ import "package:flow/data/exchange_rates.dart";
 import "package:flow/data/money.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/category.dart";
+import "package:flow/entity/recurring_transaction.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction/extensions/base.dart";
 import "package:flow/entity/transaction/extensions/default/geo.dart";
+import "package:flow/entity/transaction/extensions/default/recurring.dart";
+import "package:flow/entity/transaction/wrapper.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/l10n/named_enum.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/prefs/local_preferences.dart";
-import "package:flow/routes/new_transaction/description_section.dart";
-import "package:flow/routes/new_transaction/input_amount_sheet.dart";
-import "package:flow/routes/new_transaction/section.dart";
-import "package:flow/routes/new_transaction/select_account_sheet.dart";
-import "package:flow/routes/new_transaction/select_category_sheet.dart";
-import "package:flow/routes/new_transaction/title_input.dart";
+import "package:flow/routes/transaction_page/description_section.dart";
+import "package:flow/routes/transaction_page/input_amount_sheet.dart";
+import "package:flow/routes/transaction_page/section.dart";
+import "package:flow/routes/transaction_page/select_account_sheet.dart";
+import "package:flow/routes/transaction_page/select_category_sheet.dart";
+import "package:flow/routes/transaction_page/select_recurrence.dart";
+import "package:flow/routes/transaction_page/select_recurring_update_mode_sheet.dart";
+import "package:flow/routes/transaction_page/title_input.dart";
 import "package:flow/services/exchange_rates.dart";
+import "package:flow/services/recurring_transactions.dart";
 import "package:flow/services/transactions.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/general/button.dart";
+import "package:flow/widgets/general/directional_chevron.dart";
 import "package:flow/widgets/general/flow_icon.dart";
 import "package:flow/widgets/general/form_close_button.dart";
 import "package:flow/widgets/general/info_text.dart";
@@ -41,6 +49,8 @@ import "package:latlong2/latlong.dart";
 import "package:logging/logging.dart";
 import "package:material_symbols_icons/symbols.dart";
 import "package:moment_dart/moment_dart.dart";
+import "package:recurrence/recurrence.dart";
+import "package:uuid/uuid.dart";
 
 final Logger _log = Logger("TransactionPage");
 
@@ -98,7 +108,18 @@ class _TransactionPageState extends State<TransactionPage> {
 
   List<RelevanceScoredTitle>? autofillHints;
 
-  late DateTime _transactionDate;
+  RecurringTransaction? _recurringTransaction;
+
+  Recurrence? _recurrence;
+
+  DateTime? _transactionDate;
+
+  DateTime get transactionDate => _transactionDate ?? DateTime.now();
+
+  DateTime? _initialTransactionDate;
+
+  bool get pastDuePending =>
+      !widget.isNewTransaction && _isPending && transactionDate.isPast;
 
   late final bool enableGeo;
 
@@ -110,6 +131,8 @@ class _TransactionPageState extends State<TransactionPage> {
       _selectedAccountTransferTo != null &&
       _selectedAccount!.currency != _selectedAccountTransferTo!.currency;
 
+  bool _isPending = false;
+
   @override
   void initState() {
     super.initState();
@@ -118,12 +141,11 @@ class _TransactionPageState extends State<TransactionPage> {
     categories = ObjectBox().getCategories();
 
     /// Transaction we're editing.
-    _currentlyEditing =
-        widget.isNewTransaction
-            ? null
-            : TransactionsService()
-                .getOneSync(widget.transactionId)
-                ?.findTransferOriginalOrThis();
+    _currentlyEditing = widget.isNewTransaction
+        ? null
+        : TransactionsService()
+              .getOneSync(widget.transactionId)
+              ?.findTransferOriginalOrThis();
 
     if (!widget.isNewTransaction && _currentlyEditing == null) {
       error = "Transaction with id ${widget.transactionId} was not found";
@@ -137,24 +159,32 @@ class _TransactionPageState extends State<TransactionPage> {
       _selectedAccount = _currentlyEditing?.account.target;
       _selectedCategory = _currentlyEditing?.category.target;
       _transactionDate = _currentlyEditing?.transactionDate ?? DateTime.now();
+      _initialTransactionDate = _currentlyEditing?.transactionDate;
       _transactionType =
           _currentlyEditing?.type ??
           widget.initialTransactionType ??
           TransactionType.expense;
-      _amount =
-          _currentlyEditing?.isTransfer == true
-              ? _currentlyEditing!.amount.abs()
-              : _currentlyEditing?.amount ??
-                  (_transactionType == TransactionType.expense ? -0 : 0);
+      _amount = _currentlyEditing?.isTransfer == true
+          ? _currentlyEditing!.amount.abs()
+          : _currentlyEditing?.amount ??
+                (_transactionType == TransactionType.expense ? -0 : 0);
       _selectedAccountTransferTo = accounts.firstWhereOrNull(
         (account) =>
             account.uuid ==
             _currentlyEditing?.extensions.transfer?.toAccountUuid,
       );
       _geo = _currentlyEditing?.extensions.geo;
+      _isPending = _currentlyEditing?.isPending ?? _isPending;
       if (_currentlyEditing?.isTransfer == true) {
         _conversionRate =
             _currentlyEditing!.extensions.transfer?.conversionRate ?? 1.0;
+      }
+
+      if (_currentlyEditing != null && _currentlyEditing.isRecurring) {
+        _recurringTransaction = RecurringTransactionsService().findOneSync(
+          _currentlyEditing.extensions.recurring?.uuid,
+        );
+        _recurrence = _recurringTransaction?.recurrence;
       }
     }
 
@@ -188,314 +218,365 @@ class _TransactionPageState extends State<TransactionPage> {
 
   @override
   Widget build(BuildContext context) {
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
-    final bool showPostTransactionBalance =
-        _selectedAccount != null && !isTransfer && !widget.isNewTransaction;
+    final TimeRange? startBounds = getStartBounds();
 
-    return CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.escape): () => pop(),
-        osSingleActivator(LogicalKeyboardKey.enter): () => save(),
-        osSingleActivator(LogicalKeyboardKey.numpadEnter): () => save(),
-      },
-      child: Focus(
-        autofocus: true,
-        child: Scaffold(
-          appBar: AppBar(
-            leadingWidth: 40.0,
-            leading: FormCloseButton(canPop: () => !hasChanged()),
-            actions: [
-              IconButton(
-                onPressed: () => save(),
-                icon: const Icon(Symbols.check_rounded),
-                tooltip: "general.save".t(context),
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.escape): () => pop(),
+          osSingleActivator(LogicalKeyboardKey.enter): () => save(),
+          osSingleActivator(LogicalKeyboardKey.numpadEnter): () => save(),
+        },
+        child: Focus(
+          autofocus: true,
+          child: Scaffold(
+            appBar: AppBar(
+              leadingWidth: 40.0,
+              leading: FormCloseButton(canPop: () => !hasChanged()),
+              actions: [
+                IconButton(
+                  onPressed: () => save(),
+                  icon: const Icon(Symbols.check_rounded),
+                  tooltip: "general.save".t(context),
+                ),
+              ],
+              title: TypeSelector(
+                current: _transactionType,
+                onChange: updateTransactionType,
+                canEdit:
+                    _currentlyEditing == null ||
+                    _currentlyEditing.isTransfer == false,
               ),
-            ],
-            title: TypeSelector(
-              current: _transactionType,
-              onChange: updateTransactionType,
-              canEdit:
-                  _currentlyEditing == null ||
-                  _currentlyEditing.isTransfer == false,
+              titleTextStyle: context.textTheme.bodyLarge,
+              centerTitle: true,
+              backgroundColor: context.colorScheme.surface,
             ),
-            titleTextStyle: context.textTheme.bodyLarge,
-            centerTitle: true,
-            backgroundColor: context.colorScheme.surface,
-          ),
-          body: SafeArea(
-            child: SingleChildScrollView(
-              child: Form(
-                canPop: !hasChanged(),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 24.0),
-                    TitleInput(
-                      focusNode: _titleFocusNode,
-                      controller: _titleController,
-                      transactionType: _transactionType,
-                      selectedAccountId: _selectedAccount?.id,
-                      selectedCategoryId: _selectedCategory?.id,
-                      fallbackTitle: fallbackTitle,
-                      onSubmitted: (_) => save(),
-                    ),
-                    const SizedBox(height: 24.0),
-                    Center(
-                      child: InkWell(
-                        onTap: inputAmount,
-                        child: Center(
-                          child: Text(
-                            Money(
-                              _amount,
-                              _selectedAccount?.currency ?? primaryCurrency,
-                            ).formatMoney(),
-                            style: context.textTheme.displayMedium,
+            body: SafeArea(
+              child: SingleChildScrollView(
+                child: Form(
+                  canPop: !hasChanged(),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 24.0),
+                      TitleInput(
+                        key: ValueKey(_amount),
+                        focusNode: _titleFocusNode,
+                        controller: _titleController,
+                        transactionType: _transactionType,
+                        selectedAccountId: _selectedAccount?.id,
+                        selectedCategoryId: _selectedCategory?.id,
+                        amount: _amount,
+                        currency: _selectedAccount?.currency,
+                        transactionDate: _transactionDate,
+                        fallbackTitle: fallbackTitle,
+                        onSubmitted: (_) => save(),
+                      ),
+                      const SizedBox(height: 24.0),
+                      Center(
+                        child: InkWell(
+                          onTap: inputAmount,
+                          child: Center(
+                            child: Text(
+                              Money(
+                                _amount,
+                                _selectedAccount?.currency ?? primaryCurrency,
+                              ).formatMoney(),
+                              style: context.textTheme.displayMedium,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 24.0),
-                    // From account
-                    Section(
-                      title:
-                          isTransfer
-                              ? "transaction.transfer.from".t(context)
-                              : "account".t(context),
-                      child: Column(
-                        children: [
-                          ListTile(
-                            leading:
-                                _selectedAccount == null
-                                    ? null
-                                    : FlowIcon(
+                      const SizedBox(height: 24.0),
+                      // From account
+                      Section(
+                        title: isTransfer
+                            ? "transaction.transfer.from".t(context)
+                            : "account".t(context),
+                        child: Column(
+                          children: [
+                            ListTile(
+                              leading: _selectedAccount == null
+                                  ? null
+                                  : FlowIcon(
                                       _selectedAccount!.icon,
                                       plated: true,
                                     ),
-                            title: Text(
-                              _selectedAccount?.name ??
-                                  "transaction.edit.selectAccount".t(context),
-                            ),
-                            subtitle:
-                                showPostTransactionBalance
-                                    ? MoneyText(
+                              title: Text(
+                                _selectedAccount?.name ??
+                                    "transaction.edit.selectAccount".t(context),
+                              ),
+                              subtitle:
+                                  (!widget.isNewTransaction &&
+                                      _selectedAccount != null)
+                                  ? MoneyText(
                                       _selectedAccount!.balanceAt(
-                                        _transactionDate,
+                                        transactionDate,
                                       ),
                                     )
-                                    : null,
-                            onTap: () => selectAccount(),
-                            trailing:
-                                _selectedAccount == null
-                                    ? const Icon(Symbols.chevron_right)
-                                    : null,
-                            focusNode: _selectAccountFocusNode,
-                          ),
-                        ],
+                                  : null,
+                              onTap: () => selectAccount(),
+                              trailing: _selectedAccount == null
+                                  ? const Icon(Symbols.chevron_right)
+                                  : null,
+                              focusNode: _selectAccountFocusNode,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 24.0),
-                    // To account
-                    if (isTransfer) ...[
-                      Section(
-                        title: "transaction.transfer.to".t(context),
-                        child: ListTile(
-                          leading:
-                              _selectedAccountTransferTo == null
-                                  ? null
-                                  : FlowIcon(
+                      const SizedBox(height: 24.0),
+                      // To account
+                      if (isTransfer) ...[
+                        Section(
+                          title: "transaction.transfer.to".t(context),
+                          child: ListTile(
+                            leading: _selectedAccountTransferTo == null
+                                ? null
+                                : FlowIcon(
                                     _selectedAccountTransferTo!.icon,
                                     plated: true,
                                   ),
-                          title: Text(
-                            _selectedAccountTransferTo?.name ??
-                                "transaction.edit.selectAccount".t(context),
-                          ),
-                          onTap: () => selectAccountTransferTo(),
-                          trailing:
-                              _selectedAccountTransferTo == null
-                                  ? const Icon(Symbols.chevron_right)
-                                  : null,
-                          focusNode: _selectAccountTransferToFocusNode,
-                        ),
-                      ),
-                      if (crossCurrencyTransfer) ...[
-                        const SizedBox(height: 24.0),
-                        Section(
-                          title: "transaction.transfer.conversionRate".t(
-                            context,
-                          ),
-                          child: ListTile(
                             title: Text(
-                              "${Money(1.0, _selectedAccount!.currency).formatMoney()} = ${Money(_conversionRate, _selectedAccountTransferTo!.currency).formatMoney()}",
+                              _selectedAccountTransferTo?.name ??
+                                  "transaction.edit.selectAccount".t(context),
                             ),
-                            onTap: () => inputPostConversionAmount(),
-                            trailing:
-                                _selectedAccountTransferTo == null
-                                    ? const Icon(Symbols.chevron_right)
-                                    : null,
+                            subtitle:
+                                (!widget.isNewTransaction &&
+                                    _selectedAccountTransferTo != null)
+                                ? MoneyText(
+                                    _selectedAccountTransferTo!.balanceAt(
+                                      transactionDate,
+                                    ),
+                                  )
+                                : null,
+                            onTap: () => selectAccountTransferTo(),
+                            trailing: _selectedAccountTransferTo == null
+                                ? const Icon(Symbols.chevron_right)
+                                : null,
                             focusNode: _selectAccountTransferToFocusNode,
                           ),
                         ),
+                        if (crossCurrencyTransfer) ...[
+                          const SizedBox(height: 24.0),
+                          Section(
+                            title: "transaction.transfer.conversionRate".t(
+                              context,
+                            ),
+                            child: ListTile(
+                              title: Text(
+                                "${Money(1.0, _selectedAccount!.currency).formatMoney()} = ${Money(_conversionRate, _selectedAccountTransferTo!.currency).formatMoney()}",
+                              ),
+                              onTap: () => inputPostConversionAmount(),
+                              trailing: _selectedAccountTransferTo == null
+                                  ? DirectionalChevron()
+                                  : null,
+                              focusNode: _selectAccountTransferToFocusNode,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
-                    // Category
-                    if (!isTransfer)
-                      Section(
-                        title: "category".t(context),
-                        child: ListTile(
-                          leading:
-                              _selectedCategory == null
-                                  ? null
-                                  : FlowIcon(
+                      // Category
+                      if (!isTransfer)
+                        Section(
+                          title: "category".t(context),
+                          child: ListTile(
+                            leading: _selectedCategory == null
+                                ? null
+                                : FlowIcon(
                                     _selectedCategory!.icon,
                                     plated: true,
                                   ),
-                          title: Text(
-                            _selectedCategory?.name ??
-                                "transaction.edit.selectCategory".t(context),
-                          ),
-                          // subtitle: _selectedAccount == null
-                          //     ? null
-                          //     : Text(_selectedAccount!.balance.money),
-                          onTap: () => selectCategory(),
-                          trailing:
-                              _selectedCategory == null
-                                  ? const Icon(Symbols.chevron_right)
-                                  : null,
-                        ),
-                      ),
-                    const SizedBox(height: 24.0),
-                    DescriptionSection(
-                      controller: _descriptionController,
-                      focusNode: _descriptionFocusNode,
-                      onChanged: (_) => setState(() => {}),
-                    ),
-                    const SizedBox(height: 24.0),
-                    Section(
-                      title: "transaction.date".t(context),
-                      child: ListTile(
-                        title: Text(_transactionDate.toMoment().LLL),
-                        onTap: () => selectTransactionDate(),
-                        trailing:
-                            _selectedCategory == null
+                            title: Text(
+                              _selectedCategory?.name ??
+                                  "transaction.edit.selectCategory".t(context),
+                            ),
+                            onTap: () => selectCategory(),
+                            trailing: _selectedCategory == null
                                 ? const Icon(Symbols.chevron_right)
                                 : null,
+                          ),
+                        ),
+                      const SizedBox(height: 24.0),
+                      DescriptionSection(
+                        controller: _descriptionController,
+                        focusNode: _descriptionFocusNode,
+                        onChanged: (_) => setState(() => {}),
                       ),
-                    ),
-                    if (_geo != null || enableGeo) ...[
+                      if (_recurrence == null || !widget.isNewTransaction) ...[
+                        const SizedBox(height: 24.0),
+                        Section(
+                          title: "transaction.date".t(context),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                title: Text(transactionDate.toMoment().LLL),
+                                onTap: () => selectTransactionDate(),
+                                leading: Icon(Symbols.calendar_month_rounded),
+                                trailing: const DirectionalChevron(),
+                              ),
+                              SwitchListTile(
+                                title: Text("transaction.pending".t(context)),
+                                secondary: Icon(
+                                  Symbols.search_activity_rounded,
+                                ),
+                                value: _isPending,
+                                onChanged: pastDuePending
+                                    ? null
+                                    : updatePending,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 24.0),
                       Section(
-                        title: "transaction.location".t(context),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child:
-                                _geo == null
-                                    ? Container(
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                          image: AssetImage(
-                                            "assets/images/map_square.png",
-                                          ),
+                        title: "transaction.recurring".t(context),
+                        child: AnimatedSize(
+                          duration: const Duration(milliseconds: 300),
+                          child: _recurrence != null
+                              ? SelectRecurrence(
+                                  initialValue: _recurrence,
+                                  onChanged: updateRecurrence,
+                                  startBounds: startBounds,
+                                )
+                              : ListTile(
+                                  leading: Icon(Symbols.repeat_rounded),
+                                  title: Text(
+                                    "transaction.recurring.setup".t(context),
+                                  ),
+                                  onTap: _setupRecurring,
+                                  trailing: const DirectionalChevron(),
+                                ),
+                        ),
+                      ),
+
+                      if (_geo != null || enableGeo) ...[
+                        const SizedBox(height: 24.0),
+                        Section(
+                          title: "transaction.location".t(context),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: _geo == null
+                                ? Container(
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                          "assets/images/map_square.png",
                                         ),
                                       ),
-                                      child: AspectRatio(
-                                        aspectRatio: 1.0,
-                                        child: Center(
-                                          child: Button(
-                                            onTap: selectLocation,
-                                            trailing: const Icon(
-                                              Symbols.pin_drop_rounded,
-                                            ),
-                                            child: Text(
-                                              "transaction.location.add".t(
-                                                context,
-                                              ),
-                                            ),
+                                      shape: BoxShape.rectangle,
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    child: AspectRatio(
+                                      aspectRatio: 1.0,
+                                      child: Center(
+                                        child: Button(
+                                          onTap: selectLocation,
+                                          trailing: const Icon(
+                                            Symbols.pin_drop_rounded,
                                           ),
-                                        ),
-                                      ),
-                                    )
-                                    : Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        InfoText(
                                           child: Text(
-                                            "transaction.location.edit".t(
+                                            "transaction.location.add".t(
                                               context,
                                             ),
                                           ),
                                         ),
-                                        const SizedBox(height: 8.0),
-                                        SquareMap(
-                                          mapController: _mapController,
-                                          interactable: false,
-                                          onTap: (_) => selectLocation(),
-                                          center: LatLng(
-                                            _geo?.latitude ??
-                                                sukhbaatarSquareCenterLat,
-                                            _geo?.longitude ??
-                                                sukhbaatarSquareCenterLong,
+                                      ),
+                                    ),
+                                  )
+                                : Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(
+                                          8.0,
+                                        ),
+                                        child: AspectRatio(
+                                          aspectRatio: 1.0,
+                                          child: OSMap(
+                                            mapController: _mapController,
+                                            interactable: false,
+                                            onTap: (_) => selectLocation(),
+                                            center: LatLng(
+                                              _geo?.latitude ??
+                                                  sukhbaatarSquareCenterLat,
+                                              _geo?.longitude ??
+                                                  sukhbaatarSquareCenterLong,
+                                            ),
                                           ),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                      SizedBox(height: 8.0),
+                                      InfoText(
+                                        child: Text(
+                                          "transaction.location.edit".t(
+                                            context,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                           ),
                         ),
-                      ),
-                    ],
-                    const SizedBox(height: 24.0),
-                    if (_currentlyEditing != null) ...[
+                      ],
                       const SizedBox(height: 24.0),
-                      Text(
-                        "${"transaction.createdDate".t(context)} ${_currentlyEditing.createdDate.format(payload: "LLL", forceLocal: true)}",
-                        style: context.textTheme.bodyMedium?.semi(context),
-                      ),
-                      const SizedBox(height: 32.0),
-                      Section(
-                        title: "transaction.actions".t(context),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (!isTransfer)
-                              ListTile(
-                                leading: Icon(Symbols.content_copy_rounded),
-                                title: Text("transaction.duplicate".t(context)),
-                                onTap: () => _duplicate(),
-                              ),
-                            if (_currentlyEditing.isDeleted == true)
-                              ListTile(
-                                leading: Icon(Symbols.restore_page_rounded),
-                                title: Text(
-                                  "transaction.moveToTrashBin.restore".t(
-                                    context,
+                      if (_currentlyEditing != null) ...[
+                        Section(
+                          title: "transaction.actions".t(context),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (!isTransfer)
+                                ListTile(
+                                  leading: Icon(Symbols.content_copy_rounded),
+                                  title: Text(
+                                    "transaction.duplicate".t(context),
                                   ),
+                                  onTap: () => _duplicate(),
                                 ),
-                                onTap: () => _restoreTransaction(),
-                              ),
-                            if (_currentlyEditing.isDeleted == true)
-                              ListTile(
-                                leading: Icon(Symbols.delete_forever_rounded),
-                                title: Text("transaction.delete".t(context)),
-                                onTap: () => _deleteTransaction(),
-                                iconColor: context.flowColors.expense,
-                                textColor: context.flowColors.expense,
-                              ),
-                            if (_currentlyEditing.isDeleted != true)
-                              ListTile(
-                                leading: Icon(Symbols.delete_forever_rounded),
-                                title: Text(
-                                  "transaction.moveToTrashBin".t(context),
+                              if (_currentlyEditing.isDeleted == true)
+                                ListTile(
+                                  leading: Icon(Symbols.restore_page_rounded),
+                                  title: Text(
+                                    "transaction.moveToTrashBin.restore".t(
+                                      context,
+                                    ),
+                                  ),
+                                  onTap: () => _restoreTransaction(),
                                 ),
-                                onTap: () => _moveToTrash(),
+                              if (_currentlyEditing.isDeleted == true)
+                                ListTile(
+                                  leading: Icon(Symbols.delete_forever_rounded),
+                                  title: Text("transaction.delete".t(context)),
+                                  onTap: () => _deleteTransaction(),
+                                  iconColor: context.flowColors.expense,
+                                  textColor: context.flowColors.expense,
+                                ),
+                              if (_currentlyEditing.isDeleted != true)
+                                ListTile(
+                                  leading: Icon(Symbols.delete_forever_rounded),
+                                  title: Text(
+                                    "transaction.moveToTrashBin".t(context),
+                                  ),
+                                  onTap: () => _moveToTrash(),
+                                ),
+                              SizedBox(height: 32.0),
+                              Text(
+                                "${"transaction.createdDate".t(context)} ${_currentlyEditing.createdDate.format(payload: "LLL", forceLocal: true)}",
+                                style: context.textTheme.bodyMedium?.semi(
+                                  context,
+                                ),
                               ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
+                      const SizedBox(height: 24.0),
                     ],
-                    const SizedBox(height: 24.0),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -562,32 +643,31 @@ class _TransactionPageState extends State<TransactionPage> {
 
   void inputAmount() async {
     await TransitiveLocalPreferences().updateTransitiveProperties();
-    final hideCurrencySymbol =
-        !TransitiveLocalPreferences().transitiveUsesSingleCurrency.get();
+    final hideCurrencySymbol = !TransitiveLocalPreferences()
+        .usesMultipleCurrencies
+        .get();
 
     if (!mounted) return;
 
     final double? result = await showModalBottomSheet<double>(
       context: context,
-      builder:
-          (context) => InputAmountSheet(
-            initialAmount: _amount.abs(),
-            currency: _selectedAccount?.currency,
-            hideCurrencySymbol: _selectedAccount == null && hideCurrencySymbol,
-            title: _transactionType.localizedNameContext(context),
-            lockSign: true,
-          ),
+      builder: (context) => InputAmountSheet(
+        initialAmount: _amount.abs(),
+        currency: _selectedAccount?.currency,
+        hideCurrencySymbol: _selectedAccount == null && hideCurrencySymbol,
+        title: _transactionType.localizedNameContext(context),
+        lockSign: true,
+      ),
       isScrollControlled: true,
     );
 
-    final double? resultAmount =
-        result == null
-            ? null
-            : switch (_transactionType) {
-              TransactionType.expense => -result.abs(),
-              TransactionType.income => result.abs(),
-              TransactionType.transfer => result.abs(),
-            };
+    final double? resultAmount = result == null
+        ? null
+        : switch (_transactionType) {
+            TransactionType.expense => -result.abs(),
+            TransactionType.income => result.abs(),
+            TransactionType.transfer => result.abs(),
+          };
 
     setState(() {
       _amount = resultAmount ?? _amount;
@@ -600,7 +680,11 @@ class _TransactionPageState extends State<TransactionPage> {
     if (!mounted) return;
 
     if (widget.isNewTransaction && result != null) {
-      FocusScope.of(context).requestFocus(_titleFocusNode);
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          FocusScope.of(context).requestFocus(_titleFocusNode);
+        }
+      });
     }
   }
 
@@ -612,17 +696,15 @@ class _TransactionPageState extends State<TransactionPage> {
     // In the currency of [to]
     final double? postConversionAmount = await showModalBottomSheet<double>(
       context: context,
-      builder:
-          (context) => InputAmountSheet(
-            initialAmount: initialAmount,
-            currency: _selectedAccountTransferTo?.currency,
-            overrideDecimalPrecision: 8,
-            hideCurrencySymbol: false,
-            title:
-                "${Money(_amount, _selectedAccount!.currency).formatMoney()} =",
-            lockSign: true,
-            allowNegative: false,
-          ),
+      builder: (context) => InputAmountSheet(
+        initialAmount: initialAmount,
+        currency: _selectedAccountTransferTo?.currency,
+        overrideDecimalPrecision: 8,
+        hideCurrencySymbol: false,
+        title: "${Money(_amount, _selectedAccount!.currency).formatMoney()} =",
+        lockSign: true,
+        allowNegative: false,
+      ),
       isScrollControlled: true,
     );
 
@@ -634,23 +716,21 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void selectAccount() async {
-    final Account? result =
-        accounts.length == 1
-            ? accounts.single
-            : await showModalBottomSheet<Account>(
-              context: context,
-              builder:
-                  (context) => SelectAccountSheet(
-                    accounts: accounts,
-                    currentlySelectedAccountId: _selectedAccount?.id,
-                    titleOverride:
-                        isTransfer
-                            ? "transaction.transfer.from.select".t(context)
-                            : null,
-                    showBalance: true,
-                  ),
-              isScrollControlled: true,
-            );
+    final Account? result = accounts.length == 1
+        ? accounts.single
+        : await showModalBottomSheet<Account>(
+            context: context,
+            builder: (context) => SelectAccountSheet(
+              accounts: accounts,
+              currentlySelectedAccountId: _selectedAccount?.id,
+              titleOverride: isTransfer
+                  ? "transaction.transfer.from.select".t(context)
+                  : null,
+              showBalance: true,
+              showTrailing: widget.isNewTransaction,
+            ),
+            isScrollControlled: true,
+          );
 
     setState(() {
       if (result?.id == _selectedAccountTransferTo?.id) {
@@ -669,25 +749,22 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void selectAccountTransferTo() async {
-    final List<Account> toAccounts =
-        accounts.where((element) {
-          return element.id != _selectedAccount?.id;
-        }).toList();
+    final List<Account> toAccounts = accounts.where((element) {
+      return element.id != _selectedAccount?.id;
+    }).toList();
 
-    final Account? result =
-        toAccounts.length == 1
-            ? toAccounts.single
-            : await showModalBottomSheet<Account>(
-              context: context,
-              builder:
-                  (context) => SelectAccountSheet(
-                    accounts: toAccounts,
-                    currentlySelectedAccountId: _selectedAccountTransferTo?.id,
-                    titleOverride: "transaction.transfer.to.select".t(context),
-                    showBalance: true,
-                  ),
-              isScrollControlled: true,
-            );
+    final Account? result = toAccounts.length == 1
+        ? toAccounts.single
+        : await showModalBottomSheet<Account>(
+            context: context,
+            builder: (context) => SelectAccountSheet(
+              accounts: toAccounts,
+              currentlySelectedAccountId: _selectedAccountTransferTo?.id,
+              titleOverride: "transaction.transfer.to.select".t(context),
+              showBalance: true,
+            ),
+            isScrollControlled: true,
+          );
 
     setState(() {
       _selectedAccountTransferTo = result ?? _selectedAccountTransferTo;
@@ -699,15 +776,14 @@ class _TransactionPageState extends State<TransactionPage> {
         _selectedAccount!.currency != _selectedAccountTransferTo!.currency;
 
     if (crossCurrency && widget.isNewTransaction) {
-      final ExchangeRates? rates =
-          ExchangeRatesService().getPrimaryCurrencyRates();
+      final ExchangeRates? rates = ExchangeRatesService()
+          .getPrimaryCurrencyRates();
 
       if (rates != null) {
-        _conversionRate =
-            Money(
-              1.0,
-              _selectedAccount!.currency,
-            ).convert(_selectedAccountTransferTo!.currency, rates).amount;
+        _conversionRate = Money(
+          1.0,
+          _selectedAccount!.currency,
+        ).convert(_selectedAccountTransferTo!.currency, rates).amount;
       }
     }
 
@@ -723,11 +799,11 @@ class _TransactionPageState extends State<TransactionPage> {
     final Optional<Category>? result =
         await showModalBottomSheet<Optional<Category>>(
           context: context,
-          builder:
-              (context) => SelectCategorySheet(
-                categories: categories,
-                currentlySelectedCategoryId: _selectedCategory?.id,
-              ),
+          builder: (context) => SelectCategorySheet(
+            categories: categories,
+            currentlySelectedCategoryId: _selectedCategory?.id,
+            showTrailing: widget.isNewTransaction,
+          ),
           isScrollControlled: true,
         );
 
@@ -741,18 +817,15 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void selectTransactionDate() async {
-    final TimeOfDay currentTimeOfDay = TimeOfDay.fromDateTime(_transactionDate);
+    final TimeOfDay currentTimeOfDay = TimeOfDay.fromDateTime(transactionDate);
 
-    final DateTime? result = await showDatePicker(
-      context: context,
-      firstDate: DateTime.fromMicrosecondsSinceEpoch(0),
-      lastDate: DateTime(9999, 12, 31),
-      initialDate: _transactionDate,
-    );
+    final DateTime? result = await context.pickDate(transactionDate);
 
     setState(() {
       _transactionDate = result ?? _transactionDate;
     });
+
+    _postSelectTransactionDate();
 
     if (!mounted || result == null) return;
 
@@ -764,7 +837,7 @@ class _TransactionPageState extends State<TransactionPage> {
     if (timeResult == null) return;
 
     setState(() {
-      _transactionDate = _transactionDate.copyWith(
+      _transactionDate = transactionDate.copyWith(
         hour: timeResult.hour,
         minute: timeResult.minute,
         second: 0,
@@ -772,34 +845,71 @@ class _TransactionPageState extends State<TransactionPage> {
         millisecond: 0,
       );
     });
+
+    _postSelectTransactionDate();
+  }
+
+  void updatePending(bool newPending) {
+    setState(() {
+      _isPending = newPending;
+    });
+  }
+
+  void updateRecurrence(Recurrence? recurrence) {
+    if (widget.isNewTransaction) {
+      _transactionDate = recurrence?.range.from;
+    }
+    _recurrence = recurrence;
+
+    if (!mounted) return;
+
+    setState(() {});
+  }
+
+  void _postSelectTransactionDate() async {
+    final bool pendingTransactionsRequireConfrimation = LocalPreferences()
+        .pendingTransactions
+        .requireConfrimation
+        .get();
+
+    if (!_isPending && pendingTransactionsRequireConfrimation) {
+      _isPending = transactionDate.isFutureAnchored(
+        Moment.now().startOfNextMinute(),
+      );
+      if (mounted) {
+        setState(() {});
+      }
+    }
+
+    // noop
+    return;
   }
 
   void selectLocation() async {
     final Optional<LatLng>? result =
         await showModalBottomSheet<Optional<LatLng>>(
           context: context,
-          builder:
-              (context) => LocationPickerSheet(
-                latitude: _geo?.latitude,
-                longitude: _geo?.longitude,
-              ),
+          builder: (context) => LocationPickerSheet(
+            latitude: _geo?.latitude,
+            longitude: _geo?.longitude,
+          ),
           isScrollControlled: true,
         );
 
-    if (result == null) return;
+    if (result != null) {
+      final LatLng? newLatLng = result.value;
 
-    final LatLng? newLatLng = result.value;
+      _geoHandpicked = newLatLng?.toSexagesimal() != _geo?.toSexagesimal();
+      _geo = newLatLng == null ? null : Geo.fromLatLng(newLatLng);
 
-    _geoHandpicked = newLatLng?.toSexagesimal() != _geo?.toSexagesimal();
-    _geo = newLatLng == null ? null : Geo.fromLatLng(newLatLng);
+      if (newLatLng != null) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          _mapController?.move(newLatLng, _mapController.camera.zoom);
+        });
+      }
+    }
 
     setState(() {});
-
-    if (newLatLng != null) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        _mapController?.move(newLatLng, _mapController.camera.zoom);
-      });
-    }
   }
 
   bool _ensureAccountsSelected() {
@@ -822,20 +932,53 @@ class _TransactionPageState extends State<TransactionPage> {
     return true;
   }
 
-  void update({
+  void _setupRecurring() {
+    _recurrence ??= Recurrence(
+      range: transactionDate.rangeToMax(),
+      rules: [MonthlyRecurrenceRule(day: transactionDate.day)],
+    );
+
+    setState(() {});
+  }
+
+  void _update({
     required String? formattedTitle,
     required String? formattedDescription,
   }) async {
     if (_currentlyEditing == null) return;
 
-    final bool pendingTransactionsRequireConfrimation =
-        LocalPreferences().pendingTransactions.requireConfrimation.get();
+    RecurringUpdateMode? mode;
 
-    final bool? isPending =
-        pendingTransactionsRequireConfrimation &&
-                _currentlyEditing.transactionDate.isPast
-            ? _transactionDate.isFuture
-            : _currentlyEditing.isPending;
+    final bool originalTransactionWasRecurring =
+        _currentlyEditing.isRecurring && _recurringTransaction != null;
+
+    if (originalTransactionWasRecurring) {
+      final List<RecurringUpdateMode> availableModes = [
+        if (_recurrence == _recurringTransaction!.recurrence)
+          RecurringUpdateMode.current,
+        RecurringUpdateMode.thisAndFuture,
+      ];
+
+      if (availableModes.length == 1) {
+        mode = availableModes.single;
+      } else {
+        mode = await showModalBottomSheet(
+          context: context,
+          builder: (context) => SelectRecurringUpdateModeSheet(
+            values: availableModes,
+            title: Text("transaction.recurring.edit".t(context)),
+          ),
+          isScrollControlled: true,
+        );
+      }
+    }
+
+    assert(mode != RecurringUpdateMode.all);
+
+    if ((originalTransactionWasRecurring && mode == null) || !mounted) return;
+
+    final String recurringTransactionUuid =
+        _recurringTransaction?.uuid ?? const Uuid().v4();
 
     if (_transactionType == TransactionType.transfer) {
       try {
@@ -846,10 +989,12 @@ class _TransactionPageState extends State<TransactionPage> {
           targetAccount: _selectedAccountTransferTo!,
           createdDate: _currentlyEditing.createdDate,
           transactionDate: _transactionDate,
-          extensions:
-              _currentlyEditing.extensions.getOverriden(_geo, Geo.keyName).data,
-          isPending: isPending,
+          extensions: _currentlyEditing.extensions
+              .getOverriden(_geo, Geo.keyName)
+              .data,
+          isPending: _isPending,
           conversionRate: crossCurrencyTransfer ? _conversionRate : null,
+          recurrence: _recurrence,
         );
 
         _currentlyEditing.permanentlyDelete(true);
@@ -857,28 +1002,118 @@ class _TransactionPageState extends State<TransactionPage> {
       } catch (e, stackTrace) {
         _log.severe("Failed to update transfer transaction", e, stackTrace);
       }
-      return;
+    } else {
+      _currentlyEditing.setCategory(_selectedCategory);
+      _currentlyEditing.setAccount(_selectedAccount);
+      _currentlyEditing.title = formattedTitle;
+      _currentlyEditing.description = formattedDescription;
+      _currentlyEditing.amount = _amount;
+      _currentlyEditing.transactionDate = transactionDate;
+      _currentlyEditing.isPending = _isPending;
+
+      /// When user edits a balance amendment transaction, it is no longer a balance amendment.
+      if (_currentlyEditing.subtype == TransactionSubtype.updateBalance.value) {
+        _currentlyEditing.subtype = null;
+      }
+
+      final List<TransactionExtension> newExtensions = [
+        ..._currentlyEditing.extensions.getOverriden(_geo, Geo.keyName).data,
+      ];
+
+      newExtensions.removeWhere((ext) => ext.key == Recurring.keyName);
+
+      if (_recurrence != null) {
+        newExtensions.add(
+          Recurring(
+            uuid: recurringTransactionUuid,
+            initialTransactionDate: _currentlyEditing.transactionDate,
+          ),
+        );
+      }
+
+      _currentlyEditing.extensions = ExtensionsWrapper(newExtensions);
+
+      TransactionsService().updateOneSync(_currentlyEditing);
     }
 
-    _currentlyEditing.setCategory(_selectedCategory);
-    _currentlyEditing.setAccount(_selectedAccount);
-    _currentlyEditing.title = formattedTitle;
-    _currentlyEditing.description = formattedDescription;
-    _currentlyEditing.amount = _amount;
-    _currentlyEditing.transactionDate = _transactionDate;
-    _currentlyEditing.isPending = isPending;
-
-    /// When user edits a balance amendment transaction, it is no longer a balance amendment.
-    if (_currentlyEditing.subtype == TransactionSubtype.updateBalance.value) {
-      _currentlyEditing.subtype = null;
+    if (_recurringTransaction == null &&
+        !originalTransactionWasRecurring &&
+        _recurrence != null) {
+      _recurringTransaction = RecurringTransactionsService()
+          .createFromTransaction(
+            identifier: _currentlyEditing,
+            recurrence: _recurrence!,
+            uuidOverride: recurringTransactionUuid,
+            transferToAccountUuid: isTransfer
+                ? _selectedAccountTransferTo?.uuid
+                : null,
+          );
     }
 
-    _currentlyEditing.extensions = _currentlyEditing.extensions.getOverriden(
-      _geo,
-      Geo.keyName,
-    );
+    if (originalTransactionWasRecurring &&
+        mode == RecurringUpdateMode.thisAndFuture) {
+      final RecurringTransaction? recurringTransaction =
+          RecurringTransactionsService().findOneSync(recurringTransactionUuid);
 
-    TransactionsService().updateOneSync(_currentlyEditing);
+      if (recurringTransaction == null) {
+        _log.warning(
+          "Failed to find recurring transaction for update. Transaction(${_currentlyEditing.uuid})",
+        );
+        return;
+      }
+
+      final (
+        _,
+        List<Transaction> futureRelatedRecurringTransactions,
+      ) = await RecurringTransactionsService().findRelatedTransactionsByMode(
+        _currentlyEditing,
+        RecurringUpdateMode.thisAndFuture,
+      );
+
+      final List<Transaction> futureRelatedRecurringTransactionsToDelete =
+          futureRelatedRecurringTransactions
+              .where(
+                (futureTransaction) =>
+                    futureTransaction.isPending == true &&
+                    futureTransaction.transactionDate.isFutureAnchored(
+                      _initialTransactionDate,
+                    ),
+              )
+              .toList();
+
+      bool hasDeletedFutureTransaction = false;
+
+      for (Transaction x in futureRelatedRecurringTransactionsToDelete) {
+        try {
+          TransactionsService().moveToBinSync(x);
+          hasDeletedFutureTransaction = true;
+        } catch (e, stackTrace) {
+          _log.severe("Failed to move transaction to trash bin", e, stackTrace);
+        }
+      }
+
+      try {
+        if (hasDeletedFutureTransaction) {
+          recurringTransaction.lastGeneratedTransactionDate =
+              _initialTransactionDate;
+        }
+        recurringTransaction.template = _currentlyEditing;
+        recurringTransaction.timeRange =
+            _recurrence?.range ?? recurringTransaction.timeRange;
+        recurringTransaction.recurrenceRules =
+            _recurrence?.rules ?? recurringTransaction.recurrenceRules;
+        recurringTransaction.transferToAccountUuid =
+            _selectedAccountTransferTo?.uuid ??
+            recurringTransaction.transferToAccountUuid;
+        RecurringTransactionsService().updateSync(recurringTransaction);
+      } catch (e, stackTrace) {
+        _log.severe(
+          "Failed to update RelatedTransaction($recurringTransactionUuid). Initiated by Transaction(${_currentlyEditing.uuid})",
+          e,
+          stackTrace,
+        );
+      }
+    }
 
     context.pop();
   }
@@ -886,32 +1121,24 @@ class _TransactionPageState extends State<TransactionPage> {
   void save() {
     if (!_ensureAccountsSelected()) return;
 
-    final bool pendingTransactionsRequireConfrimation =
-        LocalPreferences().pendingTransactions.requireConfrimation.get();
-
     final String trimmedTitle = _titleController.text.trim();
-    final String? formattedTitle =
-        trimmedTitle.isNotEmpty ? trimmedTitle : null;
+    final String? formattedTitle = trimmedTitle.isNotEmpty
+        ? trimmedTitle
+        : null;
 
     final String trimmedDescription = _descriptionController.text.trim();
-    final String? formattedDescription =
-        trimmedDescription.isNotEmpty ? trimmedDescription : null;
+    final String? formattedDescription = trimmedDescription.isNotEmpty
+        ? trimmedDescription
+        : null;
 
     if (_currentlyEditing != null) {
-      return update(
+      return _update(
         formattedTitle: formattedTitle,
         formattedDescription: formattedDescription,
       );
     }
 
     final List<TransactionExtension> extensions = [if (_geo != null) _geo!];
-
-    final bool isPending =
-        pendingTransactionsRequireConfrimation
-            ? _transactionDate.isFutureAnchored(
-              Moment.now().startOfNextMinute(),
-            )
-            : false;
 
     if (isTransfer) {
       _selectedAccount!.transferTo(
@@ -921,8 +1148,9 @@ class _TransactionPageState extends State<TransactionPage> {
         title: formattedTitle,
         description: formattedDescription,
         extensions: extensions,
-        isPending: isPending,
+        isPending: _isPending,
         conversionRate: crossCurrencyTransfer ? _conversionRate : null,
+        recurrence: _recurrence,
       );
     } else {
       _selectedAccount!.createAndSaveTransaction(
@@ -932,7 +1160,8 @@ class _TransactionPageState extends State<TransactionPage> {
         category: _selectedCategory,
         transactionDate: _transactionDate,
         extensions: extensions,
-        isPending: isPending,
+        isPending: _isPending,
+        recurrence: _recurrence,
       );
     }
 
@@ -950,16 +1179,16 @@ class _TransactionPageState extends State<TransactionPage> {
         return true;
       }
 
-      final bool ammountChanged =
-          isTransfer
-              ? _currentlyEditing.amount.abs() != _amount
-              : _currentlyEditing.amount != _amount;
+      final bool ammountChanged = isTransfer
+          ? _currentlyEditing.amount.abs() != _amount
+          : _currentlyEditing.amount != _amount;
 
       return ammountChanged ||
           _geoHandpicked ||
           (_currentlyEditing.title ?? "") != _titleController.text ||
           (_currentlyEditing.description ?? "") !=
               _descriptionController.text ||
+          (_currentlyEditing.isPending ?? false) != _isPending ||
           _currentlyEditing.type != _transactionType ||
           _currentlyEditing.accountUuid != _selectedAccount?.uuid ||
           _currentlyEditing.categoryUuid != _selectedCategory?.uuid ||
@@ -972,6 +1201,7 @@ class _TransactionPageState extends State<TransactionPage> {
         _descriptionController.text.isNotEmpty ||
         _selectedAccount != null ||
         _selectedAccountTransferTo != null ||
+        _isPending ||
         _selectedCategory != null;
   }
 
@@ -980,9 +1210,9 @@ class _TransactionPageState extends State<TransactionPage> {
       return;
     }
 
-    _currentlyEditing.moveToTrashBin();
+    final bool moved = await _currentlyEditing.moveToTrashBin(context);
 
-    if (mounted) {
+    if (mounted && moved) {
       context.showToast(text: "transaction.moveToTrashBin.success".t(context));
       pop();
     }
@@ -1038,13 +1268,33 @@ class _TransactionPageState extends State<TransactionPage> {
     context.pop();
   }
 
-  String get fallbackTitle => switch (_transactionType) {
-    TransactionType.transfer
-        when _selectedAccount != null && _selectedAccountTransferTo != null =>
-      "transaction.transfer.fromToTitle".t(context, {
-        "from": _selectedAccount!.name,
-        "to": _selectedAccountTransferTo!.name,
-      }),
-    _ => "transaction.fallbackTitle".t(context),
-  };
+  String get fallbackTitle {
+    if (UserPreferencesService().useCategoryNameForUntitledTransactions &&
+        _selectedCategory?.name != null) {
+      return _selectedCategory!.name;
+    }
+
+    return switch (_transactionType) {
+      TransactionType.transfer
+          when _selectedAccount != null && _selectedAccountTransferTo != null =>
+        "transaction.transfer.fromToTitle".t(context, {
+          "from": _selectedAccount!.name,
+          "to": _selectedAccountTransferTo!.name,
+        }),
+      _ => "transaction.fallbackTitle".t(context),
+    };
+  }
+
+  TimeRange? getStartBounds() {
+    if (widget.isNewTransaction || _currentlyEditing == null) {
+      return TimeRange.allTime();
+    }
+
+    if (!_currentlyEditing.isRecurring) {
+      return (_transactionDate ?? _currentlyEditing.transactionDate)
+          .rangeToMax();
+    }
+
+    return null;
+  }
 }

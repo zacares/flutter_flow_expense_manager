@@ -2,6 +2,7 @@ import "package:flow/entity/transaction_filter_preset.dart";
 import "package:flow/l10n/flow_localizations.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/utils.dart";
+import "package:flow/widgets/general/directional_slidable.dart";
 import "package:flutter/material.dart";
 import "package:flutter_slidable/flutter_slidable.dart";
 import "package:material_symbols_icons/symbols.dart";
@@ -39,26 +40,23 @@ class _FilterPresetListTileState extends State<FilterPresetListTile> {
 
   @override
   Widget build(BuildContext context) {
-    final String? filterSummary =
-        widget.valid ? preset.filter.summary(context) : null;
+    final String? filterSummary = widget.valid
+        ? preset.filter.summary(context)
+        : null;
 
     final Widget listTile = ListTile(
       onTap: widget.onTap,
       title: Text(preset.name),
       enabled: widget.valid,
-      subtitle:
-          widget.valid
-              ? (filterSummary == null ? null : Text(filterSummary))
-              : Text("transactionFilterPreset.invalid".t(context)),
-      trailing:
-          widget.valid
-              ? (widget.isDefault ? Icon(Symbols.star_rounded) : null)
-              : Tooltip(
-                message: "transactionFilterPreset.invalid.description".t(
-                  context,
-                ),
-                child: Icon(Symbols.error_circle_rounded),
-              ),
+      subtitle: widget.valid
+          ? (filterSummary == null ? null : Text(filterSummary))
+          : Text("transactionFilterPreset.invalid".t(context)),
+      trailing: widget.valid
+          ? (widget.isDefault ? Icon(Symbols.star_rounded) : null)
+          : Tooltip(
+              message: "transactionFilterPreset.invalid.description".t(context),
+              child: Icon(Symbols.error_circle_rounded),
+            ),
       selected: widget.selected,
     );
 
@@ -80,23 +78,11 @@ class _FilterPresetListTileState extends State<FilterPresetListTile> {
         ),
     ];
 
-    return Slidable(
+    return DirectionalSlidable(
       key: widget.dismissibleKey,
       groupTag: "filter_preset_list_tile",
-      endActionPane:
-          endActionPanes.isNotEmpty
-              ? ActionPane(
-                motion: const DrawerMotion(),
-                children: endActionPanes,
-              )
-              : null,
-      startActionPane:
-          startActionPanes.isNotEmpty
-              ? ActionPane(
-                motion: const DrawerMotion(),
-                children: startActionPanes,
-              )
-              : null,
+      endActions: endActionPanes,
+      startActions: startActionPanes,
       child: listTile,
     );
   }

@@ -10,6 +10,7 @@ import "package:flow/objectbox.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/services/accounts.dart";
 import "package:flow/services/transactions.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:local_settings/local_settings.dart";
 import "package:logging/logging.dart";
 import "package:moment_dart/moment_dart.dart";
@@ -23,12 +24,16 @@ class TransitiveLocalPreferences {
   static TransitiveLocalPreferences? _instance;
 
   /// Whether the user uses only one currency across accounts
-  late final BoolSettingsEntry transitiveUsesSingleCurrency;
+  late final BoolSettingsEntry usesNonPrimaryCurrency;
+  late final BoolSettingsEntry usesMultipleCurrencies;
 
   late final DateTimeSettingsEntry transitiveLastTimeFrecencyUpdated;
 
   late final DateTimeSettingsEntry lastAutoBackupRanAt;
   late final PrimitiveSettingsEntry<String> lastAutoBackupPath;
+
+  late final DateTimeSettingsEntry lastSuccessfulICloudSyncAt;
+  late final BoolSettingsEntry iCloudSyncWorkingFine;
 
   late final BoolSettingsEntry sessionPrivacyMode;
 
@@ -50,10 +55,15 @@ class TransitiveLocalPreferences {
   TransitiveLocalPreferences._internal(this._prefs) {
     SettingsEntry.defaultPrefix = "flow.";
 
-    transitiveUsesSingleCurrency = BoolSettingsEntry(
-      key: "transitive.usesSingleCurrency",
+    usesNonPrimaryCurrency = BoolSettingsEntry(
+      key: "transitive.usesNonPrimaryCurrency",
       preferences: _prefs,
-      initialValue: true,
+      initialValue: false,
+    );
+    usesMultipleCurrencies = BoolSettingsEntry(
+      key: "transitive.usesMultipleCurrencies",
+      preferences: _prefs,
+      initialValue: false,
     );
 
     transitiveLastTimeFrecencyUpdated = DateTimeSettingsEntry(
@@ -69,6 +79,17 @@ class TransitiveLocalPreferences {
     lastAutoBackupPath = PrimitiveSettingsEntry<String>(
       key: "transitive.lastAutoBackupPath",
       preferences: _prefs,
+    );
+
+    lastSuccessfulICloudSyncAt = DateTimeSettingsEntry(
+      key: "transitive.lastSuccessfulICloudSyncAt",
+      preferences: _prefs,
+    );
+
+    iCloudSyncWorkingFine = BoolSettingsEntry(
+      key: "transitive.iCloudSyncWorkingFine",
+      preferences: _prefs,
+      initialValue: true,
     );
 
     sessionPrivacyMode = BoolSettingsEntry(
@@ -99,10 +120,16 @@ class TransitiveLocalPreferences {
     try {
       final accounts = await AccountsService().getAll();
 
-      final usesSingleCurrency =
-          accounts.map((e) => e.currency).toSet().length == 1;
+      final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
-      await transitiveUsesSingleCurrency.set(usesSingleCurrency);
+      final bool hasAnyNonPrimaryCurrencyAccount = accounts.any(
+        (account) => account.currency != primaryCurrency,
+      );
+
+      await usesNonPrimaryCurrency.set(hasAnyNonPrimaryCurrencyAccount);
+      await usesMultipleCurrencies.set(
+        accounts.map((account) => account.currency).toSet().length > 1,
+      );
     } catch (e, stackTrace) {
       _log.warning("Cannot update transitive properties", e, stackTrace);
     }
@@ -166,8 +193,9 @@ class TransitiveLocalPreferences {
   }
 
   Future<void> _reevaluateCategoryFrecency() async {
-    final List<Category> categories =
-        await ObjectBox().box<Category>().getAllAsync();
+    final List<Category> categories = await ObjectBox()
+        .box<Category>()
+        .getAllAsync();
 
     if (categories.isEmpty) {
       return;

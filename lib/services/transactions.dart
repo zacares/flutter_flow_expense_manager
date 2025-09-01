@@ -29,7 +29,7 @@ class TransactionsService {
     _listeners.remove(listener);
   }
 
-  _onChange() {
+  void _onChange() {
     if (disableUpdates) return;
 
     for (final listener in _listeners) {
@@ -49,27 +49,44 @@ class TransactionsService {
   final Condition<Transaction> nonDeletedCondition =
       Transaction_.isDeleted.equals(false) | Transaction_.isDeleted.isNull();
 
-  QueryBuilder<Transaction> pendingTransactionsQb([DateTime? anchor]) {
+  QueryBuilder<Transaction> pendingTransactionsQb({
+    DateTime? anchor,
+    TimeRange? range,
+  }) {
     anchor = DateTime.now();
 
-    final Condition<Transaction> condition =
+    Condition<Transaction> condition =
         nonDeletedCondition &
         (Transaction_.transactionDate.greaterThanDate(
               anchor.startOfNextMinute(),
             ) |
             Transaction_.isPending.equals(true));
 
+    if (range != null) {
+      condition =
+          condition &
+          Transaction_.transactionDate.betweenDate(range.from, range.to);
+    }
+
     return ObjectBox()
         .box<Transaction>()
         .query(condition)
-        .order(Transaction_.transactionDate);
+        .order(Transaction_.transactionDate, flags: Order.descending);
   }
 
-  QueryBuilder<Transaction> deletedTransactionsQb() {
+  QueryBuilder<Transaction> deletedTransactionsQb({TimeRange? range}) {
+    Condition<Transaction> condition = Transaction_.isDeleted.equals(true);
+
+    if (range != null) {
+      condition =
+          condition &
+          Transaction_.deletedDate.betweenDate(range.from, range.to);
+    }
+
     return ObjectBox()
         .box<Transaction>()
-        .query(Transaction_.isDeleted.equals(true))
-        .order(Transaction_.transactionDate);
+        .query(condition)
+        .order(Transaction_.transactionDate, flags: Order.descending);
   }
 
   Future<List<int>> upsertMany(List<Transaction> transactions) async {
@@ -109,13 +126,17 @@ class TransactionsService {
     );
   }
 
-  Transaction? findTransferRelatedTransactionSync(Transaction transaction) {
+  Transaction? findTransferRelatedTransactionSync(
+    Transaction transaction, {
+    bool includeDeleted = false,
+  }) {
     if (!transaction.isTransfer) {
       return null;
     }
 
     return findByIdentifierSync(
       transaction.extensions.transfer?.relatedTransactionUuid,
+      includeDeleted: includeDeleted,
     );
   }
 
@@ -261,10 +282,20 @@ class TransactionsService {
   ///
   /// Returns `true` if the transaction existed, and was deleted, `false` otherwise.
   bool deleteSync(dynamic identifier) {
-    final Transaction? transaction = findByIdentifierSync(identifier);
+    final Transaction? transaction = findByIdentifierSync(
+      identifier,
+      includeDeleted: true,
+    );
 
     if (transaction == null) {
       return false;
+    }
+
+    final Transaction? relatedTransferTransaction =
+        findTransferRelatedTransactionSync(transaction, includeDeleted: true);
+
+    if (relatedTransferTransaction != null) {
+      ObjectBox().box<Transaction>().remove(relatedTransferTransaction.id);
     }
 
     return ObjectBox().box<Transaction>().remove(transaction.id);
@@ -377,16 +408,15 @@ class TransactionsService {
       return;
     }
 
-    final Query<Transaction> staleTrashBinTxns =
-        ObjectBox()
-            .box<Transaction>()
-            .query(
-              Transaction_.isDeleted.equals(true) &
-                  Transaction_.deletedDate.lessOrEqualDate(
-                    Moment.now().subtract(Duration(days: keepDays)),
-                  ),
-            )
-            .build();
+    final Query<Transaction> staleTrashBinTxns = ObjectBox()
+        .box<Transaction>()
+        .query(
+          Transaction_.isDeleted.equals(true) &
+              Transaction_.deletedDate.lessOrEqualDate(
+                Moment.now().subtract(Duration(days: keepDays)),
+              ),
+        )
+        .build();
 
     final int deletedCount = await staleTrashBinTxns.removeAsync();
 
@@ -404,10 +434,16 @@ class TransactionsService {
       FlowNotificationPayloadItemType.transaction,
     );
 
+    final Duration earlyReminder = Duration(
+      seconds:
+          PendingTransactionsLocalPreferences().earlyReminderInSeconds.get() ??
+          0,
+    );
+
     await Future.wait(
       pendingTransactions.map(
         (transaction) => NotificationsService()
-            .scheduleForPlannedTransaction(transaction)
+            .scheduleForPlannedTransaction(transaction, earlyReminder)
             .catchError((error) {
               _log.severe(
                 "Failed to schedule exact reminder for transaction ${transaction.uuid}",
@@ -422,32 +458,6 @@ class TransactionsService {
       );
       return [];
     });
-
-    final Duration earlyReminder = Duration(
-      seconds:
-          PendingTransactionsLocalPreferences().earlyReminderInSeconds.get() ??
-          0,
-    );
-
-    if (earlyReminder.inSeconds > 60) {
-      await Future.wait(
-        pendingTransactions.map(
-          (transaction) => NotificationsService()
-              .scheduleForPlannedTransaction(transaction, earlyReminder)
-              .then((_) {
-                _log.info(
-                  "Scheduled early reminder for transaction '${transaction.title ?? 'untitled'}' ${transaction.uuid}",
-                );
-              })
-              .catchError((error) {
-                _log.warning(
-                  "Failed to schedule an early reminder notification for transaction ${transaction.uuid}",
-                  error,
-                );
-              }),
-        ),
-      );
-    }
   }
 
   /// Has no effect if it's already paused

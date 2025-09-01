@@ -30,22 +30,22 @@ class TransactionFilterChip<T> extends StatelessWidget {
 
     if (defaultValue.runtimeType == value.runtimeType) {
       if (value is Set<Account>) {
-        final Set<String> defaultValueSet =
-            (defaultValue as Set<Account>)
-                .map((account) => account.uuid)
-                .toSet();
-        final Set<String> valueSet =
-            (value as Set<Account>).map((account) => account.uuid).toSet();
+        final Set<String> defaultValueSet = (defaultValue as Set<Account>)
+            .map((account) => account.uuid)
+            .toSet();
+        final Set<String> valueSet = (value as Set<Account>)
+            .map((account) => account.uuid)
+            .toSet();
 
         return !setEquals(defaultValueSet, valueSet);
       }
       if (value is Set<Category>) {
-        final Set<String> defaultValueSet =
-            (defaultValue as Set<Category>)
-                .map((category) => category.uuid)
-                .toSet();
-        final Set<String> valueSet =
-            (value as Set<Category>).map((category) => category.uuid).toSet();
+        final Set<String> defaultValueSet = (defaultValue as Set<Category>)
+            .map((category) => category.uuid)
+            .toSet();
+        final Set<String> valueSet = (value as Set<Category>)
+            .map((category) => category.uuid)
+            .toSet();
 
         return !setEquals(defaultValueSet, valueSet);
       }

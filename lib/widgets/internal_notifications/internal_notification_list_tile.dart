@@ -1,12 +1,12 @@
 import "package:flow/data/flow_icon.dart";
 import "package:flow/theme/helpers.dart";
+import "package:flow/widgets/general/directional_slidable.dart";
 import "package:flow/widgets/general/flow_icon.dart";
-import "package:flow/widgets/general/frame.dart";
 import "package:flutter/material.dart";
 import "package:flutter_slidable/flutter_slidable.dart";
 import "package:material_symbols_icons/symbols.dart";
 
-class InternalNotificationListTile extends StatelessWidget {
+class ActionableNotificationListTile extends StatelessWidget {
   final FlowIconData icon;
 
   final String title;
@@ -16,7 +16,7 @@ class InternalNotificationListTile extends StatelessWidget {
 
   final VoidCallback? onDismiss;
 
-  const InternalNotificationListTile({
+  const ActionableNotificationListTile({
     super.key,
     this.subtitle,
     required this.title,
@@ -27,42 +27,35 @@ class InternalNotificationListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Slidable(
-      endActionPane:
-          onDismiss != null
-              ? ActionPane(
-                motion: const DrawerMotion(),
+    return DirectionalSlidable(
+      endActions: [
+        if (onDismiss != null)
+          SlidableAction(
+            onPressed: (BuildContext context) => onDismiss!(),
+            icon: Symbols.close_rounded,
+          ),
+      ],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Row(
+            spacing: 12.0,
+            children: [
+              FlowIcon(icon, plated: true, size: 32.0),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  SlidableAction(
-                    onPressed: (BuildContext context) => onDismiss!(),
-                    icon: Symbols.close_rounded,
-                  ),
+                  Text(title, style: context.textTheme.labelLarge),
+                  if (subtitle != null)
+                    Text(subtitle!, style: context.textTheme.bodySmall!),
                 ],
-              )
-              : null,
-      child: Frame(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Row(
-              spacing: 12.0,
-              children: [
-                FlowIcon(icon, plated: true, size: 32.0),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(title, style: context.textTheme.labelLarge),
-                    if (subtitle != null)
-                      Text(subtitle!, style: context.textTheme.bodySmall!),
-                  ],
-                ),
-              ],
-            ),
-            action,
-          ],
-        ),
+              ),
+            ],
+          ),
+          action,
+        ],
       ),
     );
   }

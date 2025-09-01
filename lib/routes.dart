@@ -6,25 +6,29 @@ import "package:flow/routes/accounts_page.dart";
 import "package:flow/routes/categories_page.dart";
 import "package:flow/routes/category/category_edit_page.dart";
 import "package:flow/routes/category_page.dart";
+import "package:flow/routes/community/contributors_page.dart";
+import "package:flow/routes/debug/debug_icloud_page.dart";
 import "package:flow/routes/debug/debug_log_page.dart";
 import "package:flow/routes/debug/debug_logs_page.dart";
 import "package:flow/routes/debug/debug_scheduled_notifications_page.dart";
 import "package:flow/routes/debug/debug_theme_page.dart";
 import "package:flow/routes/error_page.dart";
 import "package:flow/routes/export/export_history_page.dart";
+import "package:flow/routes/export/export_pdf_page.dart";
 import "package:flow/routes/export_options_page.dart";
 import "package:flow/routes/export_page.dart";
 import "package:flow/routes/home_page.dart";
 import "package:flow/routes/import_page.dart";
 import "package:flow/routes/import_wizard/csv.dart";
+import "package:flow/routes/import_wizard/ivy.dart";
 import "package:flow/routes/import_wizard/v1.dart";
 import "package:flow/routes/import_wizard/v2.dart";
-import "package:flow/routes/preferences/auto_backup_preferences_page.dart";
 import "package:flow/routes/preferences/button_order_preferences_page.dart";
 import "package:flow/routes/preferences/money_formatting_preferences_page.dart";
 import "package:flow/routes/preferences/numpad_preferences_page.dart";
 import "package:flow/routes/preferences/pending_transactions_preferences_page.dart";
 import "package:flow/routes/preferences/reminders_preferences_page.dart";
+import "package:flow/routes/preferences/sync_preferences_page.dart";
 import "package:flow/routes/preferences/theme_preferences_page.dart";
 import "package:flow/routes/preferences/transaction_geo_preferences_page.dart";
 import "package:flow/routes/preferences/transaction_list_item_appearance_preferences_page.dart";
@@ -46,6 +50,7 @@ import "package:flow/routes/transactions_page.dart";
 import "package:flow/routes/utils/crop_square_image_page.dart";
 import "package:flow/routes/utils/edit_markdown_page.dart";
 import "package:flow/sync/export/mode.dart";
+import "package:flow/sync/import/external/ivy_wallet_csv.dart";
 import "package:flow/sync/import/import_csv.dart";
 import "package:flow/sync/import/import_v1.dart";
 import "package:flow/sync/import/import_v2.dart";
@@ -73,32 +78,27 @@ final router = GoRouter(
     ),
     GoRoute(
       path: "/transaction/:id",
-      pageBuilder:
-          (context, state) => MaterialPage(
-            child: TransactionPage.edit(
-              transactionId: int.tryParse(state.pathParameters["id"]!) ?? -1,
-            ),
-            fullscreenDialog: true,
-          ),
+      pageBuilder: (context, state) => MaterialPage(
+        child: TransactionPage.edit(
+          transactionId: int.tryParse(state.pathParameters["id"]!) ?? -1,
+        ),
+        fullscreenDialog: true,
+      ),
     ),
     GoRoute(
       path: "/transactions",
-      builder:
-          (context, state) =>
-              TransactionsPage.all(title: "transactions.all".t(context)),
+      builder: (context, state) =>
+          TransactionsPage.all(title: "transactions.all".t(context)),
     ),
     GoRoute(
       path: "/transactions/pending",
-      builder:
-          (context, state) => TransactionsPage.pending(
-            title: "transactions.pending".t(context),
-          ),
+      builder: (context, state) =>
+          TransactionsPage.pending(title: "transactions.pending".t(context)),
     ),
     GoRoute(
       path: "/transactions/deleted",
-      builder:
-          (context, state) =>
-              TransactionsPage.deleted(title: "transaction.deleted".t(context)),
+      builder: (context, state) =>
+          TransactionsPage.deleted(title: "transaction.deleted".t(context)),
     ),
     GoRoute(
       path: "/account/new",
@@ -106,31 +106,28 @@ final router = GoRouter(
     ),
     GoRoute(
       path: "/account/:id",
-      builder:
-          (context, state) => AccountPage(
-            accountId: int.tryParse(state.pathParameters["id"]!) ?? -1,
-            initialRange: TimeRange.tryParse(
-              state.uri.queryParameters["range"] ?? "",
-            ),
-          ),
+      builder: (context, state) => AccountPage(
+        accountId: int.tryParse(state.pathParameters["id"]!) ?? -1,
+        initialRange: TimeRange.tryParse(
+          state.uri.queryParameters["range"] ?? "",
+        ),
+      ),
       routes: [
         GoRoute(
           path: "edit",
-          pageBuilder:
-              (context, state) => MaterialPage(
-                child: AccountEditPage(
-                  accountId: int.tryParse(state.pathParameters["id"]!) ?? -1,
-                ),
-                fullscreenDialog: true,
-              ),
+          pageBuilder: (context, state) => MaterialPage(
+            child: AccountEditPage(
+              accountId: int.tryParse(state.pathParameters["id"]!) ?? -1,
+            ),
+            fullscreenDialog: true,
+          ),
         ),
         GoRoute(
           path: "transactions",
-          builder:
-              (context, state) => TransactionsPage.account(
-                accountId: int.tryParse(state.pathParameters["id"]!) ?? -1,
-                title: state.uri.queryParameters["title"],
-              ),
+          builder: (context, state) => TransactionsPage.account(
+            accountId: int.tryParse(state.pathParameters["id"]!) ?? -1,
+            title: state.uri.queryParameters["title"],
+          ),
         ),
       ],
     ),
@@ -140,23 +137,21 @@ final router = GoRouter(
     ),
     GoRoute(
       path: "/category/:id",
-      builder:
-          (context, state) => CategoryPage(
-            categoryId: int.tryParse(state.pathParameters["id"]!) ?? -1,
-            initialRange: TimeRange.tryParse(
-              state.uri.queryParameters["range"] ?? "",
-            ),
-          ),
+      builder: (context, state) => CategoryPage(
+        categoryId: int.tryParse(state.pathParameters["id"]!) ?? -1,
+        initialRange: TimeRange.tryParse(
+          state.uri.queryParameters["range"] ?? "",
+        ),
+      ),
       routes: [
         GoRoute(
           path: "edit",
-          pageBuilder:
-              (context, state) => MaterialPage(
-                child: CategoryEditPage(
-                  categoryId: int.tryParse(state.pathParameters["id"]!) ?? -1,
-                ),
-                fullscreenDialog: true,
-              ),
+          pageBuilder: (context, state) => MaterialPage(
+            child: CategoryEditPage(
+              categoryId: int.tryParse(state.pathParameters["id"]!) ?? -1,
+            ),
+            fullscreenDialog: true,
+          ),
         ),
       ],
     ),
@@ -174,8 +169,8 @@ final router = GoRouter(
       routes: [
         GoRoute(
           path: "pendingTransactions",
-          builder:
-              (context, state) => const PendingTransactionPreferencesPage(),
+          builder: (context, state) =>
+              const PendingTransactionPreferencesPage(),
         ),
         GoRoute(
           path: "numpad",
@@ -210,24 +205,22 @@ final router = GoRouter(
           builder: (context, state) => const MoneyFormattingPreferencesPage(),
         ),
         GoRoute(
-          path: "autoBackup",
-          builder: (context, state) => const AutoBackupPreferencesPage(),
+          path: "sync",
+          builder: (context, state) => const SyncPreferencesPage(),
         ),
         GoRoute(
           path: "transactionListItemAppearance",
-          builder:
-              (context, state) =>
-                  const TransactionListItemAppearancePreferencesPage(),
+          builder: (context, state) =>
+              const TransactionListItemAppearancePreferencesPage(),
         ),
       ],
     ),
     GoRoute(path: "/profile", builder: (context, state) => const ProfilePage()),
     GoRoute(
       path: "/profile/:id",
-      builder:
-          (context, state) => ProfilePage(
-            profileId: int.tryParse(state.pathParameters["id"]!) ?? -1,
-          ),
+      builder: (context, state) => ProfilePage(
+        profileId: int.tryParse(state.pathParameters["id"]!) ?? -1,
+      ),
     ),
     GoRoute(
       path: "/utils/cropsquare",
@@ -241,11 +234,10 @@ final router = GoRouter(
             ),
             fullscreenDialog: true,
           ),
-          _ =>
-            throw const ErrorPage(
-              error:
-                  "Invalid state. Pass [CropSquareImagePageProps] object to `extra` prop",
-            ),
+          _ => throw const ErrorPage(
+            error:
+                "Invalid state. Pass [CropSquareImagePageProps] object to `extra` prop",
+          ),
         };
       },
     ),
@@ -264,11 +256,10 @@ final router = GoRouter(
             ),
             fullscreenDialog: true,
           ),
-          _ =>
-            throw const ErrorPage(
-              error:
-                  "Invalid state. Pass [EditMarkdownPageProps] object or nothing to `extra` prop",
-            ),
+          _ => throw const ErrorPage(
+            error:
+                "Invalid state. Pass [EditMarkdownPageProps] object or nothing to `extra` prop",
+          ),
         };
       },
     ),
@@ -314,8 +305,21 @@ final router = GoRouter(
       path: "/import/wizard/csv",
       builder: (context, state) {
         if (state.extra case ImportCSV importCSV) {
-          return ImportWizardCSVPage(
+          return CSVImportWizardPage(
             importer: importCSV,
+            setupMode: state.uri.queryParameters["setupMode"] == "true",
+          );
+        }
+
+        return ErrorPage(error: "error.sync.invalidBackupFile".t(context));
+      },
+    ),
+    GoRoute(
+      path: "/import/wizard/external/ivy",
+      builder: (context, state) {
+        if (state.extra case IvyWalletCsvImporter ivyWalletCsvImporter) {
+          return IvyWalletImportWizardPage(
+            importer: ivyWalletCsvImporter,
             setupMode: state.uri.queryParameters["setupMode"] == "true",
           );
         }
@@ -329,18 +333,23 @@ final router = GoRouter(
     ),
     GoRoute(
       path: "/export/:type",
-      builder:
-          (context, state) => ExportPage(
-            ExportMode.tryParse(state.pathParameters["type"] ?? "zip") ??
-                ExportMode.zip,
-          ),
+      builder: (context, state) {
+        if (state.pathParameters["type"] == "pdf" && state.extra == null) {
+          return ExportPdfPage();
+        }
+
+        return ExportPage(
+          ExportMode.tryParse(state.pathParameters["type"] ?? "zip") ??
+              ExportMode.zip,
+          options: state.extra,
+        );
+      },
     ),
     GoRoute(
       path: "/import",
-      builder:
-          (context, state) => ImportPage(
-            setupMode: state.uri.queryParameters["setupMode"] == "true",
-          ),
+      builder: (context, state) => ImportPage(
+        setupMode: state.uri.queryParameters["setupMode"] == "true",
+      ),
     ),
     GoRoute(
       path: "/setup",
@@ -360,11 +369,10 @@ final router = GoRouter(
         ),
         GoRoute(
           path: "categories",
-          builder:
-              (context, state) => SetupCategoriesPage(
-                standalone: state.uri.queryParameters["standalone"] == "true",
-                selectAll: state.uri.queryParameters["selectAll"] != "false",
-              ),
+          builder: (context, state) => SetupCategoriesPage(
+            standalone: state.uri.queryParameters["standalone"] == "true",
+            selectAll: state.uri.queryParameters["selectAll"] != "false",
+          ),
         ),
         GoRoute(
           path: "profile",
@@ -372,10 +380,8 @@ final router = GoRouter(
         ),
         GoRoute(
           path: "profile/photo",
-          builder:
-              (context, state) => SetupProfilePhotoPage(
-                profileImagePath: state.extra as String,
-              ),
+          builder: (context, state) =>
+              SetupProfilePhotoPage(profileImagePath: state.extra as String),
         ),
       ],
     ),
@@ -401,12 +407,20 @@ final router = GoRouter(
       },
     ),
     GoRoute(
+      path: "/community/contributors",
+      builder: (context, state) => const ContributorsPage(),
+    ),
+    GoRoute(
       path: "/_debug/theme",
       builder: (context, state) => DebugThemePage(),
     ),
     GoRoute(
       path: "/_debug/scheduledNotifications",
       builder: (context, state) => DebugScheduledNotificationsPage(),
+    ),
+    GoRoute(
+      path: "/_debug/iCloud",
+      builder: (context, state) => DebugICloudPage(),
     ),
     GoRoute(path: "/_debug/logs", builder: (context, state) => DebugLogsPage()),
     GoRoute(

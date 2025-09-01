@@ -10,14 +10,13 @@ import "package:go_router/go_router.dart";
 import "package:image_picker/image_picker.dart";
 import "package:path_provider/path_provider.dart";
 
-Future<File?> pickJsonOrZipFile({String? dialogTitle}) async {
+Future<File?> pickImportFile({String? dialogTitle}) async {
   FilePickerResult? result = await FilePicker.platform.pickFiles(
     dialogTitle: dialogTitle ?? "Select a backup file",
     initialDirectory: await getApplicationDocumentsDirectory()
         .then<String?>((value) => value.path)
         .catchError((_) => null),
-    allowedExtensions: ["json", "zip", "csv"],
-    type: FileType.custom,
+    type: FileType.any,
     allowMultiple: false,
   );
 

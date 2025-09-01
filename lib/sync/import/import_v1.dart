@@ -77,47 +77,50 @@ class ImportV1 extends Importer {
     // 0. Erase current data
     progressNotifier.value = ImportV1Progress.erasing;
     await ObjectBox().eraseMainData();
+    _log.fine("Erased main data");
 
     // 1. Resurrect [Category]s
     progressNotifier.value = ImportV1Progress.writingCategories;
     await ObjectBox().box<Category>().putManyAsync(data.categories);
+    _log.fine("Imported ${data.categories.length} categories");
 
     // 2. Resurrect [Account]s
     progressNotifier.value = ImportV1Progress.writingAccounts;
     await ObjectBox().box<Account>().putManyAsync(data.accounts);
+    _log.fine("Imported ${data.accounts.length} accounts");
 
     // 3. Resurrect [Transaction]s
     //
     // Resolve ToOne<T> [account] and [category] by `uuid`.
     progressNotifier.value = ImportV1Progress.resolvingTransactions;
-    final transformedTransactions =
-        data.transactions
-            .map((transaction) {
-              try {
-                transaction = _resolveAccountForTransaction(transaction);
-              } catch (e) {
-                if (e is ImportException) {
-                  _log.warning(e.toString());
-                }
-                return null;
-              }
+    final transformedTransactions = data.transactions
+        .map((transaction) {
+          try {
+            transaction = _resolveAccountForTransaction(transaction);
+          } catch (e) {
+            if (e is ImportException) {
+              _log.warning(e.toString());
+            }
+            return null;
+          }
 
-              try {
-                transaction = _resolveCategoryForTransaction(transaction);
-              } catch (e) {
-                if (e is ImportException) {
-                  _log.warning(e.toString());
-                }
-                // Still proceed without category
-              }
+          try {
+            transaction = _resolveCategoryForTransaction(transaction);
+          } catch (e) {
+            if (e is ImportException) {
+              _log.warning(e.toString());
+            }
+            // Still proceed without category
+          }
 
-              return transaction;
-            })
-            .nonNulls
-            .toList();
+          return transaction;
+        })
+        .nonNulls
+        .toList();
 
     progressNotifier.value = ImportV1Progress.writingTransactions;
     await TransactionsService().upsertMany(transformedTransactions);
+    _log.fine("Imported ${transformedTransactions.length} transactions");
 
     unawaited(
       TransitiveLocalPreferences().updateTransitiveProperties().catchError((
@@ -142,11 +145,10 @@ class ImportV1 extends Importer {
 
     // If the `id` is 0, we've already encountered it
     if (memoizeAccounts[accountUuid] != 0) {
-      final Query<Account> accountQuery =
-          ObjectBox()
-              .box<Account>()
-              .query(Account_.uuid.equals(accountUuid))
-              .build();
+      final Query<Account> accountQuery = ObjectBox()
+          .box<Account>()
+          .query(Account_.uuid.equals(accountUuid))
+          .build();
 
       memoizeAccounts[accountUuid] ??= accountQuery.findFirst()?.id ?? 0;
 
@@ -174,11 +176,10 @@ class ImportV1 extends Importer {
 
     // If the `id` is 0, we've already encountered it
     if (memoizeCategories[categoryUuid] != 0) {
-      final Query<Category> categoryQuery =
-          ObjectBox()
-              .box<Category>()
-              .query(Category_.uuid.equals(categoryUuid))
-              .build();
+      final Query<Category> categoryQuery = ObjectBox()
+          .box<Category>()
+          .query(Category_.uuid.equals(categoryUuid))
+          .build();
 
       memoizeCategories[categoryUuid] ??= categoryQuery.findFirst()?.id ?? 0;
 

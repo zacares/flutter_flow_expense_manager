@@ -53,89 +53,96 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
   Widget build(BuildContext context) {
     final Widget? counterOverride =
         (widget.maxLength != null &&
-                _controller.text.length < (widget.maxLength! * 0.9))
-            ? SizedBox.shrink()
-            : null;
+            _controller.text.length < (widget.maxLength! * 0.9))
+        ? SizedBox.shrink()
+        : null;
 
-    return Scaffold(
-      appBar: AppBar(
-        leadingWidth: 40.0,
-        leading: FormCloseButton(canPop: () => !hasChanged()),
-        actions: [
-          IconButton(
-            onPressed: () => save(),
-            icon: const Icon(Symbols.check_rounded),
-            tooltip: "general.save".t(context),
-          ),
-        ],
-        bottom: TabBar(
-          tabs: [
-            Tab(text: "general.edit".t(context)),
-            Tab(text: "transaction.description.preview".t(context)),
-          ],
-          controller: _tabController,
-        ),
-        centerTitle: true,
-        backgroundColor: context.colorScheme.surface,
-      ),
-      resizeToAvoidBottomInset: false,
-      body: Stack(
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Stack(
         children: [
-          TabBarView(
-            controller: _tabController,
-            children: [
-              SingleChildScrollView(
-                padding: EdgeInsets.all(16.0),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    hintText: "transaction.description".t(context),
-                    border: OutlineInputBorder(),
-                    counter: counterOverride,
-                  ),
-                  focusNode: _focusNode,
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  maxLength: widget.maxLength,
-                  maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                  minLines: 10,
-                  controller: _controller,
-                  autofocus: true,
-                  textInputAction: TextInputAction.newline,
+          Scaffold(
+            appBar: AppBar(
+              leadingWidth: 40.0,
+              leading: FormCloseButton(canPop: () => !hasChanged()),
+              actions: [
+                IconButton(
+                  onPressed: () => save(),
+                  icon: const Icon(Symbols.check_rounded),
+                  tooltip: "general.save".t(context),
                 ),
-              ),
-              SingleChildScrollView(
-                padding: EdgeInsets.only(top: 16.0),
-                child: MarkdownView(controller: _controller),
-              ),
-            ],
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12.0,
-                vertical: 4.0,
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: _bold,
-                    icon: Icon(Symbols.format_bold_rounded),
-                  ),
-                  IconButton(
-                    onPressed: _italic,
-                    icon: Icon(Symbols.format_italic_rounded),
-                  ),
-                  IconButton(
-                    onPressed: _checklist,
-                    icon: Icon(Symbols.checklist_rounded),
-                  ),
+              ],
+              bottom: TabBar(
+                tabs: [
+                  Tab(text: "general.edit".t(context)),
+                  Tab(text: "transaction.description.preview".t(context)),
                 ],
+                controller: _tabController,
               ),
+              centerTitle: true,
+              backgroundColor: context.colorScheme.surface,
+            ),
+            body: TabBarView(
+              controller: _tabController,
+              children: [
+                SingleChildScrollView(
+                  padding: EdgeInsets.all(16.0),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 80.0),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        hintText: "transaction.description".t(context),
+                        border: OutlineInputBorder(),
+                        counter: counterOverride,
+                      ),
+                      focusNode: _focusNode,
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      maxLength: widget.maxLength,
+                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                      minLines: 10,
+                      controller: _controller,
+                      autofocus: true,
+                      textInputAction: TextInputAction.newline,
+                    ),
+                  ),
+                ),
+                SingleChildScrollView(
+                  padding: EdgeInsets.only(top: 16.0),
+                  child: MarkdownView(controller: _controller),
+                ),
+              ],
             ),
           ),
+          if (focused)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              child: Container(
+                color: context.colorScheme.surface,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12.0,
+                  vertical: 4.0,
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: _bold,
+                      icon: Icon(Symbols.format_bold_rounded),
+                    ),
+                    IconButton(
+                      onPressed: _italic,
+                      icon: Icon(Symbols.format_italic_rounded),
+                    ),
+                    IconButton(
+                      onPressed: _checklist,
+                      icon: Icon(Symbols.checklist_rounded),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -149,7 +156,7 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
     return _controller.text != widget.initialValue;
   }
 
-  _bold() {
+  void _bold() {
     if (_controller.selection.isCollapsed) {
       _insert("****", -2);
     } else {
@@ -157,7 +164,7 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
     }
   }
 
-  _italic() {
+  void _italic() {
     if (_controller.selection.isCollapsed) {
       _insert("**", -1);
     } else {
@@ -165,7 +172,7 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
     }
   }
 
-  _checklist() {
+  void _checklist() {
     if (_controller.selection.isCollapsed) {
       _insertChecklist();
     } else {
@@ -173,7 +180,11 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
     }
   }
 
-  _alterUncollapsed(String prefix, String postfix, [int cursorOffset = 0]) {
+  void _alterUncollapsed(
+    String prefix,
+    String postfix, [
+    int cursorOffset = 0,
+  ]) {
     try {
       final TextSelection selection = _controller.selection;
       final String text = _controller.text;
@@ -196,7 +207,7 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
     }
   }
 
-  _insertChecklist() {
+  void _insertChecklist() {
     try {
       final TextSelection selection = _controller.selection;
       final String text = _controller.text;
@@ -206,8 +217,9 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
       final bool currentlyAtBegginingOfLine =
           selection.start == 0 || text[selection.start - 1] == "\n";
 
-      final String payload =
-          currentlyAtBegginingOfLine ? "- [ ] \n" : "\n- [ ] \n";
+      final String payload = currentlyAtBegginingOfLine
+          ? "- [ ] \n"
+          : "\n- [ ] \n";
       final int cursorOffset = -1;
 
       _controller.value = TextEditingValue(
@@ -223,7 +235,7 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
     }
   }
 
-  _insert(String payload, [int cursorOffset = 0]) {
+  void _insert(String payload, [int cursorOffset = 0]) {
     try {
       final TextSelection selection = _controller.selection;
       final String text = _controller.text;
@@ -243,7 +255,7 @@ class _EditMarkdownPageState extends State<EditMarkdownPage>
     }
   }
 
-  _handleFocusChange() {
+  void _handleFocusChange() {
     setState(() {
       focused = _focusNode.hasFocus;
     });

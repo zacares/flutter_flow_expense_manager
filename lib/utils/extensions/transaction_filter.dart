@@ -2,6 +2,7 @@ import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/category.dart";
+import "package:flow/entity/transaction/type.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/l10n/named_enum.dart";
 import "package:flow/widgets/utils/time_and_range.dart";
@@ -45,6 +46,16 @@ extension TransactionFilterHelpers on TransactionFilter {
       );
     }
 
+    if (types?.isNotEmpty == true) {
+      parts.add(
+        getValueLabel(
+          context,
+          translationKey: "transactions.query.filter.transactionType",
+          value: types,
+        ),
+      );
+    }
+
     parts.add(
       getValueLabel(
         context,
@@ -84,7 +95,7 @@ extension TransactionFilterHelpers on TransactionFilter {
 
     if (value case TimeRange timeRange) {
       if (timeRange == last30DaysRange()) {
-        return "tabs.stats.timeRange.last30days".t(context);
+        return "select.timeRange.last30days".t(context);
       }
 
       return timeRange.format();
@@ -96,6 +107,10 @@ extension TransactionFilterHelpers on TransactionFilter {
 
     if (value case Category category) {
       return category.name;
+    }
+
+    if (value case TransactionType type) {
+      return type.localizedNameContext(context);
     }
 
     if (value case TransactionSearchData searchData) {

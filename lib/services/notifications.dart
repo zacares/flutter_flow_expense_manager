@@ -117,13 +117,13 @@ class NotificationsService {
           throw Exception("Linux doesn't support notification app launch");
         }
 
-        final NotificationAppLaunchDetails? launchDetails =
-            await pluginInstance.getNotificationAppLaunchDetails();
+        final NotificationAppLaunchDetails? launchDetails = await pluginInstance
+            .getNotificationAppLaunchDetails();
 
         notificationAppLaunchDetails =
             launchDetails?.didNotificationLaunchApp == true
-                ? launchDetails
-                : null;
+            ? launchDetails
+            : null;
       } catch (e) {
         notificationAppLaunchDetails = null;
         _log.info("NotificationAppLaunchDetails failed", e);
@@ -154,8 +154,8 @@ class NotificationsService {
   /// Upon failure, returns an empty list
   Future<List<PendingNotificationRequest>> fetchAllNotification() async {
     try {
-      final List<PendingNotificationRequest> result =
-          await pluginInstance.pendingNotificationRequests();
+      final List<PendingNotificationRequest> result = await pluginInstance
+          .pendingNotificationRequests();
       return result;
     } catch (e) {
       return <PendingNotificationRequest>[];
@@ -186,11 +186,12 @@ class NotificationsService {
       return;
     }
 
-    final TZDateTime dateTime = _getTZDateTime(
-      earlyReminder == null
-          ? transaction.transactionDate
-          : transaction.transactionDate.subtract(earlyReminder),
-    );
+    final TZDateTime dateTime = _getTZDateTime(transaction.transactionDate);
+
+    final TZDateTime? earlyDateTime =
+        (earlyReminder != null && earlyReminder >= const Duration(seconds: 60))
+        ? _getTZDateTime(transaction.transactionDate.subtract(earlyReminder))
+        : null;
 
     try {
       final NotificationDetails details = NotificationDetails(
@@ -229,16 +230,32 @@ class NotificationsService {
         dateTime,
         details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        payload:
-            FlowNotificationPayload(
-              itemType: FlowNotificationPayloadItemType.transaction,
-              id: transaction.uuid,
-            ).serialized,
+        payload: FlowNotificationPayload(
+          itemType: FlowNotificationPayloadItemType.transaction,
+          id: transaction.uuid,
+        ).serialized,
       );
-
       _log.info(
         "Scheduled a reminder for transaction '${transaction.title ?? 'untitled'}' ${transaction.uuid} at ${dateTime.toString()}",
       );
+
+      if (earlyDateTime != null) {
+        await pluginInstance.zonedSchedule(
+          _getNextId(),
+          transaction.title ?? "transaction.fallbackTitle".tr(),
+          "${transaction.money.formatMoney()}, ${dateTime.toMoment().from(earlyDateTime)}",
+          earlyDateTime,
+          details,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          payload: FlowNotificationPayload(
+            itemType: FlowNotificationPayloadItemType.transaction,
+            id: transaction.uuid,
+          ).serialized,
+        );
+        _log.info(
+          "Scheduled an early reminder for transaction '${transaction.title ?? 'untitled'}' ${transaction.uuid} at ${earlyDateTime.toString()}",
+        );
+      }
     } catch (e) {
       _log.warning("Failed to schedule notification", e);
     }
@@ -258,8 +275,8 @@ class NotificationsService {
     final List<PendingNotificationRequest> scheduledNotifications =
         await fetchAllNotification();
 
-    final List<PendingNotificationRequest> reminders =
-        scheduledNotifications.where((x) {
+    final List<PendingNotificationRequest> reminders = scheduledNotifications
+        .where((x) {
           if (x.payload == null) return type == null;
           try {
             final FlowNotificationPayload parsedPayload =
@@ -269,7 +286,8 @@ class NotificationsService {
           } catch (e) {
             return type == null;
           }
-        }).toList();
+        })
+        .toList();
 
     _log.fine(
       "Attempting to clear ${reminders.length} reminders of type $type",
@@ -354,11 +372,10 @@ class NotificationsService {
           dateTime,
           details,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          payload:
-              FlowNotificationPayload(
-                itemType: FlowNotificationPayloadItemType.reminder,
-                id: null,
-              ).serialized,
+          payload: FlowNotificationPayload(
+            itemType: FlowNotificationPayloadItemType.reminder,
+            id: null,
+          ).serialized,
         );
         _log.info("Scheduled a reminder at ${dateTime.toString()}, $i");
       } catch (e) {
@@ -496,13 +513,13 @@ class NotificationsService {
               >();
 
       try {
-        final bool? enabled =
-            await androidImplementation?.areNotificationsEnabled();
+        final bool? enabled = await androidImplementation
+            ?.areNotificationsEnabled();
         if (enabled != true) {
           return false;
         }
-        final bool? canSchedule =
-            await androidImplementation?.canScheduleExactNotifications();
+        final bool? canSchedule = await androidImplementation
+            ?.canScheduleExactNotifications();
 
         return canSchedule == true;
       } catch (e) {
@@ -510,12 +527,11 @@ class NotificationsService {
       }
     }
     if (Platform.isIOS) {
-      final NotificationsEnabledOptions? permissions =
-          await pluginInstance
-              .resolvePlatformSpecificImplementation<
-                IOSFlutterLocalNotificationsPlugin
-              >()
-              ?.checkPermissions();
+      final NotificationsEnabledOptions? permissions = await pluginInstance
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >()
+          ?.checkPermissions();
 
       if (permissions == null || !permissions.isEnabled) {
         return false;
@@ -523,12 +539,11 @@ class NotificationsService {
       return true;
     }
     if (Platform.isMacOS) {
-      final NotificationsEnabledOptions? permissions =
-          await pluginInstance
-              .resolvePlatformSpecificImplementation<
-                MacOSFlutterLocalNotificationsPlugin
-              >()
-              ?.checkPermissions();
+      final NotificationsEnabledOptions? permissions = await pluginInstance
+          .resolvePlatformSpecificImplementation<
+            MacOSFlutterLocalNotificationsPlugin
+          >()
+          ?.checkPermissions();
 
       if (permissions == null || !permissions.isEnabled) {
         return false;

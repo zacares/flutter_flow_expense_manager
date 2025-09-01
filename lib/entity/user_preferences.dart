@@ -1,4 +1,5 @@
 import "package:flow/entity/_base.dart";
+import "package:flow/entity/transaction/type.dart";
 import "package:flow/utils/json/utc_datetime_converter.dart";
 import "package:json_annotation/json_annotation.dart";
 import "package:objectbox/objectbox.dart";
@@ -43,10 +44,9 @@ class UserPreferences implements EntityBase {
   /// e.g., to set a daily reminder at 9:00 AM, set it to 9 hours
   @Transient()
   @JsonKey(includeToJson: false, includeFromJson: false)
-  Duration? get remindDailyAt =>
-      remindDailyAtRelativeSeconds == null
-          ? null
-          : Duration(seconds: remindDailyAtRelativeSeconds!);
+  Duration? get remindDailyAt => remindDailyAtRelativeSeconds == null
+      ? null
+      : Duration(seconds: remindDailyAtRelativeSeconds!);
 
   set remindDailyAt(Duration? duration) {
     remindDailyAtRelativeSeconds = duration?.inSeconds;
@@ -62,8 +62,57 @@ class UserPreferences implements EntityBase {
   bool transactionListTileShowCategoryName;
   bool transactionListTileShowAccountForLeading;
 
+  String? icuCurrencyFormattingPattern;
+
+  String? primaryCurrency;
+
   /// In hours, set as `null` to disable
   int? autoBackupIntervalInHours;
+
+  bool enableICloudSync;
+
+  /// Number of iCloud backups Flow should preserve. At each startup,
+  /// Flow will remove any extra backups, sorted by time of the backup.
+  ///
+  /// Defaults to [10]
+  ///
+  /// Set to 0 or less to keep all
+  int? iCloudBackupsToKeep;
+
+  String? transactionButtonOrderJoined;
+
+  String? themeName;
+  bool themeChangesAppIcon;
+
+  @Transient()
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  List<TransactionType> get transactionButtonOrder {
+    try {
+      if (transactionButtonOrderJoined == null ||
+          transactionButtonOrderJoined!.isEmpty) {
+        throw StateError("transactionButtonOrderJoined is null or empty");
+      }
+
+      final List<TransactionType> parsed = transactionButtonOrderJoined!
+          .split(",")
+          .map(
+            (e) => TransactionType.values.firstWhere((type) => type.value == e),
+          )
+          .toList();
+
+      if (parsed.length != TransactionType.values.length) {
+        throw StateError("Parsed transactionButtonOrder length mismatch");
+      }
+
+      return parsed;
+    } catch (e) {
+      return TransactionType.values.toList();
+    }
+  }
+
+  set transactionButtonOrder(List<TransactionType> order) {
+    transactionButtonOrderJoined = order.map((e) => e.value).join(",");
+  }
 
   UserPreferences({
     this.id = 0,
@@ -75,7 +124,15 @@ class UserPreferences implements EntityBase {
     this.transactionListTileShowAccountForLeading = false,
     this.trashBinRetentionDays = 30,
     this.defaultFilterPreset,
+    this.enableICloudSync = false,
+    this.iCloudBackupsToKeep = 10,
     this.autoBackupIntervalInHours = 72,
+    this.icuCurrencyFormattingPattern,
+    this.primaryCurrency,
+    this.transactionButtonOrderJoined,
+    this.remindDailyAtRelativeSeconds,
+    this.themeName,
+    this.themeChangesAppIcon = true,
   }) : uuid = const Uuid().v4();
 
   factory UserPreferences.fromJson(Map<String, dynamic> json) =>

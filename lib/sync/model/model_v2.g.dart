@@ -11,34 +11,29 @@ SyncModelV2 _$SyncModelV2FromJson(Map<String, dynamic> json) => SyncModelV2(
   exportDate: DateTime.parse(json['exportDate'] as String),
   username: json['username'] as String,
   appVersion: json['appVersion'] as String,
-  transactions:
-      (json['transactions'] as List<dynamic>)
-          .map((e) => Transaction.fromJson(e as Map<String, dynamic>))
-          .toList(),
-  accounts:
-      (json['accounts'] as List<dynamic>)
-          .map((e) => Account.fromJson(e as Map<String, dynamic>))
-          .toList(),
-  categories:
-      (json['categories'] as List<dynamic>)
-          .map((e) => Category.fromJson(e as Map<String, dynamic>))
-          .toList(),
-  transactionFilterPresets:
-      (json['transactionFilterPresets'] as List<dynamic>?)
-          ?.map(
-            (e) => TransactionFilterPreset.fromJson(e as Map<String, dynamic>),
-          )
-          .toList(),
-  profile:
-      json['profile'] == null
-          ? null
-          : Profile.fromJson(json['profile'] as Map<String, dynamic>),
-  userPreferences:
-      json['userPreferences'] == null
-          ? null
-          : UserPreferences.fromJson(
-            json['userPreferences'] as Map<String, dynamic>,
-          ),
+  transactions: (json['transactions'] as List<dynamic>)
+      .map((e) => Transaction.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  recurringTransactions: (json['recurringTransactions'] as List<dynamic>?)
+      ?.map((e) => RecurringTransaction.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  accounts: (json['accounts'] as List<dynamic>)
+      .map((e) => Account.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  categories: (json['categories'] as List<dynamic>)
+      .map((e) => Category.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  transactionFilterPresets: (json['transactionFilterPresets'] as List<dynamic>?)
+      ?.map((e) => TransactionFilterPreset.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  profile: json['profile'] == null
+      ? null
+      : Profile.fromJson(json['profile'] as Map<String, dynamic>),
+  userPreferences: json['userPreferences'] == null
+      ? null
+      : UserPreferences.fromJson(
+          json['userPreferences'] as Map<String, dynamic>,
+        ),
   primaryCurrency: json['primaryCurrency'] as String?,
 );
 
@@ -48,9 +43,10 @@ Map<String, dynamic> _$SyncModelV2ToJson(SyncModelV2 instance) =>
       'exportDate': instance.exportDate.toIso8601String(),
       'username': instance.username,
       'appVersion': instance.appVersion,
-      'transactions': instance.transactions,
       'accounts': instance.accounts,
       'categories': instance.categories,
+      'transactions': instance.transactions,
+      'recurringTransactions': instance.recurringTransactions,
       'transactionFilterPresets': instance.transactionFilterPresets,
       'profile': instance.profile,
       'userPreferences': instance.userPreferences,

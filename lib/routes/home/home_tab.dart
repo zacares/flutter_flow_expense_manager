@@ -1,27 +1,30 @@
 import "dart:async";
 
+import "package:flow/data/actionable_nofications/actionable_notification.dart";
 import "package:flow/data/exchange_rates.dart";
-import "package:flow/data/internal_nofications/internal_notification.dart";
+import "package:flow/data/single_currency_flow.dart";
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction_filter_preset.dart";
+import "package:flow/l10n/extensions.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/actionable_notifications.dart";
 import "package:flow/services/exchange_rates.dart";
-import "package:flow/services/internal_notifications.dart";
 import "package:flow/services/user_preferences.dart";
+import "package:flow/theme/helpers.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/default_transaction_filter_head.dart";
 import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/general/pending_transactions_header.dart";
 import "package:flow/widgets/general/wavy_divider.dart";
-import "package:flow/widgets/grouped_transaction_list.dart";
+import "package:flow/widgets/grouped_transactions_list_view.dart";
 import "package:flow/widgets/home/greetings_bar.dart";
 import "package:flow/widgets/home/home/flow_cards.dart";
 import "package:flow/widgets/home/home/no_transactions.dart";
 import "package:flow/widgets/internal_notifications/internal_notification_section.dart";
-import "package:flow/widgets/rates_missing_warning.dart";
+import "package:flow/widgets/rates_missing_error_box.dart";
 import "package:flow/widgets/transactions_date_header.dart";
 import "package:flutter/material.dart";
 import "package:flutter_slidable/flutter_slidable.dart";
@@ -45,15 +48,14 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   late TransactionFilter defaultFilter;
   DateTime dateKey = Moment.startOfToday();
 
-  InternalNotification? _internalNotification;
+  ActionableNotification? _actionableNotification;
 
   late TransactionFilter currentFilter;
 
   TransactionFilter get currentFilterWithPlanned {
-    final DateTime plannedTransactionTo =
-        Moment.now()
-            .add(Duration(days: _plannedTransactionsNextNDays))
-            .startOfNextDay();
+    final DateTime plannedTransactionTo = Moment.now()
+        .add(Duration(days: _plannedTransactionsNextNDays))
+        .startOfNextDay();
 
     final TimeRange? timeRange = currentFilter.range?.range;
 
@@ -91,15 +93,15 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     );
 
     _timer = Timer.periodic(
-      const Duration(seconds: 30),
+      const Duration(seconds: 20),
       (_) => refreshDateKeyAndDefaultFilter(),
     );
 
-    UserPreferencesService().valueNotiifer.addListener(_rawUpdateDefaultFilter);
-    InternalNotificationsService().notifications.addListener(
-      _updateInternalNotification,
+    UserPreferencesService().valueNotifier.addListener(_rawUpdateDefaultFilter);
+    ActionableNotificationsService().notifications.addListener(
+      _updateActionableNotification,
     );
-    _updateInternalNotification();
+    _updateActionableNotification();
 
     ExchangeRatesService().getPrimaryCurrencyRates();
   }
@@ -111,11 +113,11 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       _updatePlannedTransactionDays,
     );
     _timer.cancel();
-    UserPreferencesService().valueNotiifer.removeListener(
+    UserPreferencesService().valueNotifier.removeListener(
       _rawUpdateDefaultFilter,
     );
-    InternalNotificationsService().notifications.removeListener(
-      _updateInternalNotification,
+    ActionableNotificationsService().notifications.removeListener(
+      _updateActionableNotification,
     );
     super.dispose();
   }
@@ -137,7 +139,18 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           ),
       builder: (context, snapshot) {
         final DateTime now = Moment.now().startOfNextMinute();
+        final DateTime cutoffPlanned = now
+            .add(Duration(days: _plannedTransactionsNextNDays))
+            .startOfNextDay();
         final List<Transaction>? transactions = snapshot.data;
+
+        if (currentFilter.range?.range?.contains(now) == true) {
+          transactions?.removeWhere((transaction) {
+            if (transaction.transactionDate <= now) return false;
+
+            return transaction.transactionDate > cutoffPlanned;
+          });
+        }
 
         final Widget header = DefaultTransactionsFilterHead(
           defaultFilter: defaultFilter,
@@ -163,29 +176,14 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                 ],
               ),
             ),
-            if (_internalNotification != null) ...[
-              const SliverToBoxAdapter(child: SizedBox(height: 12.0)),
-              SliverToBoxAdapter(
-                child: SlidableAutoCloseBehavior(
-                  child: InternalNotificationSection(
-                    notification: _internalNotification!,
-                    onDismiss:
-                        () => setState(() {
-                          _internalNotification = null;
-                        }),
-                  ),
-                ),
-              ),
-            ],
+
             switch ((transactions?.length ?? 0, snapshot.hasData)) {
               (0, true) => SliverFillRemaining(
                 child: NoTransactions(isFilterModified: isFilterModified),
               ),
               (_, true) => buildGroupedList(context, now, transactions ?? []),
               (_, false) => const SliverFillRemaining(
-                child: Center(
-                  child: CircularProgressIndicator /*.adaptive*/ (),
-                ),
+                child: Center(child: CircularProgressIndicator()),
               ),
             },
             SliverToBoxAdapter(child: const SizedBox(height: 96.0)),
@@ -204,12 +202,12 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       valueListenable: ExchangeRatesService().exchangeRatesCache,
       builder: (context, ratesSet, _) {
         final ExchangeRates? rates = ratesSet?.get(
-          LocalPreferences().getPrimaryCurrency(),
+          UserPreferencesService().primaryCurrency,
         );
 
         final bool showMissingExchangeRatesWarning =
             rates == null &&
-            !TransitiveLocalPreferences().transitiveUsesSingleCurrency.get();
+            TransitiveLocalPreferences().usesNonPrimaryCurrency.get();
 
         final Map<TimeRange, List<Transaction>> grouped = transactions
             .where(
@@ -219,41 +217,78 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             )
             .groupByRange(rangeFn: currentFilter.groupBy.fromTransaction);
 
-        final List<Transaction> pendingTransactions =
-            transactions
-                .where(
-                  (transaction) =>
-                      transaction.transactionDate.isAfter(now) ||
-                      transaction.isPending == true,
-                )
-                .toList();
+        final List<Transaction> pendingTransactions = transactions
+            .where(
+              (transaction) =>
+                  transaction.transactionDate.isAfter(now) ||
+                  transaction.isPending == true,
+            )
+            .toList();
 
-        final int actionNeededCount =
-            pendingTransactions
-                .where((transaction) => transaction.confirmable())
-                .length;
+        final int actionNeededCount = pendingTransactions
+            .where((transaction) => transaction.confirmable())
+            .length;
 
         final Map<TimeRange, List<Transaction>> pendingTransactionsGrouped =
             pendingTransactions.groupByRange(
-              rangeFn:
-                  (transaction) =>
-                      CustomTimeRange(Moment.minValue, Moment.maxValue),
+              rangeFn: (transaction) =>
+                  CustomTimeRange(Moment.minValue, Moment.maxValue),
             );
 
         final bool shouldCombineTransferIfNeeded =
             currentFilter.accounts?.isNotEmpty != true;
 
-        return GroupedTransactionList(
-          listType: GroupedTransactionListType.sliverReorderable,
-          header: Column(
+        final String primaryCurrency = UserPreferencesService().primaryCurrency;
+
+        final SingleCurrencyFlow combinedFlow =
+            SingleCurrencyFlow(currency: primaryCurrency)..addAll(
+              transactions
+                  .where((transaction) => !transaction.isTransfer)
+                  .map((t) => t.money),
+              rates,
+            );
+
+        return GroupedTransactionsListView(
+          listType: GroupedTransactionsListViewType.sliverReorderable,
+          mainHeader: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: 12.0),
-              FlowCards(transactions: transactions, rates: rates),
-              if (showMissingExchangeRatesWarning) ...[
-                const SizedBox(height: 12.0),
-                RatesMissingWarning(),
+              // TODO @sadespresso show iCloud errors if enabled, and platform is supported
+              if (_actionableNotification != null) ...[
+                SlidableAutoCloseBehavior(
+                  child: ActionableNotificationSection(
+                    notification: _actionableNotification!,
+                    onDismiss: () => setState(() {
+                      _actionableNotification = null;
+                    }),
+                  ),
+                ),
+                SizedBox(height: 8.0),
               ],
+              if (showMissingExchangeRatesWarning) ...[
+                RatesMissingErrorBox(),
+                SizedBox(height: 8.0),
+              ],
+              // TODO @sadespresso want to analyze transactions shown in current
+              // view. For example, average amount of transaction, how often this
+              // happens, total txn count, etc
+              // if (defaultFilter != currentFilter) ...[
+              //   Text("transactions.count".t(context, transactions.length)),
+              //   const SizedBox(height: 4.0),
+              // ],
+              FlowCards(
+                totalExpense: combinedFlow.totalExpense,
+                totalIncome: combinedFlow.totalIncome,
+              ),
+              SizedBox(height: 8.0),
+              Align(
+                alignment: AlignmentDirectional.topStart,
+                child: Text(
+                  "transactions.count".t(context, transactions.renderableCount),
+                  style: context.textTheme.bodyMedium?.semi(context),
+                ),
+              ),
+              SizedBox(height: 4.0),
             ],
           ),
           controller: widget.scrollController,
@@ -262,7 +297,6 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           pendingTransactions: pendingTransactionsGrouped,
           shouldCombineTransferIfNeeded: shouldCombineTransferIfNeeded,
           pendingDivider: const WavyDivider(),
-          listPadding: const EdgeInsets.only(top: 0, bottom: 80.0),
           headerBuilder: (pendingGroup, range, transactions) {
             if (pendingGroup) {
               return PendingTransactionsHeader(
@@ -304,10 +338,10 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         TransactionFilterPreset.defaultFilter;
   }
 
-  void _updateInternalNotification() {
-    if (_internalNotification != null) return;
+  void _updateActionableNotification() {
+    if (_actionableNotification != null) return;
 
-    _internalNotification = InternalNotificationsService().consume();
+    _actionableNotification = ActionableNotificationsService().consume();
 
     setState(() {});
   }

@@ -14,13 +14,13 @@ class Haptics extends StatefulWidget {
 class _HapticsState extends State<Haptics> {
   @override
   Widget build(BuildContext context) {
-    final bool enableHapticFeedback =
-        LocalPreferences().enableHapticFeedback.get();
+    final bool enableHapticFeedback = LocalPreferences().enableHapticFeedback
+        .get();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SwitchListTile /*.adaptive*/ (
+        SwitchListTile(
           secondary: const Icon(Symbols.vibration_rounded),
           title: Text("preferences.hapticFeedback.description".t(context)),
           value: enableHapticFeedback,

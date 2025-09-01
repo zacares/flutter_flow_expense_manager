@@ -5,8 +5,10 @@ import "package:flow/data/flow_icon.dart";
 import "package:flow/data/setup/default_accounts.dart";
 import "package:flow/data/setup/default_categories.dart";
 import "package:flow/entity/account.dart";
+import "package:flow/entity/budget.dart";
 import "package:flow/entity/category.dart";
 import "package:flow/entity/profile.dart";
+import "package:flow/entity/recurring_transaction.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction_filter_preset.dart";
 import "package:flow/entity/user_preferences.dart";
@@ -61,6 +63,7 @@ class ObjectBox {
   static Future<ObjectBox> initialize({
     String? customDirectory,
     String? subdirectory,
+    Directory? appSupportDirectory,
   }) async {
     if (subdirectory == null && flowDebugMode) {
       subdirectory = kDebugDefaultSubdirectory;
@@ -69,7 +72,9 @@ class ObjectBox {
     ObjectBox.subdirectory = subdirectory;
     ObjectBox.customDirectory = customDirectory;
 
-    ObjectBox.appDataDirectory = await _appDataDirectory();
+    ObjectBox.appDataDirectory = await _appDataDirectory(
+      supportDir: appSupportDirectory,
+    );
 
     final dir = Directory(ObjectBox.appDataDirectory);
     if (!(await dir.exists())) {
@@ -93,12 +98,12 @@ class ObjectBox {
     return _instance = ObjectBox._internal(store);
   }
 
-  static Future<String> _appDataDirectory() async {
+  static Future<String> _appDataDirectory({Directory? supportDir}) async {
     if (customDirectory != null) {
       return path.join(customDirectory!, subdirectory);
     }
 
-    final appDataDir = await getApplicationSupportDirectory();
+    final appDataDir = supportDir ?? await getApplicationSupportDirectory();
 
     return path.join(appDataDir.path, subdirectory);
   }
@@ -144,11 +149,10 @@ class ObjectBox {
           const IconFlowIcon(Symbols.request_quote_rounded).toString(),
     );
 
-    final [main, cash, savings] =
-        getAccountPresets("USD").map((e) {
-          e.id = 0;
-          return e;
-        }).toList();
+    final [main, cash, savings] = getAccountPresets("USD").map((e) {
+      e.id = 0;
+      return e;
+    }).toList();
 
     main
       ..updateBalanceAndSave(
@@ -239,6 +243,8 @@ class ObjectBox {
         box<Account>().removeAllAsync(),
         box<Profile>().removeAllAsync(),
         box<UserPreferences>().removeAllAsync(),
+        box<Budget>().removeAllAsync(),
+        box<RecurringTransaction>().removeAllAsync(),
         box<TransactionFilterPreset>().removeAllAsync(),
       ]);
     } finally {}

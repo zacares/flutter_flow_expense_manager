@@ -47,66 +47,61 @@ class _AccountsTabState extends State<AccountsTab>
           const SizedBox(height: 16.0),
           Frame(child: buildHeader(context)),
           ValueListenableBuilder(
-            valueListenable: UserPreferencesService().valueNotiifer,
+            valueListenable: UserPreferencesService().valueNotifier,
             builder: (context, userPreferences, child) {
               final bool excludeTransfersInTotal =
                   userPreferences.excludeTransfersFromFlow;
 
               return Expanded(
-                child:
-                    _reordering
-                        ? Frame(
-                          child: ReorderableListView.builder(
-                            padding: const EdgeInsets.only(bottom: 96.0),
-                            itemBuilder:
-                                (context, index) => Padding(
-                                  key: ValueKey(accounts[index].uuid),
-                                  padding: const EdgeInsets.only(bottom: 16.0),
-                                  child: AccountCard(
-                                    account: accounts[index],
-                                    useCupertinoContextMenu: false,
-                                    excludeTransfersInTotal:
-                                        excludeTransfersInTotal == true,
-                                  ),
-                                ),
-                            proxyDecorator: proxyDecorator,
-                            itemCount: accounts.length,
-                            onReorder:
-                                (oldIndex, newIndex) =>
-                                    onReorder(accounts, oldIndex, newIndex),
+                child: _reordering
+                    ? Frame(
+                        child: ReorderableListView.builder(
+                          padding: const EdgeInsets.only(bottom: 96.0),
+                          itemBuilder: (context, index) => Padding(
+                            key: ValueKey(accounts[index].uuid),
+                            padding: const EdgeInsets.only(bottom: 16.0),
+                            child: AccountCard(
+                              account: accounts[index],
+                              useCupertinoContextMenu: false,
+                              excludeTransfersInTotal:
+                                  excludeTransfersInTotal == true,
+                            ),
                           ),
-                        )
-                        : ListView(
-                          padding: const EdgeInsets.all(16.0),
-                          children: [
-                            TotalBalance(),
-                            const SizedBox(height: 16.0),
-                            Divider(),
-                            const SizedBox(height: 16.0),
-                            ...accounts.map(
-                              (account) => Padding(
-                                padding: const EdgeInsets.only(bottom: 16.0),
-                                child: AccountCard(
-                                  account: account,
-                                  useCupertinoContextMenu: Platform.isIOS,
-                                  excludeTransfersInTotal:
-                                      excludeTransfersInTotal == true,
-                                  onTapOverride: Optional(() async {
-                                    await context.push(
-                                      "/account/${account.id}",
-                                    );
-                                    setState(() {});
-                                  }),
-                                ),
+                          proxyDecorator: proxyDecorator,
+                          itemCount: accounts.length,
+                          onReorder: (oldIndex, newIndex) =>
+                              onReorder(accounts, oldIndex, newIndex),
+                        ),
+                      )
+                    : ListView(
+                        padding: const EdgeInsets.all(16.0),
+                        children: [
+                          TotalBalance(),
+                          const SizedBox(height: 16.0),
+                          Divider(),
+                          const SizedBox(height: 16.0),
+                          ...accounts.map(
+                            (account) => Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: AccountCard(
+                                account: account,
+                                useCupertinoContextMenu: Platform.isIOS,
+                                excludeTransfersInTotal:
+                                    excludeTransfersInTotal == true,
+                                onTapOverride: Optional(() async {
+                                  await context.push("/account/${account.id}");
+                                  setState(() {});
+                                }),
                               ),
                             ),
-                            AccountCardSkeleton(
-                              onTap: () => context.push("/account/new"),
-                            ),
-                            const SizedBox(height: 16.0),
-                            const SizedBox(height: 64.0),
-                          ],
-                        ),
+                          ),
+                          AccountCardSkeleton(
+                            onTap: () => context.push("/account/new"),
+                          ),
+                          const SizedBox(height: 16.0),
+                          const SizedBox(height: 64.0),
+                        ],
+                      ),
               );
             },
           ),
@@ -127,14 +122,12 @@ class _AccountsTabState extends State<AccountsTab>
         const Spacer(),
         IconButton(
           onPressed: toggleReorderMode,
-          tooltip:
-              _reordering
-                  ? "general.done".t(context)
-                  : "tabs.accounts.reorder".t(context),
-          icon:
-              _reordering
-                  ? const Icon(Symbols.check_rounded)
-                  : const Icon(Symbols.reorder_rounded),
+          tooltip: _reordering
+              ? "general.done".t(context)
+              : "tabs.accounts.reorder".t(context),
+          icon: _reordering
+              ? const Icon(Symbols.check_rounded)
+              : const Icon(Symbols.reorder_rounded),
         ),
       ],
     );

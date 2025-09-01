@@ -1,33 +1,63 @@
 import "dart:math";
 
 import "package:flow/data/flow_notification_payload.dart";
+import "package:flow/entity/account.dart";
+import "package:flow/entity/transaction/type.dart";
 import "package:flow/entity/transaction_filter_preset.dart";
 import "package:flow/entity/user_preferences.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:flow/services/notifications.dart";
 import "package:flow/services/sync.dart";
+import "package:flow/theme/color_themes/registry.dart";
 import "package:flutter/material.dart";
+import "package:intl/intl.dart";
 
 class UserPreferencesService {
-  final ValueNotifier<UserPreferences> valueNotiifer = ValueNotifier(
+  final ValueNotifier<UserPreferences> valueNotifier = ValueNotifier(
     UserPreferences(),
   );
 
-  UserPreferences get value => valueNotiifer.value;
+  UserPreferences get value => valueNotifier.value;
 
   bool get combineTransfers => value.combineTransfers;
   set combineTransfers(bool newCombineTransfers) {
-    if (value.id == 0) return;
-
     value.combineTransfers = newCombineTransfers;
     ObjectBox().box<UserPreferences>().put(value);
   }
 
+  bool get enableICloudSync => value.enableICloudSync;
+  set enableICloudSync(bool newEnableICloudSync) {
+    value.enableICloudSync = newEnableICloudSync;
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
+  bool get themeChangesAppIcon => value.themeChangesAppIcon;
+  set themeChangesAppIcon(bool newThemeChangesAppIcon) {
+    value.themeChangesAppIcon = newThemeChangesAppIcon;
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
+  String get themeName {
+    final String? savedThemeName = value.themeName;
+
+    if (validateThemeName(savedThemeName)) {
+      return savedThemeName!;
+    }
+
+    return flowLights.schemes.first.name;
+  }
+
+  set themeName(String? newThemeName) {
+    if (validateThemeName(newThemeName)) {
+      value.themeName = newThemeName;
+      ObjectBox().box<UserPreferences>().put(value);
+    }
+  }
+
   int? get trashBinRetentionDays => value.trashBinRetentionDays;
   set trashBinRetentionDays(int? newTrashBinRetentionDays) {
-    if (value.id == 0) return;
-
     if (newTrashBinRetentionDays == null) {
       value.trashBinRetentionDays = null;
     } else {
@@ -37,10 +67,17 @@ class UserPreferencesService {
     ObjectBox().box<UserPreferences>().put(value);
   }
 
+  int? get iCloudBackupsToKeep => value.iCloudBackupsToKeep;
+  set iCloudBackupsToKeep(int? newICloudBackupsToKeep) {
+    if (newICloudBackupsToKeep == null) return;
+
+    value.trashBinRetentionDays = newICloudBackupsToKeep;
+
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
   int? get autoBackupIntervalInHours => value.autoBackupIntervalInHours;
   set autoBackupIntervalInHours(int? newAutobackupIntervalInHours) {
-    if (value.id == 0) return;
-
     if (newAutobackupIntervalInHours == null) {
       value.autoBackupIntervalInHours = null;
     } else {
@@ -57,8 +94,6 @@ class UserPreferencesService {
 
   bool get excludeTransfersFromFlow => value.excludeTransfersFromFlow;
   set excludeTransfersFromFlow(bool newExcludeTransfersFromFlow) {
-    if (value.id == 0) return;
-
     value.excludeTransfersFromFlow = newExcludeTransfersFromFlow;
     ObjectBox().box<UserPreferences>().put(value);
   }
@@ -68,8 +103,6 @@ class UserPreferencesService {
   set useCategoryNameForUntitledTransactions(
     bool newUseCategoryNameForUntitledTransactions,
   ) {
-    if (value.id == 0) return;
-
     value.useCategoryNameForUntitledTransactions =
         newUseCategoryNameForUntitledTransactions;
     ObjectBox().box<UserPreferences>().put(value);
@@ -80,8 +113,6 @@ class UserPreferencesService {
   set transactionListTileShowCategoryName(
     bool newTransactionListTileShowCategoryName,
   ) {
-    if (value.id == 0) return;
-
     value.transactionListTileShowCategoryName =
         newTransactionListTileShowCategoryName;
     ObjectBox().box<UserPreferences>().put(value);
@@ -92,8 +123,6 @@ class UserPreferencesService {
   set transactionListTileShowAccountForLeading(
     bool newTransactionListTileShowAccountForLeading,
   ) {
-    if (value.id == 0) return;
-
     value.transactionListTileShowAccountForLeading =
         newTransactionListTileShowAccountForLeading;
     ObjectBox().box<UserPreferences>().put(value);
@@ -101,9 +130,66 @@ class UserPreferencesService {
 
   String? get defaultFilterPresetUuid => value.defaultFilterPreset;
   set defaultFilterPresetUuid(String? uuid) {
-    if (value.id == 0) return;
-
     value.defaultFilterPreset = uuid;
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
+  String get primaryCurrency {
+    if (value.primaryCurrency != null) {
+      return value.primaryCurrency!;
+    }
+
+    late final String? firstAccountCurency;
+
+    try {
+      final Query<Account> firstAccountQuery = ObjectBox()
+          .box<Account>()
+          .query()
+          .order(Account_.createdDate)
+          .build();
+
+      firstAccountCurency = firstAccountQuery.findFirst()?.currency;
+
+      firstAccountQuery.close();
+    } catch (e) {
+      firstAccountCurency = null;
+    }
+
+    if (firstAccountCurency != null) {
+      return primaryCurrency = firstAccountCurency;
+    }
+
+    // Generally, primary currency will be set up when the user first
+    // opens the app. When recovering from a backup, backup logic should
+    // handle setting this value.
+    return primaryCurrency =
+        NumberFormat.currency(
+          locale: Intl.defaultLocale ?? "en_US",
+        ).currencyName ??
+        "USD";
+  }
+
+  set primaryCurrency(String? newPrimaryCurrency) {
+    if (newPrimaryCurrency == null ||
+        !CurrencyRegistryService().isCurrencyCodeValid(newPrimaryCurrency)) {
+      throw ArgumentError("Invalid currency code: $newPrimaryCurrency");
+    }
+
+    value.primaryCurrency = newPrimaryCurrency;
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
+  String? get icuCurrencyFormattingPattern =>
+      value.icuCurrencyFormattingPattern;
+  set icuCurrencyFormattingPattern(String? newIcuCurrencyFormattingPattern) {
+    value.icuCurrencyFormattingPattern = newIcuCurrencyFormattingPattern;
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
+  List<TransactionType> get transactionButtonOrder =>
+      value.transactionButtonOrder;
+  set transactionButtonOrder(List<TransactionType> order) {
+    value.transactionButtonOrder = order;
     ObjectBox().box<UserPreferences>().put(value);
   }
 
@@ -125,13 +211,10 @@ class UserPreferencesService {
       return null;
     }
 
-    final Query<TransactionFilterPreset> query =
-        ObjectBox()
-            .box<TransactionFilterPreset>()
-            .query(
-              TransactionFilterPreset_.uuid.equals(defaultFilterPresetUuid!),
-            )
-            .build();
+    final Query<TransactionFilterPreset> query = ObjectBox()
+        .box<TransactionFilterPreset>()
+        .query(TransactionFilterPreset_.uuid.equals(defaultFilterPresetUuid!))
+        .build();
 
     final TransactionFilterPreset? preset = query.findFirst();
 
@@ -159,7 +242,7 @@ class UserPreferencesService {
             return;
           }
 
-          valueNotiifer.value = userPreferences;
+          valueNotifier.value = userPreferences;
         });
   }
 }

@@ -13,7 +13,7 @@ import "package:flow/utils/utils.dart";
 import "package:flow/widgets/delete_button.dart";
 import "package:flow/widgets/general/flow_icon.dart";
 import "package:flow/widgets/general/form_close_button.dart";
-import "package:flow/widgets/select_flow_icon_sheet.dart";
+import "package:flow/widgets/sheets/select_flow_icon_sheet.dart";
 import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
 import "package:material_symbols_icons/symbols.dart";
@@ -49,10 +49,9 @@ class _CategoryEditPageState extends State<CategoryEditPage> {
   void initState() {
     super.initState();
 
-    _currentlyEditing =
-        widget.isNewCategory
-            ? null
-            : ObjectBox().box<Category>().get(widget.categoryId);
+    _currentlyEditing = widget.isNewCategory
+        ? null
+        : ObjectBox().box<Category>().get(widget.categoryId);
 
     if (!widget.isNewCategory && _currentlyEditing == null) {
       error = "Category with id ${widget.categoryId} was not found";
@@ -184,15 +183,14 @@ class _CategoryEditPageState extends State<CategoryEditPage> {
 
     final String trimmed = value!.trim();
 
-    final Query<Category> otherCategoriesWithSameNameQuery =
-        ObjectBox()
-            .box<Category>()
-            .query(
-              Category_.name
-                  .equals(trimmed)
-                  .and(Category_.id.notEquals(_currentlyEditing?.id ?? 0)),
-            )
-            .build();
+    final Query<Category> otherCategoriesWithSameNameQuery = ObjectBox()
+        .box<Category>()
+        .query(
+          Category_.name
+              .equals(trimmed)
+              .and(Category_.id.notEquals(_currentlyEditing?.id ?? 0)),
+        )
+        .build();
 
     final bool isNameUnique = otherCategoriesWithSameNameQuery.count() == 0;
 

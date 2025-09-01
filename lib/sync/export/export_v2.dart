@@ -7,17 +7,19 @@ import "package:flow/data/transaction_filter.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/category.dart";
 import "package:flow/entity/profile.dart";
+import "package:flow/entity/recurring_transaction.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction_filter_preset.dart";
 import "package:flow/entity/user_preferences.dart";
 import "package:flow/logging.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
-import "package:flow/prefs/local_preferences.dart";
 import "package:flow/services/transactions.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/sync/export.dart";
 import "package:flow/sync/model/model_v2.dart";
 import "package:path/path.dart" as path;
+import "package:uuid/uuid.dart";
 
 Future<String> generateBackupJSONContentV2() async {
   const int versionCode = 2;
@@ -28,17 +30,25 @@ Future<String> generateBackupJSONContentV2() async {
   );
   syncLogger.fine("Finished fetching transactions");
 
+  final List<RecurringTransaction> recurringTransactions = await ObjectBox()
+      .box<RecurringTransaction>()
+      .getAllAsync();
+  syncLogger.fine("Finished fetching recurring transactions");
+
   final List<Account> accounts = await ObjectBox().box<Account>().getAllAsync();
   syncLogger.fine("Finished fetching accounts");
 
-  final List<Category> categories =
-      await ObjectBox().box<Category>().getAllAsync();
+  final List<Category> categories = await ObjectBox()
+      .box<Category>()
+      .getAllAsync();
   syncLogger.fine("Finished fetching categories");
 
   final DateTime exportDate = DateTime.now().toUtc();
 
-  final Query<Profile> firstProfileQuery =
-      ObjectBox().box<Profile>().query().build();
+  final Query<Profile> firstProfileQuery = ObjectBox()
+      .box<Profile>()
+      .query()
+      .build();
 
   final Profile? profile = firstProfileQuery.findFirst();
 
@@ -46,11 +56,13 @@ Future<String> generateBackupJSONContentV2() async {
 
   firstProfileQuery.close();
 
-  final Query<UserPreferences> firstUserPreferencesQuery =
-      ObjectBox().box<UserPreferences>().query().build();
+  final Query<UserPreferences> firstUserPreferencesQuery = ObjectBox()
+      .box<UserPreferences>()
+      .query()
+      .build();
 
-  final UserPreferences? userPreferences =
-      firstUserPreferencesQuery.findFirst();
+  final UserPreferences? userPreferences = firstUserPreferencesQuery
+      .findFirst();
 
   firstUserPreferencesQuery.close();
 
@@ -73,7 +85,10 @@ Future<String> generateBackupJSONContentV2() async {
     transactionFilterPresets: transactionFilterPresets,
     profile: profile,
     userPreferences: userPreferences,
-    primaryCurrency: LocalPreferences().getPrimaryCurrency(),
+    recurringTransactions: recurringTransactions,
+    primaryCurrency:
+        userPreferences?.primaryCurrency ??
+        UserPreferencesService().primaryCurrency,
   );
 
   return jsonEncode(obj.toJson());
@@ -85,9 +100,9 @@ Future<File> generateBackupZipV2({Function(double)? onProgress}) async {
 
   final String jsonContent = await generateBackupJSONContentV2();
 
-  final Directory tempDir = await Directory.systemTemp.createTemp(
-    "flow_export_v2",
-  );
+  final Directory tempDir = Directory(
+    path.join(Directory.systemTemp.path, Uuid().v4()),
+  )..createSync(recursive: true);
 
   await File(path.join(tempDir.path, jsonFileName)).writeAsString(jsonContent);
 
@@ -101,11 +116,10 @@ Future<File> generateBackupZipV2({Function(double)? onProgress}) async {
     final List<FileSystemEntity> filesList = Directory(
       ObjectBox.imagesDirectory,
     ).listSync(followLinks: false, recursive: false);
-    final List<File> pngsList =
-        filesList
-            .where((file) => path.extension(file.path).toLowerCase() == ".png")
-            .map((file) => File(file.path))
-            .toList();
+    final List<File> pngsList = filesList
+        .where((file) => path.extension(file.path).toLowerCase() == ".png")
+        .map((file) => File(file.path))
+        .toList();
 
     await Future.wait(
       pngsList.map(

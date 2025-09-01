@@ -1,5 +1,104 @@
 # Changelog
 
+## 0.15.0
+
+### New features
+
+* Now supports backups to iCloud.
+  * DISCLAIMER: This is not syncing. It will not sync across your devices.
+* Now supports following cryptocurrencies: BTC, ETH, USDT, XRP, BNB, SOL, USDC, DOGE, ADA, BCH, AVAX, TON, SHIB, LTC,
+  HBAR, XMR, DAI, DOT, UNI, PEPE, AAVE, APT, OKB, NEAR, ICP, CRO, ETC
+
+### Fixes
+
+* Now has more loose parsing for Ivy Wallet CSV option, closes [#547](https://github.com/flow-mn/flow/issues/547)
+
+## 0.14.5
+
+### New features
+
+* Now you can export transactions history in PDF format. Closes [#516](https://github.com/flow-mn/flow/issues/516)
+
+### Changes and improvements
+
+* Range selector now remembers the last value, closes [#542](https://github.com/flow-mn/flow/issues/542)
+* No longer shows year 4000 in some places in transaction page :O
+
+### Fixes
+
+* Transaction reminder text no longer reverses the ago/in.
+
+## 0.14.4
+
+### New features
+
+* Now you can filter transactions by type in the home tab
+* Added support for Spanish and Russian (Thanks to Gemini Pro 2.5)
+
+### Changes and improvements
+
+* Primary currency, and transaction button orders now persists with backups.
+* Exports now run in a different [Isolate](https://dart.dev/language/isolates)
+
+## 0.14.3
+
+* Fixed permenantly deleting a part of transfer transaction from the trash bin
+  would result in a stale transaction, that is unable to be opened
+* Now you can customize money formats. Closes [#179](https://github.com/flow-mn/flow/issues/179)
+* German language support thanks to [@MarkusWangler](https://github.com/MarkusWangler)
+
+## 0.14.2
+
+### New features
+
+* Now you can import from Ivy Wallet, closes [#477](https://github.com/flow-mn/flow/issues/477)
+* Now you can choose to auto-lock the app when switching to different app, closes [#450](https://github.com/flow-mn/flow/issues/450)
+* Now you can assign types to accounts. This is part of an upcoming feature, [#464](https://github.com/flow-mn/flow/issues/464)
+
+### Fixes
+
+* Fixed some preferences weren't toggling, and not getting included in the backups
+* Transaction title input placeholder no longer looks like a real title
+* Fixed recurring transactions weren't generating new transactions in some scenarios, special thanks to @abelood on Discord
+* Now you can slide transaction list tile even if they don't have any action
+* You can no longer slide multiple list tiles on home tab
+* Pending transactions now respects "Show on home" option when the current date
+  is part of the filter (e.g., This month, Last 30 days, this *, etc...)
+
+## 0.14.1
+
+### Fixes
+
+* Arabic ordinal numbers are somewhat fixed (Please help if you can <https://github.com/sadespresso/moment_dart/issues/47>)
+* Fixed early reminder date estimate was incorrect
+* Fixed some place were misleadingly showing missing exchange rates when offline
+* You can no longer confirm a deleted transaction
+* Overall polishments
+* Improved markdown editor UX, fixed keyboard was covering the text area, closes [#493](https://github.com/flow-mn/flow/issues/493)
+
+## 0.14.0
+
+### New features
+
+* Added list of contributors, closes [#448](https://github.com/flow-mn/flow/issues/448)
+* Date and time are now in Arabic when the language is set to Arabic, thanks to [Ultrate](https://github.com/Ultrate)
+* Now you can do recurring transactions, closes [#59](https://github.com/flow-mn/flow/issues/59)
+
+### Changes & Improvements
+
+* Backup files naming convention has changed (to comply with upcoming iCloud Drive file name requirements)
+* Added "Recommend Flow" button
+* Title suggestion now considers recency of a transaction
+* Improved RTL support in certain parts of the UI. Feel free to report more issues regarding RTL
+* Transfer transactions now shows account balance
+* Home page default filter now shows transactions of the current month rather than last 30 days'
+* Some transactions page now has time range filter (transactions pages for deleted, pending, account, etc.)
+
+### Fixes
+
+* Fixed `Categories page` add from preset buttons were squashed on smaller screens
+* `Add category from presets` page no longer show presets with same name as any of your existing categories
+
 ## 0.13.1
 
 ### Changes & Improvements

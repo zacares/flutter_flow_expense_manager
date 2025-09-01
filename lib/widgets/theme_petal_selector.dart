@@ -1,7 +1,7 @@
 import "dart:math" as math;
 
 import "package:flow/data/flow_icon.dart";
-import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/flow_theme_group.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/widgets/general/flow_icon.dart";
@@ -92,7 +92,7 @@ class _ThemePetalSelectorState extends State<ThemePetalSelector>
 
   @override
   Widget build(BuildContext context) {
-    final String currentTheme = LocalPreferences().getCurrentTheme();
+    final String currentTheme = UserPreferencesService().themeName;
     int groupIndex = 0;
     int themeIndex = -1;
 
@@ -139,10 +139,9 @@ class _ThemePetalSelectorState extends State<ThemePetalSelector>
                         itemCount,
                       );
 
-                      _cursor =
-                          itemIndexAtPointer != null
-                              ? SystemMouseCursors.click
-                              : MouseCursor.defer;
+                      _cursor = itemIndexAtPointer != null
+                          ? SystemMouseCursors.click
+                          : MouseCursor.defer;
 
                       setState(() {
                         hoveringIndex = itemIndexAtPointer;
@@ -150,21 +149,19 @@ class _ThemePetalSelectorState extends State<ThemePetalSelector>
                     },
                     onExit: (_) => setState(() => hoveringIndex = null),
                     child: GestureDetector(
-                      onPanUpdate:
-                          widget.updateOnHover
-                              ? ((details) {
-                                final int? itemIndexAtPointer =
-                                    getItemAtPointer(
-                                      details.localPosition,
-                                      constraints,
-                                      itemCount,
-                                    );
+                      onPanUpdate: widget.updateOnHover
+                          ? ((details) {
+                              final int? itemIndexAtPointer = getItemAtPointer(
+                                details.localPosition,
+                                constraints,
+                                itemCount,
+                              );
 
-                                if (itemIndexAtPointer == null) return;
+                              if (itemIndexAtPointer == null) return;
 
-                                setThemeByIndex(itemIndexAtPointer, groupIndex);
-                              })
-                              : null,
+                              setThemeByIndex(itemIndexAtPointer, groupIndex);
+                            })
+                          : null,
                       onTapUp: (details) {
                         final int? itemIndexAtPointer = getItemAtPointer(
                           details.localPosition,
@@ -177,22 +174,20 @@ class _ThemePetalSelectorState extends State<ThemePetalSelector>
                         setThemeByIndex(itemIndexAtPointer, groupIndex);
                       },
                       child: AnimatedBuilder(
-                        builder:
-                            (context, child) => CustomPaint(
-                              painter: ThemePetalPainter(
-                                animationValue: flowerAnimation.value,
-                                colors:
-                                    widget.groups[groupIndex].schemes
-                                        .map((theme) => theme.primary)
-                                        .toList(),
-                                selectedIndex: themeIndex,
-                                hoveringIndex: hoveringIndex,
-                                petalRadiusProc: petalRadiusProc,
-                                centerSpaceRadiusProc: centerSpaceRadiusProc,
-                                selectedColor: context.colorScheme.onSurface,
-                                angleOffset: angleOffset,
-                              ),
-                            ),
+                        builder: (context, child) => CustomPaint(
+                          painter: ThemePetalPainter(
+                            animationValue: flowerAnimation.value,
+                            colors: widget.groups[groupIndex].schemes
+                                .map((theme) => theme.primary)
+                                .toList(),
+                            selectedIndex: themeIndex,
+                            hoveringIndex: hoveringIndex,
+                            petalRadiusProc: petalRadiusProc,
+                            centerSpaceRadiusProc: centerSpaceRadiusProc,
+                            selectedColor: context.colorScheme.onSurface,
+                            angleOffset: angleOffset,
+                          ),
+                        ),
                         animation: animationController,
                       ),
                     ),
@@ -200,50 +195,44 @@ class _ThemePetalSelectorState extends State<ThemePetalSelector>
                 ),
                 if (widget.groups.length > 1)
                   AnimatedBuilder(
-                    builder:
-                        (context, child) => SizedBox(
-                          width: constraints.maxWidth,
-                          height: constraints.maxHeight,
-                          child: Opacity(
-                            opacity: opacityAnimation.value,
-                            child: Center(
-                              child: InkWell(
-                                onTap: () {
-                                  if (themeIndex >= 0) {
-                                    setThemeByIndex(
-                                      themeIndex,
-                                      (groupIndex + 1),
-                                    );
-                                  } else {
-                                    setState(() {
-                                      selectedGroupIndex =
-                                          (selectedGroupIndex + 1) %
-                                          widget.groups.length;
-                                    });
-                                  }
-                                },
-                                borderRadius: BorderRadius.circular(999.0),
-                                child: Container(
-                                  width: middleButtonSize,
-                                  height: middleButtonSize,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: context.colorScheme.primary,
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: FlowIcon(
-                                    widget.groups[groupIndex].icon ??
-                                        FlowIconData.emoji(
-                                          groupIndex.toString(),
-                                        ),
-                                    size: middleButtonSize * 0.67,
-                                    color: context.colorScheme.onPrimary,
-                                  ),
-                                ),
+                    builder: (context, child) => SizedBox(
+                      width: constraints.maxWidth,
+                      height: constraints.maxHeight,
+                      child: Opacity(
+                        opacity: opacityAnimation.value,
+                        child: Center(
+                          child: InkWell(
+                            onTap: () {
+                              if (themeIndex >= 0) {
+                                setThemeByIndex(themeIndex, (groupIndex + 1));
+                              } else {
+                                setState(() {
+                                  selectedGroupIndex =
+                                      (selectedGroupIndex + 1) %
+                                      widget.groups.length;
+                                });
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(999.0),
+                            child: Container(
+                              width: middleButtonSize,
+                              height: middleButtonSize,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: context.colorScheme.primary,
+                              ),
+                              alignment: Alignment.center,
+                              child: FlowIcon(
+                                widget.groups[groupIndex].icon ??
+                                    FlowIconData.emoji(groupIndex.toString()),
+                                size: middleButtonSize * 0.67,
+                                color: context.colorScheme.onPrimary,
                               ),
                             ),
                           ),
                         ),
+                      ),
+                    ),
                     animation: animationController,
                   ),
               ],
@@ -262,13 +251,12 @@ class _ThemePetalSelectorState extends State<ThemePetalSelector>
         busy = true;
       });
 
-      final String themeName =
-          widget
-              .groups[(groupIndex % widget.groups.length)]
-              .schemes[themeIndex]
-              .name;
+      final String themeName = widget
+          .groups[(groupIndex % widget.groups.length)]
+          .schemes[themeIndex]
+          .name;
 
-      await LocalPreferences().theme.themeName.set(themeName);
+      UserPreferencesService().themeName = themeName;
     } catch (e) {
       _log.warning("Something went wrong with the theme petal selector.", e);
     } finally {

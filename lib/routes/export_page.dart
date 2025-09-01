@@ -1,5 +1,6 @@
 import "package:flow/entity/backup_entry.dart";
 import "package:flow/l10n/extensions.dart";
+import "package:flow/logging.dart";
 import "package:flow/sync/export.dart";
 import "package:flow/sync/export/mode.dart";
 import "package:flow/utils/utils.dart";
@@ -10,8 +11,9 @@ import "package:moment_dart/moment_dart.dart";
 
 class ExportPage extends StatefulWidget {
   final ExportMode mode;
+  final dynamic options;
 
-  const ExportPage(this.mode, {super.key});
+  const ExportPage(this.mode, {super.key, this.options});
 
   @override
   State<ExportPage> createState() => _ExportPageState();
@@ -64,11 +66,17 @@ class _ExportPageState extends State<ExportPage> {
         mode: widget.mode,
         showShareDialog: false,
         type: BackupEntryType.manual,
+        options: widget.options,
       );
 
       filePath = result.filePath;
-    } catch (e) {
+    } catch (e, stackTrace) {
       error = e;
+      syncLogger.severe(
+        "(export page ${widget.mode}) runExport() at UI level has failed",
+        e,
+        stackTrace,
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -78,31 +86,27 @@ class _ExportPageState extends State<ExportPage> {
     }
   }
 
-  Future<void> showShareSheet(RenderObject? renderObject) async {
-    final RenderBox? renderBox =
-        renderObject is RenderBox ? renderObject : null;
-
+  Future<void> showShareSheet(BuildContext context) async {
     await context
-        .showShareSheet(
+        .showFileShareSheet(
           subject: "sync.export.save.shareTitle".t(context, {
             "type": widget.mode.name,
             "date": Moment.now().lll,
           }),
           filePath: filePath!,
-          renderBox: renderBox,
         )
         .then((savedPath) {
           if (savedPath == null || !isDesktop()) {
             return;
           }
-          if (!mounted) return;
+          if (!context.mounted) return;
 
           context.showToast(
             text: "sync.export.savedTo".t(context, {"path": savedPath}),
           );
         })
         .catchError((error) {
-          if (mounted) {
+          if (context.mounted) {
             context.showErrorToast(error: error?.toString());
           }
         });

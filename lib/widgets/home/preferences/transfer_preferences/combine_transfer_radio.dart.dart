@@ -44,16 +44,16 @@ class CombineTransferRadio extends StatelessWidget {
                 Text(
                   combine
                       ? "preferences.transfer.combineTransferTransaction.combine"
-                          .t(context)
+                            .t(context)
                       : "preferences.transfer.combineTransferTransaction.separate"
-                          .t(context),
+                            .t(context),
                 ),
                 const SizedBox(height: 8.0),
                 IgnorePointer(
-                  child: Radio /*.adaptive*/ (
-                    value: combine,
+                  child: RadioGroup(
                     groupValue: currentlyUsingCombineMode,
                     onChanged: (_) {},
+                    child: Radio(value: combine),
                   ),
                 ),
               ],

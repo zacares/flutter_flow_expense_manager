@@ -2,7 +2,7 @@ import "package:flow/l10n/extensions.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/widgets/general/button.dart";
 import "package:flow/widgets/setup/foss_slide.dart";
-import "package:flow/widgets/setup/offline_slide.dart";
+import "package:flow/widgets/setup/privacy_slide.dart";
 import "package:flow/widgets/setup/welcome_slide.dart";
 import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
@@ -47,7 +47,7 @@ class _SetupPageState extends State<SetupPage> {
       body: SafeArea(
         child: PageView(
           controller: _pageController,
-          children: const [WelcomeSlide(), FossSlide(), OfflineSlide()],
+          children: const [WelcomeSlide(), FossSlide(), PrivacySlide()],
         ),
       ),
       bottomNavigationBar: SafeArea(
@@ -66,12 +66,11 @@ class _SetupPageState extends State<SetupPage> {
                   radius: 12.0,
                   spacing: 6.0,
                 ),
-                onDotClicked:
-                    (index) => _pageController.animateToPage(
-                      index,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOut,
-                    ),
+                onDotClicked: (index) => _pageController.animateToPage(
+                  index,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOut,
+                ),
               ),
               const Spacer(),
               Button(

@@ -2,10 +2,10 @@ import "dart:io";
 
 import "package:flow/data/flow_icon.dart";
 import "package:flow/l10n/named_enum.dart";
-import "package:json_annotation/json_annotation.dart";
-import "package:material_symbols_icons/symbols.dart";
-import "package:objectbox/objectbox.dart";
 import "package:flow/sync/sync.dart";
+import "package:flow/utils/extensions/string.dart";
+import "package:json_annotation/json_annotation.dart";
+import "package:objectbox/objectbox.dart";
 
 @Entity()
 class BackupEntry {
@@ -18,6 +18,9 @@ class BackupEntry {
 
   String filePath;
 
+  /// Does not have a leading dot.
+  ///
+  /// See [ExportMode]
   String fileExt;
 
   @Property()
@@ -36,11 +39,7 @@ class BackupEntry {
   }
 
   @Transient()
-  FlowIconData get icon => switch (fileExt) {
-    "json" => FlowIconData.icon(Symbols.hard_drive_rounded),
-    "csv" => FlowIconData.icon(Symbols.table_rounded),
-    _ => FlowIconData.icon(Symbols.error_rounded),
-  };
+  FlowIconData get icon => fileExt.backupExtensionIcon;
 
   Future<bool> exists() => File(filePath).exists();
   bool existsSync() => File(filePath).existsSync();

@@ -1,9 +1,10 @@
 import "package:flow/entity/transaction.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/l10n/named_enum.dart";
-import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/navbar_theme.dart";
 import "package:flow/theme/theme.dart";
+import "package:flow/utils/extensions/directionality.dart";
 import "package:flutter/material.dart" hide Flow;
 import "package:material_symbols_icons/symbols.dart";
 import "package:pie_menu/pie_menu.dart";
@@ -25,13 +26,11 @@ class _NewTransactionButtonState extends State<NewTransactionButton> {
     final NavbarTheme navbarTheme = Theme.of(context).extension<NavbarTheme>()!;
 
     return ValueListenableBuilder(
-      valueListenable: LocalPreferences().transactionButtonOrder.valueNotifier,
-      builder: (context, buttonOrder, child) {
-        buttonOrder ??= TransactionType.values;
-
-        if (Directionality.maybeOf(context) == TextDirection.rtl) {
-          buttonOrder = buttonOrder.reversed.toList();
-        }
+      valueListenable: UserPreferencesService().valueNotifier,
+      builder: (context, userPreferences, child) {
+        final List<TransactionType> buttonOrder = context.isLtr
+            ? userPreferences.transactionButtonOrder
+            : userPreferences.transactionButtonOrder.reversed.toList();
 
         return PieMenu(
           theme: context.pieTheme.copyWith(
@@ -41,7 +40,8 @@ class _NewTransactionButtonState extends State<NewTransactionButton> {
             customAngleAnchor: PieAnchor.center,
             leftClickShowsMenu: true,
             rightClickShowsMenu: true,
-            delayDuration: Duration.zero,
+            regularPressShowsMenu: true,
+            longPressDuration: Duration.zero,
           ),
           onToggle: onToggle,
           actions: [
@@ -59,29 +59,28 @@ class _NewTransactionButtonState extends State<NewTransactionButton> {
               ),
           ],
           child: StatefulBuilder(
-            builder:
-                (context, setState) => Tooltip(
-                  message: "transaction.new".t(context),
-                  child: Material(
-                    color: navbarTheme.transactionButtonBackgroundColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(32.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: AnimatedRotation(
-                        turns: _buttonRotationTurns,
-                        duration: const Duration(milliseconds: 600),
-                        child: Icon(
-                          Symbols.add_rounded,
-                          fill: 0.0,
-                          color: navbarTheme.transactionButtonForegroundColor,
-                          weight: 600.0,
-                        ),
-                      ),
+            builder: (context, setState) => Tooltip(
+              message: "transaction.new".t(context),
+              child: Material(
+                color: navbarTheme.transactionButtonBackgroundColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(32.0),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: AnimatedRotation(
+                    turns: _buttonRotationTurns,
+                    duration: const Duration(milliseconds: 600),
+                    child: Icon(
+                      Symbols.add_rounded,
+                      fill: 0.0,
+                      color: navbarTheme.transactionButtonForegroundColor,
+                      weight: 600.0,
                     ),
                   ),
                 ),
+              ),
+            ),
           ),
         );
       },

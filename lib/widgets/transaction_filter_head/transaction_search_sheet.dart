@@ -55,7 +55,6 @@ class _TransactionSearchSheetState extends State<TransactionSearchSheet> {
           ),
         ],
       ),
-      scrollableContentMaxHeight: MediaQuery.of(context).size.height * 0.5,
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -65,18 +64,16 @@ class _TransactionSearchSheetState extends State<TransactionSearchSheet> {
               child: Wrap(
                 spacing: 8.0,
                 runSpacing: 8.0,
-                children:
-                    TransactionSearchMode.values
-                        .map(
-                          (mode) => ChoiceChip(
-                            label: Text(mode.localizedTextKey.t(context)),
-                            selected: mode == _searchData.mode,
-                            onSelected:
-                                (bool selected) =>
-                                    _updateMode(selected ? mode : null),
-                          ),
-                        )
-                        .toList(),
+                children: TransactionSearchMode.values
+                    .map(
+                      (mode) => ChoiceChip(
+                        label: Text(mode.localizedTextKey.t(context)),
+                        selected: mode == _searchData.mode,
+                        onSelected: (bool selected) =>
+                            _updateMode(selected ? mode : null),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
             const SizedBox(height: 16.0),
@@ -92,7 +89,7 @@ class _TransactionSearchSheetState extends State<TransactionSearchSheet> {
               ),
             ),
             const SizedBox(height: 16.0),
-            CheckboxListTile /*.adaptive*/ (
+            CheckboxListTile(
               title: Text(
                 "transactions.query.filter.keyword.includeDescription".t(
                   context,

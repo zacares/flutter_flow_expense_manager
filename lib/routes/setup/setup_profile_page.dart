@@ -71,7 +71,7 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
                 ),
                 const SizedBox(height: 16.0),
                 if (_textEditingController.text.trim().toLowerCase() == "test")
-                  CheckboxListTile /*.adaptive*/ (
+                  CheckboxListTile(
                     title: Text("Enable demo mode"),
                     value: testMode,
                     onChanged: (value) {
@@ -151,8 +151,10 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
   }
 
   void _updateProfile() {
-    final Query<Profile> profileQuery =
-        ObjectBox().box<Profile>().query().build();
+    final Query<Profile> profileQuery = ObjectBox()
+        .box<Profile>()
+        .query()
+        .build();
 
     _currentlyEditing = profileQuery.findFirst();
 

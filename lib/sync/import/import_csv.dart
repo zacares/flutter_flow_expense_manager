@@ -16,6 +16,7 @@ import "package:flow/sync/import/base.dart";
 import "package:flow/sync/model/csv/parsed_data.dart";
 import "package:flow/sync/model/csv/parsers.dart";
 import "package:flow/utils/extensions/iterables.dart";
+import "package:flow/utils/guess_preset_icon.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:material_symbols_icons/symbols.dart";
@@ -96,7 +97,10 @@ class ImportCSV extends Importer {
                 (name) => Category.preset(
                   name: name,
                   uuid: categoryNameUuidMapping[name]!,
-                  iconCode: IconFlowIcon(Symbols.category_rounded).toString(),
+                  iconCode: guessPresetIcon(
+                    name,
+                    fallback: IconFlowIcon(Symbols.category_rounded),
+                  ).toString(),
                 ),
               )
               .toList(),
@@ -124,7 +128,10 @@ class ImportCSV extends Importer {
                 (name) => Account.preset(
                   name: name,
                   uuid: accountNameUuidMapping[name]!,
-                  iconCode: IconFlowIcon(Symbols.wallet).toString(),
+                  iconCode: guessPresetIcon(
+                    name,
+                    fallback: IconFlowIcon(Symbols.wallet_rounded),
+                  ).toString(),
                   currency: accountCurrencies[name]!,
                 ),
               )
@@ -159,32 +166,34 @@ class ImportCSV extends Importer {
     }
     // 3. Create [Transaction]s
     progressNotifier.value = ImportCSVProgress.creatingTransactions;
-    final List<Transaction> transformedTransactions =
-        data.transactions.map((csvt) {
-          final Account resolvedAccount =
-              accountsCache[accountNameUuidMapping[csvt.account]!]!;
+    final List<Transaction> transformedTransactions = data.transactions.map((
+      csvt,
+    ) {
+      final Account resolvedAccount =
+          accountsCache[accountNameUuidMapping[csvt.account]!]!;
 
-          final Transaction transaction =
-              Transaction(
-                  uuid: UuidV4().generate(),
-                  amount: csvt.amount,
-                  title: csvt.title,
-                  description: csvt.notes,
-                  transactionDate: csvt.transactionDate,
-                  currency: resolvedAccount.currency,
-                )
-                ..setAccount(resolvedAccount)
-                ..setCategory(
-                  categoriesCache[categoryNameUuidMapping[csvt.category]],
-                );
+      final Transaction transaction =
+          Transaction(
+              uuid: UuidV4().generate(),
+              amount: csvt.amount,
+              title: csvt.title,
+              description: csvt.notes,
+              transactionDate: csvt.transactionDate,
+              currency: resolvedAccount.currency,
+            )
+            ..setAccount(resolvedAccount)
+            ..setCategory(
+              categoriesCache[categoryNameUuidMapping[csvt.category]],
+            );
 
-          return transaction;
-        }).toList();
+      return transaction;
+    }).toList();
 
     // Transfers
     for (int i = 0; i < transformedTransactions.length; i++) {
-      final Transaction? previousTransaction =
-          i > 0 ? transformedTransactions[i - 1] : null;
+      final Transaction? previousTransaction = i > 0
+          ? transformedTransactions[i - 1]
+          : null;
 
       if (previousTransaction == null) continue;
 

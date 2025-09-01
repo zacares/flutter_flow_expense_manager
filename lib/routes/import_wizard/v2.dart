@@ -35,45 +35,46 @@ class _ImportWizardV2PageState extends State<ImportWizardV2Page> {
       body: SafeArea(
         child: ValueListenableBuilder(
           valueListenable: importer.progressNotifier,
-          builder:
-              (context, value, child) => switch (value) {
-                ImportV2Progress.waitingConfirmation => BackupInfo(
-                  importer: importer,
-                  onClickStart: _start,
-                ),
-                ImportV2Progress.error => Text(error.toString()),
-                ImportV2Progress.success => ImportSuccess(
-                  setupMode: widget.setupMode,
-                ),
-                _ => Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Spinner.center(),
-                      const SizedBox(height: 8.0),
-                      Center(
-                        child: Text(
-                          value.localizedNameContext(context),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
+          builder: (context, value, child) => switch (value) {
+            ImportV2Progress.waitingConfirmation => BackupInfo(
+              importer: importer,
+              onClickStart: _start,
+            ),
+            ImportV2Progress.error => Text(error.toString()),
+            ImportV2Progress.success => ImportSuccess(
+              setupMode: widget.setupMode,
+            ),
+            _ => Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Spinner.center(),
+                  const SizedBox(height: 8.0),
+                  Center(
+                    child: Text(
+                      value.localizedNameContext(context),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                ),
-              },
+                ],
+              ),
+            ),
+          },
         ),
       ),
     );
   }
 
   void _start() async {
-    final bool? confirm = await context.showConfirmationSheet(
-      title: "sync.import.eraseWarning".t(context),
-      isDeletionConfirmation: true,
-      mainActionLabelOverride: "general.confirm".t(context),
-    );
+    if (!widget.setupMode) {
+      final bool? confirm = await context.showConfirmationSheet(
+        title: "sync.import.eraseWarning".t(context),
+        isDeletionConfirmation: true,
+        mainActionLabelOverride: "general.confirm".t(context),
+      );
 
-    if (confirm != true) return;
+      if (confirm != true) return;
+    }
 
     try {
       await importer.execute();

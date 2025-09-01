@@ -2,7 +2,7 @@ import "package:flow/data/chart_data.dart";
 import "package:flow/data/exchange_rates.dart";
 import "package:flow/data/flow_analytics.dart";
 import "package:flow/data/money.dart";
-import "package:flow/data/money_flow.dart";
+import "package:flow/data/multi_currency_flow.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/l10n/flow_localizations.dart";
 import "package:flow/l10n/named_enum.dart";
@@ -10,9 +10,10 @@ import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/services/exchange_rates.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/widgets/general/spinner.dart";
 import "package:flow/widgets/home/stats/pie_graph_view.dart";
-import "package:flow/widgets/rates_missing_warning.dart";
+import "package:flow/widgets/rates_missing_error_box.dart";
 import "package:flow/widgets/time_range_selector.dart";
 import "package:flow/widgets/utils/time_and_range.dart";
 import "package:flutter/material.dart";
@@ -65,12 +66,12 @@ class StatsByGroupPageState extends State<StatsByGroupPage>
         valueListenable: ExchangeRatesService().exchangeRatesCache,
         builder: (context, exchangeRatesCache, child) {
           final ExchangeRates? rates = exchangeRatesCache?.get(
-            LocalPreferences().getPrimaryCurrency(),
+            UserPreferencesService().primaryCurrency,
           );
 
           final bool showMissingExchangeRatesWarning =
               rates == null &&
-              TransitiveLocalPreferences().transitiveUsesSingleCurrency.get();
+              TransitiveLocalPreferences().usesNonPrimaryCurrency.get();
 
           final Map<String, ChartData> expenses = _prepareChartData(
             analytics?.flow,
@@ -112,7 +113,7 @@ class StatsByGroupPageState extends State<StatsByGroupPage>
                   ],
                 ),
                 if (showMissingExchangeRatesWarning)
-                  const RatesMissingWarning(),
+                  const RatesMissingErrorBox(),
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
@@ -154,10 +155,9 @@ class StatsByGroupPageState extends State<StatsByGroupPage>
     });
 
     try {
-      analytics =
-          widget.byCategory
-              ? await ObjectBox().flowByCategories(range: range)
-              : await ObjectBox().flowByAccounts(range: range);
+      analytics = widget.byCategory
+          ? await ObjectBox().flowByCategories(range: range)
+          : await ObjectBox().flowByAccounts(range: range);
     } finally {
       busy = false;
 
@@ -181,37 +181,29 @@ class StatsByGroupPageState extends State<StatsByGroupPage>
   }
 
   Map<String, ChartData<T>> _prepareChartData<T>(
-    Map<String, MoneyFlow<T>>? raw,
+    Map<String, MultiCurrencyFlow<T>>? raw,
     TransactionType type,
     ExchangeRates? rates,
   ) {
     if (raw == null || raw.isEmpty) return {};
 
-    final String primaryCurrency = LocalPreferences().getPrimaryCurrency();
+    final String primaryCurrency = UserPreferencesService().primaryCurrency;
 
     final Map<String, Money> cache = {};
 
-    final List<MapEntry<String, MoneyFlow<T>>> filtered =
-        raw.entries.where((entry) {
-          if (rates != null) {
-            cache[entry.key] = entry.value.getTotalByType(
-              type,
-              rates,
-              primaryCurrency,
-            );
-          } else {
-            cache[entry.key] = entry.value.getByTypeAndCurrency(
-              primaryCurrency,
-              type,
-            );
-          }
+    final List<MapEntry<String, MultiCurrencyFlow<T>>> filtered = raw.entries
+        .where((entry) {
+          final mergedFlow = entry.value.merge(primaryCurrency, rates);
 
           if (type == TransactionType.expense) {
-            return cache[entry.key]!.amount < 0.0;
+            cache[entry.key] = mergedFlow.totalExpense;
+            return mergedFlow.totalExpense.amount < 0.0;
           } else {
-            return cache[entry.key]!.amount > 0.0;
+            cache[entry.key] = mergedFlow.totalIncome;
+            return mergedFlow.totalIncome.amount > 0.0;
           }
-        }).toList();
+        })
+        .toList();
 
     filtered.sort((a, b) => cache[b.key]!.tryCompareTo(cache[a.key]!));
 

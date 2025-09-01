@@ -9,7 +9,7 @@ import "package:flow/widgets/general/info_text.dart";
 import "package:flow/widgets/general/list_header.dart";
 import "package:flow/widgets/import_wizard/csv/account_currency_list_tile.dart";
 import "package:flow/widgets/import_wizard/import_item_list_tile.dart";
-import "package:flow/widgets/select_currency_sheet.dart";
+import "package:flow/widgets/sheets/select_currency_sheet.dart";
 import "package:flutter/material.dart";
 import "package:material_symbols_icons/symbols.dart";
 
@@ -67,16 +67,15 @@ class _BackupInfoCSVState extends State<BackupInfoCSV> {
             padding: const EdgeInsets.only(left: 16.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children:
-                  widget.importer.data.accountNames.map((name) {
-                    final String? currency =
-                        widget.importer.accountCurrencies[name];
-                    return AccountCurrencyListTile(
-                      name: name,
-                      currency: currency,
-                      onTap: () => _setCurrencyFor(name),
-                    );
-                  }).toList(),
+              children: widget.importer.data.accountNames.map((name) {
+                final String? currency =
+                    widget.importer.accountCurrencies[name];
+                return AccountCurrencyListTile(
+                  name: name,
+                  currency: currency,
+                  onTap: () => _setCurrencyFor(name),
+                );
+              }).toList(),
             ),
           ),
           const SizedBox(height: 8.0),
@@ -105,10 +104,9 @@ class _BackupInfoCSVState extends State<BackupInfoCSV> {
           InfoText(child: Text("sync.import.emergencyBackup".t(context))),
           const SizedBox(height: 16.0),
           Button(
-            onTap:
-                widget.importer.ready
-                    ? widget.onClickStart
-                    : _showIncompleteToast,
+            onTap: widget.importer.ready
+                ? widget.onClickStart
+                : _showIncompleteToast,
             leading: FlowIcon(FlowIconData.icon(Symbols.download_rounded)),
             child: Text("sync.import.start".t(context)),
           ),

@@ -22,30 +22,16 @@ class CategoriesPage extends StatefulWidget {
 }
 
 class _CategoriesPageState extends State<CategoriesPage> {
-  late bool usesSingleCurrency;
-
   QueryBuilder<Category> qb() =>
       ObjectBox().box<Category>().query().order(Category_.createdDate);
 
   @override
   void initState() {
     super.initState();
-    TransitiveLocalPreferences().transitiveUsesSingleCurrency.addListener(
-      _updateUsesSingleCurrency,
-    );
-    _updateUsesSingleCurrency();
 
-    if (!usesSingleCurrency) {
+    if (TransitiveLocalPreferences().usesNonPrimaryCurrency.get()) {
       ExchangeRatesService().getPrimaryCurrencyRates();
     }
-  }
-
-  @override
-  void dispose() {
-    TransitiveLocalPreferences().transitiveUsesSingleCurrency.removeListener(
-      _updateUsesSingleCurrency,
-    );
-    super.dispose();
   }
 
   @override
@@ -64,12 +50,10 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
             final List<Category> categories = snapshot.requireData;
 
-            final bool showPresetsButton =
-                !getCategoryPresets().every(
-                  (preset) => categories.any(
-                    (category) => category.uuid == preset.uuid,
-                  ),
-                );
+            final bool showPresetsButton = !getCategoryPresets().every(
+              (preset) =>
+                  categories.any((category) => category.uuid == preset.uuid),
+            );
 
             return switch (categories.length) {
               0 => const NoCategories(),
@@ -77,46 +61,37 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 valueListenable: ExchangeRatesService().exchangeRatesCache,
                 builder: (context, exchangeRatesCache, _) {
                   return ValueListenableBuilder(
-                    valueListenable: UserPreferencesService().valueNotiifer,
+                    valueListenable: UserPreferencesService().valueNotifier,
                     builder: (context, userPreferences, child) {
                       final bool excludeTransfersInTotal =
                           userPreferences.excludeTransfersFromFlow;
                       final String primaryCurrency =
-                          LocalPreferences().getPrimaryCurrency();
+                          UserPreferencesService().primaryCurrency;
 
                       return SingleChildScrollView(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
                           spacing: 16.0,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Row(
-                              spacing: 12.0,
-                              children: [
-                                Expanded(
-                                  child: Button(
-                                    onTap: () => context.push("/category/new"),
-                                    leading: Icon(Symbols.add_rounded),
-                                    child: Text("category.new".t(context)),
-                                  ),
-                                ),
-                                if (showPresetsButton)
-                                  Expanded(
-                                    child: Button(
-                                      trailing: Icon(
-                                        Symbols.chevron_right_rounded,
-                                      ),
-                                      onTap: () {
-                                        context.push(
-                                          "/setup/categories?standalone=true&selectAll=false",
-                                        );
-                                      },
-                                      child: Text(
-                                        "categories.addFromPresets".t(context),
-                                      ),
-                                    ),
-                                  ),
-                              ],
+                            Button(
+                              onTap: () => context.push("/category/new"),
+                              leading: Icon(Symbols.add_rounded),
+                              child: Text("category.new".t(context)),
                             ),
+                            if (showPresetsButton)
+                              Button(
+                                leading: Icon(Symbols.category_rounded),
+                                onTap: () {
+                                  context.push(
+                                    "/setup/categories?standalone=true&selectAll=false",
+                                  );
+                                },
+                                child: Text(
+                                  "categories.addFromPresets".t(context),
+                                ),
+                              ),
+                            const Divider(),
                             ...categories.map(
                               (category) => CategoryCard(
                                 category: category,
@@ -138,12 +113,5 @@ class _CategoriesPageState extends State<CategoriesPage> {
         ),
       ),
     );
-  }
-
-  void _updateUsesSingleCurrency() {
-    setState(() {
-      usesSingleCurrency =
-          TransitiveLocalPreferences().transitiveUsesSingleCurrency.get();
-    });
   }
 }

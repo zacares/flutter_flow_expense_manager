@@ -9,21 +9,21 @@ import "package:flow/widgets/import_wizard/backup_info.dart";
 import "package:flow/widgets/import_wizard/import_success.dart";
 import "package:flutter/material.dart";
 
-class ImportWizardCSVPage extends StatefulWidget {
+class CSVImportWizardPage extends StatefulWidget {
   final ImportCSV importer;
   final bool setupMode;
 
-  const ImportWizardCSVPage({
+  const CSVImportWizardPage({
     super.key,
     required this.importer,
     this.setupMode = false,
   });
 
   @override
-  State<ImportWizardCSVPage> createState() => _ImportWizardCSVPageState();
+  State<CSVImportWizardPage> createState() => _CSVImportWizardPageState();
 }
 
-class _ImportWizardCSVPageState extends State<ImportWizardCSVPage> {
+class _CSVImportWizardPageState extends State<CSVImportWizardPage> {
   ImportCSV get importer => widget.importer;
 
   dynamic error;
@@ -35,45 +35,46 @@ class _ImportWizardCSVPageState extends State<ImportWizardCSVPage> {
       body: SafeArea(
         child: ValueListenableBuilder(
           valueListenable: importer.progressNotifier,
-          builder:
-              (context, value, child) => switch (value) {
-                ImportCSVProgress.waitingConfirmation => BackupInfo(
-                  importer: importer,
-                  onClickStart: _start,
-                ),
-                ImportCSVProgress.error => Text(error.toString()),
-                ImportCSVProgress.success => ImportSuccess(
-                  setupMode: widget.setupMode,
-                ),
-                _ => Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Spinner.center(),
-                      const SizedBox(height: 8.0),
-                      Center(
-                        child: Text(
-                          value.localizedNameContext(context),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
+          builder: (context, value, child) => switch (value) {
+            ImportCSVProgress.waitingConfirmation => BackupInfo(
+              importer: importer,
+              onClickStart: _start,
+            ),
+            ImportCSVProgress.error => Text(error.toString()),
+            ImportCSVProgress.success => ImportSuccess(
+              setupMode: widget.setupMode,
+            ),
+            _ => Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Spinner.center(),
+                  const SizedBox(height: 8.0),
+                  Center(
+                    child: Text(
+                      value.localizedNameContext(context),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                ),
-              },
+                ],
+              ),
+            ),
+          },
         ),
       ),
     );
   }
 
   void _start() async {
-    final bool? confirm = await context.showConfirmationSheet(
-      title: "sync.import.eraseWarning".t(context),
-      isDeletionConfirmation: true,
-      mainActionLabelOverride: "general.confirm".t(context),
-    );
+    if (!widget.setupMode) {
+      final bool? confirm = await context.showConfirmationSheet(
+        title: "sync.import.eraseWarning".t(context),
+        isDeletionConfirmation: true,
+        mainActionLabelOverride: "general.confirm".t(context),
+      );
 
-    if (confirm != true) return;
+      if (confirm != true) return;
+    }
 
     try {
       await importer.execute();

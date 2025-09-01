@@ -1,35 +1,23 @@
 import "package:flow/l10n/flow_localizations.dart";
+import "package:flow/l10n/supported_languages.dart";
 import "package:flutter/widgets.dart";
 
 extension L10nHelper on BuildContext {
   FlowLocalizations get l => FlowLocalizations.of(this);
 }
 
-/// No need to specify the regoin/country unless:
-///
-/// * The dialect is very different from other dialects of the same language
-/// * We have multiple region/dialect support for the same language
-final Map<String, (String, String)> _localeNames = {
-  "mn_MN": ("Mongolian (Mongolia)", "Монгол (Монгол)"),
-  "en_US": ("English (US)", "English (US)"),
-  "en_IN": ("English (India)", "English (India)"),
-  "it_IT": ("Italian (Italy)", "Italiano (Italia)"),
-  "tr_TR": ("Turkish (Turkey)", "Türkçe (Türkiye)"),
-  "fr_FR": ("French (France)", "Français (France)"),
-  "ar": ("Arabic", "العربية"),
-};
-
 extension Underscore on Locale {
   /// Example outcome:
-  /// * en_US
+  /// * en
+  /// * fr_FR
   /// * mn_Mong_MN
   String get code => [languageCode, scriptCode, countryCode].nonNulls.join("_");
 
   /// English name
-  String get name => _localeNames[code]?.$1 ?? "Unknown";
+  String get name => supportedLanguages[this]?.$1 ?? "Unknown";
 
   /// Language name in the language
-  String get endonym => _localeNames[code]?.$2 ?? "Unknown";
+  String get endonym => supportedLanguages[this]?.$2 ?? "Unknown";
 }
 
 extension L10nStringHelper on String {
