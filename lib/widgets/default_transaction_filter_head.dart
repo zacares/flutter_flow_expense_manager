@@ -1,4 +1,3 @@
-import "package:flow/data/currencies.dart";
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/account.dart";
@@ -12,6 +11,7 @@ import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/providers/accounts_provider.dart";
 import "package:flow/providers/categories.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:flow/utils/extensions.dart";
 import "package:flow/utils/optional.dart";
 import "package:flow/widgets/sheets/select_multi_currency_sheet.dart";
@@ -321,7 +321,9 @@ class _DefaultTransactionsFilterHeadState
           context: context,
           builder: (context) => SelectMultiCurrencySheet(
             currencies: possibleCurrencies
-                .map((code) => iso4217CurrenciesGrouped[code])
+                .map(
+                  (code) => CurrencyRegistryService().groupedCurrencies[code],
+                )
                 .nonNulls
                 .toList(),
             currentlySelected: filter.currencies,
@@ -368,11 +370,10 @@ class _DefaultTransactionsFilterHeadState
   }
 
   void _updateShowCurrencyFilterChip() {
-    setState(() {
-      showCurrencyFilterChip = TransitiveLocalPreferences()
-          .usesMultipleCurrencies
-          .get();
-    });
+    showCurrencyFilterChip = TransitiveLocalPreferences().usesMultipleCurrencies
+        .get();
+    if (!mounted) return;
+    setState(() {});
   }
 
   void _saveNewFilterPreset() async {

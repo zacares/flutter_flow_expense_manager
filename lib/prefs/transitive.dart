@@ -33,6 +33,7 @@ class TransitiveLocalPreferences {
   late final PrimitiveSettingsEntry<String> lastAutoBackupPath;
 
   late final DateTimeSettingsEntry lastSuccessfulICloudSyncAt;
+  late final BoolSettingsEntry iCloudSyncWorkingFine;
 
   late final BoolSettingsEntry sessionPrivacyMode;
 
@@ -83,6 +84,12 @@ class TransitiveLocalPreferences {
     lastSuccessfulICloudSyncAt = DateTimeSettingsEntry(
       key: "transitive.lastSuccessfulICloudSyncAt",
       preferences: _prefs,
+    );
+
+    iCloudSyncWorkingFine = BoolSettingsEntry(
+      key: "transitive.iCloudSyncWorkingFine",
+      preferences: _prefs,
+      initialValue: true,
     );
 
     sessionPrivacyMode = BoolSettingsEntry(

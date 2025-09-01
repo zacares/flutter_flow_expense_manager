@@ -5,8 +5,8 @@ import "dart:math";
 import "package:flow/entity/backup_entry.dart";
 import "package:flow/logging.dart";
 import "package:flow/objectbox.dart";
-import "package:flow/services/icloud_sync.dart";
 import "package:flow/services/sync.dart";
+import "package:flow/services/sync/icloud_syncer.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flow/sync/export/export_csv.dart";
 import "package:flow/sync/export/export_pdf.dart";
@@ -83,7 +83,7 @@ Future<ExportResult> export({
         return -1;
       });
 
-  if (ICloudSyncService.supported && type == BackupEntryType.manual) {
+  if (ICloudSyncer.supported && type == BackupEntryType.manual) {
     syncLogger.info("Trying to save manual backup to iCloud");
 
     try {
@@ -98,30 +98,7 @@ Future<ExportResult> export({
       // Upload to iCloud if the user has enabled it
       unawaited(
         SyncService()
-            .saveBackupToICloud(
-              entry: entry,
-              onProgress: (progressStream) {
-                late StreamSubscription subscription;
-
-                subscription = progressStream.listen(
-                  (progress) {
-                    syncLogger.fine(
-                      "iCloud upload progress for (${entry.type}) (${path.basename(entry.filePath)}): ${(progress * 100).toStringAsFixed(1)}%",
-                    );
-                  },
-                  onDone: () {
-                    syncLogger.info(
-                      "iCloud upload completed for (${entry.type}) (${path.basename(entry.filePath)}): 100.0%",
-                    );
-                    try {
-                      subscription.cancel();
-                    } catch (e) {
-                      // silent fail
-                    }
-                  },
-                );
-              },
-            )
+            .putToAll(entry)
             .then((_) {
               syncLogger.info(
                 "Successfully uploaded manual backup to iCloud (${entry.filePath})",

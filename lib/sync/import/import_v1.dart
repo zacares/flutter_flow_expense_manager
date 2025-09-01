@@ -77,14 +77,17 @@ class ImportV1 extends Importer {
     // 0. Erase current data
     progressNotifier.value = ImportV1Progress.erasing;
     await ObjectBox().eraseMainData();
+    _log.fine("Erased main data");
 
     // 1. Resurrect [Category]s
     progressNotifier.value = ImportV1Progress.writingCategories;
     await ObjectBox().box<Category>().putManyAsync(data.categories);
+    _log.fine("Imported ${data.categories.length} categories");
 
     // 2. Resurrect [Account]s
     progressNotifier.value = ImportV1Progress.writingAccounts;
     await ObjectBox().box<Account>().putManyAsync(data.accounts);
+    _log.fine("Imported ${data.accounts.length} accounts");
 
     // 3. Resurrect [Transaction]s
     //
@@ -117,6 +120,7 @@ class ImportV1 extends Importer {
 
     progressNotifier.value = ImportV1Progress.writingTransactions;
     await TransactionsService().upsertMany(transformedTransactions);
+    _log.fine("Imported ${transformedTransactions.length} transactions");
 
     unawaited(
       TransitiveLocalPreferences().updateTransitiveProperties().catchError((

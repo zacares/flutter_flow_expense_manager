@@ -11,8 +11,6 @@ import "package:shared_preferences/shared_preferences.dart";
 
 final Logger _log = Logger("GracefulMigrations");
 
-// late final JsonListSettingsEntry<TransactionType> transactionButtonOrder;
-
 void migrateButtonOrder() async {
   const String migrationUuid = "be216298-efca-4d93-85c2-6809ebd34dff";
 
@@ -174,6 +172,44 @@ void migrateExtraKeyIndexing() async {
           return t;
         }).toList(),
       );
+
+      await prefs.setString("flow.migration.$migrationUuid", "ok");
+    } catch (e) {
+      _log.warning(
+        "Failed to migrate transactions for migration $migrationUuid",
+        e,
+      );
+    }
+  } catch (e) {
+    _log.warning(
+      "Failed to read migration status for migration $migrationUuid",
+      e,
+    );
+  }
+}
+
+void migrateThemePrefsToDb() async {
+  const String migrationUuid = "efdbace2-a642-4805-85e9-07a0b4d36488";
+
+  try {
+    final SharedPreferencesWithCache prefs =
+        await SharedPreferencesWithCache.create(
+          cacheOptions: SharedPreferencesWithCacheOptions(),
+        );
+
+    final ok = prefs.getString("flow.migration.$migrationUuid");
+
+    if (ok != null) return;
+
+    try {
+      // ignore: deprecated_member_use_from_same_package
+
+      final String? themeName = prefs.getString("flow.themeName");
+      final bool themeChangesAppIcon =
+          prefs.getBool("flow.themeChangesAppIcon") ?? true;
+
+      UserPreferencesService().themeName = themeName;
+      UserPreferencesService().themeChangesAppIcon = themeChangesAppIcon;
 
       await prefs.setString("flow.migration.$migrationUuid", "ok");
     } catch (e) {

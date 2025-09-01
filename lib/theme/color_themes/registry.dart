@@ -51,7 +51,7 @@ FlowColorScheme getTheme(String? themeName, {bool preferDark = false}) {
   final FlowColorScheme? scheme = allThemes[themeName ?? ""];
 
   if (scheme == null) {
-    themeLogger.warning("Unknown theme: $themeName");
+    themeLogger.warning("Unknown theme: $themeName", StackTrace.current);
     return preferDark ? flowDarks.schemes.first : flowDarks.schemes.first;
   }
 

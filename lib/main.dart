@@ -31,6 +31,7 @@ import "package:flow/prefs/local_preferences.dart";
 import "package:flow/providers/accounts_provider.dart";
 import "package:flow/providers/categories.dart";
 import "package:flow/routes.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:flow/services/exchange_rates.dart";
 import "package:flow/services/local_auth.dart";
 import "package:flow/services/notifications.dart";
@@ -112,6 +113,8 @@ void main() async {
   startupLog.fine("Initializing exchange rates service");
   ExchangeRatesService().init();
 
+  CurrencyRegistryService();
+
   try {
     startupLog.fine("Initializing user preferences service");
     UserPreferencesService().initialize();
@@ -183,8 +186,9 @@ class FlowState extends State<Flow> {
     _reloadLocale();
     _reloadTheme();
 
+    UserPreferencesService().valueNotifier.addListener(_reloadTheme);
+
     LocalPreferences().localeOverride.addListener(_reloadLocale);
-    LocalPreferences().theme.themeName.addListener(_reloadTheme);
     LocalPreferences().primaryCurrency.addListener(_refreshExchangeRates);
 
     _tempLock = LocalPreferences().requireLocalAuth.get();
@@ -199,6 +203,7 @@ class FlowState extends State<Flow> {
       migrateRemoveTitleFromUntitledTransactions();
       migrateExtraKeyIndexing();
       migratePrimaryCurrencyToDb();
+      migrateThemePrefsToDb();
     });
 
     _tryUnlockTempLock();
@@ -225,7 +230,7 @@ class FlowState extends State<Flow> {
   @override
   void dispose() {
     LocalPreferences().localeOverride.removeListener(_reloadLocale);
-    LocalPreferences().theme.themeName.removeListener(_reloadTheme);
+    UserPreferencesService().valueNotifier.removeListener(_reloadTheme);
     LocalPreferences().primaryCurrency.removeListener(_refreshExchangeRates);
 
     TransactionsService().removeListener(_synchronizePlannedNotifications);
@@ -290,16 +295,22 @@ class FlowState extends State<Flow> {
   }
 
   void _reloadTheme() {
-    final String? themeName = LocalPreferences().theme.themeName.value;
+    final String? themeName = UserPreferencesService().value.themeName;
 
-    themeLogger.info("Reloading $themeName");
+    if (validateThemeName(themeName)) {
+      themeLogger.info("Reloading $themeName");
 
-    FlowColorScheme theme = getTheme(themeName, preferDark: useDarkTheme);
+      FlowColorScheme theme = getTheme(themeName, preferDark: useDarkTheme);
 
-    setState(() {
-      _themeMode = theme.mode;
-      _themeFactory = ThemeFactory(theme);
-    });
+      setState(() {
+        _themeMode = theme.mode;
+        _themeFactory = ThemeFactory(theme);
+      });
+    } else {
+      themeLogger.warning(
+        "Invalid theme name: $themeName, falling back to null",
+      );
+    }
   }
 
   void _reloadLocale() {

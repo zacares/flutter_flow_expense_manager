@@ -4,8 +4,8 @@ import "package:flow/constants.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/services/exchange_rates.dart";
-import "package:flow/services/icloud_sync.dart";
 import "package:flow/services/notifications.dart";
+import "package:flow/services/sync/icloud_syncer.dart";
 import "package:flow/services/transactions.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/utils.dart";
@@ -93,12 +93,15 @@ class _ProfileTabState extends State<ProfileTab> {
             leading: const Icon(Symbols.groups_rounded),
             onTap: () => context.push("/community/contributors"),
           ),
-          Builder(
-            builder: (context) => ListTile(
-              title: Text("tabs.profile.recommend".t(context)),
-              leading: const Icon(Symbols.share_rounded),
-              onTap: () => context.showUriShareSheet(uri: website),
-            ),
+          ListTile(
+            title: Text("tabs.profile.recommend".t(context)),
+            leading: const Icon(Symbols.share_rounded),
+            onTap: () => context.showUriShareSheet(uri: website),
+          ),
+          ListTile(
+            title: Text("tabs.profile.guide".t(context)),
+            leading: const Icon(Symbols.book_2_rounded),
+            onTap: () => openUrl(guideUrl),
           ),
           ListTile(
             title: Text("visitGitHubRepo".t(context)),
@@ -265,7 +268,11 @@ class _ProfileTabState extends State<ProfileTab> {
     if (confirm != true) return;
 
     try {
-      await ICloudSyncService().debugPurge();
+      final int deletedCount = await ICloudSyncer().debugPurge();
+
+      if (mounted) {
+        context.showToast(text: "Deleted $deletedCount debug items");
+      }
     } finally {
       _debugICloudBusy = false;
       if (mounted) {

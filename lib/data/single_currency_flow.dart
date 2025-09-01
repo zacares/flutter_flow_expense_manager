@@ -1,6 +1,6 @@
-import "package:flow/data/currencies.dart";
 import "package:flow/data/exchange_rates.dart";
 import "package:flow/data/money.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:flow/services/user_preferences.dart";
 
 /// A class that sums up expense/income separately. When a foreign currency is used,
@@ -31,7 +31,7 @@ class SingleCurrencyFlow<T> {
   SingleCurrencyFlow({this.associatedData, String? currency}) {
     this.currency = (currency ??= UserPreferencesService().primaryCurrency);
 
-    if (!isCurrencyCodeValid(currency)) {
+    if (!CurrencyRegistryService().isCurrencyCodeValid(currency)) {
       throw FormatException(
         "[MoneyFlow] Failed initializing, invalid currency code: $currency",
       );
@@ -47,7 +47,7 @@ class SingleCurrencyFlow<T> {
 
     final String currency = money.currency.trim().toUpperCase();
 
-    if (!isCurrencyCodeValid(currency)) {
+    if (!CurrencyRegistryService().isCurrencyCodeValid(currency)) {
       throw FormatException(
         "[MoneyFlow] Failed adding income, invalid currency code: $currency",
       );

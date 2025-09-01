@@ -236,18 +236,6 @@ final _entities = <obx_int.ModelEntity>[
         type: 9,
         flags: 0,
       ),
-      obx_int.ModelProperty(
-        id: const obx_int.IdUid(7, 2598696840666344158),
-        name: 'iCloudRelativePath',
-        type: 9,
-        flags: 0,
-      ),
-      obx_int.ModelProperty(
-        id: const obx_int.IdUid(8, 7012537446377796117),
-        name: 'iCloudChangeDate',
-        type: 10,
-        flags: 0,
-      ),
     ],
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[],
@@ -419,7 +407,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(10, 7829328581176695647),
     name: 'UserPreferences',
-    lastPropertyId: const obx_int.IdUid(17, 5034425281728425226),
+    lastPropertyId: const obx_int.IdUid(20, 3170754472241464501),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -511,6 +499,24 @@ final _entities = <obx_int.ModelEntity>[
         id: const obx_int.IdUid(17, 5034425281728425226),
         name: 'transactionButtonOrderJoined',
         type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(18, 5817984994810877086),
+        name: 'iCloudBackupsToKeep',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(19, 4873078044604055561),
+        name: 'themeName',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(20, 3170754472241464501),
+        name: 'themeChangesAppIcon',
+        type: 1,
         flags: 0,
       ),
     ],
@@ -740,6 +746,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
       420551111786793892,
       3842898167150913136,
       1701734084880256388,
+      2598696840666344158,
+      7012537446377796117,
     ],
     retiredRelationUids: const [],
     modelVersion: 5,
@@ -980,9 +988,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final filePathOffset = fbb.writeString(object.filePath);
         final typeOffset = fbb.writeString(object.type);
         final fileExtOffset = fbb.writeString(object.fileExt);
-        final iCloudRelativePathOffset = object.iCloudRelativePath == null
-            ? null
-            : fbb.writeString(object.iCloudRelativePath!);
         fbb.startTable(9);
         fbb.addInt64(0, object.id);
         fbb.addInt64(1, object.syncModelVersion);
@@ -990,19 +995,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addOffset(3, filePathOffset);
         fbb.addOffset(4, typeOffset);
         fbb.addOffset(5, fileExtOffset);
-        fbb.addOffset(6, iCloudRelativePathOffset);
-        fbb.addInt64(7, object.iCloudChangeDate?.millisecondsSinceEpoch);
         fbb.finish(fbb.endTable());
         return object.id;
       },
       objectFromFB: (obx.Store store, ByteData fbData) {
         final buffer = fb.BufferContext(fbData);
         final rootOffset = buffer.derefObject(0);
-        final iCloudChangeDateValue = const fb.Int64Reader().vTableGetNullable(
-          buffer,
-          rootOffset,
-          18,
-        );
         final idParam = const fb.Int64Reader().vTableGet(
           buffer,
           rootOffset,
@@ -1027,22 +1025,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final fileExtParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGet(buffer, rootOffset, 14, '');
-        final iCloudRelativePathParam = const fb.StringReader(
-          asciiOptimization: true,
-        ).vTableGetNullable(buffer, rootOffset, 16);
-        final object =
-            BackupEntry(
-                id: idParam,
-                filePath: filePathParam,
-                createdDate: createdDateParam,
-                syncModelVersion: syncModelVersionParam,
-                type: typeParam,
-                fileExt: fileExtParam,
-                iCloudRelativePath: iCloudRelativePathParam,
-              )
-              ..iCloudChangeDate = iCloudChangeDateValue == null
-                  ? null
-                  : DateTime.fromMillisecondsSinceEpoch(iCloudChangeDateValue);
+        final object = BackupEntry(
+          id: idParam,
+          filePath: filePathParam,
+          createdDate: createdDateParam,
+          syncModelVersion: syncModelVersionParam,
+          type: typeParam,
+          fileExt: fileExtParam,
+        );
 
         return object;
       },
@@ -1278,7 +1268,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
             object.transactionButtonOrderJoined == null
             ? null
             : fbb.writeString(object.transactionButtonOrderJoined!);
-        fbb.startTable(18);
+        final themeNameOffset = object.themeName == null
+            ? null
+            : fbb.writeString(object.themeName!);
+        fbb.startTable(21);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uuidOffset);
         fbb.addBool(2, object.combineTransfers);
@@ -1294,6 +1287,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addOffset(13, icuCurrencyFormattingPatternOffset);
         fbb.addOffset(15, primaryCurrencyOffset);
         fbb.addOffset(16, transactionButtonOrderJoinedOffset);
+        fbb.addInt64(17, object.iCloudBackupsToKeep);
+        fbb.addOffset(18, themeNameOffset);
+        fbb.addBool(19, object.themeChangesAppIcon);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -1335,6 +1331,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
           28,
           false,
         );
+        final iCloudBackupsToKeepParam = const fb.Int64Reader()
+            .vTableGetNullable(buffer, rootOffset, 38);
         final autoBackupIntervalInHoursParam = const fb.Int64Reader()
             .vTableGetNullable(buffer, rootOffset, 22);
         final icuCurrencyFormattingPatternParam = const fb.StringReader(
@@ -1348,6 +1346,15 @@ obx_int.ModelDefinition getObjectBoxModel() {
         ).vTableGetNullable(buffer, rootOffset, 36);
         final remindDailyAtRelativeSecondsParam = const fb.Int64Reader()
             .vTableGetNullable(buffer, rootOffset, 16);
+        final themeNameParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 40);
+        final themeChangesAppIconParam = const fb.BoolReader().vTableGet(
+          buffer,
+          rootOffset,
+          42,
+          false,
+        );
         final object =
             UserPreferences(
                 id: idParam,
@@ -1362,11 +1369,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 trashBinRetentionDays: trashBinRetentionDaysParam,
                 defaultFilterPreset: defaultFilterPresetParam,
                 enableICloudSync: enableICloudSyncParam,
+                iCloudBackupsToKeep: iCloudBackupsToKeepParam,
                 autoBackupIntervalInHours: autoBackupIntervalInHoursParam,
                 icuCurrencyFormattingPattern: icuCurrencyFormattingPatternParam,
                 primaryCurrency: primaryCurrencyParam,
                 transactionButtonOrderJoined: transactionButtonOrderJoinedParam,
                 remindDailyAtRelativeSeconds: remindDailyAtRelativeSecondsParam,
+                themeName: themeNameParam,
+                themeChangesAppIcon: themeChangesAppIconParam,
               )
               ..uuid = const fb.StringReader(
                 asciiOptimization: true,
@@ -1704,16 +1714,6 @@ class BackupEntry_ {
   static final fileExt = obx.QueryStringProperty<BackupEntry>(
     _entities[3].properties[5],
   );
-
-  /// See [BackupEntry.iCloudRelativePath].
-  static final iCloudRelativePath = obx.QueryStringProperty<BackupEntry>(
-    _entities[3].properties[6],
-  );
-
-  /// See [BackupEntry.iCloudChangeDate].
-  static final iCloudChangeDate = obx.QueryDateProperty<BackupEntry>(
-    _entities[3].properties[7],
-  );
 }
 
 /// [Transaction] entity fields to define ObjectBox queries.
@@ -1905,6 +1905,21 @@ class UserPreferences_ {
   /// See [UserPreferences.transactionButtonOrderJoined].
   static final transactionButtonOrderJoined =
       obx.QueryStringProperty<UserPreferences>(_entities[6].properties[14]);
+
+  /// See [UserPreferences.iCloudBackupsToKeep].
+  static final iCloudBackupsToKeep = obx.QueryIntegerProperty<UserPreferences>(
+    _entities[6].properties[15],
+  );
+
+  /// See [UserPreferences.themeName].
+  static final themeName = obx.QueryStringProperty<UserPreferences>(
+    _entities[6].properties[16],
+  );
+
+  /// See [UserPreferences.themeChangesAppIcon].
+  static final themeChangesAppIcon = obx.QueryBooleanProperty<UserPreferences>(
+    _entities[6].properties[17],
+  );
 }
 
 /// [Budget] entity fields to define ObjectBox queries.

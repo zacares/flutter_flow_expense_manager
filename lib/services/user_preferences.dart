@@ -1,6 +1,5 @@
 import "dart:math";
 
-import "package:flow/data/currencies.dart";
 import "package:flow/data/flow_notification_payload.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/transaction/type.dart";
@@ -8,8 +7,10 @@ import "package:flow/entity/transaction_filter_preset.dart";
 import "package:flow/entity/user_preferences.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:flow/services/notifications.dart";
 import "package:flow/services/sync.dart";
+import "package:flow/theme/color_themes/registry.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 
@@ -32,6 +33,29 @@ class UserPreferencesService {
     ObjectBox().box<UserPreferences>().put(value);
   }
 
+  bool get themeChangesAppIcon => value.themeChangesAppIcon;
+  set themeChangesAppIcon(bool newThemeChangesAppIcon) {
+    value.themeChangesAppIcon = newThemeChangesAppIcon;
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
+  String get themeName {
+    final String? savedThemeName = value.themeName;
+
+    if (validateThemeName(savedThemeName)) {
+      return savedThemeName!;
+    }
+
+    return flowLights.schemes.first.name;
+  }
+
+  set themeName(String? newThemeName) {
+    if (validateThemeName(newThemeName)) {
+      value.themeName = newThemeName;
+      ObjectBox().box<UserPreferences>().put(value);
+    }
+  }
+
   int? get trashBinRetentionDays => value.trashBinRetentionDays;
   set trashBinRetentionDays(int? newTrashBinRetentionDays) {
     if (newTrashBinRetentionDays == null) {
@@ -39,6 +63,15 @@ class UserPreferencesService {
     } else {
       value.trashBinRetentionDays = min(max(0, newTrashBinRetentionDays), 365);
     }
+
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
+  int? get iCloudBackupsToKeep => value.iCloudBackupsToKeep;
+  set iCloudBackupsToKeep(int? newICloudBackupsToKeep) {
+    if (newICloudBackupsToKeep == null) return;
+
+    value.trashBinRetentionDays = newICloudBackupsToKeep;
 
     ObjectBox().box<UserPreferences>().put(value);
   }
@@ -138,7 +171,7 @@ class UserPreferencesService {
 
   set primaryCurrency(String? newPrimaryCurrency) {
     if (newPrimaryCurrency == null ||
-        !isCurrencyCodeValid(newPrimaryCurrency)) {
+        !CurrencyRegistryService().isCurrencyCodeValid(newPrimaryCurrency)) {
       throw ArgumentError("Invalid currency code: $newPrimaryCurrency");
     }
 

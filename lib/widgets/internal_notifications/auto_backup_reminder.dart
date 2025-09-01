@@ -1,4 +1,4 @@
-import "package:flow/data/internal_nofications/internal_notification.dart";
+import "package:flow/data/actionable_nofications/actionable_notification.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/utils/utils.dart";
@@ -19,7 +19,7 @@ class AutoBackupReminderNotification extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InternalNotificationListTile(
+    return ActionableNotificationListTile(
       onDismiss: onDismiss,
       icon: notification.icon,
       title: "tabs.home.reminders.autoBackup".t(context),

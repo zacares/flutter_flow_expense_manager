@@ -1,3 +1,7 @@
+import "package:flow/data/flow_icon.dart";
+import "package:material_symbols_icons/symbols.dart";
+import "package:path/path.dart" as path;
+
 extension Casings on String {
   static RegExp whitespaceMatcher = RegExp(r"\s");
 
@@ -50,4 +54,13 @@ extension Casings on String {
   /// 02 -> 2
   /// 03xe -> 3xe
   String get withoutLeadingZeroes => replaceAll(RegExp(r"^0*"), "");
+}
+
+extension StringUtils on String {
+  FlowIconData get backupExtensionIcon => switch (path.extension(this)) {
+    ".zip" || "zip" => FlowIconData.icon(Symbols.hard_drive_rounded),
+    ".json" || "json" => FlowIconData.icon(Symbols.hard_drive_rounded),
+    ".csv" || "csv" => FlowIconData.icon(Symbols.table_rounded),
+    _ => FlowIconData.icon(Symbols.error_rounded),
+  };
 }

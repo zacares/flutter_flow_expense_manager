@@ -175,16 +175,6 @@
           "id": "6:85022155315718452",
           "name": "fileExt",
           "type": 9
-        },
-        {
-          "id": "7:2598696840666344158",
-          "name": "iCloudRelativePath",
-          "type": 9
-        },
-        {
-          "id": "8:7012537446377796117",
-          "name": "iCloudChangeDate",
-          "type": 10
         }
       ],
       "relations": []
@@ -334,7 +324,7 @@
     },
     {
       "id": "10:7829328581176695647",
-      "lastPropertyId": "17:5034425281728425226",
+      "lastPropertyId": "20:3170754472241464501",
       "name": "UserPreferences",
       "properties": [
         {
@@ -414,6 +404,21 @@
           "id": "17:5034425281728425226",
           "name": "transactionButtonOrderJoined",
           "type": 9
+        },
+        {
+          "id": "18:5817984994810877086",
+          "name": "iCloudBackupsToKeep",
+          "type": 6
+        },
+        {
+          "id": "19:4873078044604055561",
+          "name": "themeName",
+          "type": 9
+        },
+        {
+          "id": "20:3170754472241464501",
+          "name": "themeChangesAppIcon",
+          "type": 1
         }
       ],
       "relations": []
@@ -586,7 +591,9 @@
     4341960036397140355,
     420551111786793892,
     3842898167150913136,
-    1701734084880256388
+    1701734084880256388,
+    2598696840666344158,
+    7012537446377796117
   ],
   "retiredRelationUids": [],
   "version": 1

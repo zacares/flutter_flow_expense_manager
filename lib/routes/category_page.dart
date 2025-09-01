@@ -22,7 +22,7 @@ import "package:flow/widgets/general/spinner.dart";
 import "package:flow/widgets/general/wavy_divider.dart";
 import "package:flow/widgets/grouped_transactions_list_view.dart";
 import "package:flow/widgets/no_result.dart";
-import "package:flow/widgets/rates_missing_warning.dart";
+import "package:flow/widgets/rates_missing_error_box.dart";
 import "package:flow/widgets/time_range_selector.dart";
 import "package:flow/widgets/transactions_date_header.dart";
 import "package:flutter/material.dart";
@@ -170,7 +170,7 @@ class _CategoryPageState extends State<CategoryPage> {
             ),
             if (showMissingExchangeRatesWarning) ...[
               const SizedBox(height: 12.0),
-              RatesMissingWarning(),
+              RatesMissingErrorBox(),
             ],
           ],
         );

@@ -1,7 +1,7 @@
-import "package:flow/data/currencies.dart";
 import "package:flow/data/exchange_rates.dart";
 import "package:flow/data/money.dart";
 import "package:flow/data/single_currency_flow.dart";
+import "package:flow/services/currency_registry.dart";
 
 /// A little class that sums expense/income separately for each currency.
 ///
@@ -33,7 +33,7 @@ class MultiCurrencyFlow<T> {
       return;
     }
 
-    if (!isCurrencyCodeValid(currency)) {
+    if (!CurrencyRegistryService().isCurrencyCodeValid(currency)) {
       throw FormatException(
         "[MoneyFlow] Failed adding income, invalid currency code: $currency",
       );

@@ -1,7 +1,7 @@
 import "dart:io";
 
 import "package:flow/l10n/extensions.dart";
-import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/color_themes/registry.dart";
 import "package:flow/theme/helpers.dart";
 import "package:flow/theme/names.dart";
@@ -29,7 +29,7 @@ class _ThemePreferencesPageState extends State<ThemePreferencesPage> {
   void initState() {
     super.initState();
 
-    final String currentTheme = LocalPreferences().getCurrentTheme();
+    final String currentTheme = UserPreferencesService().themeName;
 
     selectedGroup =
         groups.entries
@@ -42,13 +42,11 @@ class _ThemePreferencesPageState extends State<ThemePreferencesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final String currentTheme = LocalPreferences().getCurrentTheme();
+    final String currentTheme = UserPreferencesService().themeName;
     final String? currentThemeName = themeNames[currentTheme];
 
-    final bool themeChangesAppIcon = LocalPreferences()
-        .theme
-        .themeChangesAppIcon
-        .get();
+    final bool themeChangesAppIcon =
+        UserPreferencesService().themeChangesAppIcon;
 
     return Scaffold(
       appBar: AppBar(title: Text("preferences.theme.choose".t(context))),
@@ -110,13 +108,22 @@ class _ThemePreferencesPageState extends State<ThemePreferencesPage> {
               ],
               ListHeader("preferences.theme.other".t(context)),
               const SizedBox(height: 8.0),
-              ...standaloneThemes.entries.map(
-                (entry) => RadioListTile(
-                  title: Text(themeNames[entry.value.name] ?? entry.value.name),
-                  value: entry.key,
-                  groupValue: currentTheme,
-                  onChanged: (value) => handleChange(value),
-                  activeColor: context.colorScheme.primary,
+              RadioGroup(
+                groupValue: currentTheme,
+                onChanged: (value) => handleChange(value),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: standaloneThemes.entries
+                      .map(
+                        (entry) => RadioListTile(
+                          title: Text(
+                            themeNames[entry.value.name] ?? entry.value.name,
+                          ),
+                          value: entry.key,
+                          activeColor: context.colorScheme.primary,
+                        ),
+                      )
+                      .toList(),
                 ),
               ),
             ],
@@ -132,10 +139,10 @@ class _ThemePreferencesPageState extends State<ThemePreferencesPage> {
 
     try {
       appIconBusy = true;
-      await LocalPreferences().theme.themeChangesAppIcon.set(newValue);
+      UserPreferencesService().themeChangesAppIcon = newValue;
       trySetAppIcon(
         newValue
-            ? allThemes[LocalPreferences().getCurrentTheme()]?.iconName
+            ? allThemes[UserPreferencesService().themeName]?.iconName
             : null,
       );
     } finally {
@@ -151,8 +158,8 @@ class _ThemePreferencesPageState extends State<ThemePreferencesPage> {
     if (busy) return;
 
     try {
-      await LocalPreferences().theme.themeName.set(name);
-      if (LocalPreferences().theme.themeChangesAppIcon.get()) {
+      UserPreferencesService().themeName = name;
+      if (UserPreferencesService().themeChangesAppIcon) {
         trySetAppIcon(allThemes[name]?.iconName);
       }
     } finally {

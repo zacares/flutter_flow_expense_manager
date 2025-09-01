@@ -1,7 +1,7 @@
 import "dart:async";
 
+import "package:flow/data/actionable_nofications/actionable_notification.dart";
 import "package:flow/data/exchange_rates.dart";
-import "package:flow/data/internal_nofications/internal_notification.dart";
 import "package:flow/data/single_currency_flow.dart";
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
@@ -10,8 +10,8 @@ import "package:flow/entity/transaction_filter_preset.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/actionable_notifications.dart";
 import "package:flow/services/exchange_rates.dart";
-import "package:flow/services/internal_notifications.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/helpers.dart";
 import "package:flow/utils/utils.dart";
@@ -24,7 +24,7 @@ import "package:flow/widgets/home/greetings_bar.dart";
 import "package:flow/widgets/home/home/flow_cards.dart";
 import "package:flow/widgets/home/home/no_transactions.dart";
 import "package:flow/widgets/internal_notifications/internal_notification_section.dart";
-import "package:flow/widgets/rates_missing_warning.dart";
+import "package:flow/widgets/rates_missing_error_box.dart";
 import "package:flow/widgets/transactions_date_header.dart";
 import "package:flutter/material.dart";
 import "package:flutter_slidable/flutter_slidable.dart";
@@ -48,7 +48,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   late TransactionFilter defaultFilter;
   DateTime dateKey = Moment.startOfToday();
 
-  InternalNotification? _internalNotification;
+  ActionableNotification? _actionableNotification;
 
   late TransactionFilter currentFilter;
 
@@ -98,10 +98,10 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     );
 
     UserPreferencesService().valueNotifier.addListener(_rawUpdateDefaultFilter);
-    InternalNotificationsService().notifications.addListener(
-      _updateInternalNotification,
+    ActionableNotificationsService().notifications.addListener(
+      _updateActionableNotification,
     );
-    _updateInternalNotification();
+    _updateActionableNotification();
 
     ExchangeRatesService().getPrimaryCurrencyRates();
   }
@@ -116,8 +116,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     UserPreferencesService().valueNotifier.removeListener(
       _rawUpdateDefaultFilter,
     );
-    InternalNotificationsService().notifications.removeListener(
-      _updateInternalNotification,
+    ActionableNotificationsService().notifications.removeListener(
+      _updateActionableNotification,
     );
     super.dispose();
   }
@@ -254,19 +254,19 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             mainAxisSize: MainAxisSize.min,
             children: [
               // TODO @sadespresso show iCloud errors if enabled, and platform is supported
-              if (_internalNotification != null) ...[
+              if (_actionableNotification != null) ...[
                 SlidableAutoCloseBehavior(
-                  child: InternalNotificationSection(
-                    notification: _internalNotification!,
+                  child: ActionableNotificationSection(
+                    notification: _actionableNotification!,
                     onDismiss: () => setState(() {
-                      _internalNotification = null;
+                      _actionableNotification = null;
                     }),
                   ),
                 ),
                 SizedBox(height: 8.0),
               ],
               if (showMissingExchangeRatesWarning) ...[
-                RatesMissingWarning(),
+                RatesMissingErrorBox(),
                 SizedBox(height: 8.0),
               ],
               // TODO @sadespresso want to analyze transactions shown in current
@@ -338,10 +338,10 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         TransactionFilterPreset.defaultFilter;
   }
 
-  void _updateInternalNotification() {
-    if (_internalNotification != null) return;
+  void _updateActionableNotification() {
+    if (_actionableNotification != null) return;
 
-    _internalNotification = InternalNotificationsService().consume();
+    _actionableNotification = ActionableNotificationsService().consume();
 
     setState(() {});
   }
