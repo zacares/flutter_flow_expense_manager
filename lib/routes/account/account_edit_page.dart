@@ -323,6 +323,7 @@ class _AccountEditPageState extends State<AccountEditPage> {
         await showModalBottomSheet<Optional<DateTime>>(
           context: context,
           builder: (context) => UpdateBalanceOptionsSheet(),
+          isScrollControlled: true,
         );
 
     if (updateAtResult == null || !mounted) {

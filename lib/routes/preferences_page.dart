@@ -295,6 +295,7 @@ class PreferencesPageState extends State<PreferencesPage> {
       final selected = await showModalBottomSheet<String>(
         context: context,
         builder: (context) => SelectCurrencySheet(currentlySelected: current),
+        isScrollControlled: true,
       );
 
       if (selected != null) {
