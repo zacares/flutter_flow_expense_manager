@@ -117,7 +117,7 @@ void main() async {
 
   try {
     startupLog.fine("Initializing user preferences service");
-    UserPreferencesService().initialize();
+    await UserPreferencesService().initialize();
   } catch (e) {
     startupLog.severe("Failed to initialize UserPreferencesService", e);
   }

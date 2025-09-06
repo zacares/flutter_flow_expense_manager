@@ -58,6 +58,8 @@ class SyncService {
       final int? intervalHours =
           UserPreferencesService().autoBackupIntervalInHours;
 
+      print("Auto backup interval hours: $intervalHours");
+
       if (intervalHours == null) {
         _log.info("Auto backup is disabled");
         return;
