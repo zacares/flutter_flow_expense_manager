@@ -48,4 +48,33 @@ class TransactionTag extends EntityBase {
     this.type,
     this.payload,
   }) : createdDate = createdDate ?? DateTime.now();
+
+  static Object? parsePayload(TransactionTagType type, String? payload) {
+    if (payload == null) return null;
+
+    switch (type) {
+      case TransactionTagType.generic:
+        return payload;
+      case TransactionTagType.location:
+        {
+          try {
+            final List<double?> coordinates = payload
+                .split(",")
+                .map((e) => double.tryParse(e))
+                .toList();
+
+            if (coordinates.length != 2 ||
+                coordinates.any((element) => element == null)) {
+              return null;
+            }
+
+            return coordinates;
+          } catch (e) {
+            return null;
+          }
+        }
+      case TransactionTagType.contact:
+        return;
+    }
+  }
 }

@@ -5,7 +5,7 @@ import "package:json_annotation/json_annotation.dart";
 enum TransactionTagType implements LocalizedEnum {
   generic("generic"),
   location("location"),
-  contact("contact");
+  person("person");
 
   final String value;
 

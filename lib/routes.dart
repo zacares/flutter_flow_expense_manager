@@ -32,6 +32,7 @@ import "package:flow/routes/preferences/sync_preferences_page.dart";
 import "package:flow/routes/preferences/theme_preferences_page.dart";
 import "package:flow/routes/preferences/transaction_geo_preferences_page.dart";
 import "package:flow/routes/preferences/transaction_list_item_appearance_preferences_page.dart";
+import "package:flow/routes/preferences/transaction_tags_preferences_page.dart";
 import "package:flow/routes/preferences/transfer_preferences_page.dart";
 import "package:flow/routes/preferences/trash_bin_preferences_page.dart";
 import "package:flow/routes/preferences_page.dart";
@@ -46,6 +47,8 @@ import "package:flow/routes/setup_page.dart";
 import "package:flow/routes/stats/stats_by_group_page.dart";
 import "package:flow/routes/support_page.dart";
 import "package:flow/routes/transaction_page.dart";
+import "package:flow/routes/transaction_tag_page.dart";
+import "package:flow/routes/transaction_tags_page.dart";
 import "package:flow/routes/transactions_page.dart";
 import "package:flow/routes/utils/crop_square_image_page.dart";
 import "package:flow/routes/utils/edit_markdown_page.dart";
@@ -164,6 +167,18 @@ final router = GoRouter(
       builder: (context, state) => const AccountsPage(),
     ),
     GoRoute(
+      path: "/transactionTags",
+      builder: (context, state) => const TransactionTagsPage(),
+    ),
+    GoRoute(
+      path: "/transactionTags/new",
+      builder: (context, state) => const TransactionTagPage.create(),
+    ),
+    GoRoute(
+      path: "/transactionTags/:id",
+      builder: (context, state) => const TransactionTagPage(),
+    ),
+    GoRoute(
       path: "/preferences",
       builder: (context, state) => const PreferencesPage(),
       routes: [
@@ -195,6 +210,10 @@ final router = GoRouter(
         GoRoute(
           path: "transactionGeo",
           builder: (context, state) => const TransactionGeoPreferencesPage(),
+        ),
+        GoRoute(
+          path: "transactionTags",
+          builder: (context, state) => const TransactionTagsPreferencesPage(),
         ),
         GoRoute(
           path: "theme",

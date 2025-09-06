@@ -56,7 +56,7 @@ class _AccountsPageState extends State<AccountsPage> {
               return const Spinner.center();
             }
 
-            final accounts = snapshot.requireData;
+            final List<Account> accounts = snapshot.requireData;
 
             return switch (accounts.length) {
               0 => const NoAccounts(),

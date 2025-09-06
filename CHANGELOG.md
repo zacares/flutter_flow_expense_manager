@@ -1,5 +1,15 @@
 # Changelog
 
+## Next
+
+### New features
+
+* Now you can add tags to transactions. Closes [#568](https://github.com/flow-mn/flow/issues/568)
+
+### Fixes
+
+* Fixed auto-backup interval was locked into "3 days"
+
 ## 0.15.0
 
 ### New features
