@@ -88,8 +88,6 @@ class UserPreferencesService {
       );
     }
 
-    print("due -> ${value.autoBackupIntervalInHours}");
-
     ObjectBox().box<UserPreferences>().put(value);
 
     SyncService().triggerAutoBackup();
