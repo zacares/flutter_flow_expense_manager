@@ -43,6 +43,10 @@ class Transaction implements EntityBase {
   static const int maxDescriptionLength = 65536;
   String? description;
 
+  @HnswIndex(dimensions: 2, distanceType: VectorDistanceType.geo)
+  @Property(type: PropertyType.floatVector)
+  List<double>? location;
+
   double amount;
 
   bool? isPending;
@@ -59,7 +63,6 @@ class Transaction implements EntityBase {
   // transactions might not be good idea.
   //
   /// Subtype of transaction
-  @Property()
   String? subtype;
 
   @Transient()

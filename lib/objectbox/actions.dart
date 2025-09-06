@@ -13,6 +13,7 @@ import "package:flow/entity/backup_entry.dart";
 import "package:flow/entity/category.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction/extensions/base.dart";
+import "package:flow/entity/transaction/extensions/default/geo.dart";
 import "package:flow/entity/transaction/extensions/default/recurring.dart";
 import "package:flow/entity/transaction/extensions/default/transfer.dart";
 import "package:flow/l10n/extensions.dart";
@@ -900,8 +901,16 @@ extension AccountActions on Account {
     TransactionSubtype? subtype,
     Recurrence? recurrence,
     List<String>? extraTags,
+    List<double>? location,
   }) {
     final String uuid = uuidOverride ?? const Uuid().v4();
+
+    if (location == null) {
+      final Geo? geo =
+          extensions?.firstWhereOrNull((ext) => ext is Geo) as Geo?;
+
+      location ??= geo?.toLatLng();
+    }
 
     final String? recurringTransactionUuid = recurrence == null
         ? null

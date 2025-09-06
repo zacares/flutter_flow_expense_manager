@@ -181,7 +181,7 @@
     },
     {
       "id": "7:5357777579468740615",
-      "lastPropertyId": "21:8105783725440518384",
+      "lastPropertyId": "22:8732200258907669936",
       "name": "Transaction",
       "properties": [
         {
@@ -282,6 +282,13 @@
           "id": "21:8105783725440518384",
           "name": "extraTags",
           "type": 30
+        },
+        {
+          "id": "22:8732200258907669936",
+          "name": "location",
+          "type": 28,
+          "flags": 8,
+          "indexId": "22:4524862754555930046"
         }
       ],
       "relations": []
@@ -537,10 +544,61 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "13:1815911240017711144",
+      "lastPropertyId": "8:7684406616909361899",
+      "name": "TransactionTag",
+      "properties": [
+        {
+          "id": "1:3148504216745320475",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:267854316046110520",
+          "name": "uuid",
+          "type": 9,
+          "flags": 2080,
+          "indexId": "23:848773158592813096"
+        },
+        {
+          "id": "3:1701687991250279034",
+          "name": "createdDate",
+          "type": 10
+        },
+        {
+          "id": "4:1033466507363479834",
+          "name": "isDeleted",
+          "type": 1
+        },
+        {
+          "id": "5:5151684011991355185",
+          "name": "deletedDate",
+          "type": 10
+        },
+        {
+          "id": "6:1324427155948625680",
+          "name": "title",
+          "type": 9
+        },
+        {
+          "id": "7:1336731416210755961",
+          "name": "type",
+          "type": 9
+        },
+        {
+          "id": "8:7684406616909361899",
+          "name": "payload",
+          "type": 9
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "12:800756592587838565",
-  "lastIndexId": "21:7291423328418584896",
+  "lastEntityId": "13:1815911240017711144",
+  "lastIndexId": "23:848773158592813096",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
