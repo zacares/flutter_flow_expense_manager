@@ -176,7 +176,9 @@ final router = GoRouter(
     ),
     GoRoute(
       path: "/transactionTags/:id",
-      builder: (context, state) => const TransactionTagPage(),
+      builder: (context, state) => TransactionTagPage(
+        tagId: int.tryParse(state.pathParameters["id"]!) ?? -1,
+      ),
     ),
     GoRoute(
       path: "/preferences",

@@ -1,3 +1,6 @@
+import "dart:convert";
+
+import "package:flow/data/transaction_contact_tag.dart";
 import "package:flow/entity/_base.dart";
 import "package:flow/entity/transaction/tag_type.dart";
 import "package:flow/utils/json/utc_datetime_converter.dart";
@@ -73,8 +76,15 @@ class TransactionTag extends EntityBase {
             return null;
           }
         }
-      case TransactionTagType.contact:
-        return;
+      case TransactionTagType.person:
+        {
+          try {
+            final Map<String, dynamic> json = jsonDecode(payload);
+            return TransactionContactTag.fromJson(json);
+          } catch (e) {
+            return null;
+          }
+        }
     }
   }
 }

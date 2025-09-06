@@ -33,7 +33,7 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
       payload = null;
     } else {
       _titleController = TextEditingController();
-      _type = TransactionTagType.expense;
+      _type = TransactionTagType.generic;
     }
   }
 
