@@ -1,5 +1,15 @@
 # Changelog
 
+## Next
+
+### Fixes
+
+* Fixed PDF range date were relative.
+
+### New features
+
+* Pdf summary now shows summary for the report duration
+
 ## 0.15.0
 
 ### New features
