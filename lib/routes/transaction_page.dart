@@ -37,7 +37,7 @@ import "package:flow/widgets/general/form_close_button.dart";
 import "package:flow/widgets/general/info_text.dart";
 import "package:flow/widgets/general/money_text.dart";
 import "package:flow/widgets/location_picker_sheet.dart";
-import "package:flow/widgets/square_map.dart";
+import "package:flow/widgets/open_street_map.dart";
 import "package:flow/widgets/transaction/type_selector.dart";
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
@@ -496,7 +496,7 @@ class _TransactionPageState extends State<TransactionPage> {
                                         ),
                                         child: AspectRatio(
                                           aspectRatio: 1.0,
-                                          child: OSMap(
+                                          child: OpenStreetMap(
                                             mapController: _mapController,
                                             interactable: false,
                                             onTap: (_) => selectLocation(),

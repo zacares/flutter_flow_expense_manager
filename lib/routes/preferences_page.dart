@@ -168,12 +168,6 @@ class PreferencesPageState extends State<PreferencesPage> {
               trailing: DirectionalChevron(),
             ),
             ListTile(
-              leading: const Icon(Symbols.style_rounded),
-              title: Text("preferences.transactions.tags".t(context)),
-              onTap: () => _pushAndRefreshAfter("/preferences/transactionTags"),
-              trailing: DirectionalChevron(),
-            ),
-            ListTile(
               leading: const Icon(Symbols.list_rounded),
               title: Text("preferences.transactions.listTile".t(context)),
               onTap: () => _pushAndRefreshAfter(

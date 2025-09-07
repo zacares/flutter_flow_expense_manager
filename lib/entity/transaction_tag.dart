@@ -6,6 +6,7 @@ import "package:flow/entity/transaction/tag_type.dart";
 import "package:flow/utils/json/utc_datetime_converter.dart";
 import "package:json_annotation/json_annotation.dart";
 import "package:objectbox/objectbox.dart";
+import "package:uuid/uuid.dart";
 
 part "transaction_tag.g.dart";
 
@@ -43,14 +44,17 @@ class TransactionTag extends EntityBase {
 
   TransactionTag({
     this.id = 0,
-    required this.uuid,
+    String? uuid,
     DateTime? createdDate,
     this.isDeleted,
     this.deletedDate,
     this.title,
     this.type,
     this.payload,
-  }) : createdDate = createdDate ?? DateTime.now();
+  }) : createdDate = createdDate ?? DateTime.now(),
+       uuid = Uuid.isValidUUID(fromString: uuid ?? "")
+           ? uuid!
+           : const Uuid().v4();
 
   static Object? parsePayload(TransactionTagType type, String? payload) {
     if (payload == null) return null;
@@ -76,7 +80,7 @@ class TransactionTag extends EntityBase {
             return null;
           }
         }
-      case TransactionTagType.person:
+      case TransactionTagType.contact:
         {
           try {
             final Map<String, dynamic> json = jsonDecode(payload);
@@ -85,6 +89,20 @@ class TransactionTag extends EntityBase {
             return null;
           }
         }
+    }
+  }
+
+  static String? serializePayload(Object? payload) {
+    if (payload == null) return null;
+
+    if (payload is String) {
+      return payload;
+    } else if (payload is List<double>) {
+      return payload.join(",");
+    } else if (payload is TransactionContactTag) {
+      return jsonEncode(payload.toJson());
+    } else {
+      return null;
     }
   }
 }
