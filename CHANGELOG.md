@@ -2,8 +2,13 @@
 
 ## Next
 
+### Fixes
+
+* Fixed PDF range date were relative.
+
 ### New features
 
+* Pdf summary now shows summary for the report duration
 * Now you can programmatically open new transaction page with prefilled fields.
   * Example for creating $300 transaction in an USD account:
 
@@ -11,10 +16,6 @@
   * All fields are passed by uri query params
   * To retrieve the account id, use json export
   * For valid fields, see [schema](./schemas/20250919-transaction-programmable-object.json)
-
-### Fixes
-
-* Fixed auto-backup interval was locked into "3 days"
 
 ## 0.15.0
 
