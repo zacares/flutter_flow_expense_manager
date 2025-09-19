@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:flow/data/transaction_contact_tag.dart";
 import "package:flow/entity/transaction/tag_type.dart";
 import "package:flow/entity/transaction_tag.dart";
@@ -52,13 +54,12 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
   void initState() {
     super.initState();
 
-    _currentlyEditing = ObjectBox().box<TransactionTag>().get(widget.tagId);
-
     if (widget.isNewTag) {
       _titleController = TextEditingController();
       _type = TransactionTagType.generic;
       _payload = null;
     } else {
+      _currentlyEditing = ObjectBox().box<TransactionTag>().get(widget.tagId);
       _titleController = TextEditingController(text: _currentlyEditing?.title);
       _type = _currentlyEditing?.tagType ?? TransactionTagType.generic;
       _payload = TransactionTag.parsePayload(_type, _currentlyEditing?.payload);
@@ -166,14 +167,14 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
                     ),
                     trailing: DirectionalChevron(),
                   ),
-                if (_type == TransactionTagType.contact)
+                if ((Platform.isAndroid || Platform.isIOS) &&
+                    _type == TransactionTagType.contact) ...[
                   ListTile(
                     leading: Icon(Symbols.contact_page_rounded),
                     onTap: _selectContact,
                     title: Text("transaction.tags.contact.select".t(context)),
                     trailing: DirectionalChevron(),
                   ),
-                if (_type == TransactionTagType.contact)
                   Frame(
                     child: InfoText(
                       child: Text(
@@ -182,6 +183,7 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
                       ),
                     ),
                   ),
+                ],
               ],
             ),
           ),
@@ -322,7 +324,7 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
 
     final String formattedName = _titleController.text.trim();
 
-    if (_currentlyEditing != null) {
+    if (!widget.isNewTag) {
       return update(formattedName);
     }
 

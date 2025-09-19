@@ -1,4 +1,4 @@
-import "package:flow/entity/transaction.dart";
+import "package:flow/data/transaction_programmable_object.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/routes/account/account_edit_page.dart";
 import "package:flow/routes/account_page.dart";
@@ -56,7 +56,6 @@ import "package:flow/sync/import/external/ivy_wallet_csv.dart";
 import "package:flow/sync/import/import_csv.dart";
 import "package:flow/sync/import/import_v1.dart";
 import "package:flow/sync/import/import_v2.dart";
-import "package:flow/utils/utils.dart";
 import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
 import "package:moment_dart/moment_dart.dart";
@@ -68,12 +67,11 @@ final router = GoRouter(
     GoRoute(
       path: "/transaction/new",
       pageBuilder: (context, state) {
-        final TransactionType? type = TransactionType.values.firstWhereOrNull(
-          (element) => element.value == state.uri.queryParameters["type"],
-        );
+        final TransactionProgrammableObject? params =
+            TransactionProgrammableObject.tryParse(state.uri.queryParameters);
 
         return MaterialPage(
-          child: TransactionPage.create(initialTransactionType: type),
+          child: TransactionPage.create(params: params),
           fullscreenDialog: true,
         );
       },

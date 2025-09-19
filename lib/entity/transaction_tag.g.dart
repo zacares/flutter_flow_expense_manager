@@ -8,7 +8,7 @@ part of 'transaction_tag.dart';
 
 TransactionTag _$TransactionTagFromJson(Map<String, dynamic> json) =>
     TransactionTag(
-      uuid: json['uuid'] as String,
+      uuid: json['uuid'] as String?,
       createdDate: _$JsonConverterFromJson<String, DateTime>(
         json['createdDate'],
         const UTCDateTimeConverter().fromJson,
