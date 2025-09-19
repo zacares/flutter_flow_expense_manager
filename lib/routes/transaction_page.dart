@@ -3,6 +3,7 @@ import "dart:io";
 import "package:flow/constants.dart";
 import "package:flow/data/exchange_rates.dart";
 import "package:flow/data/money.dart";
+import "package:flow/data/transaction_programmable_object.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/category.dart";
 import "package:flow/entity/recurring_transaction.dart";
@@ -37,7 +38,7 @@ import "package:flow/widgets/general/form_close_button.dart";
 import "package:flow/widgets/general/info_text.dart";
 import "package:flow/widgets/general/money_text.dart";
 import "package:flow/widgets/location_picker_sheet.dart";
-import "package:flow/widgets/square_map.dart";
+import "package:flow/widgets/open_street_map.dart";
 import "package:flow/widgets/transaction/type_selector.dart";
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
@@ -58,16 +59,13 @@ class TransactionPage extends StatefulWidget {
   /// Transaction Object ID
   final int transactionId;
 
-  final TransactionType? initialTransactionType;
+  final TransactionProgrammableObject? params;
 
   bool get isNewTransaction => transactionId == 0;
 
-  const TransactionPage.create({
-    super.key,
-    this.initialTransactionType = TransactionType.expense,
-  }) : transactionId = 0;
+  const TransactionPage.create({super.key, this.params}) : transactionId = 0;
   const TransactionPage.edit({super.key, required this.transactionId})
-    : initialTransactionType = null;
+    : params = null;
 
   @override
   State<TransactionPage> createState() => _TransactionPageState();
@@ -140,51 +138,84 @@ class _TransactionPageState extends State<TransactionPage> {
     accounts = ObjectBox().getAccounts();
     categories = ObjectBox().getCategories();
 
-    /// Transaction we're editing.
-    _currentlyEditing = widget.isNewTransaction
-        ? null
-        : TransactionsService()
-              .getOneSync(widget.transactionId)
-              ?.findTransferOriginalOrThis();
-
-    if (!widget.isNewTransaction && _currentlyEditing == null) {
-      error = "Transaction with id ${widget.transactionId} was not found";
-    } else {
+    if (widget.isNewTransaction) {
+      _currentlyEditing = null;
       _titleController = TextEditingController(
-        text: _currentlyEditing?.title ?? "",
+        text: widget.params?.title ?? "",
       );
       _descriptionController = TextEditingController(
-        text: _currentlyEditing?.description ?? "",
+        text: widget.params?.notes ?? "",
       );
-      _selectedAccount = _currentlyEditing?.account.target;
-      _selectedCategory = _currentlyEditing?.category.target;
-      _transactionDate = _currentlyEditing?.transactionDate ?? DateTime.now();
-      _initialTransactionDate = _currentlyEditing?.transactionDate;
-      _transactionType =
-          _currentlyEditing?.type ??
-          widget.initialTransactionType ??
-          TransactionType.expense;
-      _amount = _currentlyEditing?.isTransfer == true
-          ? _currentlyEditing!.amount.abs()
-          : _currentlyEditing?.amount ??
-                (_transactionType == TransactionType.expense ? -0 : 0);
-      _selectedAccountTransferTo = accounts.firstWhereOrNull(
-        (account) =>
-            account.uuid ==
-            _currentlyEditing?.extensions.transfer?.toAccountUuid,
-      );
-      _geo = _currentlyEditing?.extensions.geo;
-      _isPending = _currentlyEditing?.isPending ?? _isPending;
-      if (_currentlyEditing?.isTransfer == true) {
-        _conversionRate =
-            _currentlyEditing!.extensions.transfer?.conversionRate ?? 1.0;
+      _selectedAccount = widget.params?.fromAccountUuid == null
+          ? null
+          : accounts.firstWhereOrNull(
+              (account) => account.uuid == widget.params!.fromAccountUuid,
+            );
+      _selectedCategory = widget.params?.categoryUuid == null
+          ? null
+          : categories.firstWhereOrNull(
+              (category) => category.uuid == widget.params!.categoryUuid,
+            );
+      _transactionDate = widget.params?.transactionDate ?? DateTime.now();
+      _initialTransactionDate =
+          widget.params?.transactionDate ?? DateTime.now();
+      _transactionType = widget.params?.type ?? TransactionType.expense;
+      _amount = switch (_transactionType) {
+        TransactionType.transfer => widget.params?.amount?.abs() ?? 0.0,
+        TransactionType.expense => -(widget.params?.amount ?? 0.0),
+        TransactionType.income => widget.params?.amount?.abs() ?? 0.0,
+      };
+      _selectedAccountTransferTo = widget.params?.toAccountUuid == null
+          ? null
+          : accounts.firstWhereOrNull(
+              (account) => account.uuid == widget.params!.toAccountUuid,
+            );
+      _isPending = widget.params?.isPending ?? _isPending;
+      if (_transactionType == TransactionType.transfer) {
+        _conversionRate = widget.params?.transferConversionRate ?? 1.0;
       }
-
-      if (_currentlyEditing != null && _currentlyEditing.isRecurring) {
-        _recurringTransaction = RecurringTransactionsService().findOneSync(
-          _currentlyEditing.extensions.recurring?.uuid,
+    } else {
+      /// Transaction we're editing.
+      _currentlyEditing = widget.isNewTransaction
+          ? null
+          : TransactionsService()
+                .getOneSync(widget.transactionId)
+                ?.findTransferOriginalOrThis();
+      if (_currentlyEditing == null) {
+        error = "Transaction with id ${widget.transactionId} was not found";
+      } else {
+        _titleController = TextEditingController(
+          text: _currentlyEditing.title ?? "",
         );
-        _recurrence = _recurringTransaction?.recurrence;
+        _descriptionController = TextEditingController(
+          text: _currentlyEditing.description ?? "",
+        );
+        _selectedAccount = _currentlyEditing.account.target;
+        _selectedCategory = _currentlyEditing.category.target;
+        _transactionDate = _currentlyEditing.transactionDate;
+        _initialTransactionDate = _currentlyEditing.transactionDate;
+        _transactionType = _currentlyEditing.type;
+        _amount = _currentlyEditing.isTransfer == true
+            ? _currentlyEditing.amount.abs()
+            : _currentlyEditing.amount;
+        _selectedAccountTransferTo = accounts.firstWhereOrNull(
+          (account) =>
+              account.uuid ==
+              _currentlyEditing.extensions.transfer?.toAccountUuid,
+        );
+        _geo = _currentlyEditing.extensions.geo;
+        _isPending = _currentlyEditing.isPending ?? _isPending;
+        if (_currentlyEditing.isTransfer == true) {
+          _conversionRate =
+              _currentlyEditing.extensions.transfer?.conversionRate ?? 1.0;
+        }
+
+        if (_currentlyEditing.isRecurring) {
+          _recurringTransaction = RecurringTransactionsService().findOneSync(
+            _currentlyEditing.extensions.recurring?.uuid,
+          );
+          _recurrence = _recurringTransaction?.recurrence;
+        }
       }
     }
 
@@ -194,9 +225,7 @@ class _TransactionPageState extends State<TransactionPage> {
 
     if (widget.isNewTransaction) {
       tryFetchLocation();
-    }
 
-    if (widget.isNewTransaction) {
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
         selectAccount();
       });
@@ -496,7 +525,7 @@ class _TransactionPageState extends State<TransactionPage> {
                                         ),
                                         child: AspectRatio(
                                           aspectRatio: 1.0,
-                                          child: OSMap(
+                                          child: OpenStreetMap(
                                             mapController: _mapController,
                                             interactable: false,
                                             onTap: (_) => selectLocation(),
@@ -642,46 +671,50 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void inputAmount() async {
-    await TransitiveLocalPreferences().updateTransitiveProperties();
-    final hideCurrencySymbol = !TransitiveLocalPreferences()
-        .usesMultipleCurrencies
-        .get();
+    if (_amount == 0.0) {
+      await TransitiveLocalPreferences().updateTransitiveProperties();
+      final hideCurrencySymbol = !TransitiveLocalPreferences()
+          .usesMultipleCurrencies
+          .get();
+
+      if (!mounted) return;
+
+      final double? result = await showModalBottomSheet<double>(
+        context: context,
+        builder: (context) => InputAmountSheet(
+          initialAmount: _amount.abs(),
+          currency: _selectedAccount?.currency,
+          hideCurrencySymbol: _selectedAccount == null && hideCurrencySymbol,
+          title: _transactionType.localizedNameContext(context),
+          lockSign: true,
+        ),
+        isScrollControlled: true,
+      );
+
+      final double? resultAmount = result == null
+          ? null
+          : switch (_transactionType) {
+              TransactionType.expense => -result.abs(),
+              TransactionType.income => result.abs(),
+              TransactionType.transfer => result.abs(),
+            };
+
+      setState(() {
+        _amount = resultAmount ?? _amount;
+      });
+    }
 
     if (!mounted) return;
 
-    final double? result = await showModalBottomSheet<double>(
-      context: context,
-      builder: (context) => InputAmountSheet(
-        initialAmount: _amount.abs(),
-        currency: _selectedAccount?.currency,
-        hideCurrencySymbol: _selectedAccount == null && hideCurrencySymbol,
-        title: _transactionType.localizedNameContext(context),
-        lockSign: true,
-      ),
-      isScrollControlled: true,
-    );
-
-    final double? resultAmount = result == null
-        ? null
-        : switch (_transactionType) {
-            TransactionType.expense => -result.abs(),
-            TransactionType.income => result.abs(),
-            TransactionType.transfer => result.abs(),
-          };
-
-    setState(() {
-      _amount = resultAmount ?? _amount;
-    });
+    if (_conversionRate == 1.0) {
+      await inputPostConversionAmount();
+    }
 
     if (!mounted) return;
 
-    await inputPostConversionAmount();
-
-    if (!mounted) return;
-
-    if (widget.isNewTransaction && result != null) {
+    if (widget.isNewTransaction && _amount == 0.0) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (context.mounted) {
+        if (context.mounted && _titleController.text.isEmpty) {
           FocusScope.of(context).requestFocus(_titleFocusNode);
         }
       });
@@ -716,30 +749,32 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void selectAccount() async {
-    final Account? result = accounts.length == 1
-        ? accounts.single
-        : await showModalBottomSheet<Account>(
-            context: context,
-            builder: (context) => SelectAccountSheet(
-              accounts: accounts,
-              currentlySelectedAccountId: _selectedAccount?.id,
-              titleOverride: isTransfer
-                  ? "transaction.transfer.from.select".t(context)
-                  : null,
-              showBalance: true,
-              showTrailing: widget.isNewTransaction,
-            ),
-            isScrollControlled: true,
-          );
+    if (_selectedAccount == null) {
+      final Account? result = accounts.length == 1
+          ? accounts.single
+          : await showModalBottomSheet<Account>(
+              context: context,
+              builder: (context) => SelectAccountSheet(
+                accounts: accounts,
+                currentlySelectedAccountId: _selectedAccount?.id,
+                titleOverride: isTransfer
+                    ? "transaction.transfer.from.select".t(context)
+                    : null,
+                showBalance: true,
+                showTrailing: widget.isNewTransaction,
+              ),
+              isScrollControlled: true,
+            );
 
-    setState(() {
-      if (result?.id == _selectedAccountTransferTo?.id) {
-        _selectedAccountTransferTo = null;
-      }
-      _selectedAccount = result ?? _selectedAccount;
-    });
+      setState(() {
+        if (result?.id == _selectedAccountTransferTo?.id) {
+          _selectedAccountTransferTo = null;
+        }
+        _selectedAccount = result ?? _selectedAccount;
+      });
+    }
 
-    if (widget.isNewTransaction && result != null) {
+    if (widget.isNewTransaction && _selectedAccount != null) {
       if (isTransfer) {
         selectAccountTransferTo();
       } else {
@@ -796,24 +831,26 @@ class _TransactionPageState extends State<TransactionPage> {
       return;
     }
 
-    final Optional<Category>? result =
-        await showModalBottomSheet<Optional<Category>>(
-          context: context,
-          builder: (context) => SelectCategorySheet(
-            categories: categories,
-            currentlySelectedCategoryId: _selectedCategory?.id,
-            showTrailing: widget.isNewTransaction,
-          ),
-          isScrollControlled: true,
-        );
+    if (_selectedCategory == null) {
+      final Optional<Category>? result =
+          await showModalBottomSheet<Optional<Category>>(
+            context: context,
+            builder: (context) => SelectCategorySheet(
+              categories: categories,
+              currentlySelectedCategoryId: _selectedCategory?.id,
+              showTrailing: widget.isNewTransaction,
+            ),
+            isScrollControlled: true,
+          );
 
-    if (result != null) {
-      setState(() {
-        _selectedCategory = result.value;
-      });
+      if (result != null) {
+        setState(() {
+          _selectedCategory = result.value;
+        });
+      }
     }
 
-    if (widget.isNewTransaction && result != null) inputAmount();
+    if (widget.isNewTransaction && _selectedCategory != null) inputAmount();
   }
 
   void selectTransactionDate() async {

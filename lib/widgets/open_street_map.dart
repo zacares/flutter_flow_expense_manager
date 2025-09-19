@@ -4,13 +4,13 @@ import "package:flutter_map/flutter_map.dart";
 import "package:latlong2/latlong.dart";
 import "package:flow/widgets/utils/utils.dart";
 
-class OSMap extends StatelessWidget {
+class OpenStreetMap extends StatelessWidget {
   final bool interactable;
   final LatLng center;
   final Function(LatLng)? onTap;
   final MapController? mapController;
 
-  const OSMap({
+  const OpenStreetMap({
     super.key,
     this.center = sukhbaatarSquareCenter,
     this.mapController,

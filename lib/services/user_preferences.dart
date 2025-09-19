@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:math";
 
 import "package:flow/data/flow_notification_payload.dart";
@@ -230,19 +231,29 @@ class UserPreferencesService {
 
   UserPreferencesService._internal();
 
-  void initialize() {
+  Future<void> initialize() async {
+    final Completer<void> completer = Completer();
+
     ObjectBox()
         .box<UserPreferences>()
         .query()
         .watch(triggerImmediately: true)
         .listen((event) {
-          final UserPreferences? userPreferences = event.findFirst();
+          try {
+            final UserPreferences? userPreferences = event.findFirst();
 
-          if (userPreferences == null) {
-            return;
+            if (userPreferences == null) {
+              return;
+            }
+
+            valueNotifier.value = userPreferences;
+          } finally {
+            if (!completer.isCompleted) {
+              completer.complete();
+            }
           }
-
-          valueNotifier.value = userPreferences;
         });
+
+    return completer.future;
   }
 }

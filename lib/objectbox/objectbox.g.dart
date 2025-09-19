@@ -22,6 +22,7 @@ import '../entity/profile.dart';
 import '../entity/recurring_transaction.dart';
 import '../entity/transaction.dart';
 import '../entity/transaction_filter_preset.dart';
+import '../entity/transaction_tag.dart';
 import '../entity/user_preferences.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
@@ -243,7 +244,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(7, 5357777579468740615),
     name: 'Transaction',
-    lastPropertyId: const obx_int.IdUid(21, 8105783725440518384),
+    lastPropertyId: const obx_int.IdUid(22, 8732200258907669936),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -358,6 +359,14 @@ final _entities = <obx_int.ModelEntity>[
         name: 'extraTags',
         type: 30,
         flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(22, 8732200258907669936),
+        name: 'location',
+        type: 28,
+        flags: 8,
+        indexId: const obx_int.IdUid(22, 4524862754555930046),
+        hnswParams: obx_int.ModelHnswParams(dimensions: 2, distanceType: 6),
       ),
     ],
     relations: <obx_int.ModelRelation>[],
@@ -655,6 +664,65 @@ final _entities = <obx_int.ModelEntity>[
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[],
   ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(13, 1815911240017711144),
+    name: 'TransactionTag',
+    lastPropertyId: const obx_int.IdUid(8, 7684406616909361899),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 3148504216745320475),
+        name: 'id',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 267854316046110520),
+        name: 'uuid',
+        type: 9,
+        flags: 2080,
+        indexId: const obx_int.IdUid(23, 848773158592813096),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 1701687991250279034),
+        name: 'createdDate',
+        type: 10,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 1033466507363479834),
+        name: 'isDeleted',
+        type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(5, 5151684011991355185),
+        name: 'deletedDate',
+        type: 10,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(6, 1324427155948625680),
+        name: 'title',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(7, 1336731416210755961),
+        name: 'type',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(8, 7684406616909361899),
+        name: 'payload',
+        type: 9,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
 ];
 
 /// Shortcut for [obx.Store.new] that passes [getObjectBoxModel] and for Flutter
@@ -695,8 +763,8 @@ Future<obx.Store> openStore({
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
     entities: _entities,
-    lastEntityId: const obx_int.IdUid(12, 800756592587838565),
-    lastIndexId: const obx_int.IdUid(21, 7291423328418584896),
+    lastEntityId: const obx_int.IdUid(13, 1815911240017711144),
+    lastIndexId: const obx_int.IdUid(23, 848773158592813096),
     lastRelationId: const obx_int.IdUid(0, 0),
     lastSequenceId: const obx_int.IdUid(0, 0),
     retiredEntityUids: const [
@@ -1069,7 +1137,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final extraTagsOffset = fbb.writeList(
           object.extraTags.map(fbb.writeString).toList(growable: false),
         );
-        fbb.startTable(22);
+        final locationOffset = object.location == null
+            ? null
+            : fbb.writeListFloat32(object.location!);
+        fbb.startTable(23);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uuidOffset);
         fbb.addInt64(2, object.createdDate.millisecondsSinceEpoch);
@@ -1088,6 +1159,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addBool(17, object.isDeleted);
         fbb.addInt64(18, object.deletedDate?.millisecondsSinceEpoch);
         fbb.addOffset(20, extraTagsOffset);
+        fbb.addOffset(21, locationOffset);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -1171,7 +1243,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
               )
               ..deletedDate = deletedDateValue == null
                   ? null
-                  : DateTime.fromMillisecondsSinceEpoch(deletedDateValue);
+                  : DateTime.fromMillisecondsSinceEpoch(deletedDateValue)
+              ..location = const fb.ListReader<double>(
+                fb.Float32Reader(),
+                lazy: false,
+              ).vTableGetNullable(buffer, rootOffset, 46);
         object.category.targetId = const fb.Int64Reader().vTableGet(
           buffer,
           rootOffset,
@@ -1559,6 +1635,88 @@ obx_int.ModelDefinition getObjectBoxModel() {
         return object;
       },
     ),
+    TransactionTag: obx_int.EntityDefinition<TransactionTag>(
+      model: _entities[9],
+      toOneRelations: (TransactionTag object) => [],
+      toManyRelations: (TransactionTag object) => {},
+      getId: (TransactionTag object) => object.id,
+      setId: (TransactionTag object, int id) {
+        object.id = id;
+      },
+      objectToFB: (TransactionTag object, fb.Builder fbb) {
+        final uuidOffset = fbb.writeString(object.uuid);
+        final titleOffset = object.title == null
+            ? null
+            : fbb.writeString(object.title!);
+        final typeOffset = object.type == null
+            ? null
+            : fbb.writeString(object.type!);
+        final payloadOffset = object.payload == null
+            ? null
+            : fbb.writeString(object.payload!);
+        fbb.startTable(9);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, uuidOffset);
+        fbb.addInt64(2, object.createdDate.millisecondsSinceEpoch);
+        fbb.addBool(3, object.isDeleted);
+        fbb.addInt64(4, object.deletedDate?.millisecondsSinceEpoch);
+        fbb.addOffset(5, titleOffset);
+        fbb.addOffset(6, typeOffset);
+        fbb.addOffset(7, payloadOffset);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
+        final deletedDateValue = const fb.Int64Reader().vTableGetNullable(
+          buffer,
+          rootOffset,
+          12,
+        );
+        final idParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          4,
+          0,
+        );
+        final uuidParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 6, '');
+        final createdDateParam = DateTime.fromMillisecondsSinceEpoch(
+          const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0),
+        );
+        final isDeletedParam = const fb.BoolReader().vTableGetNullable(
+          buffer,
+          rootOffset,
+          10,
+        );
+        final deletedDateParam = deletedDateValue == null
+            ? null
+            : DateTime.fromMillisecondsSinceEpoch(deletedDateValue);
+        final titleParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 14);
+        final typeParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 16);
+        final payloadParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 18);
+        final object = TransactionTag(
+          id: idParam,
+          uuid: uuidParam,
+          createdDate: createdDateParam,
+          isDeleted: isDeletedParam,
+          deletedDate: deletedDateParam,
+          title: titleParam,
+          type: typeParam,
+          payload: payloadParam,
+        );
+
+        return object;
+      },
+    ),
   };
 
   return obx_int.ModelDefinition(model, bindings);
@@ -1807,6 +1965,11 @@ class Transaction_ {
   static final extraTags = obx.QueryStringVectorProperty<Transaction>(
     _entities[4].properties[17],
   );
+
+  /// See [Transaction.location].
+  static final location = obx.QueryHnswProperty<Transaction>(
+    _entities[4].properties[18],
+  );
 }
 
 /// [TransactionFilterPreset] entity fields to define ObjectBox queries.
@@ -2013,4 +2176,47 @@ class RecurringTransaction_ {
   /// See [RecurringTransaction.lastGeneratedTransactionDate].
   static final lastGeneratedTransactionDate =
       obx.QueryDateProperty<RecurringTransaction>(_entities[8].properties[8]);
+}
+
+/// [TransactionTag] entity fields to define ObjectBox queries.
+class TransactionTag_ {
+  /// See [TransactionTag.id].
+  static final id = obx.QueryIntegerProperty<TransactionTag>(
+    _entities[9].properties[0],
+  );
+
+  /// See [TransactionTag.uuid].
+  static final uuid = obx.QueryStringProperty<TransactionTag>(
+    _entities[9].properties[1],
+  );
+
+  /// See [TransactionTag.createdDate].
+  static final createdDate = obx.QueryDateProperty<TransactionTag>(
+    _entities[9].properties[2],
+  );
+
+  /// See [TransactionTag.isDeleted].
+  static final isDeleted = obx.QueryBooleanProperty<TransactionTag>(
+    _entities[9].properties[3],
+  );
+
+  /// See [TransactionTag.deletedDate].
+  static final deletedDate = obx.QueryDateProperty<TransactionTag>(
+    _entities[9].properties[4],
+  );
+
+  /// See [TransactionTag.title].
+  static final title = obx.QueryStringProperty<TransactionTag>(
+    _entities[9].properties[5],
+  );
+
+  /// See [TransactionTag.type].
+  static final type = obx.QueryStringProperty<TransactionTag>(
+    _entities[9].properties[6],
+  );
+
+  /// See [TransactionTag.payload].
+  static final payload = obx.QueryStringProperty<TransactionTag>(
+    _entities[9].properties[7],
+  );
 }

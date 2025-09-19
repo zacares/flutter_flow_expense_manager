@@ -19,6 +19,7 @@ import "dart:async";
 import "dart:io";
 import "dart:ui";
 
+import "package:app_links/app_links.dart";
 import "package:flow/constants.dart";
 import "package:flow/data/flow_icon.dart";
 import "package:flow/entity/profile.dart";
@@ -117,7 +118,7 @@ void main() async {
 
   try {
     startupLog.fine("Initializing user preferences service");
-    UserPreferencesService().initialize();
+    await UserPreferencesService().initialize();
   } catch (e) {
     startupLog.severe("Failed to initialize UserPreferencesService", e);
   }
@@ -173,6 +174,8 @@ class FlowState extends State<Flow> {
 
   ThemeMode get themeMode => _themeMode;
 
+  late final StreamSubscription<Uri?> _flowUriSubscription;
+
   late bool _tempLock;
 
   bool get useDarkTheme => (_themeMode == ThemeMode.system
@@ -185,6 +188,9 @@ class FlowState extends State<Flow> {
 
     _reloadLocale();
     _reloadTheme();
+
+    AppLinks().getInitialLink().then(_handleFlowUri);
+    _flowUriSubscription = AppLinks().uriLinkStream.listen(_handleFlowUri);
 
     UserPreferencesService().valueNotifier.addListener(_reloadTheme);
 
@@ -234,6 +240,8 @@ class FlowState extends State<Flow> {
     LocalPreferences().primaryCurrency.removeListener(_refreshExchangeRates);
 
     TransactionsService().removeListener(_synchronizePlannedNotifications);
+
+    _flowUriSubscription.cancel();
 
     _appLifeCycleListener.dispose();
 
@@ -397,6 +405,23 @@ class FlowState extends State<Flow> {
       }
     } catch (e) {
       mainLogger.severe("Failed to initialize LocalAuthService", e);
+    }
+  }
+
+  void _handleFlowUri(Uri? uri) {
+    if (uri == null) return;
+    mainLogger.info("Received app link: $uri");
+
+    if (uri.scheme != "flow-mn") {
+      mainLogger.warning("Ignoring non-flow scheme URI: $uri");
+      return;
+    }
+
+    if (uri.pathSegments.join("/") == "transaction/new") {
+      if (mounted) {
+        router.push("/transaction/new?${uri.query}");
+      }
+      return;
     }
   }
 }
