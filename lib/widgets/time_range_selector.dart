@@ -1,7 +1,6 @@
 import "package:flow/l10n/flow_localizations.dart";
 import "package:flow/theme/helpers.dart";
 import "package:flow/widgets/general/button.dart";
-import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/utils/time_and_range.dart";
 import "package:flutter/gestures.dart";
 import "package:flutter/material.dart";
@@ -67,14 +66,13 @@ class _TimeRangeSelectorState extends State<TimeRangeSelector> {
           Directionality(
             textDirection: TextDirection.ltr,
             child: Row(
+              spacing: 4.0,
               children: [
-                if (buildNextPrev) ...[
+                if (buildNextPrev)
                   IconButton(
                     icon: const Icon(Symbols.chevron_left),
                     onPressed: prev,
                   ),
-                  const SizedBox(width: 12.0),
-                ],
                 Expanded(
                   child: Listener(
                     onPointerSignal: (event) {
@@ -145,29 +143,25 @@ class _TimeRangeSelectorState extends State<TimeRangeSelector> {
                     ),
                   ),
                 ),
-                if (buildNextPrev) ...[
-                  const SizedBox(width: 12.0),
+                if (buildNextPrev)
                   IconButton(
                     icon: const Icon(Symbols.chevron_right),
                     onPressed: next,
                   ),
-                ],
               ],
             ),
           ),
           const SizedBox(height: 4.0),
-          Frame(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(modeLabel),
-                TextButton(
-                  onPressed: changeMode,
-                  child: Text("select.timeRange.changeMode".t(context)),
-                ),
-              ],
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(modeLabel),
+              TextButton(
+                onPressed: changeMode,
+                child: Text("select.timeRange.changeMode".t(context)),
+              ),
+            ],
           ),
         ],
       ),

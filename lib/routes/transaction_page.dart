@@ -272,6 +272,7 @@ class _TransactionPageState extends State<TransactionPage> {
                   tooltip: "general.save".t(context),
                 ),
               ],
+              actionsPadding: EdgeInsets.zero,
               title: TypeSelector(
                 current: _transactionType,
                 onChange: updateTransactionType,

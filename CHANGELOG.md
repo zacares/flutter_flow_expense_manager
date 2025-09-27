@@ -2,13 +2,11 @@
 
 ## Next
 
-### Fixes
-
-* Fixed PDF range date were relative.
-
 ### New features
 
 * Pdf summary now shows summary for the report duration
+* Added transaction tags, closes [#568](https://github.com/flow-mn/flow/issues/568)
+* Now you can set colors for tags, accounts, and categories.
 * Now you can programmatically open new transaction page with prefilled fields.
   * Example for creating $300 transaction in an USD account:
 
@@ -16,6 +14,17 @@
   * All fields are passed by uri query params
   * To retrieve the account id, use json export
   * For valid fields, see [schema](./schemas/20250919-transaction-programmable-object.json)
+
+### Fixes
+
+* Fixed PDF range date were relative.
+* Fixed it was impossible to edit the category/account of an existing
+  transaction in some scenarios
+
+### Changes
+
+* Added slight shadow to the navbar for distinction
+* Some pages now scroll behind the system navbar
 
 ## 0.15.0
 
