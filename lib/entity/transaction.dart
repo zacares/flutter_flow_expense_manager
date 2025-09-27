@@ -6,6 +6,7 @@ import "package:flow/entity/transaction/extensions/base.dart";
 import "package:flow/entity/transaction/subtype.dart";
 import "package:flow/entity/transaction/type.dart";
 import "package:flow/entity/transaction/wrapper.dart";
+import "package:flow/entity/transaction_tag.dart";
 import "package:flow/utils/json/utc_datetime_converter.dart";
 import "package:json_annotation/json_annotation.dart";
 import "package:objectbox/objectbox.dart";
@@ -127,6 +128,12 @@ class Transaction implements EntityBase {
 
     return amount.isNegative ? TransactionType.expense : TransactionType.income;
   }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final tags = ToMany<TransactionTag>();
+
+  @Transient()
+  List<String> get tagUuids => tags.map((e) => e.uuid).toList();
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   final category = ToOne<Category>();

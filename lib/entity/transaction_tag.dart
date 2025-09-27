@@ -1,8 +1,12 @@
 import "dart:convert";
 
+import "package:flow/data/flow_icon.dart";
 import "package:flow/data/transaction_contact_tag.dart";
 import "package:flow/entity/_base.dart";
 import "package:flow/entity/transaction/tag_type.dart";
+import "package:flow/theme/color_themes/registry.dart";
+import "package:flow/theme/flow_color_scheme.dart";
+import "package:flow/utils/extensions/transaction_tag_type.dart";
 import "package:flow/utils/json/utc_datetime_converter.dart";
 import "package:json_annotation/json_annotation.dart";
 import "package:objectbox/objectbox.dart";
@@ -32,6 +36,26 @@ class TransactionTag extends EntityBase {
 
   String? title;
 
+  String? iconCode;
+
+  String? colorSchemeName;
+
+  @Transient()
+  FlowColorScheme? get colorScheme => getThemeStrict(colorSchemeName);
+
+  @Transient()
+  FlowIconData get icon {
+    if (iconCode == null) {
+      return FlowIconData.icon(tagType.icon);
+    }
+
+    try {
+      return FlowIconData.parse(iconCode!);
+    } catch (e) {
+      return FlowIconData.icon(tagType.icon);
+    }
+  }
+
   @Transient()
   TransactionTagType get tagType => TransactionTagType.fromString(type);
 
@@ -51,6 +75,8 @@ class TransactionTag extends EntityBase {
     this.title,
     this.type,
     this.payload,
+    this.iconCode,
+    this.colorSchemeName,
   }) : createdDate = createdDate ?? DateTime.now(),
        uuid = Uuid.isValidUUID(fromString: uuid ?? "")
            ? uuid!

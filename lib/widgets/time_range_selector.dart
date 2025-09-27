@@ -1,6 +1,7 @@
 import "package:flow/l10n/flow_localizations.dart";
 import "package:flow/theme/helpers.dart";
 import "package:flow/widgets/general/button.dart";
+import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/utils/time_and_range.dart";
 import "package:flutter/gestures.dart";
 import "package:flutter/material.dart";
@@ -155,16 +156,18 @@ class _TimeRangeSelectorState extends State<TimeRangeSelector> {
             ),
           ),
           const SizedBox(height: 4.0),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(modeLabel),
-              TextButton(
-                onPressed: changeMode,
-                child: Text("select.timeRange.changeMode".t(context)),
-              ),
-            ],
+          Frame(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(modeLabel),
+                TextButton(
+                  onPressed: changeMode,
+                  child: Text("select.timeRange.changeMode".t(context)),
+                ),
+              ],
+            ),
           ),
         ],
       ),

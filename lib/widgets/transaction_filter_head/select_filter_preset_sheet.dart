@@ -104,6 +104,8 @@ class _SelectFilterPresetSheetState extends State<SelectFilterPresetSheet> {
                         final bool valid = preset.filter.validate(
                           accounts: accounts.map((x) => x.uuid).toSet(),
                           categories: categories.map((x) => x.uuid).toSet(),
+                          // TODO @sadespresso - fetch tags from provider
+                          tags: {},
                         );
 
                         if (differenceCount == 0) {

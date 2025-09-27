@@ -227,7 +227,7 @@ class _TransactionPageState extends State<TransactionPage> {
       tryFetchLocation();
 
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-        selectAccount();
+        selectAccount(true);
       });
     }
   }
@@ -283,8 +283,8 @@ class _TransactionPageState extends State<TransactionPage> {
               centerTitle: true,
               backgroundColor: context.colorScheme.surface,
             ),
-            body: SafeArea(
-              child: SingleChildScrollView(
+            body: SingleChildScrollView(
+              child: SafeArea(
                 child: Form(
                   canPop: !hasChanged(),
                   child: Column(
@@ -416,6 +416,7 @@ class _TransactionPageState extends State<TransactionPage> {
                                 : FlowIcon(
                                     _selectedCategory!.icon,
                                     plated: true,
+                                    colorScheme: _selectedCategory!.colorScheme,
                                   ),
                             title: Text(
                               _selectedCategory?.name ??
@@ -427,6 +428,11 @@ class _TransactionPageState extends State<TransactionPage> {
                                 : null,
                           ),
                         ),
+                      const SizedBox(height: 24.0),
+                      Section(
+                        title: "transaction.tags".t(context),
+                        child: Wrap(),
+                      ),
                       const SizedBox(height: 24.0),
                       DescriptionSection(
                         controller: _descriptionController,
@@ -670,7 +676,7 @@ class _TransactionPageState extends State<TransactionPage> {
     setState(() {});
   }
 
-  void inputAmount() async {
+  void inputAmount([bool fromAutomatedFlow = false]) async {
     if (_amount == 0.0) {
       await TransitiveLocalPreferences().updateTransitiveProperties();
       final hideCurrencySymbol = !TransitiveLocalPreferences()
@@ -712,7 +718,7 @@ class _TransactionPageState extends State<TransactionPage> {
 
     if (!mounted) return;
 
-    if (widget.isNewTransaction && _amount == 0.0) {
+    if (fromAutomatedFlow && widget.isNewTransaction && _amount == 0.0) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         if (context.mounted && _titleController.text.isEmpty) {
           FocusScope.of(context).requestFocus(_titleFocusNode);
@@ -748,8 +754,8 @@ class _TransactionPageState extends State<TransactionPage> {
     setState(() {});
   }
 
-  void selectAccount() async {
-    if (_selectedAccount == null) {
+  void selectAccount([bool fromAutomatedFlow = false]) async {
+    if (!fromAutomatedFlow || _selectedAccount == null) {
       final Account? result = accounts.length == 1
           ? accounts.single
           : await showModalBottomSheet<Account>(
@@ -774,16 +780,18 @@ class _TransactionPageState extends State<TransactionPage> {
       });
     }
 
-    if (widget.isNewTransaction && _selectedAccount != null) {
+    if (fromAutomatedFlow &&
+        widget.isNewTransaction &&
+        _selectedAccount != null) {
       if (isTransfer) {
-        selectAccountTransferTo();
+        selectAccountTransferTo(true);
       } else {
-        selectCategory();
+        selectCategory(true);
       }
     }
   }
 
-  void selectAccountTransferTo() async {
+  void selectAccountTransferTo([bool fromAutomatedFlow = false]) async {
     final List<Account> toAccounts = accounts.where((element) {
       return element.id != _selectedAccount?.id;
     }).toList();
@@ -822,16 +830,18 @@ class _TransactionPageState extends State<TransactionPage> {
       }
     }
 
-    if (widget.isNewTransaction && result != null) inputAmount();
+    if (fromAutomatedFlow && widget.isNewTransaction && result != null) {
+      inputAmount();
+    }
   }
 
-  void selectCategory() async {
+  void selectCategory([bool fromAutomatedFlow = false]) async {
     if (categories.isEmpty) {
       inputAmount();
       return;
     }
 
-    if (_selectedCategory == null) {
+    if (!fromAutomatedFlow || _selectedCategory == null) {
       final Optional<Category>? result =
           await showModalBottomSheet<Optional<Category>>(
             context: context,
@@ -850,7 +860,9 @@ class _TransactionPageState extends State<TransactionPage> {
       }
     }
 
-    if (widget.isNewTransaction && _selectedCategory != null) inputAmount();
+    if (fromAutomatedFlow) {
+      if (widget.isNewTransaction && _selectedCategory != null) inputAmount();
+    }
   }
 
   void selectTransactionDate() async {

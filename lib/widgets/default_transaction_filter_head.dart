@@ -118,6 +118,8 @@ class _DefaultTransactionsFilterHeadState
               !_filter.validate(
                 accounts: activeAccounts.map((account) => account.uuid).toSet(),
                 categories: categories.map((category) => category.uuid).toSet(),
+                // TODO @sadespresso - fetch tags from provider
+                tags: {},
               )) {
             SchedulerBinding.instance.addPostFrameCallback((_) {
               filter = widget.defaultFilter;

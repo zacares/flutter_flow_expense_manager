@@ -51,7 +51,6 @@ class _TransactionTagsPageState extends State<TransactionTagsPage> {
                 return ListTile(
                   leading: Icon(tag.tagType.icon),
                   title: Text(tag.title ?? "~"),
-                  subtitle: Text(tag.createdDate.toString()),
                   onTap: () => context.push("/transactionTags/${tag.id}"),
                 );
               },

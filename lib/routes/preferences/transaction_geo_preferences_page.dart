@@ -57,15 +57,15 @@ class _TransactionGeoPreferencesPageState
 
     return Scaffold(
       appBar: AppBar(title: Text("preferences.transactions.geo".t(context))),
-      body: SafeArea(
-        child: FutureBuilder(
-          future: _geoPermissionGranted,
-          builder: (context, snapshot) {
-            final LocationPermission? permissionData = snapshot.data;
-            final bool hasPermission =
-                permissionData != null && resolvePermission(permissionData);
+      body: FutureBuilder(
+        future: _geoPermissionGranted,
+        builder: (context, snapshot) {
+          final LocationPermission? permissionData = snapshot.data;
+          final bool hasPermission =
+              permissionData != null && resolvePermission(permissionData);
 
-            return SingleChildScrollView(
+          return SingleChildScrollView(
+            child: SafeArea(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -104,9 +104,9 @@ class _TransactionGeoPreferencesPageState
                   const SizedBox(height: 16.0),
                 ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

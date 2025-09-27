@@ -91,9 +91,9 @@ class _StatsTabState extends State<StatsTab>
 
     return Column(
       children: [
-        Frame.standalone(
-          child: TimeRangeSelector(initialValue: range, onChanged: updateRange),
-        ),
+        const SizedBox(height: 16.0),
+        TimeRangeSelector(initialValue: range, onChanged: updateRange),
+        const SizedBox(height: 16.0),
         if (showMissingExchangeRatesWarning) ...[
           RatesMissingErrorBox(),
           const SizedBox(height: 12.0),

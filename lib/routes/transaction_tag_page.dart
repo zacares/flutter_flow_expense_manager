@@ -1,5 +1,6 @@
 import "dart:io";
 
+import "package:flow/data/flow_icon.dart";
 import "package:flow/data/transaction_contact_tag.dart";
 import "package:flow/entity/transaction/tag_type.dart";
 import "package:flow/entity/transaction_tag.dart";
@@ -8,15 +9,19 @@ import "package:flow/l10n/flow_localizations.dart";
 import "package:flow/l10n/named_enum.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
+import "package:flow/theme/color_themes/registry.dart";
 import "package:flow/theme/helpers.dart";
 import "package:flow/utils/extensions/transaction_tag_type.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/general/directional_chevron.dart";
+import "package:flow/widgets/general/flow_icon.dart";
 import "package:flow/widgets/general/form_close_button.dart";
 import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/general/info_text.dart";
 import "package:flow/widgets/open_street_map.dart";
+import "package:flow/widgets/select_color_scheme_list_tile.dart";
 import "package:flow/widgets/sheets/select_contact_sheet.dart";
+import "package:flow/widgets/sheets/select_flow_icon_sheet.dart";
 import "package:flutter/material.dart";
 import "package:flutter_contacts/contact.dart";
 import "package:geolocator/geolocator.dart";
@@ -50,6 +55,13 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
 
   bool _locationBusy = false;
 
+  String? _colorSchemeName;
+
+  FlowIconData? _iconData;
+
+  String get iconCodeOrError =>
+      _iconData?.toString() ?? FlowIconData.icon(_type.icon).toString();
+
   @override
   void initState() {
     super.initState();
@@ -57,12 +69,13 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
     if (widget.isNewTag) {
       _titleController = TextEditingController();
       _type = TransactionTagType.generic;
-      _payload = null;
     } else {
       _currentlyEditing = ObjectBox().box<TransactionTag>().get(widget.tagId);
       _titleController = TextEditingController(text: _currentlyEditing?.title);
       _type = _currentlyEditing?.tagType ?? TransactionTagType.generic;
       _payload = TransactionTag.parsePayload(_type, _currentlyEditing?.payload);
+      _colorSchemeName = _currentlyEditing?.colorSchemeName;
+      _iconData = _currentlyEditing?.icon;
     }
   }
 
@@ -89,14 +102,23 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: SafeArea(
           child: Form(
             key: _formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 16.0),
+                FlowIcon(
+                  _iconData ?? CharacterFlowIcon("T"),
+                  size: 80.0,
+                  plated: true,
+                  onTap: selectIcon,
+                  colorScheme: getThemeStrict(_colorSchemeName),
+                ),
+                const SizedBox(height: 16.0),
+
                 Align(
                   alignment: Alignment.topLeft,
                   child: SingleChildScrollView(
@@ -110,14 +132,10 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
                             (type) => FilterChip(
                               avatar: Icon(type.icon),
                               label: Text(type.localizedNameContext(context)),
+                              showCheckmark: false,
                               selected: _type == type,
-                              onSelected: (selected) {
-                                if (selected != true) return;
-
-                                setState(() {
-                                  _type = type;
-                                });
-                              },
+                              onSelected: (selected) =>
+                                  selected ? _updateType(type) : null,
                             ),
                           )
                           .toList(),
@@ -184,12 +202,42 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
                     ),
                   ),
                 ],
+                SelectColorSchemeListTile(
+                  colorScheme: _colorSchemeName,
+                  onChanged: (scheme) =>
+                      setState(() => _colorSchemeName = scheme?.name),
+                ),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> selectIcon() async {
+    final result = await showModalBottomSheet<FlowIconData>(
+      context: context,
+      builder: (context) => SelectFlowIconSheet(current: _iconData),
+      isScrollControlled: true,
+    );
+
+    if (result != null) {
+      _iconData = result;
+    }
+
+    if (mounted) setState(() {});
+  }
+
+  void _updateType(TransactionTagType newType) {
+    if (newType == _type) return;
+
+    if (FlowIconData.icon(_type.icon).toString() == _iconData.toString()) {
+      _iconData = FlowIconData.icon(newType.icon);
+    }
+    _type = newType;
+
+    setState(() {});
   }
 
   void _updatePayload(Object? payload) {
@@ -284,8 +332,11 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
           builder: (context) => const SelectContactSheet(),
         );
 
-    if (selectedContact != null) {
-      _updatePayload(selectedContact.value);
+    final Contact? contact = selectedContact?.value;
+
+    if (contact != null) {
+      _updatePayload(contact);
+      _titleController.text = contact.displayName;
     }
   }
 
@@ -293,11 +344,13 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
     if (widget.isNewTag) {
       return _titleController.text.isNotEmpty ||
           _payload != null ||
+          _colorSchemeName != null ||
           _type != TransactionTagType.generic;
     }
 
     return _titleController.text != (_currentlyEditing?.title ?? "") ||
         _type != (_currentlyEditing?.tagType ?? TransactionTagType.generic) ||
+        _colorSchemeName != _currentlyEditing?.colorSchemeName ||
         _payload != _currentlyEditing?.payload;
   }
 
@@ -307,6 +360,7 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
     _currentlyEditing!
       ..title = formattedName
       ..type = _type.value
+      ..colorSchemeName = _colorSchemeName
       ..payload = TransactionTag.serializePayload(_payload);
 
     ObjectBox().box<TransactionTag>().put(
@@ -332,6 +386,7 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
       title: formattedName,
       type: _type.value,
       payload: TransactionTag.serializePayload(_payload),
+      colorSchemeName: _colorSchemeName,
     );
 
     ObjectBox().box<TransactionTag>().put(tag, mode: PutMode.insert);

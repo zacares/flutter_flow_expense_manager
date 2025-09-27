@@ -21,6 +21,8 @@ TransactionTag _$TransactionTagFromJson(Map<String, dynamic> json) =>
       title: json['title'] as String?,
       type: json['type'] as String?,
       payload: json['payload'] as String?,
+      iconCode: json['iconCode'] as String?,
+      colorSchemeName: json['colorSchemeName'] as String?,
     );
 
 Map<String, dynamic> _$TransactionTagToJson(TransactionTag instance) =>
@@ -33,6 +35,8 @@ Map<String, dynamic> _$TransactionTagToJson(TransactionTag instance) =>
         const UTCDateTimeConverter().toJson,
       ),
       'title': instance.title,
+      'iconCode': instance.iconCode,
+      'colorSchemeName': instance.colorSchemeName,
       'type': instance.type,
       'payload': instance.payload,
     };

@@ -36,6 +36,7 @@ class TransactionFilter implements Jasonable {
 
   final List<String>? categories;
   final List<String>? accounts;
+  final List<String>? tags;
 
   final bool sortDescending;
   final TransactionSortField sortBy;
@@ -59,6 +60,7 @@ class TransactionFilter implements Jasonable {
     this.uuids,
     this.categories,
     this.accounts,
+    this.tags,
     this.range,
     this.types,
     this.isPending,
@@ -81,6 +83,7 @@ class TransactionFilter implements Jasonable {
   bool validate({
     required Set<String> accounts,
     required Set<String> categories,
+    required Set<String> tags,
   }) {
     if (this.accounts?.isNotEmpty == true &&
         this.accounts!.any((accountUuid) => !accounts.contains(accountUuid))) {
@@ -91,6 +94,11 @@ class TransactionFilter implements Jasonable {
         this.categories!.any(
           (categoryUuid) => !categories.contains(categoryUuid),
         )) {
+      return false;
+    }
+
+    if (this.tags?.isNotEmpty == true &&
+        this.tags!.any((tag) => !tags.contains(tag))) {
       return false;
     }
 
@@ -138,6 +146,12 @@ class TransactionFilter implements Jasonable {
     if (accounts?.isNotEmpty == true) {
       predicates.add(
         (Transaction t) => accounts!.any((account) => t.accountUuid == account),
+      );
+    }
+
+    if (tags?.isNotEmpty == true) {
+      predicates.add(
+        (Transaction t) => tags!.any((tag) => t.tags.any((e) => e.uuid == tag)),
       );
     }
 
@@ -219,6 +233,12 @@ class TransactionFilter implements Jasonable {
     if (accounts?.isNotEmpty == true) {
       conditions.add(Transaction_.accountUuid.oneOf(accounts!));
     }
+
+    // if (tags?.isNotEmpty == true) {
+    //   conditions.add(
+    //     Transaction_.extraTags.i(TransactionTag_.uuid.oneOf(tags!)),
+    //   );
+    // }
 
     if (minAmount != null) {
       conditions.add(Transaction_.amount.greaterOrEqual(minAmount!));
