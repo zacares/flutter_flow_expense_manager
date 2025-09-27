@@ -18,7 +18,7 @@ TransactionTag _$TransactionTagFromJson(Map<String, dynamic> json) =>
         json['deletedDate'],
         const UTCDateTimeConverter().fromJson,
       ),
-      title: json['title'] as String?,
+      title: json['title'] as String,
       type: json['type'] as String?,
       payload: json['payload'] as String?,
       iconCode: json['iconCode'] as String?,

@@ -12,11 +12,15 @@ import "package:flow/entity/transaction/extensions/base.dart";
 import "package:flow/entity/transaction/extensions/default/geo.dart";
 import "package:flow/entity/transaction/extensions/default/recurring.dart";
 import "package:flow/entity/transaction/wrapper.dart";
+import "package:flow/entity/transaction_tag.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/l10n/named_enum.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/prefs/local_preferences.dart";
+import "package:flow/providers/accounts_provider.dart";
+import "package:flow/providers/categories_provider.dart";
+import "package:flow/providers/transaction_tags_provider.dart";
 import "package:flow/routes/transaction_page/description_section.dart";
 import "package:flow/routes/transaction_page/input_amount_sheet.dart";
 import "package:flow/routes/transaction_page/section.dart";
@@ -35,11 +39,15 @@ import "package:flow/widgets/general/button.dart";
 import "package:flow/widgets/general/directional_chevron.dart";
 import "package:flow/widgets/general/flow_icon.dart";
 import "package:flow/widgets/general/form_close_button.dart";
+import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/general/info_text.dart";
 import "package:flow/widgets/general/money_text.dart";
 import "package:flow/widgets/location_picker_sheet.dart";
 import "package:flow/widgets/open_street_map.dart";
+import "package:flow/widgets/sheets/select_transaction_tags_sheet.dart";
 import "package:flow/widgets/transaction/type_selector.dart";
+import "package:flow/widgets/transaction_tag_chip.dart";
+import "package:flutter/foundation.dart" hide Category;
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
 import "package:flutter/services.dart";
@@ -89,9 +97,6 @@ class _TransactionPageState extends State<TransactionPage> {
   final FocusNode _selectAccountFocusNode = FocusNode();
   final FocusNode _selectAccountTransferToFocusNode = FocusNode();
 
-  late final List<Account> accounts;
-  late final List<Category> categories;
-
   Geo? _geo;
   bool _geoHandpicked = false;
 
@@ -103,6 +108,8 @@ class _TransactionPageState extends State<TransactionPage> {
   Category? _selectedCategory;
 
   Account? _selectedAccountTransferTo;
+
+  List<TransactionTag>? _selectedTags;
 
   List<RelevanceScoredTitle>? autofillHints;
 
@@ -135,8 +142,8 @@ class _TransactionPageState extends State<TransactionPage> {
   void initState() {
     super.initState();
 
-    accounts = ObjectBox().getAccounts();
-    categories = ObjectBox().getCategories();
+    final accounts = ObjectBox().getAccounts();
+    final categories = ObjectBox().getCategories();
 
     if (widget.isNewTransaction) {
       _currentlyEditing = null;
@@ -192,6 +199,7 @@ class _TransactionPageState extends State<TransactionPage> {
         );
         _selectedAccount = _currentlyEditing.account.target;
         _selectedCategory = _currentlyEditing.category.target;
+        _selectedTags = _currentlyEditing.tags;
         _transactionDate = _currentlyEditing.transactionDate;
         _initialTransactionDate = _currentlyEditing.transactionDate;
         _transactionType = _currentlyEditing.type;
@@ -432,7 +440,41 @@ class _TransactionPageState extends State<TransactionPage> {
                       const SizedBox(height: 24.0),
                       Section(
                         title: "transaction.tags".t(context),
-                        child: Wrap(),
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          child: _selectedTags?.isNotEmpty == true
+                              ? Frame(
+                                  child: Align(
+                                    alignment: AlignmentDirectional.topStart,
+                                    child: IgnorePointer(
+                                      child: Wrap(
+                                        spacing: 12.0,
+                                        runSpacing: 12.0,
+                                        children: _selectedTags!
+                                            .map(
+                                              (tag) =>
+                                                  TransactionTagChip(tag: tag),
+                                            )
+                                            .toList(),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : ListTile(
+                                  leading: Icon(Symbols.style_rounded),
+                                  title: Text(
+                                    "transaction.edit.selectTags".t(context),
+                                  ),
+                                  trailing: DirectionalChevron(),
+                                ),
+                          onTap: () {
+                            if (LocalPreferences().enableHapticFeedback.get()) {
+                              HapticFeedback.lightImpact();
+                            }
+
+                            _selectTags();
+                          },
+                        ),
                       ),
                       const SizedBox(height: 24.0),
                       DescriptionSection(
@@ -756,6 +798,8 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void selectAccount([bool fromAutomatedFlow = false]) async {
+    final accounts = AccountsProvider.of(context).activeAccounts;
+
     if (!fromAutomatedFlow || _selectedAccount == null) {
       final Account? result = accounts.length == 1
           ? accounts.single
@@ -793,6 +837,8 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void selectAccountTransferTo([bool fromAutomatedFlow = false]) async {
+    final accounts = AccountsProvider.of(context).activeAccounts;
+
     final List<Account> toAccounts = accounts.where((element) {
       return element.id != _selectedAccount?.id;
     }).toList();
@@ -837,6 +883,8 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void selectCategory([bool fromAutomatedFlow = false]) async {
+    final categories = CategoriesProvider.of(context).categories;
+
     if (categories.isEmpty) {
       inputAmount();
       return;
@@ -991,6 +1039,29 @@ class _TransactionPageState extends State<TransactionPage> {
     setState(() {});
   }
 
+  void _selectTags() async {
+    final List<TransactionTag> allTags = TransactionTagsProvider.of(
+      context,
+    ).tags;
+
+    final List<TransactionTag>? tags = await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => SelectTransactionTagsSheet(
+        tags: allTags,
+        initialTagUuids: _selectedTags?.map((e) => e.uuid).toList(),
+      ),
+    );
+
+    if (tags != null) {
+      _selectedTags = tags;
+    }
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   void _update({
     required String? formattedTitle,
     required String? formattedDescription,
@@ -1045,6 +1116,7 @@ class _TransactionPageState extends State<TransactionPage> {
           isPending: _isPending,
           conversionRate: crossCurrencyTransfer ? _conversionRate : null,
           recurrence: _recurrence,
+          tags: _selectedTags,
         );
 
         _currentlyEditing.permanentlyDelete(true);
@@ -1060,6 +1132,7 @@ class _TransactionPageState extends State<TransactionPage> {
       _currentlyEditing.amount = _amount;
       _currentlyEditing.transactionDate = transactionDate;
       _currentlyEditing.isPending = _isPending;
+      _currentlyEditing.setTags(_selectedTags ?? []);
 
       /// When user edits a balance amendment transaction, it is no longer a balance amendment.
       if (_currentlyEditing.subtype == TransactionSubtype.updateBalance.value) {
@@ -1201,6 +1274,7 @@ class _TransactionPageState extends State<TransactionPage> {
         isPending: _isPending,
         conversionRate: crossCurrencyTransfer ? _conversionRate : null,
         recurrence: _recurrence,
+        tags: _selectedTags,
       );
     } else {
       _selectedAccount!.createAndSaveTransaction(
@@ -1212,6 +1286,7 @@ class _TransactionPageState extends State<TransactionPage> {
         extensions: extensions,
         isPending: _isPending,
         recurrence: _recurrence,
+        tags: _selectedTags,
       );
     }
 
@@ -1229,11 +1304,11 @@ class _TransactionPageState extends State<TransactionPage> {
         return true;
       }
 
-      final bool ammountChanged = isTransfer
+      final bool amountChanged = isTransfer
           ? _currentlyEditing.amount.abs() != _amount
           : _currentlyEditing.amount != _amount;
 
-      return ammountChanged ||
+      return amountChanged ||
           _geoHandpicked ||
           (_currentlyEditing.title ?? "") != _titleController.text ||
           (_currentlyEditing.description ?? "") !=
@@ -1242,6 +1317,10 @@ class _TransactionPageState extends State<TransactionPage> {
           _currentlyEditing.type != _transactionType ||
           _currentlyEditing.accountUuid != _selectedAccount?.uuid ||
           _currentlyEditing.categoryUuid != _selectedCategory?.uuid ||
+          !setEquals(
+            _selectedTags?.map((tag) => tag.uuid).toSet(),
+            _currentlyEditing.tags.map((tag) => tag.uuid).toSet(),
+          ) ||
           _currentlyEditing.transactionDate != _transactionDate;
     }
 
@@ -1252,6 +1331,7 @@ class _TransactionPageState extends State<TransactionPage> {
         _selectedAccount != null ||
         _selectedAccountTransferTo != null ||
         _isPending ||
+        (_selectedTags ?? []).isNotEmpty ||
         _selectedCategory != null;
   }
 

@@ -34,7 +34,7 @@ class TransactionTag extends EntityBase {
 
   static const int maxTitleLength = 96;
 
-  String? title;
+  String title;
 
   String? iconCode;
 
@@ -72,7 +72,7 @@ class TransactionTag extends EntityBase {
     DateTime? createdDate,
     this.isDeleted,
     this.deletedDate,
-    this.title,
+    required this.title,
     this.type,
     this.payload,
     this.iconCode,

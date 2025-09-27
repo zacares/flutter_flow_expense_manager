@@ -234,12 +234,6 @@ class TransactionFilter implements Jasonable {
       conditions.add(Transaction_.accountUuid.oneOf(accounts!));
     }
 
-    // if (tags?.isNotEmpty == true) {
-    //   conditions.add(
-    //     Transaction_.extraTags.i(TransactionTag_.uuid.oneOf(tags!)),
-    //   );
-    // }
-
     if (minAmount != null) {
       conditions.add(Transaction_.amount.greaterOrEqual(minAmount!));
     }
@@ -283,6 +277,10 @@ class TransactionFilter implements Jasonable {
     final filtered = ObjectBox().box<Transaction>().query(
       conditions.isNotEmpty ? conditions.reduce((a, b) => a & b) : null,
     );
+
+    if (tags != null && tags!.isNotEmpty) {
+      filtered.linkMany(Transaction_.tags, TransactionTag_.uuid.oneOf(tags!));
+    }
 
     return switch (sortBy) {
       TransactionSortField.amount => filtered.order(
@@ -359,6 +357,10 @@ class TransactionFilter implements Jasonable {
       count++;
     }
 
+    if (!setEquals(tags?.toSet(), other.tags?.toSet())) {
+      count++;
+    }
+
     if (extraTag != other.extraTag) {
       count++;
     }
@@ -372,6 +374,7 @@ class TransactionFilter implements Jasonable {
     TransactionSearchData? searchData,
     Optional<List<String>>? categories,
     Optional<List<String>>? accounts,
+    Optional<List<String>>? tags,
     bool? sortDescending,
     TransactionSortField? sortBy,
     Optional<TransactionGroupRange>? groupBy,
@@ -387,6 +390,7 @@ class TransactionFilter implements Jasonable {
       searchData: searchData ?? this.searchData,
       categories: categories == null ? this.categories : categories.value,
       accounts: accounts == null ? this.accounts : accounts.value,
+      tags: tags == null ? this.tags : tags.value,
       sortBy: sortBy ?? this.sortBy,
       groupBy: (groupBy == null || groupBy.value == null)
           ? this.groupBy

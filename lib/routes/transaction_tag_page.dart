@@ -118,7 +118,6 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
                   colorScheme: getThemeStrict(_colorSchemeName),
                 ),
                 const SizedBox(height: 16.0),
-
                 Align(
                   alignment: Alignment.topLeft,
                   child: SingleChildScrollView(

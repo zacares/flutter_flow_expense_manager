@@ -50,7 +50,7 @@ class _TransactionTagsPageState extends State<TransactionTagsPage> {
                 final tag = tags[index - 1];
                 return ListTile(
                   leading: Icon(tag.tagType.icon),
-                  title: Text(tag.title ?? "~"),
+                  title: Text(tag.title),
                   onTap: () => context.push("/transactionTags/${tag.id}"),
                 );
               },

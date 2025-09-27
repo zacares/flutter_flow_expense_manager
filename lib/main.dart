@@ -30,7 +30,8 @@ import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/providers/accounts_provider.dart";
-import "package:flow/providers/categories.dart";
+import "package:flow/providers/categories_provider.dart";
+import "package:flow/providers/transaction_tags_provider.dart";
 import "package:flow/routes.dart";
 import "package:flow/services/currency_registry.dart";
 import "package:flow/services/exchange_rates.dart";
@@ -268,31 +269,33 @@ class FlowState extends State<Flow> {
       builder: (context, child) {
         return AccountsProviderScope(
           child: CategoriesProviderScope(
-            child: GestureDetector(
-              behavior: _tempLock
-                  ? HitTestBehavior.opaque
-                  : HitTestBehavior.deferToChild,
-              onTap: _tryUnlockTempLock,
-              child: IgnorePointer(
-                ignoring: _tempLock,
-                child: Stack(
-                  children: [
-                    child ?? Container(),
-                    if (_tempLock)
-                      Positioned.fill(
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
-                          child: SizedBox.expand(
-                            child: Center(
-                              child: FlowIcon(
-                                FlowIconData.icon(Symbols.lock_rounded),
-                                size: 80.0,
+            child: TransactionTagsProviderScope(
+              child: GestureDetector(
+                behavior: _tempLock
+                    ? HitTestBehavior.opaque
+                    : HitTestBehavior.deferToChild,
+                onTap: _tryUnlockTempLock,
+                child: IgnorePointer(
+                  ignoring: _tempLock,
+                  child: Stack(
+                    children: [
+                      child ?? Container(),
+                      if (_tempLock)
+                        Positioned.fill(
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
+                            child: SizedBox.expand(
+                              child: Center(
+                                child: FlowIcon(
+                                  FlowIconData.icon(Symbols.lock_rounded),
+                                  size: 80.0,
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

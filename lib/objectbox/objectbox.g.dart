@@ -257,7 +257,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(7, 5357777579468740615),
     name: 'Transaction',
-    lastPropertyId: const obx_int.IdUid(22, 8732200258907669936),
+    lastPropertyId: const obx_int.IdUid(24, 2157597498441905857),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -380,6 +380,12 @@ final _entities = <obx_int.ModelEntity>[
         flags: 8,
         indexId: const obx_int.IdUid(22, 4524862754555930046),
         hnswParams: obx_int.ModelHnswParams(dimensions: 2, distanceType: 6),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(24, 2157597498441905857),
+        name: 'tagsUuids',
+        type: 30,
+        flags: 0,
       ),
     ],
     relations: <obx_int.ModelRelation>[
@@ -923,6 +929,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
       7012537446377796117,
       6033810133674409127,
       610924910099589699,
+      3063095817126288040,
     ],
     retiredRelationUids: const [],
     modelVersion: 5,
@@ -1265,7 +1272,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final locationOffset = object.location == null
             ? null
             : fbb.writeListFloat32(object.location!);
-        fbb.startTable(23);
+        final tagsUuidsOffset = fbb.writeList(
+          object.tagsUuids.map(fbb.writeString).toList(growable: false),
+        );
+        fbb.startTable(25);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uuidOffset);
         fbb.addInt64(2, object.createdDate.millisecondsSinceEpoch);
@@ -1285,6 +1295,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addInt64(18, object.deletedDate?.millisecondsSinceEpoch);
         fbb.addOffset(20, extraTagsOffset);
         fbb.addOffset(21, locationOffset);
+        fbb.addOffset(23, tagsUuidsOffset);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -1372,7 +1383,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
               ..location = const fb.ListReader<double>(
                 fb.Float32Reader(),
                 lazy: false,
-              ).vTableGetNullable(buffer, rootOffset, 46);
+              ).vTableGetNullable(buffer, rootOffset, 46)
+              ..tagsUuids = const fb.ListReader<String>(
+                fb.StringReader(asciiOptimization: true),
+                lazy: false,
+              ).vTableGet(buffer, rootOffset, 50, []);
         object.category.targetId = const fb.Int64Reader().vTableGet(
           buffer,
           rootOffset,
@@ -1775,9 +1790,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
       },
       objectToFB: (TransactionTag object, fb.Builder fbb) {
         final uuidOffset = fbb.writeString(object.uuid);
-        final titleOffset = object.title == null
-            ? null
-            : fbb.writeString(object.title!);
+        final titleOffset = fbb.writeString(object.title);
         final typeOffset = object.type == null
             ? null
             : fbb.writeString(object.type!);
@@ -1834,7 +1847,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
             : DateTime.fromMillisecondsSinceEpoch(deletedDateValue);
         final titleParam = const fb.StringReader(
           asciiOptimization: true,
-        ).vTableGetNullable(buffer, rootOffset, 14);
+        ).vTableGet(buffer, rootOffset, 14, '');
         final typeParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGetNullable(buffer, rootOffset, 16);
@@ -2216,6 +2229,11 @@ class Transaction_ {
   /// See [Transaction.location].
   static final location = obx.QueryHnswProperty<Transaction>(
     _entities[4].properties[18],
+  );
+
+  /// See [Transaction.tagsUuids].
+  static final tagsUuids = obx.QueryStringVectorProperty<Transaction>(
+    _entities[4].properties[19],
   );
 
   /// see [Transaction.tags]

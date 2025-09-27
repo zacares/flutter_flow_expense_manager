@@ -11,8 +11,8 @@ import "package:flow/utils/json/utc_datetime_converter.dart";
 import "package:json_annotation/json_annotation.dart";
 import "package:objectbox/objectbox.dart";
 
-export "transaction/type.dart";
 export "transaction/subtype.dart";
+export "transaction/type.dart";
 
 part "transaction.g.dart";
 
@@ -133,7 +133,19 @@ class Transaction implements EntityBase {
   final tags = ToMany<TransactionTag>();
 
   @Transient()
-  List<String> get tagUuids => tags.map((e) => e.uuid).toList();
+  List<String>? _tagsUuids;
+
+  List<String> get tagsUuids => _tagsUuids ?? tags.map((e) => e.uuid).toList();
+
+  set tagsUuids(List<String> newTagUuids) {
+    _tagsUuids = newTagUuids;
+  }
+
+  void setTags(List<TransactionTag> newTags) {
+    tags.clear();
+    tags.addAll(newTags);
+    tagsUuids = tags.map((e) => e.uuid).toList();
+  }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   final category = ToOne<Category>();
