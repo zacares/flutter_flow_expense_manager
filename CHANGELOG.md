@@ -7,6 +7,7 @@
 * Pdf summary now shows summary for the report duration
 * Added transaction tags, closes [#568](https://github.com/flow-mn/flow/issues/568)
 * Now you can set colors for tags, accounts, and categories.
+* Now you can customize arrow/color of comparisions, closes [#546](https://github.com/flow-mn/flow/issues/546)
 * Now you can programmatically open new transaction page with prefilled fields.
   * Example for creating $300 transaction in an USD account:
 
