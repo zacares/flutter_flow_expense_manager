@@ -604,6 +604,8 @@
   "transaction.tags.location.useCurrent": "Одоогийн байршлыг ашиглах",
   "transaction.tags.name": "Шошгоны нэр",
   "transaction.tags.new": "Шинэ шошго",
+  "transaction.tags.delete": "Шошго устгах",
+  "transaction.tags.delete.description": "Энэ шошгыг устгавал холбоотой {transactionCount} гүйлгээний шошго цуг арилахыг анхаарна уу. Энэ үйлдлийг буцаах боломжгүй юм!",
   "transaction.transfer.conversionRate": "Хөрвүүлэх ханш",
   "transaction.transfer.from": "Илгээх данс",
   "transaction.transfer.from.select": "Илгээх данс",
