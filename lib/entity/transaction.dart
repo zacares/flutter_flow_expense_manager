@@ -2,6 +2,7 @@ import "package:flow/data/money.dart";
 import "package:flow/entity/_base.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/category.dart";
+import "package:flow/entity/file_attachment.dart";
 import "package:flow/entity/transaction/extensions/base.dart";
 import "package:flow/entity/transaction/subtype.dart";
 import "package:flow/entity/transaction/type.dart";
@@ -131,6 +132,9 @@ class Transaction implements EntityBase {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   final tags = ToMany<TransactionTag>();
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final files = ToMany<FileAttachment>();
 
   @Transient()
   List<String>? _tagsUuids;

@@ -18,6 +18,7 @@ import '../entity/account.dart';
 import '../entity/backup_entry.dart';
 import '../entity/budget.dart';
 import '../entity/category.dart';
+import '../entity/file_attachment.dart';
 import '../entity/goal.dart';
 import '../entity/profile.dart';
 import '../entity/recurring_transaction.dart';
@@ -394,6 +395,11 @@ final _entities = <obx_int.ModelEntity>[
         name: 'tags',
         targetId: const obx_int.IdUid(13, 1815911240017711144),
       ),
+      obx_int.ModelRelation(
+        id: const obx_int.IdUid(2, 552720950599490473),
+        name: 'files',
+        targetId: const obx_int.IdUid(15, 3741443681678089583),
+      ),
     ],
     backlinks: <obx_int.ModelBacklink>[],
   ),
@@ -441,7 +447,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(10, 7829328581176695647),
     name: 'UserPreferences',
-    lastPropertyId: const obx_int.IdUid(22, 3911662458210039466),
+    lastPropertyId: const obx_int.IdUid(23, 1897952567667191209),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -563,6 +569,12 @@ final _entities = <obx_int.ModelEntity>[
         id: const obx_int.IdUid(22, 3911662458210039466),
         name: 'transactionListTileRelaxedDensity',
         type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(23, 1897952567667191209),
+        name: 'transactionEntryFlowJson',
+        type: 9,
         flags: 0,
       ),
     ],
@@ -846,6 +858,47 @@ final _entities = <obx_int.ModelEntity>[
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[],
   ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(15, 3741443681678089583),
+    name: 'FileAttachment',
+    lastPropertyId: const obx_int.IdUid(6, 5739129158582967162),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 8212676902786201697),
+        name: 'id',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 7988670171710237425),
+        name: 'uuid',
+        type: 9,
+        flags: 2080,
+        indexId: const obx_int.IdUid(27, 5707692371585154920),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 3240403333679753202),
+        name: 'createdDate',
+        type: 10,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 4058074983882486111),
+        name: 'name',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(6, 5739129158582967162),
+        name: 'filePath',
+        type: 9,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
 ];
 
 /// Shortcut for [obx.Store.new] that passes [getObjectBoxModel] and for Flutter
@@ -886,9 +939,9 @@ Future<obx.Store> openStore({
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
     entities: _entities,
-    lastEntityId: const obx_int.IdUid(14, 7904423998243143112),
-    lastIndexId: const obx_int.IdUid(26, 6114043135141023608),
-    lastRelationId: const obx_int.IdUid(1, 3860846002029102487),
+    lastEntityId: const obx_int.IdUid(15, 3741443681678089583),
+    lastIndexId: const obx_int.IdUid(27, 5707692371585154920),
+    lastRelationId: const obx_int.IdUid(2, 552720950599490473),
     lastSequenceId: const obx_int.IdUid(0, 0),
     retiredEntityUids: const [
       3796819593314794683,
@@ -942,6 +995,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
       6033810133674409127,
       610924910099589699,
       3063095817126288040,
+      2071092278574175844,
     ],
     retiredRelationUids: const [],
     modelVersion: 5,
@@ -1252,6 +1306,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
       toOneRelations: (Transaction object) => [object.category, object.account],
       toManyRelations: (Transaction object) => {
         obx_int.RelInfo<Transaction>.toMany(1, object.id): object.tags,
+        obx_int.RelInfo<Transaction>.toMany(2, object.id): object.files,
       },
       getId: (Transaction object) => object.id,
       setId: (Transaction object, int id) {
@@ -1419,6 +1474,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
           store,
           obx_int.RelInfo<Transaction>.toMany(1, object.id),
         );
+        obx_int.InternalToManyAccess.setRelInfo<Transaction>(
+          object.files,
+          store,
+          obx_int.RelInfo<Transaction>.toMany(2, object.id),
+        );
         return object;
       },
     ),
@@ -1507,7 +1567,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final changeVisualsOffset = object.changeVisuals == null
             ? null
             : fbb.writeString(object.changeVisuals!);
-        fbb.startTable(23);
+        final transactionEntryFlowJsonOffset =
+            object.transactionEntryFlowJson == null
+            ? null
+            : fbb.writeString(object.transactionEntryFlowJson!);
+        fbb.startTable(24);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uuidOffset);
         fbb.addBool(2, object.combineTransfers);
@@ -1528,6 +1592,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addBool(19, object.themeChangesAppIcon);
         fbb.addOffset(20, changeVisualsOffset);
         fbb.addBool(21, object.transactionListTileRelaxedDensity);
+        fbb.addOffset(22, transactionEntryFlowJsonOffset);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -1589,6 +1654,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final themeNameParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGetNullable(buffer, rootOffset, 40);
+        final transactionEntryFlowJsonParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 48);
         final themeChangesAppIconParam = const fb.BoolReader().vTableGet(
           buffer,
           rootOffset,
@@ -1618,6 +1686,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 transactionButtonOrderJoined: transactionButtonOrderJoinedParam,
                 remindDailyAtRelativeSeconds: remindDailyAtRelativeSecondsParam,
                 themeName: themeNameParam,
+                transactionEntryFlowJson: transactionEntryFlowJsonParam,
                 themeChangesAppIcon: themeChangesAppIconParam,
               )
               ..uuid = const fb.StringReader(
@@ -1991,6 +2060,61 @@ obx_int.ModelDefinition getObjectBoxModel() {
         return object;
       },
     ),
+    FileAttachment: obx_int.EntityDefinition<FileAttachment>(
+      model: _entities[11],
+      toOneRelations: (FileAttachment object) => [],
+      toManyRelations: (FileAttachment object) => {},
+      getId: (FileAttachment object) => object.id,
+      setId: (FileAttachment object, int id) {
+        object.id = id;
+      },
+      objectToFB: (FileAttachment object, fb.Builder fbb) {
+        final uuidOffset = fbb.writeString(object.uuid);
+        final nameOffset = object.name == null
+            ? null
+            : fbb.writeString(object.name!);
+        final filePathOffset = fbb.writeString(object.filePath);
+        fbb.startTable(7);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, uuidOffset);
+        fbb.addInt64(2, object.createdDate.millisecondsSinceEpoch);
+        fbb.addOffset(3, nameOffset);
+        fbb.addOffset(5, filePathOffset);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
+        final idParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          4,
+          0,
+        );
+        final nameParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 10);
+        final filePathParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 14, '');
+        final createdDateParam = DateTime.fromMillisecondsSinceEpoch(
+          const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0),
+        );
+        final object =
+            FileAttachment(
+                id: idParam,
+                name: nameParam,
+                filePath: filePathParam,
+                createdDate: createdDateParam,
+              )
+              ..uuid = const fb.StringReader(
+                asciiOptimization: true,
+              ).vTableGet(buffer, rootOffset, 6, '');
+
+        return object;
+      },
+    ),
   };
 
   return obx_int.ModelDefinition(model, bindings);
@@ -2264,6 +2388,11 @@ class Transaction_ {
   static final tags = obx.QueryRelationToMany<Transaction, TransactionTag>(
     _entities[4].relations[0],
   );
+
+  /// see [Transaction.files]
+  static final files = obx.QueryRelationToMany<Transaction, FileAttachment>(
+    _entities[4].relations[1],
+  );
 }
 
 /// [TransactionFilterPreset] entity fields to define ObjectBox queries.
@@ -2386,6 +2515,10 @@ class UserPreferences_ {
   /// See [UserPreferences.transactionListTileRelaxedDensity].
   static final transactionListTileRelaxedDensity =
       obx.QueryBooleanProperty<UserPreferences>(_entities[6].properties[19]);
+
+  /// See [UserPreferences.transactionEntryFlowJson].
+  static final transactionEntryFlowJson =
+      obx.QueryStringProperty<UserPreferences>(_entities[6].properties[20]);
 }
 
 /// [Budget] entity fields to define ObjectBox queries.
@@ -2582,5 +2715,33 @@ class Goal_ {
   /// See [Goal.accountUuid].
   static final accountUuid = obx.QueryStringProperty<Goal>(
     _entities[10].properties[9],
+  );
+}
+
+/// [FileAttachment] entity fields to define ObjectBox queries.
+class FileAttachment_ {
+  /// See [FileAttachment.id].
+  static final id = obx.QueryIntegerProperty<FileAttachment>(
+    _entities[11].properties[0],
+  );
+
+  /// See [FileAttachment.uuid].
+  static final uuid = obx.QueryStringProperty<FileAttachment>(
+    _entities[11].properties[1],
+  );
+
+  /// See [FileAttachment.createdDate].
+  static final createdDate = obx.QueryDateProperty<FileAttachment>(
+    _entities[11].properties[2],
+  );
+
+  /// See [FileAttachment.name].
+  static final name = obx.QueryStringProperty<FileAttachment>(
+    _entities[11].properties[3],
+  );
+
+  /// See [FileAttachment.filePath].
+  static final filePath = obx.QueryStringProperty<FileAttachment>(
+    _entities[11].properties[4],
   );
 }

@@ -29,7 +29,12 @@ class ObjectBox {
 
   static late String appDataDirectory;
 
-  static String get imagesDirectory => path.join(appDataDirectory, "images");
+  static const String imagesDirectoryName = "images";
+  static const String filesDirectoryName = "files";
+  static String get imagesDirectory =>
+      path.join(appDataDirectory, imagesDirectoryName);
+  static String get filesDirectory =>
+      path.join(appDataDirectory, filesDirectoryName);
 
   static String kDebugDefaultSubdirectory = "__debug";
 
