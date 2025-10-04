@@ -29,6 +29,23 @@ class FilesSection extends StatefulWidget {
 }
 
 class _FilesSectionState extends State<FilesSection> {
+  int? totalSizeInBytes;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _recalculateTotalSize();
+  }
+
+  @override
+  void didUpdateWidget(covariant FilesSection oldWidget) {
+    if (widget.attachments != oldWidget.attachments) {
+      _recalculateTotalSize();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Section(
@@ -47,7 +64,12 @@ class _FilesSectionState extends State<FilesSection> {
           const SizedBox(height: 12.0),
           Frame(
             child: InfoText(
-              child: Text("transaction.attachments.warning".t(context)),
+              child: Text(
+                "transaction.attachments.warning".t(
+                  context,
+                  totalSizeInBytes?.humanReadableBinarySize ?? "?",
+                ),
+              ),
             ),
           ),
         ],
@@ -99,5 +121,20 @@ class _FilesSectionState extends State<FilesSection> {
     } finally {
       widget.onRemove(file);
     }
+  }
+
+  void _recalculateTotalSize() {
+    int sum = 0;
+
+    for (final FileAttachment attachment in (widget.attachments ?? [])) {
+      try {
+        sum += attachment.file.lengthSync();
+      } catch (e) {
+        // Ignore
+      }
+    }
+
+    totalSizeInBytes = sum;
+    setState(() {});
   }
 }

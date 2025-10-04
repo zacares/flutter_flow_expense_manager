@@ -28,7 +28,10 @@ class FileAttachment extends EntityBase {
   /// Display name. If null, the file name will be used.
   String? name;
 
+  /// Relative path from objectbox root directory.
   String filePath;
+
+  File get file => File(path.join(ObjectBox.appDataDirectory, filePath));
 
   @Transient()
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -50,9 +53,9 @@ class FileAttachment extends EntityBase {
   static Future<FileAttachment?> fromFile(XFile xFile) async {
     try {
       final String fileName = "${const Uuid().v4()}/${xFile.name}";
-      final File file = File(path.join(ObjectBox.imagesDirectory, fileName));
+      final File file = File(path.join(ObjectBox.filesDirectory, fileName));
       await file.create(recursive: true);
-      await xFile.saveTo(file.path);
+      await File(xFile.path).copy(file.path);
 
       return FileAttachment(
         filePath: "${ObjectBox.filesDirectoryName}/$fileName",

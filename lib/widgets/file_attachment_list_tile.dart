@@ -59,7 +59,7 @@ class _FileAttachmentListTileState extends State<FileAttachmentListTile> {
   Widget build(BuildContext context) {
     final String subtitle = [
       widget.fileAttachment.createdDate.toMoment().toLocal().lll,
-      sizeInBytes != null ? Text(sizeInBytes!.humanReadableBinarySize) : null,
+      sizeInBytes?.humanReadableBinarySize,
     ].whereType<String>().join(" • ");
 
     final List<SlidableAction> endActions = [
@@ -100,19 +100,21 @@ class _FileAttachmentListTileState extends State<FileAttachmentListTile> {
   }
 
   void _inspectFile() async {
-    final File file = File(widget.fileAttachment.filePath);
+    final File file = widget.fileAttachment.file;
 
     final bool exists = await file.exists();
 
     fileExists = exists;
 
-    if (!exists || !mounted) {
+    if (!mounted) {
       return;
     }
 
     if (mounted) {
       setState(() {});
     }
+
+    if (!exists) return;
 
     final int size = await file.length();
 

@@ -60,6 +60,21 @@ Future<XFile?> pickImage({
   return xfile;
 }
 
+Future<List<XFile>?> pickMultipleMediaFiles({
+  ImageSource source = ImageSource.gallery,
+  double? maxWidth,
+  double? maxHeight,
+}) async {
+  final xFiles = await ImagePicker().pickMultipleMedia(
+    maxHeight: maxHeight,
+    maxWidth: maxWidth,
+    requestFullMetadata: false,
+    imageQuality: 99,
+  );
+
+  return xFiles;
+}
+
 Future<ui.Image?> pickAndCropSquareImage(
   BuildContext context, {
   double? maxDimension,
