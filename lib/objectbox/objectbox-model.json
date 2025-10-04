@@ -191,7 +191,7 @@
     },
     {
       "id": "7:5357777579468740615",
-      "lastPropertyId": "24:2157597498441905857",
+      "lastPropertyId": "25:1116277179564620916",
       "name": "Transaction",
       "properties": [
         {
@@ -304,6 +304,11 @@
           "id": "24:2157597498441905857",
           "name": "tagsUuids",
           "type": 30
+        },
+        {
+          "id": "25:1116277179564620916",
+          "name": "attachmentsUuids",
+          "type": 30
         }
       ],
       "relations": [
@@ -313,8 +318,8 @@
           "targetId": "13:1815911240017711144"
         },
         {
-          "id": "2:552720950599490473",
-          "name": "files",
+          "id": "3:8693268912561290427",
+          "name": "attachments",
           "targetId": "15:3741443681678089583"
         }
       ]
@@ -752,7 +757,7 @@
   ],
   "lastEntityId": "15:3741443681678089583",
   "lastIndexId": "27:5707692371585154920",
-  "lastRelationId": "2:552720950599490473",
+  "lastRelationId": "3:8693268912561290427",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
@@ -810,6 +815,8 @@
     3063095817126288040,
     2071092278574175844
   ],
-  "retiredRelationUids": [],
+  "retiredRelationUids": [
+    552720950599490473
+  ],
   "version": 1
 }

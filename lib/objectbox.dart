@@ -7,6 +7,7 @@ import "package:flow/data/setup/default_categories.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/budget.dart";
 import "package:flow/entity/category.dart";
+import "package:flow/entity/file_attachment.dart";
 import "package:flow/entity/goal.dart";
 import "package:flow/entity/profile.dart";
 import "package:flow/entity/recurring_transaction.dart";
@@ -253,6 +254,7 @@ class ObjectBox {
         box<Budget>().removeAllAsync(),
         box<Goal>().removeAllAsync(),
         box<TransactionTag>().removeAllAsync(),
+        box<FileAttachment>().removeAllAsync(),
         box<RecurringTransaction>().removeAllAsync(),
         box<TransactionFilterPreset>().removeAllAsync(),
       ]);

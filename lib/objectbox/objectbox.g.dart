@@ -258,7 +258,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(7, 5357777579468740615),
     name: 'Transaction',
-    lastPropertyId: const obx_int.IdUid(24, 2157597498441905857),
+    lastPropertyId: const obx_int.IdUid(25, 1116277179564620916),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -388,6 +388,12 @@ final _entities = <obx_int.ModelEntity>[
         type: 30,
         flags: 0,
       ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(25, 1116277179564620916),
+        name: 'attachmentsUuids',
+        type: 30,
+        flags: 0,
+      ),
     ],
     relations: <obx_int.ModelRelation>[
       obx_int.ModelRelation(
@@ -396,8 +402,8 @@ final _entities = <obx_int.ModelEntity>[
         targetId: const obx_int.IdUid(13, 1815911240017711144),
       ),
       obx_int.ModelRelation(
-        id: const obx_int.IdUid(2, 552720950599490473),
-        name: 'files',
+        id: const obx_int.IdUid(3, 8693268912561290427),
+        name: 'attachments',
         targetId: const obx_int.IdUid(15, 3741443681678089583),
       ),
     ],
@@ -941,7 +947,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
     entities: _entities,
     lastEntityId: const obx_int.IdUid(15, 3741443681678089583),
     lastIndexId: const obx_int.IdUid(27, 5707692371585154920),
-    lastRelationId: const obx_int.IdUid(2, 552720950599490473),
+    lastRelationId: const obx_int.IdUid(3, 8693268912561290427),
     lastSequenceId: const obx_int.IdUid(0, 0),
     retiredEntityUids: const [
       3796819593314794683,
@@ -997,7 +1003,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
       3063095817126288040,
       2071092278574175844,
     ],
-    retiredRelationUids: const [],
+    retiredRelationUids: const [552720950599490473],
     modelVersion: 5,
     modelVersionParserMinimum: 5,
     version: 1,
@@ -1306,7 +1312,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
       toOneRelations: (Transaction object) => [object.category, object.account],
       toManyRelations: (Transaction object) => {
         obx_int.RelInfo<Transaction>.toMany(1, object.id): object.tags,
-        obx_int.RelInfo<Transaction>.toMany(2, object.id): object.files,
+        obx_int.RelInfo<Transaction>.toMany(3, object.id): object.attachments,
       },
       getId: (Transaction object) => object.id,
       setId: (Transaction object, int id) {
@@ -1339,10 +1345,19 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final locationOffset = object.location == null
             ? null
             : fbb.writeListFloat32(object.location!);
-        final tagsUuidsOffset = fbb.writeList(
-          object.tagsUuids.map(fbb.writeString).toList(growable: false),
-        );
-        fbb.startTable(25);
+        final tagsUuidsOffset = object.tagsUuids == null
+            ? null
+            : fbb.writeList(
+                object.tagsUuids!.map(fbb.writeString).toList(growable: false),
+              );
+        final attachmentsUuidsOffset = object.attachmentsUuids == null
+            ? null
+            : fbb.writeList(
+                object.attachmentsUuids!
+                    .map(fbb.writeString)
+                    .toList(growable: false),
+              );
+        fbb.startTable(26);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uuidOffset);
         fbb.addInt64(2, object.createdDate.millisecondsSinceEpoch);
@@ -1363,6 +1378,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addOffset(20, extraTagsOffset);
         fbb.addOffset(21, locationOffset);
         fbb.addOffset(23, tagsUuidsOffset);
+        fbb.addOffset(24, attachmentsUuidsOffset);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -1454,7 +1470,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
               ..tagsUuids = const fb.ListReader<String>(
                 fb.StringReader(asciiOptimization: true),
                 lazy: false,
-              ).vTableGet(buffer, rootOffset, 50, []);
+              ).vTableGetNullable(buffer, rootOffset, 50)
+              ..attachmentsUuids = const fb.ListReader<String>(
+                fb.StringReader(asciiOptimization: true),
+                lazy: false,
+              ).vTableGetNullable(buffer, rootOffset, 52);
         object.category.targetId = const fb.Int64Reader().vTableGet(
           buffer,
           rootOffset,
@@ -1475,9 +1495,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
           obx_int.RelInfo<Transaction>.toMany(1, object.id),
         );
         obx_int.InternalToManyAccess.setRelInfo<Transaction>(
-          object.files,
+          object.attachments,
           store,
-          obx_int.RelInfo<Transaction>.toMany(2, object.id),
+          obx_int.RelInfo<Transaction>.toMany(3, object.id),
         );
         return object;
       },
@@ -2384,15 +2404,21 @@ class Transaction_ {
     _entities[4].properties[19],
   );
 
+  /// See [Transaction.attachmentsUuids].
+  static final attachmentsUuids = obx.QueryStringVectorProperty<Transaction>(
+    _entities[4].properties[20],
+  );
+
   /// see [Transaction.tags]
   static final tags = obx.QueryRelationToMany<Transaction, TransactionTag>(
     _entities[4].relations[0],
   );
 
-  /// see [Transaction.files]
-  static final files = obx.QueryRelationToMany<Transaction, FileAttachment>(
-    _entities[4].relations[1],
-  );
+  /// see [Transaction.attachments]
+  static final attachments =
+      obx.QueryRelationToMany<Transaction, FileAttachment>(
+        _entities[4].relations[1],
+      );
 }
 
 /// [TransactionFilterPreset] entity fields to define ObjectBox queries.

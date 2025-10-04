@@ -17,6 +17,15 @@ class FileAttachmentService {
     // Constructor
   }
 
+  void upsertManySync(List<FileAttachment> fileAttachments) {
+    try {
+      final box = ObjectBox().box<FileAttachment>();
+      box.putMany(fileAttachments);
+    } catch (e, stackTrace) {
+      _log.severe("Failed to upsert FileAttachments", e, stackTrace);
+    }
+  }
+
   Future<bool> delete(FileAttachment fileAttachment) async {
     try {
       final List<FileAttachment> attachments = await ObjectBox()

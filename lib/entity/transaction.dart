@@ -133,22 +133,38 @@ class Transaction implements EntityBase {
   @JsonKey(includeFromJson: false, includeToJson: false)
   final tags = ToMany<TransactionTag>();
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  final files = ToMany<FileAttachment>();
-
   @Transient()
   List<String>? _tagsUuids;
 
-  List<String> get tagsUuids => _tagsUuids ?? tags.map((e) => e.uuid).toList();
+  List<String>? get tagsUuids => _tagsUuids ?? tags.map((e) => e.uuid).toList();
 
-  set tagsUuids(List<String> newTagUuids) {
-    _tagsUuids = newTagUuids;
+  set tagsUuids(List<String>? newTagUuids) {
+    _tagsUuids = newTagUuids ?? <String>[];
   }
 
-  void setTags(List<TransactionTag> newTags) {
+  void setTags(List<TransactionTag>? newTags) {
     tags.clear();
-    tags.addAll(newTags);
+    tags.addAll(newTags ?? []);
     tagsUuids = tags.map((e) => e.uuid).toList();
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final attachments = ToMany<FileAttachment>();
+
+  @Transient()
+  List<String>? _attachmentsUuids;
+
+  List<String>? get attachmentsUuids =>
+      _attachmentsUuids ?? attachments.map((e) => e.uuid).toList();
+
+  set attachmentsUuids(List<String>? newFileUuids) {
+    _attachmentsUuids = newFileUuids ?? <String>[];
+  }
+
+  void setAttachments(List<FileAttachment>? newFiles) {
+    attachments.clear();
+    attachments.addAll(newFiles ?? []);
+    attachmentsUuids = attachments.map((e) => e.uuid).toList();
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)

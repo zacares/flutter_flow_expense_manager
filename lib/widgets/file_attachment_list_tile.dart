@@ -1,9 +1,9 @@
+import "dart:async";
 import "dart:io";
 
+import "package:file_saver/file_saver.dart";
 import "package:flow/data/flow_icon.dart";
 import "package:flow/entity/file_attachment.dart";
-import "package:flow/l10n/extensions.dart";
-import "package:flow/services/file_attachment.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/extensions/file_attachment.dart";
 import "package:flow/utils/utils.dart";
@@ -11,18 +11,22 @@ import "package:flow/widgets/general/directional_slidable.dart";
 import "package:flow/widgets/general/flow_icon.dart";
 import "package:flutter/material.dart";
 import "package:flutter_slidable/flutter_slidable.dart";
-import "package:go_router/go_router.dart";
 import "package:material_symbols_icons/symbols.dart";
 import "package:moment_dart/moment_dart.dart";
+import "package:open_filex/open_filex.dart";
 
 class FileAttachmentListTile extends StatefulWidget {
   final FileAttachment fileAttachment;
+  final FutureOr<void> Function()? onDelete;
+  final FutureOr<void> Function()? onShare;
   final Key? dismissibleKey;
 
   const FileAttachmentListTile({
     super.key,
     required this.fileAttachment,
     this.dismissibleKey,
+    this.onDelete,
+    this.onShare,
   });
 
   @override
@@ -41,6 +45,17 @@ class _FileAttachmentListTileState extends State<FileAttachmentListTile> {
   }
 
   @override
+  void didUpdateWidget(covariant FileAttachmentListTile oldWidget) {
+    if (oldWidget.fileAttachment.id != widget.fileAttachment.id ||
+        oldWidget.fileAttachment.filePath != widget.fileAttachment.filePath) {
+      sizeInBytes = null;
+      fileExists = null;
+      _inspectFile();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final String subtitle = [
       widget.fileAttachment.createdDate.toMoment().toLocal().lll,
@@ -48,26 +63,38 @@ class _FileAttachmentListTileState extends State<FileAttachmentListTile> {
     ].whereType<String>().join(" • ");
 
     final List<SlidableAction> endActions = [
-      SlidableAction(
-        onPressed: (context) => showDeleteConfirmation(),
-        icon: Symbols.delete_forever_rounded,
-        backgroundColor: context.flowColors.expense,
-      ),
+      if (widget.onDelete != null)
+        SlidableAction(
+          onPressed: (context) => widget.onDelete,
+          icon: Symbols.delete_forever_rounded,
+          backgroundColor: context.flowColors.expense,
+        ),
+    ];
+
+    final List<SlidableAction> startActions = [
+      if (widget.onShare != null)
+        SlidableAction(
+          onPressed: (context) => widget.onShare,
+          icon: Symbols.share_rounded,
+          backgroundColor: context.colorScheme.primary,
+        ),
     ];
 
     return DirectionalSlidable(
       key: widget.dismissibleKey,
+      startActions: startActions,
       endActions: endActions,
       child: ListTile(
         leading: FlowIcon(
-          FlowIconData.icon(widget.fileAttachment.icon),
+          fileExists != false
+              ? FlowIconData.icon(widget.fileAttachment.icon)
+              : FlowIconData.icon(Symbols.error_circle_rounded),
           size: 24.0,
+          color: fileExists == false ? context.colorScheme.error : null,
         ),
         title: Text(widget.fileAttachment.displayName),
         subtitle: Text(subtitle),
-        onTap: () {
-          //
-        },
+        onTap: open,
       ),
     );
   }
@@ -96,25 +123,24 @@ class _FileAttachmentListTileState extends State<FileAttachmentListTile> {
     }
   }
 
-  void showDeleteConfirmation() async {
-    final bool? confirmation = await context.showConfirmationSheet(
-      isDeletionConfirmation: true,
-      title: "fileAttachment.delete".t(context),
-      child: Text("fileAttachment.delete".t(context)),
+  void open() async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      await OpenFilex.open(widget.fileAttachment.filePath);
+      return;
+    }
+
+    final String savedPath = await FileSaver.instance.saveFile(
+      filePath: widget.fileAttachment.filePath,
+      name: widget.fileAttachment.fileName,
     );
-
-    if (confirmation != true || !mounted) return;
-
-    context.pop();
-
-    try {
-      await FileAttachmentService().delete(widget.fileAttachment);
-      if (mounted) {
-        context.showToast(text: "fileAttachment.delete.success".t(context));
-      }
-    } catch (e) {
-      if (!mounted) return;
-      context.showErrorToast(error: "error.sync.fileNotFound".t(context));
+    if (Platform.isLinux) {
+      Process.runSync("xdg-open", [File(savedPath).parent.path]);
+    }
+    if (Platform.isMacOS) {
+      Process.runSync("open", [File(savedPath).parent.path]);
+    }
+    if (Platform.isWindows) {
+      Process.runSync("explorer", [File(savedPath).parent.path]);
     }
   }
 }

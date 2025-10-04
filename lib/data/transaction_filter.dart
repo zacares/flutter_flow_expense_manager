@@ -196,9 +196,9 @@ class TransactionFilter implements Jasonable {
 
     if (hasAttachments != null) {
       if (hasAttachments!) {
-        predicates.add((Transaction t) => t.files.isNotEmpty);
+        predicates.add((Transaction t) => t.attachments.isNotEmpty);
       } else {
-        predicates.add((Transaction t) => t.files.isEmpty);
+        predicates.add((Transaction t) => t.attachments.isEmpty);
       }
     }
 
@@ -318,9 +318,15 @@ class TransactionFilter implements Jasonable {
 
     if (hasAttachments != null) {
       if (hasAttachments!) {
-        filtered.linkMany(Transaction_.files, FileAttachment_.id.notEquals(0));
+        filtered.linkMany(
+          Transaction_.attachments,
+          FileAttachment_.id.notEquals(0),
+        );
       } else {
-        filtered.linkMany(Transaction_.files, FileAttachment_.id.equals(0));
+        filtered.linkMany(
+          Transaction_.attachments,
+          FileAttachment_.id.equals(0),
+        );
       }
     }
 
