@@ -187,7 +187,6 @@
   "error.url.cannotOpen": "Bağlantı açılamıyor",
   "fileAttachment": "Dosya",
   "fileAttachment.add": "Dosya ekle",
-  "fileAttachment.add.description": "Bu dosya yalnızca ZIP yedeklerine dahil edilir. Bulut yedeklemelerini (örn. iCloud) kullanıyorsanız, bu dosya bulut depolama yedeklerinizde {size} yer kaplar.",
   "fileAttachment.delete": "Dosyayı sil",
   "fileAttachment.delete.description": "Bu işlem Flow'da saklanan kopyayı siler; orijinal dosya etkilenmez. Orijinal dosyayı daha sonra yeniden ekleyebilirsiniz, ancak bu işlemi geri alamazsınız.",
   "flowIcon.change": "Simgeyi değiştir",

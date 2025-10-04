@@ -187,7 +187,6 @@
   "error.url.cannotOpen": "لا يمكن فتح الرابط",
   "fileAttachment": "ملف",
   "fileAttachment.add": "إضافة ملفات",
-  "fileAttachment.add.description": "سيتم تضمين هذا الملف فقط في نُسخ ZIP الاحتياطية. إذا كنت تستخدم النسخ الاحتياطية السحابية (مثل iCloud)، فسيشغل هذا الملف مساحة قدرها {size} في نُسخك الاحتياطية على السحابة.",
   "fileAttachment.delete": "حذف الملف",
   "fileAttachment.delete.description": "سيؤدي هذا إلى حذف النسخة المخزنة في Flow، ولن يتأثر الملف الأصلي. يمكنك إعادة إضافة الملف الأصلي لاحقًا، ولكن لا يمكنك التراجع عن هذا الإجراء.",
   "flowIcon.change": "تغيير الأيقونة",

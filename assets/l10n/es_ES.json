@@ -187,7 +187,6 @@
   "error.url.cannotOpen": "No se puede abrir el enlace",
   "fileAttachment": "Archivo",
   "fileAttachment.add": "Añadir archivos",
-  "fileAttachment.add.description": "Este archivo se incluirá únicamente en las copias de seguridad ZIP. Si usas copias de seguridad en la nube (p. ej., iCloud), este archivo ocupará {size} de espacio en tus copias de seguridad en la nube.",
   "fileAttachment.delete": "Eliminar archivo",
   "fileAttachment.delete.description": "Esto eliminará la copia almacenada en Flow; el archivo original no se verá afectado. Puedes volver a añadir el archivo original más adelante, pero no puedes deshacer esta acción.",
   "flowIcon.change": "Cambiar icono",

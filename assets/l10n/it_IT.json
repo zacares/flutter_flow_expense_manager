@@ -187,7 +187,6 @@
   "error.url.cannotOpen": "Impossibile aprire il collegamento",
   "fileAttachment": "File",
   "fileAttachment.add": "Aggiungi file",
-  "fileAttachment.add.description": "Questo file verrà incluso solo nei backup ZIP. Se usi i backup nel cloud (ad es. iCloud), questo file occuperà {size} di spazio nei backup archiviati nel cloud.",
   "fileAttachment.delete": "Elimina file",
   "fileAttachment.delete.description": "Questo eliminerà la copia archiviata in Flow; il file originale non verrà modificato. Puoi aggiungere di nuovo il file originale in seguito, ma non è possibile annullare questa azione.",
   "flowIcon.change": "Cambia icona",

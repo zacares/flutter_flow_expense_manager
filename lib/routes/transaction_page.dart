@@ -21,9 +21,10 @@ import "package:flow/prefs/local_preferences.dart";
 import "package:flow/providers/accounts_provider.dart";
 import "package:flow/providers/categories_provider.dart";
 import "package:flow/providers/transaction_tags_provider.dart";
-import "package:flow/routes/transaction_page/description_section.dart";
 import "package:flow/routes/transaction_page/input_amount_sheet.dart";
 import "package:flow/routes/transaction_page/section.dart";
+import "package:flow/routes/transaction_page/sections/description_section.dart";
+import "package:flow/routes/transaction_page/sections/tags_section.dart";
 import "package:flow/routes/transaction_page/select_account_sheet.dart";
 import "package:flow/routes/transaction_page/select_category_sheet.dart";
 import "package:flow/routes/transaction_page/select_recurrence.dart";
@@ -39,14 +40,12 @@ import "package:flow/widgets/general/button.dart";
 import "package:flow/widgets/general/directional_chevron.dart";
 import "package:flow/widgets/general/flow_icon.dart";
 import "package:flow/widgets/general/form_close_button.dart";
-import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/general/info_text.dart";
 import "package:flow/widgets/general/money_text.dart";
 import "package:flow/widgets/location_picker_sheet.dart";
 import "package:flow/widgets/open_street_map.dart";
 import "package:flow/widgets/sheets/select_transaction_tags_sheet.dart";
 import "package:flow/widgets/transaction/type_selector.dart";
-import "package:flow/widgets/transaction_tag_chip.dart";
 import "package:flutter/foundation.dart" hide Category;
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
@@ -438,43 +437,9 @@ class _TransactionPageState extends State<TransactionPage> {
                           ),
                         ),
                       const SizedBox(height: 24.0),
-                      Section(
-                        title: "transaction.tags".t(context),
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          child: _selectedTags?.isNotEmpty == true
-                              ? Frame(
-                                  child: Align(
-                                    alignment: AlignmentDirectional.topStart,
-                                    child: IgnorePointer(
-                                      child: Wrap(
-                                        spacing: 12.0,
-                                        runSpacing: 12.0,
-                                        children: _selectedTags!
-                                            .map(
-                                              (tag) =>
-                                                  TransactionTagChip(tag: tag),
-                                            )
-                                            .toList(),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : ListTile(
-                                  leading: Icon(Symbols.style_rounded),
-                                  title: Text(
-                                    "transaction.edit.selectTags".t(context),
-                                  ),
-                                  trailing: DirectionalChevron(),
-                                ),
-                          onTap: () {
-                            if (LocalPreferences().enableHapticFeedback.get()) {
-                              HapticFeedback.lightImpact();
-                            }
-
-                            selectTags();
-                          },
-                        ),
+                      TagsSection(
+                        selectTags: selectTags,
+                        selectedTags: _selectedTags,
                       ),
                       const SizedBox(height: 24.0),
                       DescriptionSection(
