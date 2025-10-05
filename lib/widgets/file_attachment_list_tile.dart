@@ -66,7 +66,7 @@ class _FileAttachmentListTileState extends State<FileAttachmentListTile> {
     final List<SlidableAction> endActions = [
       if (widget.onDelete != null)
         SlidableAction(
-          onPressed: (context) => widget.onDelete,
+          onPressed: (context) => widget.onDelete!(),
           icon: Symbols.delete_forever_rounded,
           backgroundColor: context.flowColors.expense,
         ),
@@ -75,7 +75,7 @@ class _FileAttachmentListTileState extends State<FileAttachmentListTile> {
     final List<SlidableAction> startActions = [
       if (widget.onShare != null)
         SlidableAction(
-          onPressed: (context) => widget.onShare,
+          onPressed: (context) => widget.onShare!(),
           icon: Symbols.share_rounded,
           backgroundColor: context.colorScheme.primary,
         ),

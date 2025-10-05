@@ -1426,7 +1426,9 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void removeFile(FileAttachment attachment) {
-    _attachments?.removeWhere((a) => a.uuid == attachment.uuid);
+    _attachments = _attachments
+        ?.where((a) => a.uuid != attachment.uuid)
+        .toList();
     if (mounted) {
       setState(() {});
     }

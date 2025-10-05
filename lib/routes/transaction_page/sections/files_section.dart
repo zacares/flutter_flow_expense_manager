@@ -111,7 +111,7 @@ class _FilesSectionState extends State<FilesSection> {
     if (confirmation != true || !mounted) return;
 
     try {
-      await FileAttachmentService().delete(file);
+      await FileAttachmentService().deleteIfOrphan(file);
       if (mounted) {
         context.showToast(text: "fileAttachment.delete.success".t(context));
       }
