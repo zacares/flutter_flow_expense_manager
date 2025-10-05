@@ -85,6 +85,7 @@
   "enum.ImportCSVProgress@parsing": "Өгөгдлийг уншиж байна",
   "enum.ImportCSVProgress@success": "Амжилттай",
   "enum.ImportCSVProgress@waitingConfirmation": "Баталгаажуулалт хүлээж байна",
+  "enum.ImportV1Progress@copyingFileAttachments": "Файлын хавсралтуудыг хуулж байна",
   "enum.ImportV1Progress@erasing": "Хуучин өгөгдлийг цэвэрлэж байна",
   "enum.ImportV1Progress@error": "Алдаа гарлаа ({error})",
   "enum.ImportV1Progress@resolvingTransactions": "Гүйлгээнүүдийг хуваарилж байна",

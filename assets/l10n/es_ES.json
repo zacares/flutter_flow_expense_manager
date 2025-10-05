@@ -85,6 +85,7 @@
   "enum.ImportCSVProgress@parsing": "Analizando datos",
   "enum.ImportCSVProgress@success": "Éxito",
   "enum.ImportCSVProgress@waitingConfirmation": "Esperando confirmación",
+  "enum.ImportV1Progress@copyingFileAttachments": "Copiando archivos adjuntos",
   "enum.ImportV1Progress@erasing": "Borrando datos actuales",
   "enum.ImportV1Progress@error": "Algo salió mal ({error})",
   "enum.ImportV1Progress@resolvingTransactions": "Organizando transacciones",
