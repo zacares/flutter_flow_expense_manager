@@ -8,12 +8,14 @@ import "package:flow/routes/preferences/language_selection_sheet.dart";
 import "package:flow/routes/preferences/sections/haptics.dart";
 import "package:flow/routes/preferences/sections/lock_app.dart";
 import "package:flow/routes/preferences/sections/privacy.dart";
+import "package:flow/services/file_attachment.dart";
 import "package:flow/services/local_auth.dart";
 import "package:flow/services/notifications.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/color_themes/registry.dart";
 import "package:flow/theme/flow_color_scheme.dart";
 import "package:flow/theme/names.dart";
+import "package:flow/utils/extensions.dart";
 import "package:flow/widgets/general/directional_chevron.dart";
 import "package:flow/widgets/general/list_header.dart";
 import "package:flow/widgets/general/rtl_flipper.dart";
@@ -175,6 +177,13 @@ class PreferencesPageState extends State<PreferencesPage> {
               ),
               trailing: DirectionalChevron(),
             ),
+            // ListTile(
+            //   leading: const Icon(Symbols.automation_rounded),
+            //   title: Text("preferences.transactionEntryFlow".t(context)),
+            //   onTap: () =>
+            //       _pushAndRefreshAfter("/preferences/transactionEntryFlow"),
+            //   trailing: DirectionalChevron(),
+            // ),
             const SizedBox(height: 24.0),
             ListHeader("preferences.appearance".t(context)),
             const SizedBox(height: 8.0),
@@ -212,6 +221,12 @@ class PreferencesPageState extends State<PreferencesPage> {
               ),
               trailing: DirectionalChevron(),
             ),
+            ListTile(
+              title: Text("preferences.changeVisuals".t(context)),
+              leading: const Icon(Symbols.moving_rounded),
+              onTap: () => _pushAndRefreshAfter("/preferences/changeVisuals"),
+              trailing: DirectionalChevron(),
+            ),
             const SizedBox(height: 24.0),
             ListHeader("preferences.privacy".t(context)),
             const SizedBox(height: 8.0),
@@ -224,6 +239,12 @@ class PreferencesPageState extends State<PreferencesPage> {
             const SizedBox(height: 24.0),
             ListHeader("preferences.feedback".t(context)),
             const SizedBox(height: 8.0),
+            ListTile(
+              title: Text("fileAttachment.cleanupHangingFiles".t(context)),
+              leading: const Icon(Symbols.bug_report_rounded),
+              onTap: () => _deleteHangingFiles(),
+              trailing: DirectionalChevron(),
+            ),
             ListTile(
               title: Text("preferences.feedback.debugLogs".t(context)),
               leading: const Icon(Symbols.bug_report_rounded),
@@ -331,6 +352,32 @@ class PreferencesPageState extends State<PreferencesPage> {
 
     // Rebuild to update description text
     if (mounted) setState(() {});
+  }
+
+  void _deleteHangingFiles() async {
+    final bool? confirmation = await context.showConfirmationSheet(
+      isDeletionConfirmation: true,
+      title: "fileAttachment.cleanupHangingFiles".t(context),
+      child: Text("fileAttachment.cleanupHangingFiles.description".t(context)),
+    );
+
+    if (confirmation != true || !mounted) return;
+
+    try {
+      final int deleted = await FileAttachmentService().deleteAllOrphans();
+
+      if (mounted) {
+        context.showToast(text: "fileAttachment.delete.success".t(context));
+      }
+
+      _log.info("Deleted $deleted hanging files");
+    } catch (e, stackTrace) {
+      _log.warning("Failed to delete hanging files", e, stackTrace);
+
+      if (mounted) {
+        context.showErrorToast(error: "error.sync.fileNotFound".t(context));
+      }
+    }
   }
 
   void reload() {

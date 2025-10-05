@@ -7,10 +7,13 @@ import "package:flow/data/setup/default_categories.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/budget.dart";
 import "package:flow/entity/category.dart";
+import "package:flow/entity/file_attachment.dart";
+import "package:flow/entity/goal.dart";
 import "package:flow/entity/profile.dart";
 import "package:flow/entity/recurring_transaction.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction_filter_preset.dart";
+import "package:flow/entity/transaction_tag.dart";
 import "package:flow/entity/user_preferences.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/objectbox/objectbox.g.dart";
@@ -27,7 +30,12 @@ class ObjectBox {
 
   static late String appDataDirectory;
 
-  static String get imagesDirectory => path.join(appDataDirectory, "images");
+  static const String imagesDirectoryName = "images";
+  static const String filesDirectoryName = "files";
+  static String get imagesDirectory =>
+      path.join(appDataDirectory, imagesDirectoryName);
+  static String get filesDirectory =>
+      path.join(appDataDirectory, filesDirectoryName);
 
   static String kDebugDefaultSubdirectory = "__debug";
 
@@ -244,6 +252,9 @@ class ObjectBox {
         box<Profile>().removeAllAsync(),
         box<UserPreferences>().removeAllAsync(),
         box<Budget>().removeAllAsync(),
+        box<Goal>().removeAllAsync(),
+        box<TransactionTag>().removeAllAsync(),
+        box<FileAttachment>().removeAllAsync(),
         box<RecurringTransaction>().removeAllAsync(),
         box<TransactionFilterPreset>().removeAllAsync(),
       ]);

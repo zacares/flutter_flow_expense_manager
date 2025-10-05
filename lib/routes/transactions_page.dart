@@ -134,9 +134,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (showExchangeRatesMissingWarning) RatesMissingErrorBox(),
-                  Frame(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Frame(
                       child: TimeRangeSelector(
                         initialValue: _timeRange,
                         onChanged: (newRange) {

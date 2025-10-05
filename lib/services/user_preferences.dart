@@ -1,10 +1,13 @@
+import "dart:async";
 import "dart:math";
 
 import "package:flow/data/flow_notification_payload.dart";
+import "package:flow/data/prefs/change_visuals.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/transaction/type.dart";
 import "package:flow/entity/transaction_filter_preset.dart";
 import "package:flow/entity/user_preferences.dart";
+import "package:flow/entity/user_preferences/transaction_entry_flow.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/services/currency_registry.dart";
@@ -49,11 +52,24 @@ class UserPreferencesService {
     return flowLights.schemes.first.name;
   }
 
+  String? get themeNameRaw => value.themeName;
+
   set themeName(String? newThemeName) {
     if (validateThemeName(newThemeName)) {
       value.themeName = newThemeName;
       ObjectBox().box<UserPreferences>().put(value);
     }
+  }
+
+  ChangeVisuals get changeVisuals {
+    final ChangeVisuals? parsed = ChangeVisuals.tryParse(value.changeVisuals);
+
+    return parsed ?? ChangeVisuals.defaults;
+  }
+
+  set changeVisuals(ChangeVisuals newChangeVisuals) {
+    value.changeVisuals = newChangeVisuals.serialize();
+    ObjectBox().box<UserPreferences>().put(value);
   }
 
   int? get trashBinRetentionDays => value.trashBinRetentionDays;
@@ -115,6 +131,16 @@ class UserPreferencesService {
   ) {
     value.transactionListTileShowCategoryName =
         newTransactionListTileShowCategoryName;
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
+  bool get transactionListTileRelaxedDensity =>
+      value.transactionListTileRelaxedDensity;
+  set transactionListTileRelaxedDensity(
+    bool newTransactionListTileRelaxedDensity,
+  ) {
+    value.transactionListTileRelaxedDensity =
+        newTransactionListTileRelaxedDensity;
     ObjectBox().box<UserPreferences>().put(value);
   }
 
@@ -206,6 +232,12 @@ class UserPreferencesService {
     }
   }
 
+  TransactionEntryFlow get transactionEntryFlow => value.transactionEntryFlow;
+  set transactionEntryFlow(TransactionEntryFlow newEntryFlow) {
+    value.transactionEntryFlow = newEntryFlow;
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
   TransactionFilterPreset? get defaultFilterPreset {
     if (defaultFilterPresetUuid == null) {
       return null;
@@ -230,19 +262,29 @@ class UserPreferencesService {
 
   UserPreferencesService._internal();
 
-  void initialize() {
+  Future<void> initialize() async {
+    final Completer<void> completer = Completer();
+
     ObjectBox()
         .box<UserPreferences>()
         .query()
         .watch(triggerImmediately: true)
         .listen((event) {
-          final UserPreferences? userPreferences = event.findFirst();
+          try {
+            final UserPreferences? userPreferences = event.findFirst();
 
-          if (userPreferences == null) {
-            return;
+            if (userPreferences == null) {
+              return;
+            }
+
+            valueNotifier.value = userPreferences;
+          } finally {
+            if (!completer.isCompleted) {
+              completer.complete();
+            }
           }
-
-          valueNotifier.value = userPreferences;
         });
+
+    return completer.future;
   }
 }

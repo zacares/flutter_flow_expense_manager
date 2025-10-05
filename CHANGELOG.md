@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.16.0
+
+### New features
+
+* Pdf summary now shows summary for the report duration
+* Added transaction tags, closes [#568](https://github.com/flow-mn/flow/issues/568)
+* Now you can set colors for tags, accounts, and categories.
+* Now you can set N occurences for recurring transactions, closes [#536](https://github.com/flow-mn/flow/issues/536)
+* Now you can customize arrow/color of comparisions, closes [#546](https://github.com/flow-mn/flow/issues/546)
+* Now you can attach files to transactions, closes [#517](https://github.com/flow-mn/flow/issues/517)
+* Now you can programmatically open new transaction page with prefilled fields with `flow-mn` uri scheme
+  * Example for creating $300 transaction in an USD account:
+
+    `flow-mn:/transaction/new?amount=300&fromAccountUuid=2627442e-b741-4ab7-93a8-d82178007519`
+  * All fields are passed by uri query params
+  * To retrieve the account id, use json export
+  * For valid fields, see [schema](./schemas/20250919-transaction-programmable-object.json)
+
+### Fixes
+
+* Fixed PDF range date were relative.
+* Fixed it was impossible to edit the category/account of an existing
+  transaction in some scenarios
+* Single character/emoji Flow Icons are vertically centered (way better than before at least)
+
+### Changes
+
+* Added slight shadow to the navbar for distinction
+* Some pages now scroll behind the system navbar
+* Reorganized profile tab to account for upcoming changes
+
 ## 0.15.0
 
 ### New features

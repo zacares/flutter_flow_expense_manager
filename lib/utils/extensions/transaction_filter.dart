@@ -3,9 +3,10 @@ import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/category.dart";
 import "package:flow/entity/transaction/type.dart";
+import "package:flow/entity/transaction_tag.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/l10n/named_enum.dart";
-import "package:flow/widgets/utils/time_and_range.dart";
+import "package:flow/utils/time_and_range.dart";
 import "package:flutter/material.dart";
 import "package:moment_dart/moment_dart.dart";
 
@@ -87,6 +88,10 @@ extension TransactionFilterHelpers on TransactionFilter {
       return "$translationKey.all".t(context);
     }
 
+    if (value case bool b) {
+      return "$translationKey#$b".t(context);
+    }
+
     if (value case TransactionFilterTimeRange filterTimeRange) {
       return filterTimeRange.preset?.localizedNameContext(context) ??
           filterTimeRange.range?.format() ??
@@ -99,6 +104,10 @@ extension TransactionFilterHelpers on TransactionFilter {
       }
 
       return timeRange.format();
+    }
+
+    if (value case TransactionTag tag) {
+      return tag.title;
     }
 
     if (value case Account account) {
@@ -134,6 +143,8 @@ extension TransactionFilterHelpers on TransactionFilter {
             context,
             list.length,
           );
+        } else if (list.first is TransactionTag) {
+          return "transactions.query.filter.tags.n".t(context, list.length);
         }
       }
 

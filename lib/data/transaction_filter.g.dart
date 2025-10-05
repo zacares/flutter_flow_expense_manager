@@ -16,6 +16,7 @@ TransactionFilter _$TransactionFilterFromJson(
   accounts: (json['accounts'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
+  tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
   range: json['range'] == null
       ? null
       : TransactionFilterTimeRange.fromJson(json['range'] as String),
@@ -29,6 +30,8 @@ TransactionFilter _$TransactionFilterFromJson(
       ?.map((e) => e as String)
       .toList(),
   extraTag: json['extraTag'] as String?,
+  hasAttachments: json['hasAttachments'] as bool?,
+  requireAllTags: json['requireAllTags'] as bool? ?? false,
   includeDeleted: json['includeDeleted'] as bool? ?? false,
   sortDescending: json['sortDescending'] as bool? ?? true,
   searchData: json['searchData'] == null
@@ -53,6 +56,9 @@ Map<String, dynamic> _$TransactionFilterToJson(
   'types': instance.types?.map((e) => _$TransactionTypeEnumMap[e]!).toList(),
   'categories': instance.categories,
   'accounts': instance.accounts,
+  'tags': instance.tags,
+  'requireAllTags': instance.requireAllTags,
+  'hasAttachments': instance.hasAttachments,
   'sortDescending': instance.sortDescending,
   'sortBy': _$TransactionSortFieldEnumMap[instance.sortBy]!,
   'groupBy': _$TransactionGroupRangeEnumMap[instance.groupBy]!,

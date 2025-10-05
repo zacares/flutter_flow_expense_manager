@@ -1,4 +1,4 @@
-import "package:flow/entity/transaction.dart";
+import "package:flow/data/transaction_programmable_object.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/routes/account/account_edit_page.dart";
 import "package:flow/routes/account_page.dart";
@@ -24,12 +24,14 @@ import "package:flow/routes/import_wizard/ivy.dart";
 import "package:flow/routes/import_wizard/v1.dart";
 import "package:flow/routes/import_wizard/v2.dart";
 import "package:flow/routes/preferences/button_order_preferences_page.dart";
+import "package:flow/routes/preferences/change_preferences_page.dart";
 import "package:flow/routes/preferences/money_formatting_preferences_page.dart";
 import "package:flow/routes/preferences/numpad_preferences_page.dart";
 import "package:flow/routes/preferences/pending_transactions_preferences_page.dart";
 import "package:flow/routes/preferences/reminders_preferences_page.dart";
 import "package:flow/routes/preferences/sync_preferences_page.dart";
 import "package:flow/routes/preferences/theme_preferences_page.dart";
+import "package:flow/routes/preferences/transaction_entry_flow_preferences_page.dart";
 import "package:flow/routes/preferences/transaction_geo_preferences_page.dart";
 import "package:flow/routes/preferences/transaction_list_item_appearance_preferences_page.dart";
 import "package:flow/routes/preferences/transfer_preferences_page.dart";
@@ -46,6 +48,8 @@ import "package:flow/routes/setup_page.dart";
 import "package:flow/routes/stats/stats_by_group_page.dart";
 import "package:flow/routes/support_page.dart";
 import "package:flow/routes/transaction_page.dart";
+import "package:flow/routes/transaction_tag_page.dart";
+import "package:flow/routes/transaction_tags_page.dart";
 import "package:flow/routes/transactions_page.dart";
 import "package:flow/routes/utils/crop_square_image_page.dart";
 import "package:flow/routes/utils/edit_markdown_page.dart";
@@ -54,7 +58,6 @@ import "package:flow/sync/import/external/ivy_wallet_csv.dart";
 import "package:flow/sync/import/import_csv.dart";
 import "package:flow/sync/import/import_v1.dart";
 import "package:flow/sync/import/import_v2.dart";
-import "package:flow/utils/utils.dart";
 import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
 import "package:moment_dart/moment_dart.dart";
@@ -66,12 +69,11 @@ final router = GoRouter(
     GoRoute(
       path: "/transaction/new",
       pageBuilder: (context, state) {
-        final TransactionType? type = TransactionType.values.firstWhereOrNull(
-          (element) => element.value == state.uri.queryParameters["type"],
-        );
+        final TransactionProgrammableObject? params =
+            TransactionProgrammableObject.tryParse(state.uri.queryParameters);
 
         return MaterialPage(
-          child: TransactionPage.create(initialTransactionType: type),
+          child: TransactionPage.create(params: params),
           fullscreenDialog: true,
         );
       },
@@ -164,6 +166,20 @@ final router = GoRouter(
       builder: (context, state) => const AccountsPage(),
     ),
     GoRoute(
+      path: "/transactionTags",
+      builder: (context, state) => const TransactionTagsPage(),
+    ),
+    GoRoute(
+      path: "/transactionTags/new",
+      builder: (context, state) => const TransactionTagPage.create(),
+    ),
+    GoRoute(
+      path: "/transactionTags/:id",
+      builder: (context, state) => TransactionTagPage(
+        tagId: int.tryParse(state.pathParameters["id"]!) ?? -1,
+      ),
+    ),
+    GoRoute(
       path: "/preferences",
       builder: (context, state) => const PreferencesPage(),
       routes: [
@@ -197,8 +213,17 @@ final router = GoRouter(
           builder: (context, state) => const TransactionGeoPreferencesPage(),
         ),
         GoRoute(
+          path: "transactionEntryFlow",
+          builder: (context, state) =>
+              const TransactionEntryFlowPreferencesPage(),
+        ),
+        GoRoute(
           path: "theme",
           builder: (context, state) => const ThemePreferencesPage(),
+        ),
+        GoRoute(
+          path: "changeVisuals",
+          builder: (context, state) => const ChangeVisualsPreferencesPage(),
         ),
         GoRoute(
           path: "moneyFormatting",
@@ -243,6 +268,28 @@ final router = GoRouter(
     ),
     GoRoute(
       path: "/utils/editmd",
+      pageBuilder: (context, state) {
+        return switch (state.extra) {
+          null => MaterialPage(
+            child: EditMarkdownPage(),
+            fullscreenDialog: true,
+          ),
+          EditMarkdownPageProps props => MaterialPage(
+            child: EditMarkdownPage(
+              initialValue: props.initialValue,
+              maxLength: props.maxLength,
+            ),
+            fullscreenDialog: true,
+          ),
+          _ => throw const ErrorPage(
+            error:
+                "Invalid state. Pass [EditMarkdownPageProps] object or nothing to `extra` prop",
+          ),
+        };
+      },
+    ),
+    GoRoute(
+      path: "/utils/previewpdf",
       pageBuilder: (context, state) {
         return switch (state.extra) {
           null => MaterialPage(

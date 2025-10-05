@@ -16,11 +16,23 @@ class Navbar extends StatelessWidget {
     final NavbarTheme navbarTheme = Theme.of(context).extension<NavbarTheme>()!;
 
     return Container(
-      constraints: BoxConstraints.tightFor(width: 600.0),
+      constraints: BoxConstraints(maxWidth: 480.0),
       decoration: BoxDecoration(
         shape: BoxShape.rectangle,
         borderRadius: BorderRadius.circular(999.9),
         color: navbarTheme.backgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0x05000000),
+            blurRadius: 16.0,
+            offset: const Offset(0, 0),
+          ),
+          BoxShadow(
+            color: const Color(0x10000000),
+            blurRadius: 4.0,
+            offset: const Offset(0, 0),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.max,
