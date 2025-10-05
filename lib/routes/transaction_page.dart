@@ -715,11 +715,11 @@ class _TransactionPageState extends State<TransactionPage> {
             TransactionType.transfer => result.abs(),
           };
 
-    setState(() {
-      _amount = resultAmount ?? _amount;
-    });
+    _amount = resultAmount ?? _amount;
 
     if (!mounted) return;
+
+    setState(() {});
 
     if (_conversionRate == 1.0) {
       await inputPostConversionAmount();
