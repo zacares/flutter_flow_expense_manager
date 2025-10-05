@@ -85,6 +85,7 @@
   "enum.ImportCSVProgress@parsing": "Veriler ayrıştırılıyor",
   "enum.ImportCSVProgress@success": "Başarılı",
   "enum.ImportCSVProgress@waitingConfirmation": "Onay bekleniyor",
+  "enum.ImportV1Progress@copyingFileAttachments": "Dosya ekleri kopyalanıyor",
   "enum.ImportV1Progress@erasing": "Mevcut verilerin silinmesi",
   "enum.ImportV1Progress@error": "Bir şeyler ters gitti ({error})",
   "enum.ImportV1Progress@resolvingTransactions": "İşlemleri sıralama",

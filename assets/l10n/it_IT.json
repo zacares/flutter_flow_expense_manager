@@ -85,6 +85,7 @@
   "enum.ImportCSVProgress@parsing": "Analisi dei dati",
   "enum.ImportCSVProgress@success": "Operazione completata",
   "enum.ImportCSVProgress@waitingConfirmation": "In attesa di conferma",
+  "enum.ImportV1Progress@copyingFileAttachments": "Copia degli allegati",
   "enum.ImportV1Progress@erasing": "Cancellazione dei dati correnti",
   "enum.ImportV1Progress@error": "Qualcosa è andato storto ({error})",
   "enum.ImportV1Progress@resolvingTransactions": "Risoluzione delle transazioni",

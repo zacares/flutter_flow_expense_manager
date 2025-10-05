@@ -85,6 +85,7 @@
   "enum.ImportCSVProgress@parsing": "Daten werden gelesen",
   "enum.ImportCSVProgress@success": "Erfolgreich",
   "enum.ImportCSVProgress@waitingConfirmation": "Warte auf Bestätigung",
+  "enum.ImportV1Progress@copyingFileAttachments": "Dateianhänge werden kopiert",
   "enum.ImportV1Progress@erasing": "Aktuelle Daten werden gelöscht",
   "enum.ImportV1Progress@error": "Etwas ist schiefgelaufen ({error})",
   "enum.ImportV1Progress@resolvingTransactions": "Buchungen werden sortiert",

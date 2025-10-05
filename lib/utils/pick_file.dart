@@ -61,7 +61,6 @@ Future<XFile?> pickImage({
 }
 
 Future<List<XFile>?> pickMultipleMediaFiles({
-  ImageSource source = ImageSource.gallery,
   double? maxWidth,
   double? maxHeight,
 }) async {

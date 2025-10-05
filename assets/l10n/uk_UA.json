@@ -85,6 +85,7 @@
   "enum.ImportCSVProgress@parsing": "Розбір даних",
   "enum.ImportCSVProgress@success": "Успіх",
   "enum.ImportCSVProgress@waitingConfirmation": "Очікування підтвердження",
+  "enum.ImportV1Progress@copyingFileAttachments": "Копіювання файлових вкладень",
   "enum.ImportV1Progress@erasing": "Видалення поточних даних",
   "enum.ImportV1Progress@error": "Щось пішло не так ({error})",
   "enum.ImportV1Progress@resolvingTransactions": "Обробка транзакцій",

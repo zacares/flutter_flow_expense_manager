@@ -85,6 +85,7 @@
   "enum.ImportCSVProgress@parsing": "يجري تحليل البيانات",
   "enum.ImportCSVProgress@success": "نجاح",
   "enum.ImportCSVProgress@waitingConfirmation": "في انتظار التأكيد",
+  "enum.ImportV1Progress@copyingFileAttachments": "جاري نسخ مرفقات الملفات",
   "enum.ImportV1Progress@erasing": "يجري مسح البيانات الحالية",
   "enum.ImportV1Progress@error": "حدث خطأ ({error})",
   "enum.ImportV1Progress@resolvingTransactions": "يجري فرز المعاملات",
