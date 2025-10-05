@@ -50,8 +50,8 @@ class _ThemePreferencesPageState extends State<ThemePreferencesPage> {
 
     return Scaffold(
       appBar: AppBar(title: Text("preferences.theme.choose".t(context))),
-      body: SafeArea(
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -81,6 +81,8 @@ class _ThemePreferencesPageState extends State<ThemePreferencesPage> {
                 child: ThemePetalSelector(
                   groups: groups[selectedGroup]!,
                   updateOnHover: true,
+                  onChanged: (scheme) =>
+                      UserPreferencesService().themeName = scheme.name,
                 ),
               ),
               if (currentThemeName != null) ...[

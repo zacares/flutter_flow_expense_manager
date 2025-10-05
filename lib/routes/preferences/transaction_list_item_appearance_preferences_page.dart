@@ -32,13 +32,15 @@ class _TransactionListItemAppearancePreferencesPageState
         UserPreferencesService().transactionListTileShowCategoryName;
     final bool transactionListTileShowAccountForLeading =
         UserPreferencesService().transactionListTileShowAccountForLeading;
+    final bool transactionListTileRelaxedDensity =
+        UserPreferencesService().transactionListTileRelaxedDensity;
 
     return Scaffold(
       appBar: AppBar(
         title: Text("preferences.transactions.listTile".t(context)),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -49,22 +51,15 @@ class _TransactionListItemAppearancePreferencesPageState
               ...getExampleTransactions().map(
                 (transaction) => IgnorePointer(
                   child: TransactionListTile(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 4.0,
-                    ),
                     transaction: transaction,
                     recoverFromTrashFn: null,
                     moveToTrashFn: null,
                     combineTransfers: false,
-                    useAccountIconForLeading:
-                        transactionListTileShowAccountForLeading,
-                    showCategory: transactionListTileShowCategoryName,
-                    useCategoryNameForUntitledTransactions:
-                        useCategoryNameForUntitledTransactions,
                   ),
                 ),
               ),
+              const SizedBox(height: 16.0),
+              const Divider(),
               const SizedBox(height: 16.0),
               SwitchListTile(
                 title: Text(
@@ -93,47 +88,51 @@ class _TransactionListItemAppearancePreferencesPageState
                   setState(() {});
                 },
               ),
+              SwitchListTile(
+                title: Text(
+                  "preferences.transactions.listTile.transactionListTileRelaxedDensity"
+                      .t(context),
+                ),
+                value: transactionListTileRelaxedDensity,
+                onChanged: (bool newValue) {
+                  UserPreferencesService().transactionListTileRelaxedDensity =
+                      newValue;
+                  setState(() {});
+                },
+              ),
               const SizedBox(height: 8.0),
               ListHeader(
                 "preferences.transactions.listTile.leading".t(context),
               ),
               const SizedBox(height: 8.0),
               Frame(
-                child: Wrap(
-                  spacing: 12.0,
-                  runSpacing: 12.0,
-                  children: [
-                    ChoiceChip(
+                child: SegmentedButton<bool>(
+                  selected: {transactionListTileShowAccountForLeading},
+                  onSelectionChanged: (newSelection) {
+                    final bool newValue = newSelection.first;
+                    UserPreferencesService()
+                            .transactionListTileShowAccountForLeading =
+                        newValue;
+                    setState(() {});
+                  },
+                  segments: [
+                    ButtonSegment<bool>(
+                      value: false,
+                      icon: Icon(Symbols.category_rounded),
                       label: Text(
                         "preferences.transactions.listTile.leading.category".t(
                           context,
                         ),
                       ),
-                      selected: !transactionListTileShowAccountForLeading,
-                      onSelected: (selected) {
-                        if (!selected) return;
-
-                        UserPreferencesService()
-                                .transactionListTileShowAccountForLeading =
-                            false;
-                        setState(() {});
-                      },
                     ),
-                    ChoiceChip(
+                    ButtonSegment<bool>(
+                      value: true,
+                      icon: Icon(Symbols.person_rounded),
                       label: Text(
                         "preferences.transactions.listTile.leading.account".t(
                           context,
                         ),
                       ),
-                      selected: transactionListTileShowAccountForLeading,
-                      onSelected: (selected) {
-                        if (!selected) return;
-
-                        UserPreferencesService()
-                                .transactionListTileShowAccountForLeading =
-                            true;
-                        setState(() {});
-                      },
                     ),
                   ],
                 ),

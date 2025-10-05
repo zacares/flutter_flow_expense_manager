@@ -5,11 +5,13 @@ import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction/extensions/default/transfer.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/providers/accounts_provider.dart";
+import "package:flow/theme/flow_color_scheme.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/extensions/transaction.dart";
 import "package:flow/widgets/general/directional_slidable.dart";
 import "package:flow/widgets/general/flow_icon.dart";
 import "package:flow/widgets/general/money_text.dart";
+import "package:flow/widgets/transaction_list_tile_theme.dart";
 import "package:flutter/material.dart";
 import "package:flutter_slidable/flutter_slidable.dart";
 import "package:go_router/go_router.dart";
@@ -17,8 +19,9 @@ import "package:material_symbols_icons/symbols.dart";
 import "package:moment_dart/moment_dart.dart";
 
 class TransactionListTile extends StatelessWidget {
+  final TransactionListTileThemeData? theme;
+
   final Transaction transaction;
-  final EdgeInsets padding;
 
   final VoidCallback? recoverFromTrashFn;
   final VoidCallback? moveToTrashFn;
@@ -30,10 +33,6 @@ class TransactionListTile extends StatelessWidget {
   final bool combineTransfers;
 
   final bool? overrideObscure;
-
-  final bool useCategoryNameForUntitledTransactions;
-  final bool useAccountIconForLeading;
-  final bool showCategory;
 
   /// Determines what date/time to show. i.e.:
   ///
@@ -53,18 +52,20 @@ class TransactionListTile extends StatelessWidget {
     required this.moveToTrashFn,
     required this.combineTransfers,
     this.groupRange = TransactionGroupRange.day,
-    this.padding = EdgeInsets.zero,
     this.confirmFn,
     this.duplicateFn,
     this.dismissibleKey,
     this.overrideObscure,
-    this.useCategoryNameForUntitledTransactions = false,
-    this.useAccountIconForLeading = false,
-    this.showCategory = false,
+    this.theme,
   });
 
   @override
   Widget build(BuildContext context) {
+    final TransactionListTileThemeData effectiveTheme =
+        TransactionListTileTheme.maybeOf(context)?.data.merge(theme) ??
+        theme ??
+        TransactionListTileThemeData.fallback;
+
     final bool showPendingConfirmation =
         confirmFn != null && transaction.confirmable();
 
@@ -84,7 +85,7 @@ class TransactionListTile extends StatelessWidget {
 
     final String resolvedTitle =
         transaction.title ??
-        ((useCategoryNameForUntitledTransactions
+        ((effectiveTheme.useCategoryNameForUntitledTransactionsOrDefault
                 ? transaction.category.target?.name
                 : null) ??
             "transaction.fallbackTitle".t(context));
@@ -100,7 +101,8 @@ class TransactionListTile extends StatelessWidget {
           ? "${AccountsProvider.of(context).getName(transfer!.fromAccountUuid)} → ${AccountsProvider.of(context).getName(transfer.toAccountUuid)}"
           : (AccountsProvider.of(context).getName(transaction.accountUuid) ??
                 transaction.account.target?.name),
-      if (showCategory && transaction.category.target != null)
+      if (effectiveTheme.showCategoryOrDefault &&
+          transaction.category.target != null)
         transaction.category.target!.name,
       dateString,
       if (transaction.transactionDate.isFuture)
@@ -136,18 +138,19 @@ class TransactionListTile extends StatelessWidget {
       child: InkWell(
         onTap: () => context.push("/transaction/${transaction.id}"),
         child: Padding(
-          padding: padding,
+          padding: effectiveTheme.paddingOrDefault,
           child: Column(
             children: [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: effectiveTheme.spacingOrDefault,
                 children: [
-                  buildLeading(context),
-                  const SizedBox(width: 8.0),
+                  buildLeading(context, effectiveTheme),
                   Expanded(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: effectiveTheme.titleSpacingOrDefault,
                       children: [
                         RichText(
                           text: TextSpan(
@@ -172,10 +175,10 @@ class TransactionListTile extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8.0),
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,
+                    spacing: effectiveTheme.titleSpacingOrDefault,
                     children: [
                       MoneyText(
                         transaction.money,
@@ -222,7 +225,7 @@ class TransactionListTile extends StatelessWidget {
                 ],
               ),
               if (showPendingConfirmation) ...[
-                const SizedBox(height: 4.0),
+                SizedBox(height: effectiveTheme.spacingOrDefault),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -290,18 +293,23 @@ class TransactionListTile extends StatelessWidget {
     );
   }
 
-  FlowIcon buildLeading(BuildContext context) {
+  FlowIcon buildLeading(
+    BuildContext context,
+    TransactionListTileThemeData theme,
+  ) {
     late final FlowIconData iconData;
+    FlowColorScheme? colorScheme;
 
     if (transaction.isTransfer) {
       iconData = FlowIconData.icon(Symbols.sync_alt_rounded);
-    } else if (useAccountIconForLeading) {
+    } else if (theme.useAccountIconForLeadingOrDefault) {
       iconData =
           AccountsProvider.of(context).get(transaction.accountUuid)?.icon ??
           transaction.account.target?.icon ??
           FlowIconData.icon(Symbols.circle_rounded);
     } else if (transaction.category.target != null) {
       iconData = transaction.category.target!.icon;
+      colorScheme = transaction.category.target!.colorScheme;
     } else {
       iconData = FlowIconData.icon(Symbols.circle_rounded);
     }
@@ -310,6 +318,8 @@ class TransactionListTile extends StatelessWidget {
       iconData,
       plated: true,
       fill: transaction.category.target != null ? 1.0 : 0.0,
+      color: colorScheme?.primary,
+      plateColor: colorScheme?.secondary,
     );
   }
 

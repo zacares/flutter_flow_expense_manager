@@ -1,30 +1,40 @@
 import "dart:io";
 
+import "package:cross_file/cross_file.dart";
 import "package:flow/constants.dart";
 import "package:flow/data/exchange_rates.dart";
 import "package:flow/data/money.dart";
+import "package:flow/data/transaction_programmable_object.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/category.dart";
+import "package:flow/entity/file_attachment.dart";
 import "package:flow/entity/recurring_transaction.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction/extensions/base.dart";
 import "package:flow/entity/transaction/extensions/default/geo.dart";
 import "package:flow/entity/transaction/extensions/default/recurring.dart";
 import "package:flow/entity/transaction/wrapper.dart";
+import "package:flow/entity/transaction_tag.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/l10n/named_enum.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/prefs/local_preferences.dart";
-import "package:flow/routes/transaction_page/description_section.dart";
+import "package:flow/providers/accounts_provider.dart";
+import "package:flow/providers/categories_provider.dart";
+import "package:flow/providers/transaction_tags_provider.dart";
 import "package:flow/routes/transaction_page/input_amount_sheet.dart";
 import "package:flow/routes/transaction_page/section.dart";
+import "package:flow/routes/transaction_page/sections/description_section.dart";
+import "package:flow/routes/transaction_page/sections/files_section.dart";
+import "package:flow/routes/transaction_page/sections/tags_section.dart";
 import "package:flow/routes/transaction_page/select_account_sheet.dart";
 import "package:flow/routes/transaction_page/select_category_sheet.dart";
 import "package:flow/routes/transaction_page/select_recurrence.dart";
 import "package:flow/routes/transaction_page/select_recurring_update_mode_sheet.dart";
 import "package:flow/routes/transaction_page/title_input.dart";
 import "package:flow/services/exchange_rates.dart";
+import "package:flow/services/file_attachment.dart";
 import "package:flow/services/recurring_transactions.dart";
 import "package:flow/services/transactions.dart";
 import "package:flow/services/user_preferences.dart";
@@ -37,8 +47,10 @@ import "package:flow/widgets/general/form_close_button.dart";
 import "package:flow/widgets/general/info_text.dart";
 import "package:flow/widgets/general/money_text.dart";
 import "package:flow/widgets/location_picker_sheet.dart";
-import "package:flow/widgets/square_map.dart";
+import "package:flow/widgets/open_street_map.dart";
+import "package:flow/widgets/sheets/select_transaction_tags_sheet.dart";
 import "package:flow/widgets/transaction/type_selector.dart";
+import "package:flutter/foundation.dart" hide Category;
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
 import "package:flutter/services.dart";
@@ -58,16 +70,13 @@ class TransactionPage extends StatefulWidget {
   /// Transaction Object ID
   final int transactionId;
 
-  final TransactionType? initialTransactionType;
+  final TransactionProgrammableObject? params;
 
   bool get isNewTransaction => transactionId == 0;
 
-  const TransactionPage.create({
-    super.key,
-    this.initialTransactionType = TransactionType.expense,
-  }) : transactionId = 0;
+  const TransactionPage.create({super.key, this.params}) : transactionId = 0;
   const TransactionPage.edit({super.key, required this.transactionId})
-    : initialTransactionType = null;
+    : params = null;
 
   @override
   State<TransactionPage> createState() => _TransactionPageState();
@@ -91,9 +100,6 @@ class _TransactionPageState extends State<TransactionPage> {
   final FocusNode _selectAccountFocusNode = FocusNode();
   final FocusNode _selectAccountTransferToFocusNode = FocusNode();
 
-  late final List<Account> accounts;
-  late final List<Category> categories;
-
   Geo? _geo;
   bool _geoHandpicked = false;
 
@@ -105,6 +111,10 @@ class _TransactionPageState extends State<TransactionPage> {
   Category? _selectedCategory;
 
   Account? _selectedAccountTransferTo;
+
+  List<TransactionTag>? _selectedTags;
+
+  List<FileAttachment>? _attachments;
 
   List<RelevanceScoredTitle>? autofillHints;
 
@@ -137,54 +147,89 @@ class _TransactionPageState extends State<TransactionPage> {
   void initState() {
     super.initState();
 
-    accounts = ObjectBox().getAccounts();
-    categories = ObjectBox().getCategories();
+    final accounts = ObjectBox().getAccounts();
+    final categories = ObjectBox().getCategories();
 
-    /// Transaction we're editing.
-    _currentlyEditing = widget.isNewTransaction
-        ? null
-        : TransactionsService()
-              .getOneSync(widget.transactionId)
-              ?.findTransferOriginalOrThis();
-
-    if (!widget.isNewTransaction && _currentlyEditing == null) {
-      error = "Transaction with id ${widget.transactionId} was not found";
-    } else {
+    if (widget.isNewTransaction) {
+      _currentlyEditing = null;
       _titleController = TextEditingController(
-        text: _currentlyEditing?.title ?? "",
+        text: widget.params?.title ?? "",
       );
       _descriptionController = TextEditingController(
-        text: _currentlyEditing?.description ?? "",
+        text: widget.params?.notes ?? "",
       );
-      _selectedAccount = _currentlyEditing?.account.target;
-      _selectedCategory = _currentlyEditing?.category.target;
-      _transactionDate = _currentlyEditing?.transactionDate ?? DateTime.now();
-      _initialTransactionDate = _currentlyEditing?.transactionDate;
-      _transactionType =
-          _currentlyEditing?.type ??
-          widget.initialTransactionType ??
-          TransactionType.expense;
-      _amount = _currentlyEditing?.isTransfer == true
-          ? _currentlyEditing!.amount.abs()
-          : _currentlyEditing?.amount ??
-                (_transactionType == TransactionType.expense ? -0 : 0);
-      _selectedAccountTransferTo = accounts.firstWhereOrNull(
-        (account) =>
-            account.uuid ==
-            _currentlyEditing?.extensions.transfer?.toAccountUuid,
-      );
-      _geo = _currentlyEditing?.extensions.geo;
-      _isPending = _currentlyEditing?.isPending ?? _isPending;
-      if (_currentlyEditing?.isTransfer == true) {
-        _conversionRate =
-            _currentlyEditing!.extensions.transfer?.conversionRate ?? 1.0;
+      _selectedAccount = widget.params?.fromAccountUuid == null
+          ? null
+          : accounts.firstWhereOrNull(
+              (account) => account.uuid == widget.params!.fromAccountUuid,
+            );
+      _selectedCategory = widget.params?.categoryUuid == null
+          ? null
+          : categories.firstWhereOrNull(
+              (category) => category.uuid == widget.params!.categoryUuid,
+            );
+      _transactionDate = widget.params?.transactionDate ?? DateTime.now();
+      _initialTransactionDate =
+          widget.params?.transactionDate ?? DateTime.now();
+      _transactionType = widget.params?.type ?? TransactionType.expense;
+      _amount = switch (_transactionType) {
+        TransactionType.transfer => widget.params?.amount?.abs() ?? 0.0,
+        TransactionType.expense => -(widget.params?.amount ?? 0.0),
+        TransactionType.income => widget.params?.amount?.abs() ?? 0.0,
+      };
+      _selectedAccountTransferTo = widget.params?.toAccountUuid == null
+          ? null
+          : accounts.firstWhereOrNull(
+              (account) => account.uuid == widget.params!.toAccountUuid,
+            );
+      _isPending = widget.params?.isPending ?? _isPending;
+      if (_transactionType == TransactionType.transfer) {
+        _conversionRate = widget.params?.transferConversionRate ?? 1.0;
       }
-
-      if (_currentlyEditing != null && _currentlyEditing.isRecurring) {
-        _recurringTransaction = RecurringTransactionsService().findOneSync(
-          _currentlyEditing.extensions.recurring?.uuid,
+    } else {
+      /// Transaction we're editing.
+      _currentlyEditing = widget.isNewTransaction
+          ? null
+          : TransactionsService()
+                .getOneSync(widget.transactionId)
+                ?.findTransferOriginalOrThis();
+      if (_currentlyEditing == null) {
+        error = "Transaction with id ${widget.transactionId} was not found";
+      } else {
+        _titleController = TextEditingController(
+          text: _currentlyEditing.title ?? "",
         );
-        _recurrence = _recurringTransaction?.recurrence;
+        _descriptionController = TextEditingController(
+          text: _currentlyEditing.description ?? "",
+        );
+        _selectedAccount = _currentlyEditing.account.target;
+        _selectedCategory = _currentlyEditing.category.target;
+        _selectedTags = _currentlyEditing.tags;
+        _attachments = _currentlyEditing.attachments.toList();
+        _transactionDate = _currentlyEditing.transactionDate;
+        _initialTransactionDate = _currentlyEditing.transactionDate;
+        _transactionType = _currentlyEditing.type;
+        _amount = _currentlyEditing.isTransfer == true
+            ? _currentlyEditing.amount.abs()
+            : _currentlyEditing.amount;
+        _selectedAccountTransferTo = accounts.firstWhereOrNull(
+          (account) =>
+              account.uuid ==
+              _currentlyEditing.extensions.transfer?.toAccountUuid,
+        );
+        _geo = _currentlyEditing.extensions.geo;
+        _isPending = _currentlyEditing.isPending ?? _isPending;
+        if (_currentlyEditing.isTransfer == true) {
+          _conversionRate =
+              _currentlyEditing.extensions.transfer?.conversionRate ?? 1.0;
+        }
+
+        if (_currentlyEditing.isRecurring) {
+          _recurringTransaction = RecurringTransactionsService().findOneSync(
+            _currentlyEditing.extensions.recurring?.uuid,
+          );
+          _recurrence = _recurringTransaction?.recurrence;
+        }
       }
     }
 
@@ -194,11 +239,9 @@ class _TransactionPageState extends State<TransactionPage> {
 
     if (widget.isNewTransaction) {
       tryFetchLocation();
-    }
 
-    if (widget.isNewTransaction) {
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-        selectAccount();
+        selectAccount(true);
       });
     }
   }
@@ -243,6 +286,7 @@ class _TransactionPageState extends State<TransactionPage> {
                   tooltip: "general.save".t(context),
                 ),
               ],
+              actionsPadding: EdgeInsets.zero,
               title: TypeSelector(
                 current: _transactionType,
                 onChange: updateTransactionType,
@@ -254,13 +298,14 @@ class _TransactionPageState extends State<TransactionPage> {
               centerTitle: true,
               backgroundColor: context.colorScheme.surface,
             ),
-            body: SafeArea(
-              child: SingleChildScrollView(
+            body: SingleChildScrollView(
+              padding: EdgeInsetsGeometry.symmetric(vertical: 24.0),
+              child: SafeArea(
                 child: Form(
                   canPop: !hasChanged(),
                   child: Column(
+                    spacing: 24.0,
                     children: [
-                      const SizedBox(height: 24.0),
                       TitleInput(
                         key: ValueKey(_amount),
                         focusNode: _titleFocusNode,
@@ -274,7 +319,6 @@ class _TransactionPageState extends State<TransactionPage> {
                         fallbackTitle: fallbackTitle,
                         onSubmitted: (_) => save(),
                       ),
-                      const SizedBox(height: 24.0),
                       Center(
                         child: InkWell(
                           onTap: inputAmount,
@@ -289,7 +333,6 @@ class _TransactionPageState extends State<TransactionPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24.0),
                       // From account
                       Section(
                         title: isTransfer
@@ -326,7 +369,6 @@ class _TransactionPageState extends State<TransactionPage> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24.0),
                       // To account
                       if (isTransfer) ...[
                         Section(
@@ -358,8 +400,7 @@ class _TransactionPageState extends State<TransactionPage> {
                             focusNode: _selectAccountTransferToFocusNode,
                           ),
                         ),
-                        if (crossCurrencyTransfer) ...[
-                          const SizedBox(height: 24.0),
+                        if (crossCurrencyTransfer)
                           Section(
                             title: "transaction.transfer.conversionRate".t(
                               context,
@@ -375,7 +416,6 @@ class _TransactionPageState extends State<TransactionPage> {
                               focusNode: _selectAccountTransferToFocusNode,
                             ),
                           ),
-                        ],
                       ],
                       // Category
                       if (!isTransfer)
@@ -387,6 +427,7 @@ class _TransactionPageState extends State<TransactionPage> {
                                 : FlowIcon(
                                     _selectedCategory!.icon,
                                     plated: true,
+                                    colorScheme: _selectedCategory!.colorScheme,
                                   ),
                             title: Text(
                               _selectedCategory?.name ??
@@ -398,14 +439,21 @@ class _TransactionPageState extends State<TransactionPage> {
                                 : null,
                           ),
                         ),
-                      const SizedBox(height: 24.0),
+                      TagsSection(
+                        selectTags: selectTags,
+                        selectedTags: _selectedTags,
+                      ),
                       DescriptionSection(
                         controller: _descriptionController,
                         focusNode: _descriptionFocusNode,
                         onChanged: (_) => setState(() => {}),
                       ),
-                      if (_recurrence == null || !widget.isNewTransaction) ...[
-                        const SizedBox(height: 24.0),
+                      FilesSection(
+                        onAdd: addFiles,
+                        onRemove: removeFile,
+                        attachments: _attachments,
+                      ),
+                      if (_recurrence == null || !widget.isNewTransaction)
                         Section(
                           title: "transaction.date".t(context),
                           child: Column(
@@ -430,8 +478,7 @@ class _TransactionPageState extends State<TransactionPage> {
                             ],
                           ),
                         ),
-                      ],
-                      const SizedBox(height: 24.0),
+
                       Section(
                         title: "transaction.recurring".t(context),
                         child: AnimatedSize(
@@ -453,8 +500,7 @@ class _TransactionPageState extends State<TransactionPage> {
                         ),
                       ),
 
-                      if (_geo != null || enableGeo) ...[
-                        const SizedBox(height: 24.0),
+                      if (_geo != null || enableGeo)
                         Section(
                           title: "transaction.location".t(context),
                           child: Padding(
@@ -496,7 +542,7 @@ class _TransactionPageState extends State<TransactionPage> {
                                         ),
                                         child: AspectRatio(
                                           aspectRatio: 1.0,
-                                          child: OSMap(
+                                          child: OpenStreetMap(
                                             mapController: _mapController,
                                             interactable: false,
                                             onTap: (_) => selectLocation(),
@@ -521,9 +567,8 @@ class _TransactionPageState extends State<TransactionPage> {
                                   ),
                           ),
                         ),
-                      ],
-                      const SizedBox(height: 24.0),
-                      if (_currentlyEditing != null) ...[
+
+                      if (_currentlyEditing != null)
                         Section(
                           title: "transaction.actions".t(context),
                           child: Column(
@@ -573,8 +618,6 @@ class _TransactionPageState extends State<TransactionPage> {
                             ],
                           ),
                         ),
-                      ],
-                      const SizedBox(height: 24.0),
                     ],
                   ),
                 ),
@@ -641,13 +684,16 @@ class _TransactionPageState extends State<TransactionPage> {
     setState(() {});
   }
 
-  void inputAmount() async {
-    await TransitiveLocalPreferences().updateTransitiveProperties();
+  void inputAmount([bool fromAutomatedFlow = false]) async {
+    if (_amount == 0.0) {
+      await TransitiveLocalPreferences().updateTransitiveProperties();
+    }
+
+    if (!mounted) return;
+
     final hideCurrencySymbol = !TransitiveLocalPreferences()
         .usesMultipleCurrencies
         .get();
-
-    if (!mounted) return;
 
     final double? result = await showModalBottomSheet<double>(
       context: context,
@@ -669,19 +715,21 @@ class _TransactionPageState extends State<TransactionPage> {
             TransactionType.transfer => result.abs(),
           };
 
-    setState(() {
-      _amount = resultAmount ?? _amount;
-    });
+    _amount = resultAmount ?? _amount;
 
     if (!mounted) return;
 
-    await inputPostConversionAmount();
+    setState(() {});
+
+    if (_conversionRate == 1.0) {
+      await inputPostConversionAmount();
+    }
 
     if (!mounted) return;
 
-    if (widget.isNewTransaction && result != null) {
+    if (fromAutomatedFlow && widget.isNewTransaction && _amount != 0.0) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (context.mounted) {
+        if (context.mounted && _titleController.text.isEmpty) {
           FocusScope.of(context).requestFocus(_titleFocusNode);
         }
       });
@@ -715,40 +763,48 @@ class _TransactionPageState extends State<TransactionPage> {
     setState(() {});
   }
 
-  void selectAccount() async {
-    final Account? result = accounts.length == 1
-        ? accounts.single
-        : await showModalBottomSheet<Account>(
-            context: context,
-            builder: (context) => SelectAccountSheet(
-              accounts: accounts,
-              currentlySelectedAccountId: _selectedAccount?.id,
-              titleOverride: isTransfer
-                  ? "transaction.transfer.from.select".t(context)
-                  : null,
-              showBalance: true,
-              showTrailing: widget.isNewTransaction,
-            ),
-            isScrollControlled: true,
-          );
+  void selectAccount([bool fromAutomatedFlow = false]) async {
+    final accounts = AccountsProvider.of(context).activeAccounts;
 
-    setState(() {
-      if (result?.id == _selectedAccountTransferTo?.id) {
-        _selectedAccountTransferTo = null;
-      }
-      _selectedAccount = result ?? _selectedAccount;
-    });
+    if (!fromAutomatedFlow || _selectedAccount == null) {
+      final Account? result = accounts.length == 1
+          ? accounts.single
+          : await showModalBottomSheet<Account>(
+              context: context,
+              builder: (context) => SelectAccountSheet(
+                accounts: accounts,
+                currentlySelectedAccountId: _selectedAccount?.id,
+                titleOverride: isTransfer
+                    ? "transaction.transfer.from.select".t(context)
+                    : null,
+                showBalance: true,
+                showTrailing: widget.isNewTransaction,
+              ),
+              isScrollControlled: true,
+            );
 
-    if (widget.isNewTransaction && result != null) {
+      setState(() {
+        if (result?.id == _selectedAccountTransferTo?.id) {
+          _selectedAccountTransferTo = null;
+        }
+        _selectedAccount = result ?? _selectedAccount;
+      });
+    }
+
+    if (fromAutomatedFlow &&
+        widget.isNewTransaction &&
+        _selectedAccount != null) {
       if (isTransfer) {
-        selectAccountTransferTo();
+        selectAccountTransferTo(true);
       } else {
-        selectCategory();
+        selectCategory(true);
       }
     }
   }
 
-  void selectAccountTransferTo() async {
+  void selectAccountTransferTo([bool fromAutomatedFlow = false]) async {
+    final accounts = AccountsProvider.of(context).activeAccounts;
+
     final List<Account> toAccounts = accounts.where((element) {
       return element.id != _selectedAccount?.id;
     }).toList();
@@ -787,33 +843,43 @@ class _TransactionPageState extends State<TransactionPage> {
       }
     }
 
-    if (widget.isNewTransaction && result != null) inputAmount();
+    if (fromAutomatedFlow && widget.isNewTransaction && result != null) {
+      inputAmount(true);
+    }
   }
 
-  void selectCategory() async {
-    if (categories.isEmpty) {
-      inputAmount();
+  void selectCategory([bool fromAutomatedFlow = false]) async {
+    final categories = CategoriesProvider.of(context).categories;
+
+    if (fromAutomatedFlow && categories.isEmpty) {
+      inputAmount(true);
       return;
     }
 
-    final Optional<Category>? result =
-        await showModalBottomSheet<Optional<Category>>(
-          context: context,
-          builder: (context) => SelectCategorySheet(
-            categories: categories,
-            currentlySelectedCategoryId: _selectedCategory?.id,
-            showTrailing: widget.isNewTransaction,
-          ),
-          isScrollControlled: true,
-        );
+    if (!fromAutomatedFlow || _selectedCategory == null) {
+      final Optional<Category>? result =
+          await showModalBottomSheet<Optional<Category>>(
+            context: context,
+            builder: (context) => SelectCategorySheet(
+              categories: categories,
+              currentlySelectedCategoryId: _selectedCategory?.id,
+              showTrailing: widget.isNewTransaction,
+            ),
+            isScrollControlled: true,
+          );
 
-    if (result != null) {
-      setState(() {
-        _selectedCategory = result.value;
-      });
+      if (result != null) {
+        setState(() {
+          _selectedCategory = result.value;
+        });
+      }
     }
 
-    if (widget.isNewTransaction && result != null) inputAmount();
+    if (fromAutomatedFlow &&
+        widget.isNewTransaction &&
+        _selectedCategory != null) {
+      inputAmount(true);
+    }
   }
 
   void selectTransactionDate() async {
@@ -941,6 +1007,48 @@ class _TransactionPageState extends State<TransactionPage> {
     setState(() {});
   }
 
+  void selectTags([bool fromAutomatedFlow = false]) async {
+    final List<TransactionTag> allTags = TransactionTagsProvider.of(
+      context,
+    ).tags;
+
+    if (allTags.isEmpty) {
+      if (fromAutomatedFlow) {
+        inputAmount(true);
+        return;
+      }
+    }
+
+    final List<TransactionTag>? tags = await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => Builder(
+        builder: (context) {
+          final List<TransactionTag> allTags = TransactionTagsProvider.of(
+            context,
+          ).tags;
+
+          return SelectTransactionTagsSheet(
+            tags: allTags,
+            initialTagUuids: _selectedTags?.map((e) => e.uuid).toList(),
+          );
+        },
+      ),
+    );
+
+    if (tags != null) {
+      _selectedTags = tags;
+    }
+
+    if (!mounted) return;
+
+    setState(() {});
+
+    if (fromAutomatedFlow && tags != null) {
+      inputAmount(true);
+    }
+  }
+
   void _update({
     required String? formattedTitle,
     required String? formattedDescription,
@@ -995,6 +1103,7 @@ class _TransactionPageState extends State<TransactionPage> {
           isPending: _isPending,
           conversionRate: crossCurrencyTransfer ? _conversionRate : null,
           recurrence: _recurrence,
+          tags: _selectedTags,
         );
 
         _currentlyEditing.permanentlyDelete(true);
@@ -1010,6 +1119,8 @@ class _TransactionPageState extends State<TransactionPage> {
       _currentlyEditing.amount = _amount;
       _currentlyEditing.transactionDate = transactionDate;
       _currentlyEditing.isPending = _isPending;
+      _currentlyEditing.setTags(_selectedTags ?? []);
+      _currentlyEditing.setAttachments(_attachments);
 
       /// When user edits a balance amendment transaction, it is no longer a balance amendment.
       if (_currentlyEditing.subtype == TransactionSubtype.updateBalance.value) {
@@ -1033,6 +1144,7 @@ class _TransactionPageState extends State<TransactionPage> {
 
       _currentlyEditing.extensions = ExtensionsWrapper(newExtensions);
 
+      FileAttachmentService().upsertManySync(_attachments ?? []);
       TransactionsService().updateOneSync(_currentlyEditing);
     }
 
@@ -1151,6 +1263,8 @@ class _TransactionPageState extends State<TransactionPage> {
         isPending: _isPending,
         conversionRate: crossCurrencyTransfer ? _conversionRate : null,
         recurrence: _recurrence,
+        tags: _selectedTags,
+        attachments: _attachments,
       );
     } else {
       _selectedAccount!.createAndSaveTransaction(
@@ -1162,6 +1276,8 @@ class _TransactionPageState extends State<TransactionPage> {
         extensions: extensions,
         isPending: _isPending,
         recurrence: _recurrence,
+        tags: _selectedTags,
+        attachments: _attachments,
       );
     }
 
@@ -1179,11 +1295,11 @@ class _TransactionPageState extends State<TransactionPage> {
         return true;
       }
 
-      final bool ammountChanged = isTransfer
+      final bool amountChanged = isTransfer
           ? _currentlyEditing.amount.abs() != _amount
           : _currentlyEditing.amount != _amount;
 
-      return ammountChanged ||
+      return amountChanged ||
           _geoHandpicked ||
           (_currentlyEditing.title ?? "") != _titleController.text ||
           (_currentlyEditing.description ?? "") !=
@@ -1192,6 +1308,14 @@ class _TransactionPageState extends State<TransactionPage> {
           _currentlyEditing.type != _transactionType ||
           _currentlyEditing.accountUuid != _selectedAccount?.uuid ||
           _currentlyEditing.categoryUuid != _selectedCategory?.uuid ||
+          !setEquals(
+            _selectedTags?.map((tag) => tag.uuid).toSet(),
+            _currentlyEditing.tags.map((tag) => tag.uuid).toSet(),
+          ) ||
+          !setEquals(
+            _attachments?.map((attachment) => attachment.uuid).toSet(),
+            _currentlyEditing.attachments.map((file) => file.uuid).toSet(),
+          ) ||
           _currentlyEditing.transactionDate != _transactionDate;
     }
 
@@ -1202,6 +1326,8 @@ class _TransactionPageState extends State<TransactionPage> {
         _selectedAccount != null ||
         _selectedAccountTransferTo != null ||
         _isPending ||
+        (_selectedTags ?? []).isNotEmpty ||
+        (_attachments ?? []).isNotEmpty ||
         _selectedCategory != null;
   }
 
@@ -1265,6 +1391,7 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void pop() {
+    FileAttachmentService().performCleanupCheck();
     context.pop();
   }
 
@@ -1296,5 +1423,41 @@ class _TransactionPageState extends State<TransactionPage> {
     }
 
     return null;
+  }
+
+  void removeFile(FileAttachment attachment) {
+    _attachments = _attachments
+        ?.where((a) => a.uuid != attachment.uuid)
+        .toList();
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void addFiles(List<XFile> files) async {
+    for (XFile file in files) {
+      try {
+        final FileAttachment? attachment = await FileAttachmentService()
+            .createFromXFile(file);
+
+        if (attachment != null) {
+          _attachments ??= [];
+          _attachments!.add(attachment);
+        } else {
+          if (mounted) {
+            context.showErrorToast(error: "error.sync.fileNotFound".t(context));
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          context.showErrorToast(error: "error.sync.fileNotFound".t(context));
+        }
+        _log.warning("Failed to add file attachment", e);
+      }
+    }
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 }

@@ -34,7 +34,16 @@ Transaction _$TransactionFromJson(Map<String, dynamic> json) =>
         json['deletedDate'],
         const UTCDateTimeConverter().fromJson,
       )
+      ..location = (json['location'] as List<dynamic>?)
+          ?.map((e) => (e as num).toDouble())
+          .toList()
       ..extra = json['extra'] as String?
+      ..tagsUuids = (json['tagsUuids'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList()
+      ..attachmentsUuids = (json['attachmentsUuids'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList()
       ..categoryUuid = json['categoryUuid'] as String?
       ..accountUuid = json['accountUuid'] as String?;
 
@@ -52,12 +61,15 @@ Map<String, dynamic> _$TransactionToJson(Transaction instance) =>
       ),
       'title': instance.title,
       'description': instance.description,
+      'location': instance.location,
       'amount': instance.amount,
       'isPending': instance.isPending,
       'currency': instance.currency,
       'subtype': instance.subtype,
       'extra': instance.extra,
       'extraTags': instance.extraTags,
+      'tagsUuids': instance.tagsUuids,
+      'attachmentsUuids': instance.attachmentsUuids,
       'categoryUuid': instance.categoryUuid,
       'accountUuid': instance.accountUuid,
     };

@@ -6,31 +6,40 @@ part of 'user_preferences.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-UserPreferences _$UserPreferencesFromJson(
-  Map<String, dynamic> json,
-) => UserPreferences(
-  combineTransfers: json['combineTransfers'] as bool? ?? true,
-  excludeTransfersFromFlow: json['excludeTransfersFromFlow'] as bool? ?? true,
-  useCategoryNameForUntitledTransactions:
-      json['useCategoryNameForUntitledTransactions'] as bool? ?? false,
-  transactionListTileShowCategoryName:
-      json['transactionListTileShowCategoryName'] as bool? ?? false,
-  transactionListTileShowAccountForLeading:
-      json['transactionListTileShowAccountForLeading'] as bool? ?? false,
-  trashBinRetentionDays: (json['trashBinRetentionDays'] as num?)?.toInt() ?? 30,
-  defaultFilterPreset: json['defaultFilterPreset'] as String?,
-  enableICloudSync: json['enableICloudSync'] as bool? ?? false,
-  iCloudBackupsToKeep: (json['iCloudBackupsToKeep'] as num?)?.toInt() ?? 10,
-  autoBackupIntervalInHours:
-      (json['autoBackupIntervalInHours'] as num?)?.toInt() ?? 72,
-  icuCurrencyFormattingPattern: json['icuCurrencyFormattingPattern'] as String?,
-  primaryCurrency: json['primaryCurrency'] as String?,
-  transactionButtonOrderJoined: json['transactionButtonOrderJoined'] as String?,
-  remindDailyAtRelativeSeconds: (json['remindDailyAtRelativeSeconds'] as num?)
-      ?.toInt(),
-  themeName: json['themeName'] as String?,
-  themeChangesAppIcon: json['themeChangesAppIcon'] as bool? ?? true,
-)..uuid = json['uuid'] as String;
+UserPreferences _$UserPreferencesFromJson(Map<String, dynamic> json) =>
+    UserPreferences(
+        combineTransfers: json['combineTransfers'] as bool? ?? true,
+        excludeTransfersFromFlow:
+            json['excludeTransfersFromFlow'] as bool? ?? true,
+        useCategoryNameForUntitledTransactions:
+            json['useCategoryNameForUntitledTransactions'] as bool? ?? false,
+        transactionListTileShowCategoryName:
+            json['transactionListTileShowCategoryName'] as bool? ?? false,
+        transactionListTileShowAccountForLeading:
+            json['transactionListTileShowAccountForLeading'] as bool? ?? false,
+        transactionListTileRelaxedDensity:
+            json['transactionListTileRelaxedDensity'] as bool? ?? false,
+        trashBinRetentionDays:
+            (json['trashBinRetentionDays'] as num?)?.toInt() ?? 30,
+        defaultFilterPreset: json['defaultFilterPreset'] as String?,
+        enableICloudSync: json['enableICloudSync'] as bool? ?? false,
+        iCloudBackupsToKeep:
+            (json['iCloudBackupsToKeep'] as num?)?.toInt() ?? 10,
+        autoBackupIntervalInHours:
+            (json['autoBackupIntervalInHours'] as num?)?.toInt() ?? 72,
+        icuCurrencyFormattingPattern:
+            json['icuCurrencyFormattingPattern'] as String?,
+        primaryCurrency: json['primaryCurrency'] as String?,
+        transactionButtonOrderJoined:
+            json['transactionButtonOrderJoined'] as String?,
+        remindDailyAtRelativeSeconds:
+            (json['remindDailyAtRelativeSeconds'] as num?)?.toInt(),
+        themeName: json['themeName'] as String?,
+        transactionEntryFlowJson: json['transactionEntryFlowJson'] as String?,
+        themeChangesAppIcon: json['themeChangesAppIcon'] as bool? ?? true,
+      )
+      ..uuid = json['uuid'] as String
+      ..changeVisuals = json['changeVisuals'] as String?;
 
 Map<String, dynamic> _$UserPreferencesToJson(UserPreferences instance) =>
     <String, dynamic>{
@@ -46,6 +55,8 @@ Map<String, dynamic> _$UserPreferencesToJson(UserPreferences instance) =>
           instance.transactionListTileShowCategoryName,
       'transactionListTileShowAccountForLeading':
           instance.transactionListTileShowAccountForLeading,
+      'transactionListTileRelaxedDensity':
+          instance.transactionListTileRelaxedDensity,
       'icuCurrencyFormattingPattern': instance.icuCurrencyFormattingPattern,
       'primaryCurrency': instance.primaryCurrency,
       'autoBackupIntervalInHours': instance.autoBackupIntervalInHours,
@@ -54,4 +65,6 @@ Map<String, dynamic> _$UserPreferencesToJson(UserPreferences instance) =>
       'transactionButtonOrderJoined': instance.transactionButtonOrderJoined,
       'themeName': instance.themeName,
       'themeChangesAppIcon': instance.themeChangesAppIcon,
+      'changeVisuals': instance.changeVisuals,
+      'transactionEntryFlowJson': instance.transactionEntryFlowJson,
     };

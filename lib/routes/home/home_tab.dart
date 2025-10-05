@@ -166,14 +166,20 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           primary: true,
           slivers: [
             PinnedHeaderSliver(
-              child: Column(
-                children: [
-                  const Frame.standalone(
-                    withSurface: true,
-                    child: GreetingsBar(),
+              child: Container(
+                color: context.colorScheme.surface,
+                child: SafeArea(
+                  bottom: false,
+                  child: Column(
+                    children: [
+                      const Frame.standalone(
+                        withSurface: true,
+                        child: GreetingsBar(),
+                      ),
+                      header,
+                    ],
                   ),
-                  header,
-                ],
+                ),
               ),
             ),
 
@@ -186,7 +192,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                 child: Center(child: CircularProgressIndicator()),
               ),
             },
-            SliverToBoxAdapter(child: const SizedBox(height: 96.0)),
+            SliverToBoxAdapter(
+              child: SafeArea(child: const SizedBox(height: 96.0)),
+            ),
           ],
         );
       },

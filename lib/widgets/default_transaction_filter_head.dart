@@ -4,22 +4,27 @@ import "package:flow/entity/account.dart";
 import "package:flow/entity/category.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction_filter_preset.dart";
+import "package:flow/entity/transaction_tag.dart";
 import "package:flow/l10n/named_enum.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/providers/accounts_provider.dart";
-import "package:flow/providers/categories.dart";
+import "package:flow/providers/categories_provider.dart";
+import "package:flow/providers/transaction_tags_provider.dart";
 import "package:flow/services/currency_registry.dart";
 import "package:flow/utils/extensions.dart";
 import "package:flow/utils/optional.dart";
 import "package:flow/widgets/sheets/select_multi_currency_sheet.dart";
 import "package:flow/widgets/sheets/select_multi_transaction_type_sheet.dart";
+import "package:flow/widgets/sheets/select_transaction_tags_sheet.dart";
 import "package:flow/widgets/transaction_filter_head.dart";
 import "package:flow/widgets/transaction_filter_head/create_filter_preset_sheet.dart";
 import "package:flow/widgets/transaction_filter_head/select_filter_preset_sheet.dart";
 import "package:flow/widgets/transaction_filter_head/select_group_range_sheet.dart";
+import "package:flow/widgets/transaction_filter_head/select_has_attachment_sheet.dart";
+import "package:flow/widgets/transaction_filter_head/select_is_pending_sheet.dart";
 import "package:flow/widgets/transaction_filter_head/select_multi_account_sheet.dart";
 import "package:flow/widgets/transaction_filter_head/select_multi_category_sheet.dart";
 import "package:flow/widgets/transaction_filter_head/select_transaction_filter_time_range_sheet.dart";
@@ -112,12 +117,19 @@ class _DefaultTransactionsFilterHeadState
               CategoriesProvider.of(context).ready
               ? CategoriesProvider.of(context).categories
               : null;
+          final List<TransactionTag>? tags =
+              TransactionTagsProvider.of(context).ready
+              ? TransactionTagsProvider.of(context).tags
+              : null;
 
           if (activeAccounts != null &&
               categories != null &&
               !_filter.validate(
                 accounts: activeAccounts.map((account) => account.uuid).toSet(),
                 categories: categories.map((category) => category.uuid).toSet(),
+                tags: (tags ?? <TransactionTag>[])
+                    .map((tag) => tag.uuid)
+                    .toSet(),
               )) {
             SchedulerBinding.instance.addPostFrameCallback((_) {
               filter = widget.defaultFilter;
@@ -203,7 +215,41 @@ class _DefaultTransactionsFilterHeadState
                             .toSet()
                       : null,
                 ),
-
+              if (tags != null && tags.isNotEmpty == true)
+                TransactionFilterChip<Set<TransactionTag>>(
+                  translationKey: "transactions.query.filter.tags",
+                  avatar: const Icon(Symbols.style_rounded),
+                  onSelect: onSelectTags,
+                  defaultValue: widget.defaultFilter.tags
+                      ?.map(
+                        (uuid) => tags.firstWhere((tag) => tag.uuid == uuid),
+                      )
+                      .toSet(),
+                  value: _filter.tags?.isNotEmpty == true
+                      ? _filter.tags
+                            ?.map(
+                              (uuid) => tags.firstWhereOrNull(
+                                (tag) => tag.uuid == uuid,
+                              ),
+                            )
+                            .nonNulls
+                            .toSet()
+                      : null,
+                ),
+              TransactionFilterChip<bool?>(
+                translationKey: "transactions.query.filter.hasAttachments",
+                avatar: const Icon(Symbols.attach_file_rounded),
+                onSelect: onSelectHasAttachments,
+                defaultValue: null,
+                value: _filter.hasAttachments,
+              ),
+              TransactionFilterChip<bool?>(
+                translationKey: "transactions.query.filter.isPending",
+                avatar: const Icon(Symbols.search_activity_rounded),
+                onSelect: onSelectIsPending,
+                defaultValue: null,
+                value: _filter.isPending,
+              ),
               TransactionFilterChip<List<TransactionType>>(
                 translationKey: "transactions.query.filter.transactionType",
                 avatar: const Icon(Symbols.swap_horiz_rounded),
@@ -294,6 +340,30 @@ class _DefaultTransactionsFilterHeadState
     }
   }
 
+  void onSelectTags() async {
+    final List<TransactionTag> allTags = TransactionTagsProvider.of(
+      context,
+    ).tags;
+
+    final List<TransactionTag>? tags =
+        await showModalBottomSheet<List<TransactionTag>>(
+          context: context,
+          builder: (context) => SelectTransactionTagsSheet(
+            tags: allTags,
+            initialTagUuids: filter.tags,
+          ),
+          isScrollControlled: true,
+        );
+
+    if (tags != null) {
+      setState(() {
+        filter = filter.copyWithOptional(
+          tags: Optional(tags.map((tag) => tag.uuid).toList()),
+        );
+      });
+    }
+  }
+
   void onSelectType() async {
     final List<TransactionType>? types =
         await showModalBottomSheet<List<TransactionType>>(
@@ -366,6 +436,32 @@ class _DefaultTransactionsFilterHeadState
       filter = filter.copyWithOptional(
         range: Optional(newTransactionFilterTimeRange),
       );
+    });
+  }
+
+  void onSelectHasAttachments() async {
+    final Optional<bool>? hasAttachments = await showModalBottomSheet(
+      context: context,
+      builder: (context) => SelectHasAttachmentSheet(),
+    );
+
+    if (hasAttachments == null || !mounted) return;
+
+    setState(() {
+      filter = filter.copyWithOptional(hasAttachments: hasAttachments);
+    });
+  }
+
+  void onSelectIsPending() async {
+    final Optional<bool>? isPending = await showModalBottomSheet(
+      context: context,
+      builder: (context) => SelectIsPendingSheet(),
+    );
+
+    if (isPending == null || !mounted) return;
+
+    setState(() {
+      filter = filter.copyWithOptional(isPending: isPending);
     });
   }
 

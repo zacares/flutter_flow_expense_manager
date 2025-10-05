@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:io";
 import "dart:math" as math;
 
@@ -11,15 +12,19 @@ import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/backup_entry.dart";
 import "package:flow/entity/category.dart";
+import "package:flow/entity/file_attachment.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction/extensions/base.dart";
+import "package:flow/entity/transaction/extensions/default/geo.dart";
 import "package:flow/entity/transaction/extensions/default/recurring.dart";
 import "package:flow/entity/transaction/extensions/default/transfer.dart";
+import "package:flow/entity/transaction_tag.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/services/exchange_rates.dart";
+import "package:flow/services/file_attachment.dart";
 import "package:flow/services/recurring_transactions.dart";
 import "package:flow/services/transactions.dart";
 import "package:flow/services/user_preferences.dart";
@@ -152,6 +157,30 @@ extension MainActions on ObjectBox {
     }
 
     return categories;
+  }
+
+  List<TransactionTag> getTransactionTags([bool sortByFrecency = true]) {
+    final List<TransactionTag> transactionTags = box<TransactionTag>().getAll();
+
+    if (sortByFrecency) {
+      final FrecencyGroup frecencyGroup = FrecencyGroup(
+        transactionTags
+            .map(
+              (tag) =>
+                  TransitiveLocalPreferences().getFrecencyData("tag", tag.uuid),
+            )
+            .nonNulls
+            .toList(),
+      );
+
+      transactionTags.sort(
+        (a, b) => frecencyGroup
+            .getScore(b.uuid)
+            .compareTo(frecencyGroup.getScore(a.uuid)),
+      );
+    }
+
+    return transactionTags;
   }
 
   Future<void> updateAccountOrderList({
@@ -569,7 +598,11 @@ extension TransactionActions on Transaction {
             createdDate: Moment.now(),
             isPending: isPending,
             uuid: Uuid().v4(),
+            extraTags: extraTags,
+            subtype: subtype,
           )
+          ..setTags(tags.toList())
+          ..setAttachments(attachments.toList())
           ..setCategory(category.target)
           ..setAccount(account.target);
 
@@ -776,6 +809,8 @@ extension AccountActions on Account {
     double? latitude,
     double? longitude,
     List<TransactionExtension>? extensions,
+    List<TransactionTag>? tags,
+    List<FileAttachment>? attachments,
     bool? isPending,
     double? conversionRate = 1.0,
     Recurrence? recurrence,
@@ -800,6 +835,8 @@ extension AccountActions on Account {
         conversionRate: 1.0 / (conversionRate ?? 1.0),
         recurrence: recurrence,
         extraTags: extraTags,
+        tags: tags,
+        attachments: attachments,
       );
     }
 
@@ -854,6 +891,8 @@ extension AccountActions on Account {
       transactionDate: transactionDate,
       isPending: isPending,
       extraTags: extraTags,
+      tags: tags,
+      attachments: attachments,
     );
     final int toTransaction = targetAccount.createAndSaveTransaction(
       amount: amount * (conversionRate ?? 1.0),
@@ -872,6 +911,8 @@ extension AccountActions on Account {
       transactionDate: transactionDate,
       isPending: isPending,
       extraTags: extraTags,
+      tags: tags,
+      attachments: attachments,
     );
 
     if (recurringTransactionUuid != null) {
@@ -895,13 +936,25 @@ extension AccountActions on Account {
     String? description,
     Category? category,
     List<TransactionExtension>? extensions,
+    List<TransactionTag>? tags,
+    List<FileAttachment>? attachments,
     String? uuidOverride,
     bool? isPending,
     TransactionSubtype? subtype,
     Recurrence? recurrence,
     List<String>? extraTags,
+    List<double>? location,
   }) {
+    FileAttachmentService().upsertManySync(attachments ?? []);
+
     final String uuid = uuidOverride ?? const Uuid().v4();
+
+    if (location == null) {
+      final Geo? geo =
+          extensions?.firstWhereOrNull((ext) => ext is Geo) as Geo?;
+
+      location ??= geo?.toLatLng();
+    }
 
     final String? recurringTransactionUuid = recurrence == null
         ? null
@@ -935,8 +988,10 @@ extension AccountActions on Account {
             subtype: subtype?.value,
             extraTags: extraTags ?? [],
           )
+          ..setTags(tags ?? [])
           ..setCategory(category)
-          ..setAccount(this);
+          ..setAccount(this)
+          ..setAttachments(attachments ?? []);
 
     final List<TransactionExtension>? applicableExtensions = extensions
         ?.map((ext) {
@@ -978,12 +1033,47 @@ extension AccountActions on Account {
     }
 
     try {
-      TransitiveLocalPreferences().updateFrecencyData("account", uuid);
+      unawaited(
+        TransitiveLocalPreferences()
+            .updateFrecencyData("account", uuid)
+            .then((_) {})
+            .catchError((e, stackTrace) {
+              _log.warning(
+                "Failed to update frecency data for account ($uuid)",
+                e,
+                stackTrace,
+              );
+            }),
+      );
       if (category != null) {
-        TransitiveLocalPreferences().updateFrecencyData(
-          "category",
-          category.uuid,
+        unawaited(
+          TransitiveLocalPreferences()
+              .updateFrecencyData("category", category.uuid)
+              .then((_) {})
+              .catchError((e, stackTrace) {
+                _log.warning(
+                  "Failed to update frecency data for category (${category.uuid})",
+                  e,
+                  stackTrace,
+                );
+              }),
         );
+      }
+      if (tags?.isNotEmpty == true) {
+        for (final tag in tags!) {
+          unawaited(
+            TransitiveLocalPreferences()
+                .updateFrecencyData("tag", tag.uuid)
+                .then((_) {})
+                .catchError((e, stackTrace) {
+                  _log.warning(
+                    "Failed to update frecency data for tag (${tag.uuid})",
+                    e,
+                    stackTrace,
+                  );
+                }),
+          );
+        }
       }
     } catch (e, stackTrace) {
       _log.warning(
