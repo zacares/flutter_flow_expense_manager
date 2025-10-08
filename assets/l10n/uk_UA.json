@@ -210,6 +210,7 @@
   "flowIcon.type.icon.symbols": "Символи",
   "flowIcon.type.image": "Зображення",
   "flowIcon.type.image.description": "Виберіть зображення для використання як значок",
+  "flowIcon.type.image.paste": "Вставити зображення",
   "flowIcon.type.image.pick": "Вибрати зображення",
   "general.areYouSure": "Ви впевнені?",
   "general.back": "Назад",

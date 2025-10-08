@@ -210,6 +210,7 @@
   "flowIcon.type.icon.symbols": "Icone",
   "flowIcon.type.image": "Immagine",
   "flowIcon.type.image.description": "Scegli un'immagine da usare come icona",
+  "flowIcon.type.image.paste": "Incolla un'immagine",
   "flowIcon.type.image.pick": "Scegli un'immagine",
   "general.areYouSure": "Sei sicuro?",
   "general.back": "Torna indietro",
