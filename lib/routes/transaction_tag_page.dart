@@ -427,9 +427,12 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
       iconCode: iconCodeOrError,
     );
 
-    ObjectBox().box<TransactionTag>().put(tag, mode: PutMode.insert);
+    final int insertedId = ObjectBox().box<TransactionTag>().put(
+      tag,
+      mode: PutMode.insert,
+    );
 
-    context.pop();
+    context.pop(ObjectBox().box<TransactionTag>().get(insertedId));
   }
 
   Future<void> _deleteTag() async {

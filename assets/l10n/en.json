@@ -211,6 +211,7 @@
   "flowIcon.type.image": "Image",
   "flowIcon.type.image.description": "Pick an image to use as an icon",
   "flowIcon.type.image.pick": "Pick an image",
+  "flowIcon.type.image.paste": "Paste an image",
   "general.areYouSure": "Are you sure?",
   "general.back": "Go back",
   "general.cancel": "Cancel",

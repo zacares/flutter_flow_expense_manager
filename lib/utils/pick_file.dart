@@ -88,11 +88,9 @@ Future<ui.Image?> pickAndCropSquareImage(
   }
   if (!context.mounted) return null;
 
-  final image = Image.file(File(xfile.path));
-
   final cropped = await context.push<ui.Image>(
     "/utils/cropsquare",
-    extra: CropSquareImagePageProps(image: image),
+    extra: CropSquareImagePageProps(file: File(xfile.path)),
   );
 
   if (cropped == null) {

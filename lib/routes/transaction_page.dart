@@ -1019,6 +1019,8 @@ class _TransactionPageState extends State<TransactionPage> {
       }
     }
 
+    List<TransactionTag>? streamedTags;
+
     final List<TransactionTag>? tags = await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1031,6 +1033,9 @@ class _TransactionPageState extends State<TransactionPage> {
           return SelectTransactionTagsSheet(
             tags: allTags,
             initialTagUuids: _selectedTags?.map((e) => e.uuid).toList(),
+            onChanged: (selected) {
+              streamedTags = selected;
+            },
           );
         },
       ),
@@ -1038,6 +1043,8 @@ class _TransactionPageState extends State<TransactionPage> {
 
     if (tags != null) {
       _selectedTags = tags;
+    } else if (streamedTags != null) {
+      _selectedTags = streamedTags;
     }
 
     if (!mounted) return;
