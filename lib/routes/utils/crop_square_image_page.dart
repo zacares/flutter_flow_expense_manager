@@ -1,3 +1,6 @@
+import "dart:io";
+import "dart:typed_data";
+
 import "package:crop_image/crop_image.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/widgets/general/frame.dart";
@@ -7,49 +10,44 @@ import "package:go_router/go_router.dart";
 import "package:material_symbols_icons/symbols.dart";
 
 class CropSquareImagePageProps {
-  final Image image;
+  final File? file;
+  final Uint8List? bytes;
   final double? maxDimension;
 
-  /// If [false], returns [Image] object
-  final bool returnBitmap;
-
-  CropSquareImagePageProps({
-    required this.image,
-    this.maxDimension,
-    this.returnBitmap = true,
-  });
+  CropSquareImagePageProps({this.bytes, this.file, this.maxDimension});
 }
 
+/// Pops with a [ui.Image] object
 class CropSquareImagePage extends StatefulWidget {
-  final Image image;
+  final File? file;
+  final Uint8List? bytes;
 
   final double? maxDimension;
-  final bool returnBitmap;
 
   const CropSquareImagePage({
     super.key,
-    required this.image,
+    this.file,
+    this.bytes,
     this.maxDimension,
-    this.returnBitmap = true,
   });
+  factory CropSquareImagePage.fromProps({
+    Key? key,
+    required CropSquareImagePageProps props,
+  }) => CropSquareImagePage(
+    key: key,
+    file: props.file,
+    bytes: props.bytes,
+    maxDimension: props.maxDimension,
+  );
 
   @override
   State<CropSquareImagePage> createState() => _CropSquareImagePageState();
 }
 
 class _CropSquareImagePageState extends State<CropSquareImagePage> {
-  late final Image _image;
-
   final CropController _controller = CropController(aspectRatio: 1.0);
 
   bool busy = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _image = widget.image;
-  }
 
   @override
   void dispose() {
@@ -62,7 +60,12 @@ class _CropSquareImagePageState extends State<CropSquareImagePage> {
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(
-        child: CropImage(controller: _controller, image: _image),
+        child: CropImage(
+          controller: _controller,
+          image: widget.file != null
+              ? Image.file(widget.file!)
+              : Image.memory(widget.bytes!),
+        ),
       ),
       bottomNavigationBar: SafeArea(
         child: Frame(
@@ -98,12 +101,10 @@ class _CropSquareImagePageState extends State<CropSquareImagePage> {
       busy = true;
     });
 
-    final image = widget.returnBitmap
-        ? await _controller.croppedBitmap(
-            quality: FilterQuality.high,
-            maxSize: widget.maxDimension,
-          )
-        : await _controller.croppedImage(quality: FilterQuality.high);
+    final image = await _controller.croppedBitmap(
+      quality: FilterQuality.high,
+      maxSize: widget.maxDimension,
+    );
 
     if (!mounted) return;
 
