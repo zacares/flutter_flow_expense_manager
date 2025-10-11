@@ -16,6 +16,7 @@
 ### Fixes
 
 * Small QoL fixes regarding modal bottom sheets
+* Fixed translation for attachment/pending filters
 
 ## 0.16.1
 

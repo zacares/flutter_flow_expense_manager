@@ -63,7 +63,9 @@ class _SelectIsPendingSheetState extends State<SelectIsPendingSheet> {
               .map(
                 (value) => ChoiceChip(
                   label: Text(
-                    "transactions.query.filter.isPending${suffix(value)}",
+                    "transactions.query.filter.isPending${suffix(value)}".t(
+                      context,
+                    ),
                   ),
                   selected: _selected == value,
                   onSelected: (selected) {

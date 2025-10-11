@@ -63,7 +63,8 @@ class _SelectHasAttachmentSheetState extends State<SelectHasAttachmentSheet> {
               .map(
                 (value) => ChoiceChip(
                   label: Text(
-                    "transactions.query.filter.hasAttachments${suffix(value)}",
+                    "transactions.query.filter.hasAttachments${suffix(value)}"
+                        .t(context),
                   ),
                   selected: _selected == value,
                   onSelected: (selected) {
