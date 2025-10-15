@@ -21,7 +21,7 @@
 
 ## 0.16.1
 
-* [REDACTED]
+* Exactly same as 0.16.0
 
 ## 0.16.0
 
