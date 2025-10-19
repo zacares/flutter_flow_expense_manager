@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.16.3
+
+### New features
+
+* We have a better editor for the notes/description now, yayy. Closes [#323](https://github.com/flow-mn/flow/issues/323)
+
+### Fixes
+
+* Fixed opening external links on Android, closes [#600](https://github.com/flow-mn/flow/issues/600)
+
 ## 0.16.2
 
 ### New features
@@ -21,7 +31,7 @@
 
 ## 0.16.1
 
-* [REDACTED]
+* Exactly same as 0.16.0
 
 ## 0.16.0
 

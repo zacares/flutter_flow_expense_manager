@@ -88,7 +88,7 @@ class _TransactionPageState extends State<TransactionPage> {
   bool get isTransfer => _transactionType == TransactionType.transfer;
 
   late final TextEditingController _titleController;
-  late final TextEditingController _descriptionController;
+  String? _descriptionMarkdown;
   late double _amount;
 
   double _conversionRate = 1.0;
@@ -128,8 +128,9 @@ class _TransactionPageState extends State<TransactionPage> {
 
   DateTime? _initialTransactionDate;
 
-  bool get pastDuePending =>
-      !widget.isNewTransaction && _isPending && transactionDate.isPast;
+  bool get pastDuePending => widget.isNewTransaction
+      ? false
+      : (_isPending && transactionDate.isPastAnchored());
 
   late final bool enableGeo;
 
@@ -155,9 +156,7 @@ class _TransactionPageState extends State<TransactionPage> {
       _titleController = TextEditingController(
         text: widget.params?.title ?? "",
       );
-      _descriptionController = TextEditingController(
-        text: widget.params?.notes ?? "",
-      );
+      _descriptionMarkdown = widget.params?.notes;
       _selectedAccount = widget.params?.fromAccountUuid == null
           ? null
           : accounts.firstWhereOrNull(
@@ -199,9 +198,7 @@ class _TransactionPageState extends State<TransactionPage> {
         _titleController = TextEditingController(
           text: _currentlyEditing.title ?? "",
         );
-        _descriptionController = TextEditingController(
-          text: _currentlyEditing.description ?? "",
-        );
+        _descriptionMarkdown = _currentlyEditing.description;
         _selectedAccount = _currentlyEditing.account.target;
         _selectedCategory = _currentlyEditing.category.target;
         _selectedTags = _currentlyEditing.tags;
@@ -254,7 +251,6 @@ class _TransactionPageState extends State<TransactionPage> {
     _selectAccountTransferToFocusNode.dispose();
 
     _titleController.dispose();
-    _descriptionController.dispose();
 
     super.dispose();
   }
@@ -444,9 +440,13 @@ class _TransactionPageState extends State<TransactionPage> {
                         selectedTags: _selectedTags,
                       ),
                       DescriptionSection(
-                        controller: _descriptionController,
+                        value: _descriptionMarkdown,
                         focusNode: _descriptionFocusNode,
-                        onChanged: (_) => setState(() => {}),
+                        onChanged: (value) {
+                          setState(() {
+                            _descriptionMarkdown = value;
+                          });
+                        },
                       ),
                       FilesSection(
                         onAdd: addFiles,
@@ -1245,7 +1245,7 @@ class _TransactionPageState extends State<TransactionPage> {
         ? trimmedTitle
         : null;
 
-    final String trimmedDescription = _descriptionController.text.trim();
+    final String trimmedDescription = _descriptionMarkdown?.trim() ?? "";
     final String? formattedDescription = trimmedDescription.isNotEmpty
         ? trimmedDescription
         : null;
@@ -1310,7 +1310,7 @@ class _TransactionPageState extends State<TransactionPage> {
           _geoHandpicked ||
           (_currentlyEditing.title ?? "") != _titleController.text ||
           (_currentlyEditing.description ?? "") !=
-              _descriptionController.text ||
+              (_descriptionMarkdown ?? "") ||
           (_currentlyEditing.isPending ?? false) != _isPending ||
           _currentlyEditing.type != _transactionType ||
           _currentlyEditing.accountUuid != _selectedAccount?.uuid ||
@@ -1329,7 +1329,7 @@ class _TransactionPageState extends State<TransactionPage> {
     return _amount != 0 ||
         _geoHandpicked ||
         _titleController.text.isNotEmpty ||
-        _descriptionController.text.isNotEmpty ||
+        _descriptionMarkdown?.isNotEmpty == true ||
         _selectedAccount != null ||
         _selectedAccountTransferTo != null ||
         _isPending ||
