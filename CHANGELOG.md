@@ -5,6 +5,7 @@
 ### New features
 
 * We have a better editor for the notes/description now, yayy. Closes [#323](https://github.com/flow-mn/flow/issues/323)
+* Added Czech language support thanks to **Miloš Koliáš** through email.
 
 ### Fixes
 
