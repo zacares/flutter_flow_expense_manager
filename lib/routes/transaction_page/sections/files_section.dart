@@ -46,6 +46,8 @@ class _FilesSectionState extends State<FilesSection> {
 
   @override
   Widget build(BuildContext context) {
+    final bool hasAttachments = widget.attachments?.isNotEmpty ?? false;
+
     return Section(
       title: "transaction.attachments".t(context),
       child: Column(
@@ -59,17 +61,19 @@ class _FilesSectionState extends State<FilesSection> {
               onShare: () => share(file),
             ),
           ),
-          const SizedBox(height: 12.0),
-          Frame(
-            child: InfoText(
-              child: Text(
-                "transaction.attachments.warning".t(
-                  context,
-                  totalSizeInBytes?.humanReadableBinarySize ?? "?",
+          if (hasAttachments) ...[
+            const SizedBox(height: 12.0),
+            Frame(
+              child: InfoText(
+                child: Text(
+                  "transaction.attachments.warning".t(
+                    context,
+                    totalSizeInBytes?.humanReadableBinarySize ?? "?",
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
