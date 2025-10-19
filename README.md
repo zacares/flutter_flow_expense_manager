@@ -7,16 +7,9 @@
 
 ## Preface
 
-![Flow logo](logo@16.png) Flow is a
-
-* Free
-* Open-Source
-* Simple
-* UX-Focused
-* Fully-offline[^1]
-* Cross-platform[^2]
-
-personal expense tracking app.
+![Flow logo](logo@16.png) Flow is a free, open-source, and beautifully simple
+expense tracker — built with a focus on great UX, works fully offline, and runs
+seamlessly across platforms.
 
 ## Download Flow (beta)
 
@@ -30,9 +23,9 @@ personal expense tracking app.
 ## Features
 
 * Simple UX helping you efficiently track your finances
-* Infinite accounts and currencies
-* Categories, tags, file attachments
-* Numbers to reflect on your spendings
+* Infinite accounts and currencies (including various cryptos)
+* Categories, tags, file attachments, geo tagging (optional)
+* Reflect on your spendings
 * Fully-offline[^1]
 * Full control over your data
   * No trackers, no analytics
@@ -103,12 +96,13 @@ Thank you to all the contributors, supporters, testers, and those who contribute
 * Spanish (Spain)
 * Turkish (Turkiye) - thanks to [NoRiskNoViski](https://github.com/NoRiskNoViski)
 * Ukranian (Ukrain)
+* Czech (Czechia) - thanks to **Miloš Koliáš** through email
 
 > See [Translation guide](./CONTRIBUTING.md#translating) if you want to make
 > Flow available to your language
 
 <!-- markdownlint-disable-next-line -->
-<a href="https://www.producthunt.com/posts/flow-2cbe921f-2ed9-4ed1-b8d7-26dff1c2c49d?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-flow&#0045;2cbe921f&#0045;2ed9&#0045;4ed1&#0045;b8d7&#0045;26dff1c2c49d" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=955354&theme=light&period=daily&t=1745222977391" alt="Flow - A&#0032;FOSS&#0032;expense&#0032;tracker&#0032;that&#0032;focuses&#0032;on&#0032;privacy&#0032;and&#0032;UX | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+<!-- <a href="https://www.producthunt.com/posts/flow-2cbe921f-2ed9-4ed1-b8d7-26dff1c2c49d?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-flow&#0045;2cbe921f&#0045;2ed9&#0045;4ed1&#0045;b8d7&#0045;26dff1c2c49d" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=955354&theme=light&period=daily&t=1745222977391" alt="Flow - A&#0032;FOSS&#0032;expense&#0032;tracker&#0032;that&#0032;focuses&#0032;on&#0032;privacy&#0032;and&#0032;UX | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a> -->
 
 [^1]: Flow requires internet to download currency exchage rates. Only necessary
 if you use more than one currencies
