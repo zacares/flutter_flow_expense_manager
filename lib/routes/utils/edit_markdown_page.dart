@@ -110,6 +110,9 @@ class _EditMarkdownPageState extends State<EditMarkdownPage> {
                     controller: _controller,
                     config: QuillEditorConfig(
                       customStyles: context.quillDefaultStyles,
+                      placeholder: "transaction.description.placeholder".t(
+                        context,
+                      ),
                     ),
                   ),
                 ),

@@ -96,7 +96,7 @@ class _SelectTransactionTagsSheetState
           alignment: AlignmentDirectional.topStart,
           child: Wrap(
             spacing: 12.0,
-            runSpacing: 12.0,
+            runSpacing: 8.0,
             children: [
               if (_query.isEmpty)
                 TransactionTagAddChip(onPressed: createAndAdd),

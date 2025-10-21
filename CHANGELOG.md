@@ -6,10 +6,12 @@
 
 * We have a better editor for the notes/description now, yayy. Closes [#323](https://github.com/flow-mn/flow/issues/323)
 * Added Czech language support thanks to **Miloš Koliáš** through email.
+* Added Flow to the home page.
 
 ### Fixes
 
 * Fixed opening external links on Android, closes [#600](https://github.com/flow-mn/flow/issues/600)
+* Other UX/QoL fixes and improvements
 
 ## 0.16.2
 

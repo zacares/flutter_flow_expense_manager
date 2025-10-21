@@ -1114,7 +1114,6 @@ class _TransactionPageState extends State<TransactionPage> {
         );
 
         _currentlyEditing.permanentlyDelete(true);
-        context.pop();
       } catch (e, stackTrace) {
         _log.severe("Failed to update transfer transaction", e, stackTrace);
       }
