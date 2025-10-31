@@ -20,10 +20,14 @@ enum TimeRangeMode {
   final String value;
 
   const TimeRangeMode(this.value);
+
+  String get translationKey => "select.timeRange.$value";
 }
 
 class SelectTimeRangeModeSheet extends StatelessWidget {
-  const SelectTimeRangeModeSheet({super.key});
+  final TimeRangeMode? initialValue;
+
+  const SelectTimeRangeModeSheet({super.key, this.initialValue});
 
   @override
   Widget build(BuildContext context) {
@@ -55,29 +59,23 @@ class SelectTimeRangeModeSheet extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Wrap(
               spacing: 12.0,
-              runSpacing: 4.0,
-              children: [
-                ActionChip(
-                  label: Text("select.timeRange.last30days".t(context)),
-                  onPressed: () => context.pop(TimeRangeMode.last30Days),
-                ),
-                ActionChip(
-                  label: Text("select.timeRange.thisWeek".t(context)),
-                  onPressed: () => context.pop(TimeRangeMode.thisWeek),
-                ),
-                ActionChip(
-                  label: Text("select.timeRange.thisMonth".t(context)),
-                  onPressed: () => context.pop(TimeRangeMode.thisMonth),
-                ),
-                ActionChip(
-                  label: Text("select.timeRange.thisYear".t(context)),
-                  onPressed: () => context.pop(TimeRangeMode.thisYear),
-                ),
-                ActionChip(
-                  label: Text("select.timeRange.allTime".t(context)),
-                  onPressed: () => context.pop(TimeRangeMode.allTime),
-                ),
-              ],
+              runSpacing: 8.0,
+              children:
+                  [
+                        TimeRangeMode.last30Days,
+                        TimeRangeMode.thisWeek,
+                        TimeRangeMode.thisMonth,
+                        TimeRangeMode.thisYear,
+                        TimeRangeMode.allTime,
+                      ]
+                      .map(
+                        (mode) => FilterChip(
+                          label: Text(mode.translationKey.t(context)),
+                          onSelected: (_) => context.pop(mode),
+                          selected: mode == initialValue,
+                        ),
+                      )
+                      .toList(),
             ),
           ),
           const SizedBox(height: 12.0),

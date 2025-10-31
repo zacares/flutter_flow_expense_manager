@@ -29,11 +29,13 @@ class _AccountsTabState extends State<AccountsTab>
     with AutomaticKeepAliveClientMixin {
   bool _reordering = false;
 
+  String _searchQuery = "";
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
-    final accounts = AccountsProvider.of(context).activeAccounts;
+    final List<Account> accounts = AccountsProvider.of(context).activeAccounts;
     final bool ready = AccountsProvider.of(context).ready;
 
     if (!ready) {
@@ -52,36 +54,43 @@ class _AccountsTabState extends State<AccountsTab>
               final bool excludeTransfersInTotal =
                   userPreferences.excludeTransfersFromFlow;
 
+              final bool hasQuery =
+                  !_reordering && _searchQuery.trim().isNotEmpty;
+
+              final List<Account> searchResult = hasQuery
+                  ? simpleSortByQuery(accounts, _searchQuery)
+                  : accounts;
+
               return Expanded(
                 child: _reordering
-                    ? Frame(
-                        child: ReorderableListView.builder(
-                          padding: const EdgeInsets.only(bottom: 96.0),
-                          itemBuilder: (context, index) => Padding(
-                            key: ValueKey(accounts[index].uuid),
-                            padding: const EdgeInsets.only(bottom: 16.0),
-                            child: AccountCard(
-                              account: accounts[index],
-                              useCupertinoContextMenu: false,
-                              excludeTransfersInTotal:
-                                  excludeTransfersInTotal == true,
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: Frame(
+                          child: ReorderableListView.builder(
+                            padding: const EdgeInsets.only(bottom: 96.0),
+                            itemBuilder: (context, index) => Padding(
+                              key: ValueKey(accounts[index].uuid),
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: AccountCard(
+                                account: accounts[index],
+                                useCupertinoContextMenu: false,
+                                excludeTransfersInTotal:
+                                    excludeTransfersInTotal == true,
+                              ),
                             ),
+                            proxyDecorator: proxyDecorator,
+                            itemCount: accounts.length,
+                            onReorder: (oldIndex, newIndex) =>
+                                onReorder(accounts, oldIndex, newIndex),
                           ),
-                          proxyDecorator: proxyDecorator,
-                          itemCount: accounts.length,
-                          onReorder: (oldIndex, newIndex) =>
-                              onReorder(accounts, oldIndex, newIndex),
                         ),
                       )
                     : ListView(
                         padding: const EdgeInsets.all(16.0),
                         children: [
-                          TotalBalance(),
-                          const SizedBox(height: 16.0),
-                          Divider(),
-                          const SizedBox(height: 16.0),
-                          ...accounts.map(
+                          ...searchResult.map(
                             (account) => Padding(
+                              key: ValueKey("account-card-${account.uuid}"),
                               padding: const EdgeInsets.only(bottom: 16.0),
                               child: AccountCard(
                                 account: account,
@@ -111,23 +120,41 @@ class _AccountsTabState extends State<AccountsTab>
   }
 
   Widget buildHeader(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 16.0,
       children: [
-        Text(
-          (_reordering && !isDesktop())
-              ? "tabs.accounts.reorder.guide".t(context)
-              : "tabs.accounts".t(context),
-          style: context.textTheme.titleSmall,
+        Row(
+          children: [
+            Text(
+              (_reordering && !isDesktop())
+                  ? "tabs.accounts.reorder.guide".t(context)
+                  : "tabs.accounts".t(context),
+              style: context.textTheme.titleSmall,
+            ),
+            const Spacer(),
+            IconButton(
+              onPressed: toggleReorderMode,
+              tooltip: _reordering
+                  ? "general.done".t(context)
+                  : "tabs.accounts.reorder".t(context),
+              icon: _reordering
+                  ? const Icon(Symbols.check_rounded)
+                  : const Icon(Symbols.reorder_rounded),
+            ),
+          ],
         ),
-        const Spacer(),
-        IconButton(
-          onPressed: toggleReorderMode,
-          tooltip: _reordering
-              ? "general.done".t(context)
-              : "tabs.accounts.reorder".t(context),
-          icon: _reordering
-              ? const Icon(Symbols.check_rounded)
-              : const Icon(Symbols.reorder_rounded),
+        TotalBalance(),
+        TextField(
+          onChanged: (value) => setState(() => _searchQuery = value),
+          enabled: !_reordering,
+          decoration: InputDecoration(
+            hintText: "general.search".t(context),
+            filled: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
         ),
       ],
     );
