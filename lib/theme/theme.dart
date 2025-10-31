@@ -163,9 +163,6 @@ class ThemeFactory {
         cursorColor: colorScheme.primary,
         selectionHandleColor: colorScheme.primary,
       ),
-      inputDecorationTheme: InputDecorationThemeData(
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
-      ),
       tabBarTheme: TabBarThemeData(dividerColor: colorScheme.primary),
     );
   }

@@ -4,13 +4,14 @@ import "package:flow/utils/time_and_range.dart";
 import "package:flutter/material.dart";
 import "package:moment_dart/moment_dart.dart";
 
-final Map<TransactionFilterTimeRange, TimeRangeMode> defaultItems = {
-  TransactionFilterTimeRange.last30Days: TimeRangeMode.last30Days,
-  TransactionFilterTimeRange.thisWeek: TimeRangeMode.thisWeek,
-  TransactionFilterTimeRange.thisMonth: TimeRangeMode.thisMonth,
-  TransactionFilterTimeRange.thisYear: TimeRangeMode.thisYear,
-  TransactionFilterTimeRange.allTime: TimeRangeMode.allTime,
-};
+final Map<TransactionFilterTimeRange, TimeRangeMode> filterRangeToModeMapping =
+    {
+      TransactionFilterTimeRange.last30Days: TimeRangeMode.last30Days,
+      TransactionFilterTimeRange.thisWeek: TimeRangeMode.thisWeek,
+      TransactionFilterTimeRange.thisMonth: TimeRangeMode.thisMonth,
+      TransactionFilterTimeRange.thisYear: TimeRangeMode.thisYear,
+      TransactionFilterTimeRange.allTime: TimeRangeMode.allTime,
+    };
 
 Future<TransactionFilterTimeRange?> showTransactionFilterTimeRangeSelectorSheet(
   BuildContext context, {
@@ -20,7 +21,9 @@ Future<TransactionFilterTimeRange?> showTransactionFilterTimeRangeSelectorSheet(
     context: context,
     isScrollControlled: true,
     builder: (BuildContext context) => SelectTimeRangeModeSheet(
-      initialValue: initialValue != null ? defaultItems[initialValue] : null,
+      initialValue: initialValue != null
+          ? filterRangeToModeMapping[initialValue]
+          : null,
     ),
   );
 

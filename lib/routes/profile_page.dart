@@ -93,6 +93,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         decoration: InputDecoration(
                           counter: SizedBox.shrink(),
                           labelText: "profile.name".t(context),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
                         ),
                       ),
                     ],

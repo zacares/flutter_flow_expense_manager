@@ -29,7 +29,15 @@ class _AccountsTabState extends State<AccountsTab>
     with AutomaticKeepAliveClientMixin {
   bool _reordering = false;
 
-  String _searchQuery = "";
+  final TextEditingController _searchController = TextEditingController();
+
+  String get _searchQuery => _searchController.text.trim();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +53,9 @@ class _AccountsTabState extends State<AccountsTab>
     return switch (accounts.length) {
       0 => const NoAccounts(),
       _ => Column(
+        spacing: 16.0,
         children: [
-          const SizedBox(height: 16.0),
+          SizedBox.shrink(),
           Frame(child: buildHeader(context)),
           ValueListenableBuilder(
             valueListenable: UserPreferencesService().valueNotifier,
@@ -54,8 +63,7 @@ class _AccountsTabState extends State<AccountsTab>
               final bool excludeTransfersInTotal =
                   userPreferences.excludeTransfersFromFlow;
 
-              final bool hasQuery =
-                  !_reordering && _searchQuery.trim().isNotEmpty;
+              final bool hasQuery = !_reordering && _searchQuery.isNotEmpty;
 
               final List<Account> searchResult = hasQuery
                   ? simpleSortByQuery(accounts, _searchQuery)
@@ -63,30 +71,27 @@ class _AccountsTabState extends State<AccountsTab>
 
               return Expanded(
                 child: _reordering
-                    ? Padding(
-                        padding: const EdgeInsets.only(top: 16.0),
-                        child: Frame(
-                          child: ReorderableListView.builder(
-                            padding: const EdgeInsets.only(bottom: 96.0),
-                            itemBuilder: (context, index) => Padding(
-                              key: ValueKey(accounts[index].uuid),
-                              padding: const EdgeInsets.only(bottom: 16.0),
-                              child: AccountCard(
-                                account: accounts[index],
-                                useCupertinoContextMenu: false,
-                                excludeTransfersInTotal:
-                                    excludeTransfersInTotal == true,
-                              ),
+                    ? Frame(
+                        child: ReorderableListView.builder(
+                          padding: const EdgeInsets.only(bottom: 96.0),
+                          itemBuilder: (context, index) => Padding(
+                            key: ValueKey(accounts[index].uuid),
+                            padding: const EdgeInsets.only(bottom: 16.0),
+                            child: AccountCard(
+                              account: accounts[index],
+                              useCupertinoContextMenu: false,
+                              excludeTransfersInTotal:
+                                  excludeTransfersInTotal == true,
                             ),
-                            proxyDecorator: proxyDecorator,
-                            itemCount: accounts.length,
-                            onReorder: (oldIndex, newIndex) =>
-                                onReorder(accounts, oldIndex, newIndex),
                           ),
+                          proxyDecorator: proxyDecorator,
+                          itemCount: accounts.length,
+                          onReorder: (oldIndex, newIndex) =>
+                              onReorder(accounts, oldIndex, newIndex),
                         ),
                       )
                     : ListView(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0).copyWith(top: 0.0),
                         children: [
                           ...searchResult.map(
                             (account) => Padding(
@@ -146,7 +151,8 @@ class _AccountsTabState extends State<AccountsTab>
         ),
         TotalBalance(),
         TextField(
-          onChanged: (value) => setState(() => _searchQuery = value),
+          controller: _searchController,
+          onChanged: (value) => setState(() {}),
           enabled: !_reordering,
           decoration: InputDecoration(
             hintText: "general.search".t(context),
@@ -154,6 +160,12 @@ class _AccountsTabState extends State<AccountsTab>
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
             ),
+            suffixIcon: (_searchQuery.isNotEmpty)
+                ? IconButton(
+                    onPressed: () => setState(() => _searchController.clear()),
+                    icon: const Icon(Symbols.close_rounded),
+                  )
+                : null,
           ),
         ),
       ],

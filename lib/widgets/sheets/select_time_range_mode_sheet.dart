@@ -6,6 +6,7 @@ import "package:flow/widgets/general/modal_sheet.dart";
 import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
 import "package:material_symbols_icons/symbols.dart";
+import "package:moment_dart/moment_dart.dart";
 
 enum TimeRangeMode {
   last30Days("last30Days"),
@@ -22,6 +23,32 @@ enum TimeRangeMode {
   const TimeRangeMode(this.value);
 
   String get translationKey => "select.timeRange.$value";
+
+  /// Only returns one of [TimeRangeMode.thisWeek], [TimeRangeMode.thisMonth],
+  /// [TimeRangeMode.thisYear], [TimeRangeMode.allTime] based on the [anchor]
+  /// or now.
+  static TimeRangeMode? tryInferPresetFromRange(
+    TimeRange? range, {
+    DateTime? anchor,
+  }) {
+    if (range == null) {
+      return null;
+    }
+
+    final DateTime now = anchor ?? DateTime.now();
+
+    if (range == LocalWeekTimeRange(now)) {
+      return TimeRangeMode.thisWeek;
+    } else if (range == MonthTimeRange.fromDateTime(now)) {
+      return TimeRangeMode.thisMonth;
+    } else if (range == YearTimeRange.fromDateTime(now)) {
+      return TimeRangeMode.thisYear;
+    } else if (range == Moment.minValue.rangeToMax()) {
+      return TimeRangeMode.allTime;
+    }
+
+    return null;
+  }
 }
 
 class SelectTimeRangeModeSheet extends StatelessWidget {
