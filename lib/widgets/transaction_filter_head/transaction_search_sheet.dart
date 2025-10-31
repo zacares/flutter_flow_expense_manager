@@ -86,9 +86,6 @@ class _TransactionSearchSheetState extends State<TransactionSearchSheet> {
                 decoration: InputDecoration(
                   hintText: "transactions.query.filter.keyword.hint".t(context),
                   prefixIcon: const Icon(Symbols.search_rounded),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
                 ),
               ),
             ),

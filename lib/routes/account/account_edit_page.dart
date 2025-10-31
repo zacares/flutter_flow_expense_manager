@@ -169,10 +169,14 @@ class _AccountEditPageState extends State<AccountEditPage> {
                     focusNode: _editNameFocusNode,
                     maxLength: Account.maxNameLength,
                     decoration: InputDecoration(
-                      hintText: "account.name".t(context),
                       focusColor: context.colorScheme.secondary,
-                      isDense: true,
                       counter: const SizedBox.shrink(),
+                      hintText: "account.name".t(context),
+                      hintStyle: context.textTheme.headlineMedium?.copyWith(
+                        color: context.textTheme.headlineMedium?.color
+                            ?.withAlpha(0x80),
+                      ),
+                      border: UnderlineInputBorder(),
                     ),
                     style: context.textTheme.headlineMedium,
                     textAlign: TextAlign.center,

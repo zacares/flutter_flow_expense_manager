@@ -87,9 +87,6 @@ class _SelectTransactionTagsSheetState
                 decoration: InputDecoration(
                   hintText: "general.search".t(context),
                   prefixIcon: const Icon(Symbols.search_rounded),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
                 ),
               ),
             )

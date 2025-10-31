@@ -157,9 +157,6 @@ class _AccountsTabState extends State<AccountsTab>
           decoration: InputDecoration(
             hintText: "general.search".t(context),
             filled: true,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
             suffixIcon: (_searchQuery.isNotEmpty)
                 ? IconButton(
                     onPressed: () => setState(() => _searchController.clear()),
