@@ -9,9 +9,8 @@ import WidgetKit
 import SwiftUI
 
 @main
-struct Flow_WidgetsBundle: WidgetBundle {
+struct LeBundle: WidgetBundle {
     var body: some Widget {
-        Flow_Widgets()
-        Flow_WidgetsControl()
+        FlowTwoEntryWidget()
     }
 }
