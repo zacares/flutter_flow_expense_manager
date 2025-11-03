@@ -317,6 +317,10 @@ class FlowState extends State<Flow> {
   void _reloadTheme() {
     final String? themeName = UserPreferencesService().value.themeName;
 
+    if (_themeFactory.flowColorScheme.name == themeName) {
+      return;
+    }
+
     if (validateThemeName(themeName)) {
       themeLogger.info("Reloading $themeName");
 

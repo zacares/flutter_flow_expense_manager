@@ -53,22 +53,6 @@ struct TwoEntryWidgetView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(alignment: .center, spacing: TwoEntryWidgetView.spacing) {
-                // HStack(alignment: .center, spacing: TwoEntryWidgetView.spacing) {
-                //     ForEach(entry.order.filter({ $0 != "transfer" }), id: \.self) { item in
-                //         Link(destination: URL(string: "flow-mn:///transaction/new?type=\(item)")!) {
-                //             ZStack(alignment: .center) {
-                //                 Circle()
-                //                     .fill(.tertiary)
-                //                 Image(item.capitalized)
-                //                     .resizable()
-                //                     .foregroundColor(.accentColor)
-                //                     .frame(
-                //                         width: (geometry.size.height - 40) * 0.5,
-                //                         height: (geometry.size.height - 40) * 0.5)
-                //             }
-                //         }
-                //     }
-                // }
                 Capsule()
                     .fill(.red)
                 HStack(spacing: TwoEntryWidgetView.spacing) {

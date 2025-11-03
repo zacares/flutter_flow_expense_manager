@@ -15,6 +15,7 @@ import "package:flow/services/notifications.dart";
 import "package:flow/services/sync.dart";
 import "package:flow/theme/color_themes/registry.dart";
 import "package:flutter/material.dart";
+import "package:home_widget/home_widget.dart";
 import "package:intl/intl.dart";
 
 class UserPreferencesService {
@@ -216,6 +217,13 @@ class UserPreferencesService {
       value.transactionButtonOrder;
   set transactionButtonOrder(List<TransactionType> order) {
     value.transactionButtonOrder = order;
+
+    try {
+      HomeWidget.updateWidget(name: "FlowTwoEntryWidget");
+    } catch (e) {
+      //
+    }
+
     ObjectBox().box<UserPreferences>().put(value);
   }
 
