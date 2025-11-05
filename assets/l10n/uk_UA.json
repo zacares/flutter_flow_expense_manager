@@ -392,7 +392,7 @@
   "select.timeRange": "Виберіть діапазон",
   "select.timeRange.allTime": "За весь час",
   "select.timeRange.changeMode": "Більше опцій",
-  "select.timeRange.last30days": "Останні 30 днів",
+  "select.timeRange.last30Days": "Останні 30 днів",
   "select.timeRange.mode.byMonth": "За місяцями",
   "select.timeRange.mode.byWeek": "За тижнями",
   "select.timeRange.mode.byYear": "За роками",

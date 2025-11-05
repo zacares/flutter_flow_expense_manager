@@ -22,7 +22,6 @@ class _TransactionEntryFlowPreferencesPageState
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     _actions = List.from(UserPreferencesService().transactionEntryFlow.actions);

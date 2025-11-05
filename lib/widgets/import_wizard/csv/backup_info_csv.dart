@@ -37,69 +37,80 @@ class _BackupInfoCSVState extends State<BackupInfoCSV> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          Align(
-            alignment: Alignment.topLeft,
-            child: ListHeader("sync.import.syncData.parsedEstimate".t(context)),
-          ),
-          const SizedBox(height: 16.0),
-          ImportItemListTile(
-            icon: FlowIconData.icon(Symbols.wallet_rounded),
-            label: Text(
-              "sync.import.syncData.parsedEstimate.accountCount".t(
-                context,
-                widget.importer.data.accountNames.length,
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: ListHeader(
+                      "sync.import.syncData.parsedEstimate".t(context),
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  ImportItemListTile(
+                    icon: FlowIconData.icon(Symbols.wallet_rounded),
+                    label: Text(
+                      "sync.import.syncData.parsedEstimate.accountCount".t(
+                        context,
+                        widget.importer.data.accountNames.length,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        "sync.import.pickCurrencies".t(context),
+                        style: context.textTheme.labelMedium,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: widget.importer.data.accountNames.map((name) {
+                        final String? currency =
+                            widget.importer.accountCurrencies[name];
+                        return AccountCurrencyListTile(
+                          name: name,
+                          currency: currency,
+                          onTap: () => _setCurrencyFor(name),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  ImportItemListTile(
+                    icon: FlowIconData.icon(Symbols.list_alt_rounded),
+                    label: Text(
+                      "sync.import.syncData.parsedEstimate.transactionCount".t(
+                        context,
+                        widget.importer.data.transactions.length,
+                      ),
+                    ),
+                  ),
+                  if (categoryCount > 0) ...[
+                    const SizedBox(height: 8.0),
+                    ImportItemListTile(
+                      icon: FlowIconData.icon(Symbols.category_rounded),
+                      label: Text(
+                        "sync.import.syncData.parsedEstimate.categoryCount".t(
+                          context,
+                          categoryCount,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ),
-          const SizedBox(height: 8.0),
-          Align(
-            alignment: Alignment.topLeft,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                "sync.import.pickCurrencies".t(context),
-                style: context.textTheme.labelMedium,
-              ),
-            ),
-          ),
-          const SizedBox(height: 8.0),
-          Padding(
-            padding: const EdgeInsets.only(left: 16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: widget.importer.data.accountNames.map((name) {
-                final String? currency =
-                    widget.importer.accountCurrencies[name];
-                return AccountCurrencyListTile(
-                  name: name,
-                  currency: currency,
-                  onTap: () => _setCurrencyFor(name),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 8.0),
-          ImportItemListTile(
-            icon: FlowIconData.icon(Symbols.list_alt_rounded),
-            label: Text(
-              "sync.import.syncData.parsedEstimate.transactionCount".t(
-                context,
-                widget.importer.data.transactions.length,
-              ),
-            ),
-          ),
-          if (categoryCount > 0) ...[
-            const SizedBox(height: 8.0),
-            ImportItemListTile(
-              icon: FlowIconData.icon(Symbols.category_rounded),
-              label: Text(
-                "sync.import.syncData.parsedEstimate.categoryCount".t(
-                  context,
-                  categoryCount,
-                ),
-              ),
-            ),
-          ],
           const Spacer(),
           InfoText(child: Text("sync.import.emergencyBackup".t(context))),
           const SizedBox(height: 16.0),

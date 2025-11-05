@@ -186,7 +186,9 @@ class _CategoryPageState extends State<CategoryPage> {
           ],
         );
 
-        final EdgeInsets headerPaddingOutOfList = widget.headerPadding;
+        final EdgeInsets headerPaddingOutOfList = EdgeInsets.only(
+          bottom: widget.headerPadding.bottom,
+        );
 
         return Scaffold(
           appBar: AppBar(
