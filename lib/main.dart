@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import "dart:async";
-import "dart:developer";
 import "dart:io";
 import "dart:ui";
 
@@ -425,8 +424,6 @@ class FlowState extends State<Flow> {
   }
 
   void _handleFlowUri(Uri? uri) {
-    inspect(uri);
-
     if (uri == null) return;
     mainLogger.info("Received app link: $uri");
 

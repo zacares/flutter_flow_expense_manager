@@ -56,7 +56,7 @@ class _AccountsTabState extends State<AccountsTab>
         spacing: 16.0,
         children: [
           SizedBox.shrink(),
-          Frame(child: buildHeader(context)),
+          Frame(child: buildHeader(context, hasSearchBar: accounts.length > 4)),
           ValueListenableBuilder(
             valueListenable: UserPreferencesService().valueNotifier,
             builder: (context, userPreferences, child) {
@@ -124,7 +124,7 @@ class _AccountsTabState extends State<AccountsTab>
     };
   }
 
-  Widget buildHeader(BuildContext context) {
+  Widget buildHeader(BuildContext context, {bool hasSearchBar = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 16.0,
@@ -150,21 +150,23 @@ class _AccountsTabState extends State<AccountsTab>
           ],
         ),
         TotalBalance(),
-        TextField(
-          controller: _searchController,
-          onChanged: (value) => setState(() {}),
-          enabled: !_reordering,
-          decoration: InputDecoration(
-            hintText: "general.search".t(context),
-            filled: true,
-            suffixIcon: (_searchQuery.isNotEmpty)
-                ? IconButton(
-                    onPressed: () => setState(() => _searchController.clear()),
-                    icon: const Icon(Symbols.close_rounded),
-                  )
-                : null,
+        if (hasSearchBar)
+          TextField(
+            controller: _searchController,
+            onChanged: (value) => setState(() {}),
+            enabled: !_reordering,
+            decoration: InputDecoration(
+              hintText: "general.search".t(context),
+              filled: true,
+              suffixIcon: (_searchQuery.isNotEmpty)
+                  ? IconButton(
+                      onPressed: () =>
+                          setState(() => _searchController.clear()),
+                      icon: const Icon(Symbols.close_rounded),
+                    )
+                  : null,
+            ),
           ),
-        ),
       ],
     );
   }

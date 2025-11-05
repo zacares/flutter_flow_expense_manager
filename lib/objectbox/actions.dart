@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:developer";
 import "dart:io";
 import "dart:math" as math;
 
@@ -188,8 +187,6 @@ extension MainActions on ObjectBox {
     List<Account>? accounts,
     bool ignoreIfNoUnsetValue = false,
   }) async {
-    inspect(accounts);
-
     accounts ??= await ObjectBox().box<Account>().getAllAsync();
 
     if (ignoreIfNoUnsetValue &&
@@ -200,8 +197,6 @@ extension MainActions on ObjectBox {
     for (final e in accounts.indexed) {
       accounts[e.$1].sortOrder = e.$1;
     }
-
-    inspect(accounts);
 
     await ObjectBox().box<Account>().putManyAsync(accounts);
     await _normalizeSortOrders();
