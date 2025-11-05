@@ -4,6 +4,7 @@ import WidgetKit
 struct TwoEntryWidgetEntry: TimelineEntry {
     let date: Date
     let order: [String]
+    let color: Color
 }
 
 struct TwoEntryProvider: AppIntentTimelineProvider {
@@ -12,13 +13,13 @@ struct TwoEntryProvider: AppIntentTimelineProvider {
     typealias Intent = ConfigurationAppIntent
 
     func placeholder(in context: Context) -> TwoEntryWidgetEntry {
-        TwoEntryWidgetEntry(date: Date(), order: ["income", "expense"])
+        TwoEntryWidgetEntry(date: Date(), order: ["income", "expense"], color: .primary)
     }
 
     func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async
         -> TwoEntryWidgetEntry
     {
-        TwoEntryWidgetEntry(date: Date(), order: ["income", "expense"])
+        TwoEntryWidgetEntry(date: Date(), order: ["income", "expense"], color: .primary)
     }
 
     static let validOrderNames: [String] = ["income", "expense", "transfer"]
@@ -30,12 +31,13 @@ struct TwoEntryProvider: AppIntentTimelineProvider {
             UserDefaults.standard.stringArray(forKey: "flow.widgets.buttonOrder") ?? [
                 "income", "expense",
             ]
+        let colorHex: String? = UserDefaults.standard.string(forKey: "flow.widgets.color")
         let validOrder: [String] =
             (order.allSatisfy({ TwoEntryProvider.validOrderNames.contains($0) })
                 && order.count >= 2)
             ? order : ["income", "expense"]
 
-        let entry = TwoEntryWidgetEntry(date: Date(), order: validOrder)
+        let entry = TwoEntryWidgetEntry(date: Date(), order: validOrder, color: .primary)
 
         return Timeline(entries: [entry], policy: .atEnd)
     }
@@ -52,9 +54,21 @@ struct TwoEntryWidgetView: View {
 
     var body: some View {
         GeometryReader { geometry in
+            let size = (geometry.size.height - 40) * 0.5
+
             VStack(alignment: .center, spacing: TwoEntryWidgetView.spacing) {
-                Capsule()
-                    .fill(.red)
+                Link(destination: URL(string: "flow-mn:///transaction/new?type=transfer")!) {
+                    Capsule()
+                    .fill(.tertiary)
+                    .overlay{
+                        Image("Transfer")
+                            .resizable()
+                            .foregroundStyle(.primary)
+                            .frame(
+                                width: size,
+                                height: size)
+                    }
+                }
                 HStack(spacing: TwoEntryWidgetView.spacing) {
                     ForEach(entry.order.filter({ $0 != "transfer" }), id: \.self) { item in
                         Link(destination: URL(string: "flow-mn:///transaction/new?type=\(item)")!) {
@@ -63,10 +77,10 @@ struct TwoEntryWidgetView: View {
                                 .overlay {
                                     Image(item.capitalized)
                                         .resizable()
-                                        .foregroundColor(.red)
+                                        .foregroundStyle(.primary)
                                         .frame(
-                                            width: (geometry.size.height - 40) * 0.5,
-                                            height: (geometry.size.height - 40) * 0.5)
+                                            width: size,
+                                            height: size)
                                 }
                         }
                     }
@@ -94,5 +108,5 @@ struct FlowTwoEntryWidget: Widget {
 #Preview(as: .systemSmall) {
     FlowTwoEntryWidget()
 } timeline: {
-    TwoEntryWidgetEntry(date: .now, order: ["income", "expense"])
+    TwoEntryWidgetEntry(date: .now, order: ["income", "expense"], color: .primary)
 }
