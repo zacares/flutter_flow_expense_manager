@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.16.4
+
+## New features
+
+* Now we have a very basic iOS widget, which I plan to improve later, part of
+  [#411](https://github.com/flow-mn/flow/issues/411)
+* Now you can search accounts in the accounts tab if you have more than
+  4 accounts, closes [#607](https://github.com/flow-mn/flow/issues/607)
+
+## Fixes
+
+* Fixed setup preset accounts always having USD currency thanks to Duluu
+* Fixed long text getting clipped in home screen actionable reminders [#608](https://github.com/flow-mn/flow/issues/608)
+* Other minor fixes, UX/QoL improvements;
+
 ## 0.16.3
 
 ### New features

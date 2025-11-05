@@ -392,7 +392,7 @@
   "select.timeRange": "Select range",
   "select.timeRange.allTime": "All time",
   "select.timeRange.changeMode": "More options",
-  "select.timeRange.last30days": "Last 30 days",
+  "select.timeRange.last30Days": "Last 30 days",
   "select.timeRange.mode.byMonth": "By month",
   "select.timeRange.mode.byWeek": "By week",
   "select.timeRange.mode.byYear": "By year",

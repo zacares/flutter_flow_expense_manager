@@ -392,7 +392,7 @@
   "select.timeRange": "Выберите диапазон",
   "select.timeRange.allTime": "За все время",
   "select.timeRange.changeMode": "Больше опций",
-  "select.timeRange.last30days": "Последние 30 дней",
+  "select.timeRange.last30Days": "Последние 30 дней",
   "select.timeRange.mode.byMonth": "По месяцам",
   "select.timeRange.mode.byWeek": "По неделям",
   "select.timeRange.mode.byYear": "По годам",

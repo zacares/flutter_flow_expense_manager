@@ -392,7 +392,7 @@
   "select.timeRange": "Хугацаа сонгох",
   "select.timeRange.allTime": "Бүх цаг үе",
   "select.timeRange.changeMode": "Өөр сонголтууд",
-  "select.timeRange.last30days": "Сүүлийн 30 хоног",
+  "select.timeRange.last30Days": "Сүүлийн 30 хоног",
   "select.timeRange.mode.byMonth": "Сараар",
   "select.timeRange.mode.byWeek": "Долоо хоногоор",
   "select.timeRange.mode.byYear": "Жилээр",

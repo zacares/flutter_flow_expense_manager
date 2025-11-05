@@ -199,6 +199,7 @@ extension MainActions on ObjectBox {
     }
 
     await ObjectBox().box<Account>().putManyAsync(accounts);
+    await _normalizeSortOrders();
   }
 
   /// Returns all non-pending transactions in given [range]
@@ -378,6 +379,32 @@ extension MainActions on ObjectBox {
 
       return (title: items.first.title, relevancy: max);
     }).toList();
+  }
+
+  Future<void> _normalizeSortOrders() async {
+    final List<Account> accounts = await box<Account>().getAllAsync();
+    final Set<int> sortOrders = accounts
+        .map((account) => account.sortOrder)
+        .toSet();
+
+    if (sortOrders.length != accounts.length ||
+        accounts.any((account) => account.sortOrder < 0)) {
+      accounts.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+      int i = 0;
+
+      for (var account in accounts) {
+        if (account.archived) {
+          account.sortOrder += 1000 + i;
+        } else {
+          account.sortOrder = i;
+        }
+        i++;
+      }
+
+      await box<Account>().putManyAsync(accounts);
+    }
+
+    return;
   }
 }
 

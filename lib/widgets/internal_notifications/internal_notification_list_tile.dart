@@ -43,14 +43,24 @@ class ActionableNotificationListTile extends StatelessWidget {
             spacing: 12.0,
             children: [
               FlowIcon(icon, plated: true, size: 32.0),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(title, style: context.textTheme.labelLarge),
-                  if (subtitle != null)
-                    Text(subtitle!, style: context.textTheme.bodySmall!),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: context.textTheme.labelLarge,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (subtitle != null)
+                      Text(
+                        subtitle!,
+                        style: context.textTheme.bodySmall!,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  ],
+                ),
               ),
             ],
           ),

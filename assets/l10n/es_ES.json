@@ -392,7 +392,7 @@
   "select.timeRange": "Seleccionar rango",
   "select.timeRange.allTime": "Desde siempre",
   "select.timeRange.changeMode": "Más opciones",
-  "select.timeRange.last30days": "Últimos 30 días",
+  "select.timeRange.last30Days": "Últimos 30 días",
   "select.timeRange.mode.byMonth": "Por mes",
   "select.timeRange.mode.byWeek": "Por semana",
   "select.timeRange.mode.byYear": "Por año",

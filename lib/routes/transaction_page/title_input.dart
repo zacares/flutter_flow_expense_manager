@@ -68,6 +68,7 @@ class TitleInput extends StatelessWidget {
               hintStyle: context.textTheme.headlineMedium?.copyWith(
                 color: context.textTheme.headlineMedium?.color?.withAlpha(0x80),
               ),
+              border: UnderlineInputBorder(),
               counter: const SizedBox.shrink(),
             ),
           );

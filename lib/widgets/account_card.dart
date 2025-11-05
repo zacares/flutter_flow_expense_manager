@@ -93,7 +93,7 @@ class AccountCard extends StatelessWidget {
                 ],
               ),
               if (!account.archived) ...[
-                const SizedBox(height: 24.0),
+                const SizedBox(height: 16.0),
                 Text(
                   "account.thisMonth".t(context),
                   style: context.textTheme.bodyLarge,
