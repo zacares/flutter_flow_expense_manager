@@ -77,5 +77,5 @@ dependencies {
     implementation("androidx.glance:glance-material3:1.1.1")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
-    debugImplementation("io.objectbox:objectbox-android-objectbrowser:4.3.1")
+    debugImplementation("io.objectbox:objectbox-android-objectbrowser:5.0.1")
 }

@@ -54,8 +54,8 @@ dependencies:
     markdown_quill: ^4.3.0
     material_symbols_icons: ^4.2873.0
     moment_dart: ^5.2.4
-    objectbox: ^4.3.1
-    objectbox_flutter_libs: ^4.3.1
+    objectbox: ^5.0.1
+    objectbox_flutter_libs: ^5.0.1
     open_app_file: ^4.0.4
     package_info_plus: ^8.3.1
     pasteboard: ^0.4.0
@@ -84,9 +84,12 @@ dev_dependencies:
     flutter_test:
         sdk: flutter
     json_serializable: ^6.11.1
-    objectbox_generator: ^4.3.1
+    objectbox_generator: ^5.0.1
     openai_dart: ^0.5.5
-    test: ^1.25.15
+    test: ^1.26.3
+
+dependency_overrides:
+    test_api: ^0.7.7
 
 flutter:
     generate: true
