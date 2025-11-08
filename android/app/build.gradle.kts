@@ -5,6 +5,7 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
@@ -12,6 +13,9 @@ android {
     compileSdk = 36
     ndkVersion = "28.0.13004108"
 
+    buildFeatures {
+        compose = true
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -68,7 +72,9 @@ configurations {
 dependencies {
     implementation("androidx.window:window:1.3.0")
     implementation("androidx.window:window-java:1.3.0")
+
     implementation("androidx.glance:glance-appwidget:1.1.1")
+    implementation("androidx.glance:glance-material3:1.1.1")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     debugImplementation("io.objectbox:objectbox-android-objectbrowser:4.3.1")
