@@ -277,6 +277,7 @@ class UserPreferencesService {
       );
       final bool? succeeded = await HomeWidget.updateWidget(
         name: "FlowTwoEntryWidget",
+        iOSName: "FlowTwoEntryWidget",
         androidName: "TwoEntryWidgetReceiver",
         qualifiedAndroidName:
             "mn.flow.flow.receivers.widgets.TwoEntryWidgetReceiver",

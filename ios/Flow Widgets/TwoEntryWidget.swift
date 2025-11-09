@@ -27,10 +27,7 @@ struct TwoEntryProvider: AppIntentTimelineProvider {
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<
         TwoEntryWidgetEntry
     > {
-        let order: [String] =
-            UserDefaults.standard.string(forKey: "flow.widgets.buttonOrder")?.split(separator: ",") ?? [
-                "income", "expense",
-            ].joined(separator: ",")
+        let order: [String] = UserDefaults.standard.string(forKey: "flutter.flow.widgets.buttonOrder")?.components(separatedBy: ",") ?? ["income", "expense"]
         let colorHex: String? = UserDefaults.standard.string(forKey: "flow.widgets.color")
         let validOrder: [String] =
             (order.allSatisfy({ TwoEntryProvider.validOrderNames.contains($0) })
@@ -41,10 +38,6 @@ struct TwoEntryProvider: AppIntentTimelineProvider {
 
         return Timeline(entries: [entry], policy: .atEnd)
     }
-
-    //    func relevances() async -> WidgetRelevances<ConfigurationAppIntent> {
-    //        // Generate a list containing the contexts this widget is relevant in.
-    //    }
 }
 
 struct TwoEntryWidgetView: View {
