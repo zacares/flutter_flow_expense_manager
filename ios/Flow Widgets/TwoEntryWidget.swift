@@ -28,9 +28,9 @@ struct TwoEntryProvider: AppIntentTimelineProvider {
         TwoEntryWidgetEntry
     > {
         let order: [String] =
-            UserDefaults.standard.stringArray(forKey: "flow.widgets.buttonOrder") ?? [
+            UserDefaults.standard.string(forKey: "flow.widgets.buttonOrder")?.split(separator: ",") ?? [
                 "income", "expense",
-            ]
+            ].joined(separator: ",")
         let colorHex: String? = UserDefaults.standard.string(forKey: "flow.widgets.color")
         let validOrder: [String] =
             (order.allSatisfy({ TwoEntryProvider.validOrderNames.contains($0) })

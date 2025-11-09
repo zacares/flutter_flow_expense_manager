@@ -1,3 +1,4 @@
+import "package:flow/entity/transaction.dart";
 import "package:local_settings/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -23,6 +24,11 @@ class WidgetsLocalPreferences {
     buttonOrder = PrimitiveSettingsEntry<String>(
       key: "buttonOrder",
       preferences: _prefs,
+      initialValue: [
+        TransactionType.transfer,
+        TransactionType.income,
+        TransactionType.expense,
+      ].map((e) => e.value).join(","),
     );
   }
 

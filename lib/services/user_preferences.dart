@@ -10,6 +10,7 @@ import "package:flow/entity/user_preferences.dart";
 import "package:flow/entity/user_preferences/transaction_entry_flow.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
+import "package:flow/prefs/widgets.dart";
 import "package:flow/services/currency_registry.dart";
 import "package:flow/services/notifications.dart";
 import "package:flow/services/sync.dart";
@@ -17,6 +18,9 @@ import "package:flow/theme/color_themes/registry.dart";
 import "package:flutter/material.dart";
 import "package:home_widget/home_widget.dart";
 import "package:intl/intl.dart";
+import "package:logging/logging.dart";
+
+final Logger _log = Logger("UserPreferencesService");
 
 class UserPreferencesService {
   final ValueNotifier<UserPreferences> valueNotifier = ValueNotifier(
@@ -218,11 +222,7 @@ class UserPreferencesService {
   set transactionButtonOrder(List<TransactionType> order) {
     value.transactionButtonOrder = order;
 
-    try {
-      HomeWidget.updateWidget(name: "FlowTwoEntryWidget");
-    } catch (e) {
-      //
-    }
+    _updateButtonsWidgets(order);
 
     ObjectBox().box<UserPreferences>().put(value);
   }
@@ -269,6 +269,23 @@ class UserPreferencesService {
       _instance ??= UserPreferencesService._internal();
 
   UserPreferencesService._internal();
+
+  void _updateButtonsWidgets(List<TransactionType> order) async {
+    try {
+      await WidgetsLocalPreferences().buttonOrder.set(
+        order.map((e) => e.value).join(","),
+      );
+      final bool? succeeded = await HomeWidget.updateWidget(
+        name: "FlowTwoEntryWidget",
+        androidName: "TwoEntryWidgetReceiver",
+        qualifiedAndroidName:
+            "mn.flow.flow.receivers.widgets.TwoEntryWidgetReceiver",
+      );
+      _log.finest("Updated widgets button order to: $order $succeeded");
+    } catch (e) {
+      _log.warning("Failed to update widgets button order: $e");
+    }
+  }
 
   Future<void> initialize() async {
     final Completer<void> completer = Completer();
