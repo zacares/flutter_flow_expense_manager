@@ -4,6 +4,7 @@ import HomeWidgetGlanceStateDefinition
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.glance.GlanceId
@@ -26,68 +27,68 @@ import androidx.glance.preview.ExperimentalGlancePreviewApi
 import androidx.glance.preview.Preview
 import androidx.glance.state.GlanceStateDefinition
 import mn.flow.flow.R
+import java.util.Locale
+import java.util.Locale.getDefault
 
 class TwoEntry : GlanceAppWidget() {
-    override val stateDefinition: GlanceStateDefinition<*>
-        get() = HomeWidgetGlanceStateDefinition()
+  override val stateDefinition: GlanceStateDefinition<*>
+    get() = HomeWidgetGlanceStateDefinition()
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) {
-        provideContent {
-            GlanceTheme {
-                Content()
-            }
-        }
+  override suspend fun provideGlance(context: Context, id: GlanceId) {
+    provideContent {
+      GlanceTheme {
+        Content()
+      }
     }
+  }
 }
 
 private val defaultOrder = listOf(
-    "income",
-    "expense",
+  "income",
+  "expense",
 )
 
 private fun getButtonOrder(context: Context): List<String> {
-    val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-    var buttonOrder =
-        prefs.getString("flutter.flow.widgets.buttonOrder", null)?.split(",")
-            ?: defaultOrder
+  val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+  var buttonOrder =
+    prefs.getString("flutter.flow.widgets.buttonOrder", null)?.split(",")
+      ?: defaultOrder
 
-    print(buttonOrder)
+  if (!buttonOrder.containsAll(defaultOrder)) {
+    buttonOrder = defaultOrder
+  }
 
-    if (!buttonOrder.containsAll(defaultOrder)) {
-        buttonOrder = defaultOrder
-    }
-
-    return buttonOrder.filter { item -> item != "transfer" }
+  return buttonOrder.filter { item -> item != "transfer" }
 }
 
 @OptIn(ExperimentalGlancePreviewApi::class)
 @Composable
 @Preview
 private fun Content() {
-    val buttonOrder = getButtonOrder(LocalContext.current)
+  val buttonOrder = getButtonOrder(LocalContext.current)
 
-    Box(modifier = GlanceModifier.background(GlanceTheme.colors.widgetBackground)) {
-        Row(
-            modifier = GlanceModifier.fillMaxSize()
-                .padding(start = 12.dp, top = 12.dp, bottom = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            buttonOrder.forEach { operation ->
-                CircleIconButton(
-                    ImageProvider(if (operation == "expense") R.drawable.expense else R.drawable.income),
-                    backgroundColor = GlanceTheme.colors.primary,
-                    contentColor = GlanceTheme.colors.widgetBackground,
-                    contentDescription = "New ${operation.capitalize()}",
-                    onClick =
-                        actionStartActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                "flow-mn:///transaction/new?type=${operation}".toUri()
-                            )
-                        )
-                )
-                Spacer(GlanceModifier.padding(end = 12.dp))
-            }
-        }
+  Box(modifier = GlanceModifier.background(GlanceTheme.colors.widgetBackground)) {
+    Row(
+      modifier = GlanceModifier.fillMaxSize()
+        .padding(start = 12.dp, top = 12.dp, bottom = 12.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      buttonOrder.forEach { operation ->
+        CircleIconButton(
+          ImageProvider(if (operation.lowercase(getDefault()) == "expense") R.drawable.expense else R.drawable.income),
+          backgroundColor = GlanceTheme.colors.primary,
+          contentColor = GlanceTheme.colors.widgetBackground,
+          contentDescription = "New $operation",
+          onClick =
+            actionStartActivity(
+              Intent(
+                Intent.ACTION_VIEW,
+                "flow-mn:///transaction/new?type=${operation}".toUri()
+              )
+            )
+        )
+        Spacer(GlanceModifier.padding(end = 12.dp))
+      }
     }
+  }
 }
