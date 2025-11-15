@@ -7,7 +7,6 @@ import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/prefs/pending_transactions.dart";
 import "package:flow/prefs/transitive.dart";
-import "package:flow/prefs/widgets.dart";
 import "package:intl/intl.dart";
 import "package:local_settings/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -56,7 +55,6 @@ class LocalPreferences {
 
   late final PendingTransactionsLocalPreferences pendingTransactions;
   late final TransitiveLocalPreferences transitive;
-  late final WidgetsLocalPreferences widgets;
 
   /// Number of notifications issued by the app
   ///
@@ -156,7 +154,6 @@ class LocalPreferences {
       _prefs,
     );
     transitive = TransitiveLocalPreferences.initialize(_prefs);
-    widgets = WidgetsLocalPreferences.initialize(_prefs);
   }
 
   @Deprecated("Use UserPreferencesService().primaryCurrency instead")

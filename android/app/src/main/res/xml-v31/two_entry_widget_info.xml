@@ -3,4 +3,5 @@
   android:minHeight="40dp"
   android:targetCellHeight="1"
   android:targetCellWidth="2"
-  android:initialLayout="@layout/glance_default_loading_layout"></appwidget-provider>
+  android:initialLayout="@layout/glance_default_loading_layout">
+</appwidget-provider>

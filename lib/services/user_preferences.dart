@@ -10,7 +10,6 @@ import "package:flow/entity/user_preferences.dart";
 import "package:flow/entity/user_preferences/transaction_entry_flow.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
-import "package:flow/prefs/widgets.dart";
 import "package:flow/services/currency_registry.dart";
 import "package:flow/services/notifications.dart";
 import "package:flow/services/sync.dart";
@@ -272,17 +271,16 @@ class UserPreferencesService {
 
   void _updateButtonsWidgets(List<TransactionType> order) async {
     try {
-      await WidgetsLocalPreferences().buttonOrder.set(
-        order.map((e) => e.value).join(","),
-      );
+      final String value = order.map((e) => e.value).join(",");
+      await HomeWidget.saveWidgetData("buttonOrder", value);
       final bool? succeeded = await HomeWidget.updateWidget(
         name: "FlowTwoEntryWidget",
         iOSName: "FlowTwoEntryWidget",
-        androidName: "TwoEntryWidgetReceiver",
-        qualifiedAndroidName:
-            "mn.flow.flow.receivers.widgets.TwoEntryWidgetReceiver",
+        androidName: "TwoEntryReceiver",
+        qualifiedAndroidName: "mn.flow.flow.glance.TwoEntryReceiver",
       );
-      _log.finest("Updated widgets button order to: $order $succeeded");
+      if (succeeded != true) throw Exception("HomeWidget update failed");
+      _log.finest("Updated widgets button order to: $value");
     } catch (e) {
       _log.warning("Failed to update widgets button order: $e");
     }
@@ -310,6 +308,16 @@ class UserPreferencesService {
             }
           }
         });
+
+    unawaited(
+      completer.future
+          .then((_) {
+            _updateButtonsWidgets(transactionButtonOrder);
+          })
+          .catchError((e) {
+            _log.warning("Failed to update widgets button order on init: $e");
+          }),
+    );
 
     return completer.future;
   }

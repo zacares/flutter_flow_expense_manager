@@ -77,7 +77,7 @@
       android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
 
     <receiver
-      android:name=".receivers.widgets.TwoEntryWidgetReceiver"
+      android:name=".glance.TwoEntryReceiver"
       android:exported="true">
       <intent-filter>
         <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
