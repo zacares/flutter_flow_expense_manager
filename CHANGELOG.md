@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.16.5
+
+## New features
+
+* Now we have our initial widget for Android, yey!
+* Long-pressing on a date will prompt you to create a new transaction,
+  closes [#617](https://github.com/flow-mn/flow/issues/617)
+
 ## 0.16.4
 
 ## New features

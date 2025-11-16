@@ -272,6 +272,7 @@ class UserPreferencesService {
   void _updateButtonsWidgets(List<TransactionType> order) async {
     try {
       final String value = order.map((e) => e.value).join(",");
+      await HomeWidget.setAppGroupId("group.mn.flow.flow");
       await HomeWidget.saveWidgetData("buttonOrder", value);
       final bool? succeeded = await HomeWidget.updateWidget(
         name: "FlowTwoEntryWidget",
