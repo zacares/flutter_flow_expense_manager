@@ -17,6 +17,9 @@ import "package:flow/theme/color_themes/registry.dart";
 import "package:flutter/material.dart";
 import "package:home_widget/home_widget.dart";
 import "package:intl/intl.dart";
+import "package:logging/logging.dart";
+
+final Logger _log = Logger("UserPreferencesService");
 
 class UserPreferencesService {
   final ValueNotifier<UserPreferences> valueNotifier = ValueNotifier(
@@ -218,11 +221,7 @@ class UserPreferencesService {
   set transactionButtonOrder(List<TransactionType> order) {
     value.transactionButtonOrder = order;
 
-    try {
-      HomeWidget.updateWidget(name: "FlowTwoEntryWidget");
-    } catch (e) {
-      //
-    }
+    _updateButtonsWidgets(order);
 
     ObjectBox().box<UserPreferences>().put(value);
   }
@@ -270,6 +269,24 @@ class UserPreferencesService {
 
   UserPreferencesService._internal();
 
+  void _updateButtonsWidgets(List<TransactionType> order) async {
+    try {
+      final String value = order.map((e) => e.value).join(",");
+      await HomeWidget.setAppGroupId("group.mn.flow.flow");
+      await HomeWidget.saveWidgetData("buttonOrder", value);
+      final bool? succeeded = await HomeWidget.updateWidget(
+        name: "FlowTwoEntryWidget",
+        iOSName: "FlowTwoEntryWidget",
+        androidName: "TwoEntryReceiver",
+        qualifiedAndroidName: "mn.flow.flow.glance.TwoEntryReceiver",
+      );
+      if (succeeded != true) throw Exception("HomeWidget update failed");
+      _log.finest("Updated widgets button order to: $value");
+    } catch (e) {
+      _log.warning("Failed to update widgets button order: $e");
+    }
+  }
+
   Future<void> initialize() async {
     final Completer<void> completer = Completer();
 
@@ -292,6 +309,16 @@ class UserPreferencesService {
             }
           }
         });
+
+    unawaited(
+      completer.future
+          .then((_) {
+            _updateButtonsWidgets(transactionButtonOrder);
+          })
+          .catchError((e) {
+            _log.warning("Failed to update widgets button order on init: $e");
+          }),
+    );
 
     return completer.future;
   }
