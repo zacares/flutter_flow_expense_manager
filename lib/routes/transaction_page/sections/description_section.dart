@@ -27,6 +27,8 @@ class DescriptionSection extends StatefulWidget {
 }
 
 class _DescriptionSectionState extends State<DescriptionSection> {
+  final bool _hovering = false;
+
   @override
   Widget build(BuildContext context) {
     final bool noContent = widget.value == null || widget.value!.trim().isEmpty;
@@ -55,14 +57,16 @@ class _DescriptionSectionState extends State<DescriptionSection> {
               leading: Icon(Symbols.add_notes_rounded),
               trailing: const DirectionalChevron(),
             )
-          : GestureDetector(
-              behavior: HitTestBehavior.opaque,
+          : InkWell(
               onTap: () => showEditModal(context),
-              child: MarkdownView(
-                key: ValueKey(widget.value),
-                markdown: widget.value,
-                onChanged: widget.onChanged,
-                focusNode: widget.focusNode,
+              child: Container(
+                color: _hovering ? context.colorScheme.surfaceDim : null,
+                child: MarkdownView(
+                  key: ValueKey(widget.value),
+                  markdown: widget.value,
+                  onChanged: widget.onChanged,
+                  focusNode: widget.focusNode,
+                ),
               ),
             ),
     );

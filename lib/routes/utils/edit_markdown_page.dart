@@ -109,6 +109,7 @@ class _EditMarkdownPageState extends State<EditMarkdownPage> {
                     scrollController: _editorScrollController,
                     controller: _controller,
                     config: QuillEditorConfig(
+                      enableScribble: true,
                       customStyles: context.quillDefaultStyles,
                       placeholder: "transaction.description.placeholder".t(
                         context,
@@ -130,24 +131,28 @@ class _EditMarkdownPageState extends State<EditMarkdownPage> {
   }
 
   bool hasChanged() {
-    final String currentMarkdown = DeltaToMarkdown()
-        .convert(_controller.document.toDelta())
-        .trim();
+    try {
+      final String currentMarkdown = DeltaToMarkdown()
+          .convert(_controller.document.toDelta())
+          .trim();
 
-    if ((widget.initialValue?.trim() ?? "").isEmpty &&
-        currentMarkdown.isEmpty) {
+      if ((widget.initialValue?.trim() ?? "").isEmpty &&
+          currentMarkdown.isEmpty) {
+        return false;
+      }
+
+      final String initialMarkdown = DeltaToMarkdown()
+          .convert(
+            MarkdownToDelta(
+              markdownDocument: md.Document(encodeHtml: false),
+            ).convert(widget.initialValue?.trim() ?? ""),
+          )
+          .trim();
+
+      return currentMarkdown != initialMarkdown;
+    } catch (e) {
       return false;
     }
-
-    final String initialMarkdown = DeltaToMarkdown()
-        .convert(
-          MarkdownToDelta(
-            markdownDocument: md.Document(encodeHtml: false),
-          ).convert(widget.initialValue?.trim() ?? ""),
-        )
-        .trim();
-
-    return currentMarkdown != initialMarkdown;
   }
 }
 
