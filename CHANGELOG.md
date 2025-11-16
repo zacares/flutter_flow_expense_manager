@@ -5,8 +5,13 @@
 ## New features
 
 * Now we have our initial widget for Android, yey!
+* Home widgets now respects the Button Order settings.
 * Long-pressing on a date will prompt you to create a new transaction,
   closes [#617](https://github.com/flow-mn/flow/issues/617)
+
+## Fixes
+
+* Text selection is now transparent in the markdown editor
 
 ## 0.16.4
 
