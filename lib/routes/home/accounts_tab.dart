@@ -157,7 +157,6 @@ class _AccountsTabState extends State<AccountsTab>
             enabled: !_reordering,
             decoration: InputDecoration(
               hintText: "general.search".t(context),
-              filled: true,
               prefixIcon: const Icon(Symbols.search_rounded),
               suffixIcon: (_searchQuery.isNotEmpty)
                   ? IconButton(
