@@ -65,7 +65,7 @@ class _SelectTransactionTagsSheetState
     return ModalSheet.scrollable(
       title: Text("setup.transactionTags".t(context)),
       trailing: ModalOverflowBar(
-        alignment: MainAxisAlignment.end,
+        alignment: .end,
         children: [
           TextButton.icon(
             onPressed: () => context.pop(<TransactionTag>[]),

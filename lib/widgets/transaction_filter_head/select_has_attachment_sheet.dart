@@ -45,7 +45,7 @@ class _SelectHasAttachmentSheetState extends State<SelectHasAttachmentSheet> {
     return ModalSheet(
       title: Text("transactions.query.filter.hasAttachments".t(context)),
       trailing: ModalOverflowBar(
-        alignment: MainAxisAlignment.end,
+        alignment: .end,
         children: [
           TextButton.icon(
             onPressed: pop,

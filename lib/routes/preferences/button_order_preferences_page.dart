@@ -39,7 +39,7 @@ class ButtonOrderPreferencesPageState
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: .start,
               children: [
                 const SizedBox(height: 16.0),
                 InfoText(
@@ -49,11 +49,11 @@ class ButtonOrderPreferencesPageState
                 ),
                 const SizedBox(height: 16.0),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: .center,
                   children: transactionButtonOrder
                       .map(
                         (transactionType) => Container(
-                          margin: EdgeInsets.only(
+                          margin: .only(
                             left: 8.0,
                             right: 8.0,
                             top:
@@ -65,9 +65,9 @@ class ButtonOrderPreferencesPageState
                                 : 0.0,
                           ),
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(widget.radius),
+                            borderRadius: .all(widget.radius),
                           ),
-                          clipBehavior: Clip.none,
+                          clipBehavior: .none,
                           child: DottedBorder(
                             options: RoundedRectDottedBorderOptions(
                               color: Theme.of(
@@ -75,7 +75,7 @@ class ButtonOrderPreferencesPageState
                               ).dividerColor.withAlpha(0x80),
                               strokeWidth: 4.0,
                               radius: widget.radius,
-                              strokeCap: StrokeCap.round,
+                              strokeCap: .round,
                               dashPattern: const [6.0, 10.0],
                             ),
                             child: DragTarget<TransactionType>(

@@ -97,7 +97,7 @@ class ModalSheet extends StatelessWidget {
                 height: 6.0,
                 decoration: BoxDecoration(
                   color: context.colorScheme.onSurface.withAlpha(0x80),
-                  borderRadius: BorderRadius.circular(24.0),
+                  borderRadius: .circular(24.0),
                 ),
               ),
             SizedBox(height: titleSpacing),

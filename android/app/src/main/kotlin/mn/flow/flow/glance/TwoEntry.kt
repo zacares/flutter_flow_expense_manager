@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.core.net.toUri
 import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
@@ -36,6 +37,7 @@ import androidx.glance.preview.Preview
 import androidx.glance.state.GlanceStateDefinition
 import mn.flow.flow.R
 import java.util.Locale.getDefault
+import kotlin.math.min
 
 class TwoEntry : GlanceAppWidget() {
   override val sizeMode = SizeMode.Exact
@@ -71,12 +73,12 @@ private fun getButtonOrder(prefs: SharedPreferences?): List<String> {
 
 @OptIn(ExperimentalGlancePreviewApi::class)
 @Composable
-@Preview
+@Preview(widthDp = 100, heightDp = 50)
 private fun Content(context: Context, currentState: HomeWidgetGlanceState) {
   val buttonOrder = getButtonOrder(currentState?.preferences)
 
   val size = LocalSize.current
-  val buttonSize = size.height - 32.dp
+  val buttonSize = min((size.width / 2 - 24.dp), (size.height - 16.dp))
   val iconSize = buttonSize * 2 / 3
 
   Box(
@@ -84,11 +86,11 @@ private fun Content(context: Context, currentState: HomeWidgetGlanceState) {
     contentAlignment = Alignment.Center
   ) {
     Row(
-      modifier = GlanceModifier.padding(12.dp),
+      modifier = GlanceModifier.padding(8.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
       buttonOrder.forEachIndexed { index, operation ->
-        Box(modifier = GlanceModifier.padding(end = if (index == 0) 12.dp else 0.dp)) {
+        Box(modifier = GlanceModifier.padding(end = if (index == 0) 8.dp else 0.dp)) {
           Box(
             modifier = GlanceModifier
               .background(GlanceTheme.colors.primary)

@@ -295,10 +295,10 @@ Future<Uint8List> generatePDFContent({
         pw.Padding(
           padding: pw.EdgeInsets.symmetric(vertical: 12.0),
           child: pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: .spaceBetween,
             children: [
               pw.Row(
-                mainAxisSize: pw.MainAxisSize.min,
+                mainAxisSize: .min,
                 children: [
                   pw.Image(
                     pw.MemoryImage(imageBytes),
@@ -310,7 +310,7 @@ Future<Uint8List> generatePDFContent({
                 ],
               ),
               pw.Column(
-                mainAxisSize: pw.MainAxisSize.min,
+                mainAxisSize: .min,
                 children: [
                   pw.Opacity(
                     opacity: 0.5,

@@ -40,7 +40,7 @@ class _TransactionSearchSheetState extends State<TransactionSearchSheet> {
     return ModalSheet.scrollable(
       title: Text("transactions.query.filter.keyword".t(context)),
       trailing: ModalOverflowBar(
-        alignment: MainAxisAlignment.end,
+        alignment: .end,
         children: [
           TextButton.icon(
             onPressed: clear,
@@ -57,7 +57,7 @@ class _TransactionSearchSheetState extends State<TransactionSearchSheet> {
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: .start,
           children: [
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,

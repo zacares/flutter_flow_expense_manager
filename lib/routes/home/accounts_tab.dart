@@ -126,7 +126,7 @@ class _AccountsTabState extends State<AccountsTab>
 
   Widget buildHeader(BuildContext context, {bool hasSearchBar = false}) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       spacing: 16.0,
       children: [
         Row(
@@ -157,7 +157,6 @@ class _AccountsTabState extends State<AccountsTab>
             enabled: !_reordering,
             decoration: InputDecoration(
               hintText: "general.search".t(context),
-              filled: true,
               prefixIcon: const Icon(Symbols.search_rounded),
               suffixIcon: (_searchQuery.isNotEmpty)
                   ? IconButton(

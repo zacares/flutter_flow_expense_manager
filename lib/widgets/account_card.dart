@@ -32,7 +32,7 @@ class AccountCard extends StatelessWidget {
     required this.account,
     required this.useCupertinoContextMenu,
     this.onTapOverride,
-    this.borderRadius = const BorderRadius.all(Radius.circular(24.0)),
+    this.borderRadius = const .all(Radius.circular(24.0)),
     required this.excludeTransfersInTotal,
   });
 
@@ -62,7 +62,7 @@ class AccountCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Row(
@@ -74,7 +74,7 @@ class AccountCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8.0),
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: .start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(

@@ -61,7 +61,7 @@ class SelectTimeRangeModeSheet extends StatelessWidget {
     return ModalSheet.scrollable(
       title: Text("select.timeRange".t(context)),
       trailing: ModalOverflowBar(
-        alignment: MainAxisAlignment.end,
+        alignment: .end,
         children: [
           TextButton.icon(
             onPressed: () => context.pop(null),
@@ -72,7 +72,7 @@ class SelectTimeRangeModeSheet extends StatelessWidget {
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),

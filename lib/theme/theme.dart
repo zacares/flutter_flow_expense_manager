@@ -181,7 +181,7 @@ class ThemeFactory {
         selectionHandleColor: colorScheme.primary,
       ),
       inputDecorationTheme: InputDecorationThemeData(
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+        border: OutlineInputBorder(borderRadius: .circular(8.0)),
         isDense: true,
         hintStyle: textTheme.labelLarge?.copyWith(
           color: textTheme.labelLarge?.color?.withAlpha(0x80),
