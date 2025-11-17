@@ -63,9 +63,7 @@ class _NewTransactionButtonState extends State<NewTransactionButton> {
               message: "transaction.new".t(context),
               child: Material(
                 color: navbarTheme.transactionButtonBackgroundColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(32.0),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: .circular(32.0)),
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: AnimatedRotation(

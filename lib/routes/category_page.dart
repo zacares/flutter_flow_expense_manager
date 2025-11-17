@@ -140,7 +140,7 @@ class _CategoryPageState extends State<CategoryPage> {
         );
 
         final Widget header = Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: .center,
           children: [
             Frame(
               child: TimeRangeSelector(

@@ -188,7 +188,7 @@ class _AccountEditPageState extends State<AccountEditPage> {
                 ),
                 const SizedBox(height: 48.0),
                 InkWell(
-                  borderRadius: BorderRadius.circular(16.0),
+                  borderRadius: .circular(16.0),
                   onTap: updateBalance,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),

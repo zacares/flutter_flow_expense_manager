@@ -29,7 +29,7 @@ class TagsSection extends StatelessWidget {
                   child: Align(
                     alignment: AlignmentDirectional.topStart,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: .start,
                       spacing: 8.0,
                       children: [
                         IgnorePointer(

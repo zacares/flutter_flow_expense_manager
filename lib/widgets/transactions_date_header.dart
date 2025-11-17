@@ -121,13 +121,13 @@ class _TransactionListDateHeaderState extends State<TransactionListDateHeader> {
 
         return Row(
           mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: .spaceBetween,
+          crossAxisAlignment: .center,
           children: [
             Flexible(
               fit: FlexFit.tight,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DefaultTextStyle(

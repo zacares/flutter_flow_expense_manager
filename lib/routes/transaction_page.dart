@@ -172,9 +172,9 @@ class _TransactionPageState extends State<TransactionPage> {
           widget.params?.transactionDate ?? DateTime.now();
       _transactionType = widget.params?.type ?? TransactionType.expense;
       _amount = switch (_transactionType) {
-        TransactionType.transfer => widget.params?.amount?.abs() ?? 0.0,
-        TransactionType.expense => -(widget.params?.amount ?? 0.0),
-        TransactionType.income => widget.params?.amount?.abs() ?? 0.0,
+        .transfer => widget.params?.amount?.abs() ?? 0.0,
+        .expense => -(widget.params?.amount ?? 0.0),
+        .income => widget.params?.amount?.abs() ?? 0.0,
       };
       _selectedAccountTransferTo = widget.params?.toAccountUuid == null
           ? null
@@ -504,7 +504,7 @@ class _TransactionPageState extends State<TransactionPage> {
                         Section(
                           title: "transaction.location".t(context),
                           child: Padding(
-                            padding: const EdgeInsets.all(16.0),
+                            padding: const .all(16.0),
                             child: _geo == null
                                 ? Container(
                                     decoration: BoxDecoration(
@@ -514,7 +514,7 @@ class _TransactionPageState extends State<TransactionPage> {
                                         ),
                                       ),
                                       shape: BoxShape.rectangle,
-                                      borderRadius: BorderRadius.circular(8.0),
+                                      borderRadius: .circular(8.0),
                                     ),
                                     child: AspectRatio(
                                       aspectRatio: 1.0,
@@ -537,9 +537,7 @@ class _TransactionPageState extends State<TransactionPage> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       ClipRRect(
-                                        borderRadius: BorderRadius.circular(
-                                          8.0,
-                                        ),
+                                        borderRadius: .circular(8.0),
                                         child: AspectRatio(
                                           aspectRatio: 1.0,
                                           child: OpenStreetMap(

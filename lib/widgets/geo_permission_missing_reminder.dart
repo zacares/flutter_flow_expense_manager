@@ -27,7 +27,7 @@ class _GeoPermissionMissingReminderState
       onTap: openGeoSettings,
       child: Frame.standalone(
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: .center,
           children: [
             Icon(
               Symbols.warning_rounded,

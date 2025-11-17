@@ -30,7 +30,7 @@ class TypeSelector extends StatelessWidget {
         underline: SizedBox.shrink(),
         icon: const Icon(Symbols.arrow_drop_down_rounded),
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: .circular(8.0),
         value: current,
         enableFeedback: LocalPreferences().enableHapticFeedback.get(),
         elevation: 2,

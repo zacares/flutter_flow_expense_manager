@@ -194,7 +194,7 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: .circular(8.0),
                           child: AspectRatio(
                             aspectRatio: 1.0,
                             child: OpenStreetMap(

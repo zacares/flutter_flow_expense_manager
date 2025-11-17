@@ -49,7 +49,7 @@ class _TransactionEntryFlowPreferencesPageState
       ),
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: .start,
           children: [
             Frame(
               child: InfoText(

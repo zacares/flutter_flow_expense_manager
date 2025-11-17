@@ -144,7 +144,7 @@ class _AccountPageState extends State<AccountPage> {
         const double firstHeaderTopPadding = 0.0;
 
         final Widget header = Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: .center,
           children: [
             Frame(
               child: TimeRangeSelector(

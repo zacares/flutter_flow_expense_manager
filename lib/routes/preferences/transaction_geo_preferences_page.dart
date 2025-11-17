@@ -67,7 +67,7 @@ class _TransactionGeoPreferencesPageState
           return SingleChildScrollView(
             child: SafeArea(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 children: [
                   const SizedBox(height: 16.0),
                   SwitchListTile(

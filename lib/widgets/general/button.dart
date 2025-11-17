@@ -25,7 +25,7 @@ class Button extends StatelessWidget {
     this.trailing,
     this.backgroundColor,
     this.padding = const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-    this.borderRadius = const BorderRadius.all(Radius.circular(16.0)),
+    this.borderRadius = const .all(Radius.circular(16.0)),
   });
 
   @override

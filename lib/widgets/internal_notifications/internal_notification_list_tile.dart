@@ -37,7 +37,7 @@ class ActionableNotificationListTile extends StatelessWidget {
       ],
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: .end,
         children: [
           Row(
             spacing: 12.0,
@@ -45,7 +45,7 @@ class ActionableNotificationListTile extends StatelessWidget {
               FlowIcon(icon, plated: true, size: 32.0),
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: .start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(

@@ -126,7 +126,7 @@ class _AccountsTabState extends State<AccountsTab>
 
   Widget buildHeader(BuildContext context, {bool hasSearchBar = false}) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       spacing: 16.0,
       children: [
         Row(

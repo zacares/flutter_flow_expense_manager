@@ -49,7 +49,7 @@ class ImportSuccess extends StatelessWidget {
           if (!setupMode) ...[
             const SizedBox(height: 16.0),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: .start,
               children: [
                 Icon(
                   Symbols.info_rounded,

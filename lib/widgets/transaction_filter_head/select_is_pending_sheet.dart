@@ -44,7 +44,7 @@ class _SelectIsPendingSheetState extends State<SelectIsPendingSheet> {
     return ModalSheet(
       title: Text("transactions.query.filter.isPending".t(context)),
       trailing: ModalOverflowBar(
-        alignment: MainAxisAlignment.end,
+        alignment: .end,
         children: [
           TextButton.icon(
             onPressed: pop,
