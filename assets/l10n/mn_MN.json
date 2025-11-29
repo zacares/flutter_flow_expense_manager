@@ -493,6 +493,8 @@
   "sync.export.onDeviceWarning": "Таны нөөцөлсөн өгөгдөл аппыг устгах болон утасны өгөгдлийг шинэчлэх үед хамт устахыг анхаарна уу!",
   "sync.export.pdf.accounts": "Дансууд",
   "sync.export.pdf.accounts.selected": "Сонгосон {n}, (нийт {total})",
+  "sync.export.pdf.categories": "Ангилалууд",
+  "sync.export.pdf.categories.selected": "Сонгосон {n}, (нийт {total})",
   "sync.export.pdf.header": "Flow - Гүйлгээний түүх (албан бус , {range})",
   "sync.export.pdf.notice[0]": "Үүсгэсэн: ",
   "sync.export.pdf.notice[1]": ". Энэ нь хууль ёсны баримт бичиг биш юм. Энэ нь санхүүгийн тайлан биш юм. Энэ нь ямар нэгэн байдлаар бодит байдлыг илэрхийлэхгүй болно. Зөвхөн хувийн хэрэглээнд зориулагдсан болно.",

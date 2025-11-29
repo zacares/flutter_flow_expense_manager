@@ -1,28 +1,38 @@
 # Changelog
 
+## Next
+
+### New features
+
+* Now you can select categories when exporting PDFs
+
+### Fixes
+
+* Android widget now opens the app (I'm really sorry, it was working when I tested)
+
 ## 0.16.5
 
-## New features
+### New features
 
 * Now we have our initial widget for Android, yey!
 * Home widgets now respects the Button Order settings.
 * Long-pressing on a date will prompt you to create a new transaction,
   closes [#617](https://github.com/flow-mn/flow/issues/617)
 
-## Fixes
+### Fixes
 
 * Text selection is now transparent in the markdown editor
 
 ## 0.16.4
 
-## New features
+### New features
 
 * Now we have a very basic iOS widget, which I plan to improve later, part of
   [#411](https://github.com/flow-mn/flow/issues/411)
 * Now you can search accounts in the accounts tab if you have more than
   4 accounts, closes [#607](https://github.com/flow-mn/flow/issues/607)
 
-## Fixes
+### Fixes
 
 * Fixed setup preset accounts always having USD currency thanks to Duluu
 * Fixed long text getting clipped in home screen actionable reminders [#608](https://github.com/flow-mn/flow/issues/608)
