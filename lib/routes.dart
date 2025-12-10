@@ -62,7 +62,11 @@ import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
 import "package:moment_dart/moment_dart.dart";
 
-final router = GoRouter(
+final GlobalKey<NavigatorState> globalNavigatorKey =
+    GlobalKey<NavigatorState>();
+
+final GoRouter router = GoRouter(
+  navigatorKey: globalNavigatorKey,
   errorBuilder: (context, state) => ErrorPage(error: state.error?.toString()),
   routes: [
     GoRoute(path: "/", builder: (context, state) => const HomePage()),

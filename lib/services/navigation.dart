@@ -26,7 +26,11 @@ class NavigationService {
   }
 
   void add(String path) {
-    if (_pendingStack.value.contains(path)) return;
+    if (_pendingStack.value.contains(path)) {
+      _pendingStack.value = [..._pendingStack.value];
+      _log.finer("Path already in pending stack, ignoring: $path");
+      return;
+    }
 
     _pendingStack.value = [..._pendingStack.value, path];
   }
@@ -36,7 +40,10 @@ class NavigationService {
   }
 
   Future<void> consume(Future<bool> Function(String path) onConsume) async {
-    if (_pendingStack.value.isEmpty) return;
+    if (_pendingStack.value.isEmpty) {
+      _log.finer("No pending navigation paths to consume");
+      return;
+    }
 
     final String first = _pendingStack.value.first;
     _pendingStack.value = _pendingStack.value.sublist(1);
@@ -50,8 +57,6 @@ class NavigationService {
     }
   }
 
-  static bool _cold = true;
-
   void _addRawUriWithDelay(Uri? uri) {
     if (uri == null) return;
 
@@ -63,14 +68,7 @@ class NavigationService {
     }
 
     if (uri.pathSegments.join("/") == "transaction/new") {
-      Future.delayed(
-        _cold
-            ? const Duration(milliseconds: 500)
-            : const Duration(milliseconds: 200),
-      ).then((_) {
-        NavigationService().add("/transaction/new?${uri.query}");
-      });
-      _cold = false;
+      NavigationService().add("/transaction/new?${uri.query}");
       return;
     }
   }
