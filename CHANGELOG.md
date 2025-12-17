@@ -1,10 +1,11 @@
 # Changelog
 
-## Next
+## 0.16.6
 
 ### New features
 
 * Now you can select categories when exporting PDFs
+* New theme: Monochrome for those who resemble Wednesday
 
 ### Fixes
 
