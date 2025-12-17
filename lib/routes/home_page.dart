@@ -246,7 +246,7 @@ class _HomePageState extends State<HomePage>
         throw "GoRouter is null";
       }
 
-      goRouter.go(path);
+      await goRouter.push(path);
 
       return true;
     } catch (e) {
