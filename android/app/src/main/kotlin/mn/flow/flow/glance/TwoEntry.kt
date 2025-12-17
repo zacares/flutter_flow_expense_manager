@@ -37,7 +37,6 @@ import androidx.glance.preview.Preview
 import androidx.glance.state.GlanceStateDefinition
 import mn.flow.flow.R
 import java.util.Locale.getDefault
-import kotlin.math.min
 
 class TwoEntry : GlanceAppWidget() {
   override val sizeMode = SizeMode.Exact
@@ -97,14 +96,13 @@ private fun Content(context: Context, currentState: HomeWidgetGlanceState) {
               .width(buttonSize)
               .height(buttonSize)
               .cornerRadius(999.dp)
-              .clickable {
-                actionStartActivity(
-                  Intent(
-                    Intent.ACTION_VIEW,
-                    "flow-mn:///transaction/new?type=${operation}".toUri()
-                  )
+              .clickable(
+                onClick = actionStartActivity(
+                  Intent(Intent.ACTION_VIEW, "flow-mn:///transaction/new?type=${operation}".toUri()).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                  }
                 )
-              },
+              ),
             contentAlignment = Alignment.Center
           ) {
             Image(

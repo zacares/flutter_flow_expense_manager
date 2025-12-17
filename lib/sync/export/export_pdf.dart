@@ -23,11 +23,13 @@ import "package:pdf/widgets.dart" as pw;
 class ExportPdfOptions {
   final TimeRange timeRange;
   final List<Account>? whitelistedAccounts;
+  final List<Category>? whitelistedCategories;
   final bool useA4;
 
   const ExportPdfOptions({
     required this.timeRange,
     this.whitelistedAccounts,
+    this.whitelistedCategories,
     this.useA4 = true,
   });
 }
@@ -79,6 +81,18 @@ Future<Uint8List> generatePDFContent({
   final List<Transaction> transactions = await TransactionsService().findMany(
     filter,
   );
+
+  if (options.whitelistedCategories != null) {
+    final Set<String> whitelistedCategoriesUuids = options
+        .whitelistedCategories!
+        .map((category) => category.uuid)
+        .toSet();
+
+    transactions.retainWhere(
+      (transaction) =>
+          whitelistedCategoriesUuids.contains(transaction.categoryUuid),
+    );
+  }
 
   /// TODO @sadespresso maybe ask user to download missing fonts?
   // final Map<String, bool> potentialMissingFonts = {

@@ -6,6 +6,7 @@ import "package:flow/entity/account.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/prefs/local_preferences.dart";
+import "package:flow/routes.dart";
 import "package:flow/routes/home/accounts_tab.dart";
 import "package:flow/routes/home/home_tab.dart";
 import "package:flow/routes/home/profile_tab.dart";
@@ -60,7 +61,7 @@ class _HomePageState extends State<HomePage>
       });
     });
 
-    Future.delayed(const Duration(milliseconds: 200)).then((_) {
+    Future.delayed(const Duration(milliseconds: 250)).then((_) {
       if (!mounted) return;
 
       NavigationService().pendingStack.addListener(
@@ -233,10 +234,20 @@ class _HomePageState extends State<HomePage>
   }
 
   Future<bool> _consumePendingNavigation(String path) async {
-    if (!mounted) return false;
-
     try {
-      unawaited(context.push(path));
+      final BuildContext? globalNavigatorContext =
+          globalNavigatorKey.currentState?.context;
+      if (globalNavigatorContext == null) {
+        throw "Global navigator context is null";
+      }
+
+      final goRouter = GoRouter.maybeOf(globalNavigatorContext);
+      if (goRouter == null) {
+        throw "GoRouter is null";
+      }
+
+      goRouter.go(path);
+
       return true;
     } catch (e) {
       return false;

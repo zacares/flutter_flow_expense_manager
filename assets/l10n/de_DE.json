@@ -493,6 +493,8 @@
   "sync.export.onDeviceWarning": "Alle Sicherungen werden auf deinem Gerät gespeichert. Das heißt, wenn du Flow deinstallierst oder dein Gerät zurücksetzt, sind alle Sicherungen weg!",
   "sync.export.pdf.accounts": "Konten",
   "sync.export.pdf.accounts.selected": "Ausgewählt {n} (von {total})",
+  "sync.export.pdf.categories": "Kategorien",
+  "sync.export.pdf.categories.selected": "Ausgewählt: {n} (von {total})",
   "sync.export.pdf.header": "Flow - Persönliche Finanzaufzeichnungen (inoffiziell, {range})",
   "sync.export.pdf.notice[0]": "Erstellt von ",
   "sync.export.pdf.notice[1]": ". Dies ist kein rechtliches Dokument. Dies ist keine Finanzaufstellung. Dies ist keine Quittung. Dies stellt in keiner Weise die Realität dar. Es ist ausschließlich für den persönlichen Gebrauch bestimmt.",

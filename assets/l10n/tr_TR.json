@@ -493,6 +493,8 @@
   "sync.export.onDeviceWarning": "Tüm yedeklemeler cihazda saklanır, yani Flow'u kaldırdığınızda veya cihazınızı sıfırladığınızda tüm yedeklemeler kaybolacaktır!",
   "sync.export.pdf.accounts": "Hesaplar",
   "sync.export.pdf.accounts.selected": "Seçilen {n} (toplam {total})",
+  "sync.export.pdf.categories": "Kategoriler",
+  "sync.export.pdf.categories.selected": "Seçilen {n} (toplam {total} içinden)",
   "sync.export.pdf.header": "Flow - Kişisel finansal kayıtlar (resmi olmayan, {range})",
   "sync.export.pdf.notice[0]": "Tarafından oluşturuldu ",
   "sync.export.pdf.notice[1]": ". Bu bir yasal belge değildir. Bu bir finansal tablo değildir. Bu bir makbuz değildir. Bu hiçbir şekilde gerçeği temsil etmez. Bu yalnızca kişisel kullanım için tasarlanmıştır.",
