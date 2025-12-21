@@ -72,7 +72,6 @@ income. Consider helping Flow! Here are some suggestions:
 * Leave a review on [Google Play](https://play.google.com/store/apps/details?id=mn.flow.flow)
   and [App Store](https://apps.apple.com/mn/app/flow-expense-tracker/id6477741670)
 * Tell a friend
-* Send me BTC `bc1qjf74ptmjdv2x7jep785s9rxvwgnrgn6ahxwsg8`
 * [Buy me a coffee](https://buymeacoffee.com/sadespresso)
   <!-- markdownlint-disable-next-line -->
   <a href="https://www.buymeacoffee.com/sadespresso"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=☕&slug=sadespresso&button_colour=BD5FFF&font_colour=ffffff&font_family=Lato&outline_colour=000000&coffee_colour=FFDD00" /></a>
