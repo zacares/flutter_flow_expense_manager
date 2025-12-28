@@ -4,10 +4,13 @@ class TransactionProgrammableObject {
   final String? title;
   final double? amount;
   final String? fromAccountUuid;
+  final String? fromAccount;
   final String? toAccountUuid;
+  final String? toAccount;
   final TransactionType? type;
   final DateTime? transactionDate;
   final String? categoryUuid;
+  final String? category;
   final String? notes;
 
   /// Only applicable if the type is "transfer" and the accounts have different
@@ -20,16 +23,19 @@ class TransactionProgrammableObject {
   final bool? isPending;
 
   const TransactionProgrammableObject({
-    required this.transactionDate,
-    required this.categoryUuid,
-    required this.notes,
-    required this.title,
-    required this.amount,
-    required this.fromAccountUuid,
-    required this.toAccountUuid,
-    required this.type,
-    required this.isPending,
-    required this.transferConversionRate,
+    this.transactionDate,
+    this.categoryUuid,
+    this.category,
+    this.notes,
+    this.title,
+    this.amount,
+    this.fromAccountUuid,
+    this.fromAccount,
+    this.toAccountUuid,
+    this.toAccount,
+    this.type,
+    this.isPending,
+    this.transferConversionRate,
   });
 
   Map<String, String> toMap() {
@@ -38,11 +44,14 @@ class TransactionProgrammableObject {
       map["transactionDate"] = transactionDate!.toIso8601String();
     }
     if (categoryUuid != null) map["categoryUuid"] = categoryUuid!;
+    if (category != null) map["category"] = category!;
     if (notes != null) map["notes"] = notes!;
     if (title != null) map["title"] = title!;
     if (amount != null) map["amount"] = amount!.toString();
     if (fromAccountUuid != null) map["fromAccountUuid"] = fromAccountUuid!;
+    if (fromAccount != null) map["fromAccount"] = fromAccount!;
     if (toAccountUuid != null) map["toAccountUuid"] = toAccountUuid!;
+    if (toAccount != null) map["toAccount"] = toAccount!;
     if (type != null) map["type"] = type!.name;
     if (isPending != null) map["isPending"] = isPending! ? "true" : "false";
     if (transferConversionRate != null) {
@@ -51,10 +60,10 @@ class TransactionProgrammableObject {
     return map;
   }
 
-  static TransactionProgrammableObject fromUri(Uri uri) {
+  static TransactionProgrammableObject? fromUri(Uri uri) {
     final params = uri.queryParameters;
 
-    return parse(params);
+    return tryParse(params);
   }
 
   static TransactionProgrammableObject parse(Map<String, String> params) {
@@ -63,13 +72,16 @@ class TransactionProgrammableObject {
           ? DateTime.tryParse(params["transactionDate"]!)
           : null,
       categoryUuid: params["categoryUuid"],
+      category: params["category"],
       notes: params["notes"],
       title: params["title"],
       amount: params["amount"] != null
           ? double.tryParse(params["amount"]!)
           : null,
       fromAccountUuid: params["fromAccountUuid"],
+      fromAccount: params["fromAccount"],
       toAccountUuid: params["toAccountUuid"],
+      toAccount: params["toAccount"],
       type: params["type"] != null
           ? TransactionType.values.byName(params["type"]!)
           : null,

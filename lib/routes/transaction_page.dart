@@ -265,7 +265,13 @@ class _TransactionPageState extends State<TransactionPage> {
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: CallbackShortcuts(
         bindings: {
-          const SingleActivator(LogicalKeyboardKey.escape): () => pop(),
+          const SingleActivator(LogicalKeyboardKey.escape): () {
+            if (!hasChanged()) {
+              pop();
+            } else {
+              HapticFeedback.mediumImpact();
+            }
+          },
           osSingleActivator(LogicalKeyboardKey.enter): () => save(),
           osSingleActivator(LogicalKeyboardKey.numpadEnter): () => save(),
         },
@@ -1231,7 +1237,7 @@ class _TransactionPageState extends State<TransactionPage> {
       }
     }
 
-    context.pop();
+    pop();
   }
 
   void save() {
@@ -1285,7 +1291,7 @@ class _TransactionPageState extends State<TransactionPage> {
       );
     }
 
-    context.pop();
+    pop();
   }
 
   bool hasChanged() {

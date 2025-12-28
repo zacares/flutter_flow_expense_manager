@@ -33,6 +33,61 @@ seamlessly across platforms.
   * Export CSV, PDFs
   * Periodic auto-backups to iCloud
 * Absolutely free ([please donate 🥺](#support-flow))
+* [URI-based automation](#uri-based-automation)
+
+## URI-based automation
+
+You can add one or more transactions using `flow-mn` schema uris.
+
+Check out the supported [JSON Schema file in schemas folder](./schemas/programmable-object.json).
+
+Currencies are based on the account, so there's no way to specify it at the moment.
+
+### Adding single transaction
+
+When adding single transactions, properties must be provided as query params.
+
+```json
+{
+  "title": "Tous les jours",
+  "amount": 42000.00
+}
+```
+
+turns into:
+
+```plain
+flow-mn:///transaction/new?title=Tous+les+jours&amount=42000.00
+```
+
+### Adding multiple transactions
+
+When adding multiple transactions, you must provide stringified version of the following as "json" query param.
+
+```json
+{
+  "t": [
+    {
+      "title": "Fresh blueberry piece",
+      "amount": "13000.00",
+      "transactionDate": "2011-12-05",
+      "category": "Food"
+    },
+    {
+      "title": "Caffe Mocha ice",
+      "amount": "10000.00",
+      "transactionDate": "2011-12-05",
+      "category": "Drinks"
+    }
+  ]
+}
+```
+
+turns into
+
+```plain
+flow-mn:///transaction/new?json=%7B%22t%22%3A%5B%7B%22title%22%3A%22Fresh%20blueberry%20piece%22%2C%22amount%22%3A%2213000.00%22%2C%22transactionDate%22%3A%222011-12-05%22%2C%22category%22%3A%22Food%22%7D%2C%7B%22title%22%3A%22Caffe%20Mocha%20ice%22%2C%22amount%22%3A%2210000.00%22%2C%22transactionDate%22%3A%222011-12-05%22%2C%22category%22%3A%22Drinks%22%7D%5D%7D
+```
 
 ## Development
 

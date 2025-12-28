@@ -1,5 +1,11 @@
 # Changelog
 
+## Next
+
+### New features
+
+* Now you can import multiple transactions at once with
+
 ## 0.16.6
 
 ### New features
