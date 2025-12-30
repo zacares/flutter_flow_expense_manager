@@ -7,6 +7,7 @@ import "package:flow/widgets/file_attachment_add_list_tile.dart";
 import "package:flow/widgets/file_attachment_list_tile.dart";
 import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/general/info_text.dart";
+import "package:flow/widgets/sheets/select_file_attachment_sheet.dart";
 import "package:flutter/material.dart";
 import "package:share_plus/share_plus.dart";
 
@@ -23,10 +24,10 @@ class FilesSection extends StatefulWidget {
   });
 
   @override
-  State<FilesSection> createState() => _FilesSectionState();
+  State<FilesSection> createState() => FilesSectionState();
 }
 
-class _FilesSectionState extends State<FilesSection> {
+class FilesSectionState extends State<FilesSection> {
   int? totalSizeInBytes;
 
   @override
@@ -53,7 +54,7 @@ class _FilesSectionState extends State<FilesSection> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          FileAttachmentAddListTile(onFilesPicked: widget.onAdd),
+          FileAttachmentAddListTile(onTap: pickFile),
           ...?widget.attachments?.map(
             (file) => FileAttachmentListTile(
               fileAttachment: file,
@@ -77,6 +78,16 @@ class _FilesSectionState extends State<FilesSection> {
         ],
       ),
     );
+  }
+
+  Future<void> pickFile() async {
+    final List<XFile>? files = await showModalBottomSheet(
+      context: context,
+      builder: (context) => const SelectFileAttachmentSheet(),
+    );
+    if (files != null) {
+      widget.onAdd(files);
+    }
   }
 
   void share(FileAttachment file) async {

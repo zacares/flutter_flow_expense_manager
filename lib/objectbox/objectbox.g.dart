@@ -1420,6 +1420,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
           rootOffset,
           36,
         );
+        final locationParam = const fb.ListReader<double>(
+          fb.Float32Reader(),
+          lazy: false,
+        ).vTableGetNullable(buffer, rootOffset, 46);
         final amountParam = const fb.Float64Reader().vTableGet(
           buffer,
           rootOffset,
@@ -1449,6 +1453,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 description: descriptionParam,
                 subtype: subtypeParam,
                 isPending: isPendingParam,
+                location: locationParam,
                 amount: amountParam,
                 currency: currencyParam,
                 uuid: uuidParam,
@@ -1473,10 +1478,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
               ..deletedDate = deletedDateValue == null
                   ? null
                   : DateTime.fromMillisecondsSinceEpoch(deletedDateValue)
-              ..location = const fb.ListReader<double>(
-                fb.Float32Reader(),
-                lazy: false,
-              ).vTableGetNullable(buffer, rootOffset, 46)
               ..tagsUuids = const fb.ListReader<String>(
                 fb.StringReader(asciiOptimization: true),
                 lazy: false,
