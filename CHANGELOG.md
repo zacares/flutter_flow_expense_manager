@@ -4,7 +4,8 @@
 
 ### New features
 
-* Now you can import multiple transactions at once with
+* Now you can import multiple transactions at once with [programmable URL](./README.md#adding-multiple-transactions)
+* Now there's a concept of primary accounts, closes [#624](https://github.com/flow-mn/flow/issues/624)
 
 ## 0.16.6
 

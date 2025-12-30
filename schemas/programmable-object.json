@@ -99,6 +99,40 @@
           "null"
         ],
         "description": "Indicates whether the transaction is pending. If the transactionDate is in the future, this is set to true automatically."
+      },
+      "tags": {
+        "type": [
+          "array",
+          "null"
+        ],
+        "items": {
+          "type": "string"
+        },
+        "description": "List of tags associated with the transaction."
+      },
+      "tagsUuids": {
+        "type": [
+          "array",
+          "null"
+        ],
+        "items": {
+          "type": "string"
+        },
+        "description": "List of uuid of tags associated with the transaction."
+      },
+      "lat": {
+        "type": [
+          "number",
+          "null"
+        ],
+        "description": "Latitude coordinate of the transaction location."
+      },
+      "lng": {
+        "type": [
+          "number",
+          "null"
+        ],
+        "description": "Longitude coordinate of the transaction location."
       }
     }
   }

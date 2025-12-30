@@ -20,7 +20,7 @@ class TransactionMultiProgrammableObject {
     final transactions = tList
         .map(
           (e) => TransactionProgrammableObject.tryParse(
-            Map<String, String>.from(e as Map),
+            Map<String, dynamic>.from(e as Map),
           ),
         )
         .nonNulls

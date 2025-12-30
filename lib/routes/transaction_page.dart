@@ -340,35 +340,26 @@ class _TransactionPageState extends State<TransactionPage> {
                         title: isTransfer
                             ? "transaction.transfer.from".t(context)
                             : "account".t(context),
-                        child: Column(
-                          children: [
-                            ListTile(
-                              leading: _selectedAccount == null
-                                  ? null
-                                  : FlowIcon(
-                                      _selectedAccount!.icon,
-                                      plated: true,
-                                    ),
-                              title: Text(
-                                _selectedAccount?.name ??
-                                    "transaction.edit.selectAccount".t(context),
-                              ),
-                              subtitle:
-                                  (!widget.isNewTransaction &&
-                                      _selectedAccount != null)
-                                  ? MoneyText(
-                                      _selectedAccount!.balanceAt(
-                                        transactionDate,
-                                      ),
-                                    )
-                                  : null,
-                              onTap: () => selectAccount(),
-                              trailing: _selectedAccount == null
-                                  ? const Icon(Symbols.chevron_right)
-                                  : null,
-                              focusNode: _selectAccountFocusNode,
-                            ),
-                          ],
+                        child: ListTile(
+                          leading: _selectedAccount == null
+                              ? null
+                              : FlowIcon(_selectedAccount!.icon, plated: true),
+                          title: Text(
+                            _selectedAccount?.name ??
+                                "transaction.edit.selectAccount".t(context),
+                          ),
+                          subtitle:
+                              (!widget.isNewTransaction &&
+                                  _selectedAccount != null)
+                              ? MoneyText(
+                                  _selectedAccount!.balanceAt(transactionDate),
+                                )
+                              : null,
+                          onTap: () => selectAccount(),
+                          trailing: _selectedAccount == null
+                              ? const Icon(Symbols.chevron_right)
+                              : null,
+                          focusNode: _selectAccountFocusNode,
                         ),
                       ),
                       // To account
@@ -1275,6 +1266,8 @@ class _TransactionPageState extends State<TransactionPage> {
         recurrence: _recurrence,
         tags: _selectedTags,
         attachments: _attachments,
+        latitude: _geo?.latitude,
+        longitude: _geo?.longitude,
       );
     } else {
       _selectedAccount!.createAndSaveTransaction(
@@ -1288,6 +1281,8 @@ class _TransactionPageState extends State<TransactionPage> {
         recurrence: _recurrence,
         tags: _selectedTags,
         attachments: _attachments,
+        latitude: _geo?.latitude,
+        longitude: _geo?.longitude,
       );
     }
 

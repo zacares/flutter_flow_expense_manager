@@ -3,10 +3,9 @@ import "package:flow/entity/account.dart";
 import "package:flow/entity/category.dart";
 import "package:flow/entity/transaction.dart";
 import "package:flow/entity/transaction/extensions/default/transfer.dart";
-import "package:flow/providers/accounts_provider.dart";
-import "package:flow/providers/categories_provider.dart";
+import "package:flow/services/accounts.dart";
+import "package:flow/services/categories.dart";
 import "package:flow/services/user_preferences.dart";
-import "package:flow/utils/utils.dart";
 import "package:flow/widgets/transaction_list_tile.dart";
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
@@ -42,86 +41,30 @@ class _TpoPreviewListItemState extends State<TpoPreviewListItem> {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {},
-      child: IgnorePointer(
-        child: estimate == null
-            ? SizedBox.shrink()
-            : TransactionListTile(
-                transaction: estimate!,
-                recoverFromTrashFn: null,
-                moveToTrashFn: null,
-                combineTransfers: true,
-              ),
-      ),
+    return IgnorePointer(
+      child: estimate == null
+          ? SizedBox.shrink()
+          : TransactionListTile(
+              transaction: estimate!,
+              recoverFromTrashFn: null,
+              moveToTrashFn: null,
+              combineTransfers: true,
+            ),
     );
-
-    // return InkWell(
-    //   child: Material(
-    //     type: MaterialType.card,
-    //     color: kTransparent,
-    //     child: Padding(
-    //       padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-    //       child: Row(
-    //         children: [
-    //           FlowIcon(
-    //             selectedCategory?.icon ??
-    //                 FlowIconData.icon(Symbols.error_circle_rounded_rounded),
-    //           ),
-    //           Expanded(
-    //             child: Column(
-    //               mainAxisSize: .min,
-    //               children: [
-
-    //               ],
-    //             ),
-    //           ),
-    //         ],
-    //       ),
-    //     ),
-    //   ),
-    // );
   }
 
   void _estimate() {
-    final Account? selectedFromAccount = AccountsProvider.of(context)
-        .activeAccounts
-        .firstWhereOrNull((account) {
-          if (account.uuid == widget.tpo.fromAccountUuid) {
-            return true;
-          }
-          if (account.name == widget.tpo.fromAccount) {
-            return true;
-          }
-          return false;
-        });
-
+    final Account? selectedFromAccount =
+        AccountsService().findOneActiveSync(widget.tpo.fromAccountUuid) ??
+        AccountsService().findOneActiveSync(widget.tpo.fromAccount);
     final Account? selectedToAccount = widget.tpo.type == .transfer
-        ? AccountsProvider.of(context).activeAccounts.firstWhereOrNull((
-            account,
-          ) {
-            if (account.uuid == widget.tpo.toAccountUuid) {
-              return true;
-            }
-            if (account.name == widget.tpo.toAccount) {
-              return true;
-            }
-            return false;
-          })
+        ? AccountsService().findOneActiveSync(widget.tpo.toAccountUuid) ??
+              AccountsService().findOneActiveSync(widget.tpo.toAccount)
         : null;
     final Category? selectedCategory = widget.tpo.type == .transfer
         ? null
-        : CategoriesProvider.of(context).categories.firstWhereOrNull((
-            category,
-          ) {
-            if (category.uuid == widget.tpo.categoryUuid) {
-              return true;
-            }
-            if (category.name == widget.tpo.category) {
-              return true;
-            }
-            return false;
-          });
+        : (CategoriesService().findOneSync(widget.tpo.categoryUuid) ??
+              CategoriesService().findOneSync(widget.tpo.category));
 
     final Transaction transaction = Transaction(
       title: widget.tpo.title,
@@ -150,7 +93,9 @@ class _TpoPreviewListItemState extends State<TpoPreviewListItem> {
     if (selectedCategory != null) {
       transaction.setCategory(selectedCategory);
     }
+
     estimate = transaction;
+
     if (mounted) {
       setState(() {});
     }
