@@ -18,6 +18,7 @@ import "package:flutter/material.dart";
 import "package:home_widget/home_widget.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
+import "package:uuid/uuid.dart";
 
 final Logger _log = Logger("UserPreferencesService");
 
@@ -164,6 +165,37 @@ class UserPreferencesService {
     ObjectBox().box<UserPreferences>().put(value);
   }
 
+  String? get _primaryAccountUuidRaw => value.primaryAccountUuid;
+
+  /// Throws [StateError] if no accounts are available to set as primary.
+  String get primaryAccountUuid {
+    if (value.primaryAccountUuid case String uuid) {
+      return uuid;
+    }
+
+    final Query<Account> firstAccountQuery = ObjectBox()
+        .box<Account>()
+        .query(Account_.archived.equals(false))
+        .order(Account_.sortOrder)
+        .build();
+
+    final Account? first = firstAccountQuery.findFirst();
+
+    firstAccountQuery.close();
+
+    if (first != null) {
+      primaryAccountUuid = first.uuid;
+      return first.uuid;
+    }
+
+    throw StateError("No accounts available to set as primary account.");
+  }
+
+  set primaryAccountUuid(String? newPrimaryAccountUuid) {
+    value.primaryAccountUuid = newPrimaryAccountUuid;
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
   String get primaryCurrency {
     if (value.primaryCurrency != null) {
       return value.primaryCurrency!;
@@ -287,6 +319,41 @@ class UserPreferencesService {
     }
   }
 
+  void ensurePrimaryAccountAvailability() async {
+    try {
+      final String uuid = _primaryAccountUuidRaw ?? Namespace.nil.value;
+
+      final Query<Account> primaryAccountQuery = ObjectBox()
+          .box<Account>()
+          .query(
+            Account_.uuid.equals(uuid).and(Account_.archived.equals(false)),
+          )
+          .build();
+
+      final Account? primaryAccount = primaryAccountQuery.findFirst();
+
+      primaryAccountQuery.close();
+
+      if (primaryAccount == null) {
+        final Query<Account> firstAccountQuery = ObjectBox()
+            .box<Account>()
+            .query(Account_.archived.equals(false))
+            .order(Account_.sortOrder)
+            .build();
+
+        final Account? first = firstAccountQuery.findFirst();
+
+        firstAccountQuery.close();
+
+        if (first != null) {
+          primaryAccountUuid = first.uuid;
+        }
+      }
+    } catch (e) {
+      _log.warning("Failed to update primary account: $e");
+    }
+  }
+
   Future<void> initialize() async {
     final Completer<void> completer = Completer();
 
@@ -313,6 +380,7 @@ class UserPreferencesService {
     unawaited(
       completer.future
           .then((_) {
+            ensurePrimaryAccountAvailability();
             _updateButtonsWidgets(transactionButtonOrder);
           })
           .catchError((e) {

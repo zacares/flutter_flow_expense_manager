@@ -33,8 +33,23 @@ class _AccountsTabState extends State<AccountsTab>
 
   String get _searchQuery => _searchController.text.trim();
 
+  String? primaryAccountUuid;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _updatePrimaryAccountUuid();
+    UserPreferencesService().valueNotifier.addListener(
+      _updatePrimaryAccountUuid,
+    );
+  }
+
   @override
   void dispose() {
+    UserPreferencesService().valueNotifier.removeListener(
+      _updatePrimaryAccountUuid,
+    );
     _searchController.dispose();
     super.dispose();
   }
@@ -80,6 +95,8 @@ class _AccountsTabState extends State<AccountsTab>
                             child: AccountCard(
                               account: accounts[index],
                               useCupertinoContextMenu: false,
+                              primary:
+                                  accounts[index].uuid == primaryAccountUuid,
                               excludeTransfersInTotal:
                                   excludeTransfersInTotal == true,
                             ),
@@ -100,6 +117,7 @@ class _AccountsTabState extends State<AccountsTab>
                               child: AccountCard(
                                 account: account,
                                 useCupertinoContextMenu: Platform.isIOS,
+                                primary: account.uuid == primaryAccountUuid,
                                 excludeTransfersInTotal:
                                     excludeTransfersInTotal == true,
                                 onTapOverride: Optional(() async {
@@ -195,6 +213,17 @@ class _AccountsTabState extends State<AccountsTab>
     currentAccounts.insert(newIndex, removed);
 
     ObjectBox().updateAccountOrderList(accounts: currentAccounts);
+  }
+
+  void _updatePrimaryAccountUuid() {
+    try {
+      primaryAccountUuid = UserPreferencesService().primaryAccountUuid;
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      //
+    }
   }
 
   @override
