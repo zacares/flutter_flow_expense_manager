@@ -676,7 +676,6 @@
   "transactions.batch.import.success": "Erfolgreich {n} Transaktionen importiert",
   "transactions.batch.importN": "{n} Transaktionen importieren",
   "transactions.batch.review": "Bitte überprüfen Sie die Transaktionen",
-  "transactions.batch.selectAccount": "Konto auswählen",
   "transactions.count": "{} Buchungen",
   "transactions.pending": "Ausstehende Buchungen",
   "transactions.query.clearAll": "Filter löschen",

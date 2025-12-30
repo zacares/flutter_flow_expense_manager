@@ -676,7 +676,6 @@
   "transactions.batch.import.success": "Успешно импортировано {n} транзакций",
   "transactions.batch.importN": "Импортировать {n} транзакций",
   "transactions.batch.review": "Пожалуйста, проверьте транзакции",
-  "transactions.batch.selectAccount": "Выберите счёт",
   "transactions.count": "{} транзакций",
   "transactions.pending": "Ожидающие транзакции",
   "transactions.query.clearAll": "Очистить фильтры",

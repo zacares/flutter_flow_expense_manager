@@ -676,7 +676,6 @@
   "transactions.batch.import.success": "Başarıyla {n} işlem içe aktarıldı",
   "transactions.batch.importN": "{n} işlemi içe aktar",
   "transactions.batch.review": "Lütfen işlemleri gözden geçirin",
-  "transactions.batch.selectAccount": "Hesap seç",
   "transactions.count": "{} İşlemler",
   "transactions.pending": "Bekleyen işlemler",
   "transactions.query.clearAll": "Filtreleri temizle",

@@ -36,7 +36,8 @@ class TransactionBatchImportPage extends StatefulWidget {
 class _TransactionBatchImportPageState
     extends State<TransactionBatchImportPage> {
   // final List<String> _assignedAccountUuids = [];
-  String? _massAssignedAccountUuid;
+  String? _fromAccountUuid;
+  String? _toAccountUuid;
 
   bool assignIndividually = false;
 
@@ -46,7 +47,7 @@ class _TransactionBatchImportPageState
   void initState() {
     super.initState();
     try {
-      _massAssignedAccountUuid = UserPreferencesService().primaryAccountUuid;
+      _fromAccountUuid = UserPreferencesService().primaryAccountUuid;
     } catch (e) {
       //
     }
@@ -56,11 +57,20 @@ class _TransactionBatchImportPageState
   Widget build(BuildContext context) {
     final List<Account> accounts = AccountsProvider.of(context).activeAccounts;
 
-    final Account? selectedAccount = _massAssignedAccountUuid == null
+    final Account? selectedFromAccount = _fromAccountUuid == null
         ? null
         : accounts.firstWhereOrNull(
-            (account) => account.uuid == _massAssignedAccountUuid,
+            (account) => account.uuid == _fromAccountUuid,
           );
+
+    final Account? selectedToAccount = _toAccountUuid == null
+        ? null
+        : accounts.firstWhereOrNull(
+            (account) => account.uuid == _toAccountUuid,
+          );
+
+    final bool hasAnyTransfer =
+        widget.params?.t.any((x) => x.type == .transfer) == true;
 
     return GestureDetector(
       child: CallbackShortcuts(
@@ -115,26 +125,48 @@ class _TransactionBatchImportPageState
                 //     ),
                 //   ),
                 // ),
-                if (!assignIndividually)
+                if (!assignIndividually) ...[
                   Section(
-                    title: "transactions.batch.selectAccount".t(context),
+                    title: "account".t(context),
                     child: ListTile(
-                      leading: selectedAccount == null
+                      leading: selectedFromAccount == null
                           ? null
-                          : FlowIcon(selectedAccount.icon, plated: true),
+                          : FlowIcon(selectedFromAccount.icon, plated: true),
                       title: Text(
-                        selectedAccount?.name ??
+                        selectedFromAccount?.name ??
                             "transaction.edit.selectAccount".t(context),
                       ),
-                      subtitle: selectedAccount == null
+                      subtitle: selectedFromAccount == null
                           ? null
-                          : MoneyText(selectedAccount.balance),
-                      onTap: () => selectAccount(),
+                          : MoneyText(selectedFromAccount.balance),
+                      onTap: () => selectFromAccount(),
                       trailing: const Icon(Symbols.chevron_right),
                     ),
                   ),
+                  if (hasAnyTransfer)
+                    Section(
+                      title: "transaction.transfer.to".t(context),
+                      child: ListTile(
+                        leading: selectedToAccount == null
+                            ? null
+                            : FlowIcon(selectedToAccount.icon, plated: true),
+                        title: Text(
+                          selectedToAccount?.name ??
+                              "transaction.edit.selectAccount".t(context),
+                        ),
+                        subtitle: selectedToAccount == null
+                            ? null
+                            : MoneyText(selectedToAccount.balance),
+                        onTap: () => selectToAccount(),
+                        trailing: const Icon(Symbols.chevron_right),
+                      ),
+                    ),
+                ],
+
                 Button(
-                  onTap: _busy ? null : importTransactions,
+                  onTap: (_busy || (hasAnyTransfer && _toAccountUuid == null))
+                      ? null
+                      : importTransactions,
                   leading: FlowIcon(
                     FlowIconData.icon(Symbols.download_rounded),
                   ),
@@ -153,37 +185,63 @@ class _TransactionBatchImportPageState
     );
   }
 
-  void selectAccount() async {
+  void selectFromAccount() async {
     final accounts = AccountsProvider.of(context).activeAccounts;
 
-    if (accounts.length == 1) {
-      _massAssignedAccountUuid = accounts.first.uuid;
-
-      if (!mounted) return;
-
-      setState(() {});
-
-      return;
-    }
-
     final selectedAccountId = accounts
-        .firstWhereOrNull((account) => account.uuid == _massAssignedAccountUuid)
+        .firstWhereOrNull((account) => account.uuid == _fromAccountUuid)
         ?.id;
 
-    final Account? account = await showModalBottomSheet<Account>(
-      context: context,
-      builder: (context) => SelectAccountSheet(
-        accounts: accounts,
-        currentlySelectedAccountId: selectedAccountId,
-        showBalance: true,
-        showTrailing: false,
-      ),
-      isScrollControlled: true,
-    );
+    final Account? account =
+        accounts.singleOrNull ??
+        await showModalBottomSheet<Account>(
+          context: context,
+          builder: (context) => SelectAccountSheet(
+            accounts: accounts,
+            currentlySelectedAccountId: selectedAccountId,
+            showBalance: true,
+            showTrailing: false,
+          ),
+          isScrollControlled: true,
+        );
 
     if (account == null) return;
 
-    _massAssignedAccountUuid = account.uuid;
+    _fromAccountUuid = account.uuid;
+    if (_toAccountUuid == _fromAccountUuid) {
+      _toAccountUuid = null;
+    }
+
+    if (!mounted) return;
+
+    setState(() {});
+  }
+
+  void selectToAccount() async {
+    final accounts = AccountsProvider.of(context).activeAccounts
+        .where((account) => account.uuid != _fromAccountUuid)
+        .toList();
+
+    final selectedAccountId = accounts
+        .firstWhereOrNull((account) => account.uuid == _toAccountUuid)
+        ?.id;
+
+    final Account? account =
+        accounts.singleOrNull ??
+        await showModalBottomSheet<Account>(
+          context: context,
+          builder: (context) => SelectAccountSheet(
+            accounts: accounts,
+            currentlySelectedAccountId: selectedAccountId,
+            showBalance: true,
+            showTrailing: false,
+          ),
+          isScrollControlled: true,
+        );
+
+    if (account == null) return;
+
+    _toAccountUuid = account.uuid;
 
     if (!mounted) return;
 
@@ -202,7 +260,7 @@ class _TransactionBatchImportPageState
 
     try {
       for (final TransactionProgrammableObject tpo in tpos) {
-        tpo.save(fromAccount: _massAssignedAccountUuid);
+        tpo.save(fromAccount: _fromAccountUuid, toAccount: _toAccountUuid);
       }
       if (!mounted) return;
 

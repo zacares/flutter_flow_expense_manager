@@ -1,3 +1,5 @@
+import "dart:developer";
+
 import "package:flow/data/transaction_programmable_object.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/category.dart";
@@ -41,6 +43,8 @@ class _TpoPreviewListItemState extends State<TpoPreviewListItem> {
 
   @override
   Widget build(BuildContext context) {
+    inspect(estimate);
+
     return IgnorePointer(
       child: estimate == null
           ? SizedBox.shrink()
@@ -48,7 +52,7 @@ class _TpoPreviewListItemState extends State<TpoPreviewListItem> {
               transaction: estimate!,
               recoverFromTrashFn: null,
               moveToTrashFn: null,
-              combineTransfers: true,
+              combineTransfers: false,
             ),
     );
   }

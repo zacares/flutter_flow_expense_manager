@@ -676,7 +676,6 @@
   "transactions.batch.import.success": "تم استيراد {n} من المعاملات بنجاح",
   "transactions.batch.importN": "استيراد {n} من المعاملات",
   "transactions.batch.review": "يرجى مراجعة المعاملات",
-  "transactions.batch.selectAccount": "اختر حسابًا",
   "transactions.count": "{} معاملة",
   "transactions.pending": "المعاملات المعلقة",
   "transactions.query.clearAll": "مسح الفلاتر",

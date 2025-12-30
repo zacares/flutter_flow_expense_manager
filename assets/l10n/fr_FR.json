@@ -676,7 +676,6 @@
   "transactions.batch.import.success": "{n} transactions importées avec succès",
   "transactions.batch.importN": "Importer {n} transactions",
   "transactions.batch.review": "Veuillez vérifier les transactions",
-  "transactions.batch.selectAccount": "Sélectionner un compte",
   "transactions.count": "{} transactions",
   "transactions.pending": "Transactions en attente",
   "transactions.query.clearAll": "Effacer les filtres",

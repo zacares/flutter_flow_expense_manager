@@ -676,7 +676,6 @@
   "transactions.batch.import.success": "{n} гүйлгээ амжилттай нэмлээ",
   "transactions.batch.importN": "{n} гүйлгээ нэмэх",
   "transactions.batch.review": "Гүйлгээнүүдийг хянана уу",
-  "transactions.batch.selectAccount": "Данс сонгох",
   "transactions.count": "{} гүйлгээ",
   "transactions.pending": "Хүлээгдэж буй гүйлгээнүүд",
   "transactions.query.clearAll": "Шүүлтүүрийг цэвэрлэх",

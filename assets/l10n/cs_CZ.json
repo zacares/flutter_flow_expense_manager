@@ -676,7 +676,6 @@
   "transactions.batch.import.success": "Úspěšně importováno {n} transakcí",
   "transactions.batch.importN": "Importovat {n} transakcí",
   "transactions.batch.review": "Prosím zkontrolujte transakce",
-  "transactions.batch.selectAccount": "Vybrat účet",
   "transactions.count": "{count} transakcí",
   "transactions.pending": "Čekající transakce",
   "transactions.query.clearAll": "Vymazat filtry",
