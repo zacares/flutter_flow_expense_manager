@@ -69,6 +69,8 @@ class UserPreferences implements EntityBase {
 
   String? primaryCurrency;
 
+  String? primaryAccountUuid;
+
   /// In hours, set as `null` to disable
   int? autoBackupIntervalInHours;
 
@@ -156,6 +158,7 @@ class UserPreferences implements EntityBase {
     this.autoBackupIntervalInHours = 72,
     this.icuCurrencyFormattingPattern,
     this.primaryCurrency,
+    this.primaryAccountUuid,
     this.transactionButtonOrderJoined,
     this.remindDailyAtRelativeSeconds,
     this.themeName,
