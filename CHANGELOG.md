@@ -5,6 +5,7 @@
 ### New features
 
 * Now you can configure transaction entry flows
+* Added more fields to programmable object.
 * Now you can import multiple transactions at once with [programmable URL](./README.md#adding-multiple-transactions)
 * Now there's a concept of primary accounts, closes [#624](https://github.com/flow-mn/flow/issues/624)
 

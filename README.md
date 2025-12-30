@@ -71,7 +71,9 @@ When adding multiple transactions, you must provide stringified version of the f
       "title": "Fresh blueberry piece",
       "amount": "13000.00",
       "transactionDate": "2011-12-05",
-      "category": "Food"
+      "category": "Food",
+      "tags": "My fave cafe",
+      "accountUuid": "faa6d523-277f-46af-9493-67768e5b48ab",
     },
     {
       "title": "Caffe Mocha ice",

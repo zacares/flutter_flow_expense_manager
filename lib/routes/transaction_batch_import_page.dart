@@ -202,7 +202,7 @@ class _TransactionBatchImportPageState
 
     try {
       for (final TransactionProgrammableObject tpo in tpos) {
-        tpo.save(_massAssignedAccountUuid);
+        tpo.save(fromAccount: _massAssignedAccountUuid);
       }
       if (!mounted) return;
 

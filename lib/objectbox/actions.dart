@@ -1141,36 +1141,42 @@ extension BackupEntryActions on BackupEntry {
 
 extension TransactionProgrammableObjectActions
     on TransactionProgrammableObject {
-  int save(dynamic fromAccount, {dynamic toAccount}) {
-    Account? targetAccount = switch (fromAccount) {
-      Account a => a,
-      dynamic any => AccountsService().findOneActiveSync(any),
-    };
+  int save({dynamic fromAccount, dynamic toAccount}) {
+    final Account? resolvedFromAccount =
+        AccountsService().findOneActiveSync(fromAccountUuid) ??
+        AccountsService().findOneActiveSync(fromAccount) ??
+        switch (fromAccount) {
+          Account a => a,
+          dynamic any => AccountsService().findOneActiveSync(any),
+        } ??
+        AccountsService().findOneActiveSync(
+          UserPreferencesService().primaryAccountUuid,
+        );
 
-    targetAccount ??= AccountsService().findOneActiveSync(
-      UserPreferencesService().primaryAccountUuid,
-    );
+    Account? resolvedToAccount =
+        AccountsService().findOneActiveSync(toAccountUuid) ??
+        AccountsService().findOneActiveSync(toAccount) ??
+        switch (toAccount) {
+          Account a => a,
+          dynamic any => AccountsService().findOneActiveSync(any),
+        };
 
-    Account? targetTransferToAccount = switch (toAccount) {
-      Account a => a,
-      dynamic any => AccountsService().findOneActiveSync(any),
-    };
-
-    if (targetAccount == null) {
+    if (resolvedFromAccount == null) {
       throw Exception(
         "Failed to find account for TransactionProgrammableObject.save",
       );
     }
 
     if (type == .transfer &&
-        targetTransferToAccount == null &&
-        targetAccount.uuid != UserPreferencesService().primaryAccountUuid) {
-      targetTransferToAccount = AccountsService().findOneActiveSync(
+        resolvedToAccount == null &&
+        resolvedFromAccount.uuid !=
+            UserPreferencesService().primaryAccountUuid) {
+      resolvedToAccount = AccountsService().findOneActiveSync(
         UserPreferencesService().primaryAccountUuid,
       );
     }
 
-    if (type == .transfer && targetTransferToAccount == null) {
+    if (type == .transfer && resolvedToAccount == null) {
       throw Exception(
         "Failed to find target account for transfer TransactionProgrammableObject.save",
       );
@@ -1188,21 +1194,24 @@ extension TransactionProgrammableObjectActions
       }
     }
 
+    final List<TransactionTag>? resolvedTags = resolveTags();
+
     if (type == .transfer) {
-      return targetAccount
+      return resolvedFromAccount
           .transferTo(
-            targetAccount: targetTransferToAccount!,
+            targetAccount: resolvedToAccount!,
             amount: amount ?? 0.0,
             title: title,
             description: notes,
             transactionDate: transactionDate,
             isPending: isPending,
-
-            // tags: tags,
+            tags: resolvedTags,
+            conversionRate: transferConversionRate,
             // attachments: attachments,
-            // conversionRate: conversionRate,
             // recurrence: recurrence,
             // extraTags: extraTags,
+            latitude: lat,
+            longitude: lng,
           )
           .$1;
     } else {
@@ -1221,20 +1230,50 @@ extension TransactionProgrammableObjectActions
       // Recurrence? recurrence,
       // List<String>? extraTags,
       // List<double>? location,
-      return targetAccount.createAndSaveTransaction(
+      return resolvedFromAccount.createAndSaveTransaction(
         amount: amount ?? 0.0,
         transactionDate: transactionDate,
         title: title,
         description: notes,
         category: resolvedCategory,
-        // tags: tags,
-        // attachments: attachments,
+        tags: resolvedTags,
         isPending: isPending,
+        // attachments: attachments,
         // subtype: subtype,
         // extraTags: extraTags,
         latitude: lat,
         longitude: lng,
       );
     }
+  }
+
+  List<TransactionTag>? resolveTags() {
+    if (tagsUuids == null && tags == null) {
+      return null;
+    }
+
+    if (tagsUuids?.isNotEmpty == true) {
+      final query = ObjectBox()
+          .box<TransactionTag>()
+          .query(TransactionTag_.uuid.oneOf(tagsUuids!))
+          .build();
+
+      final List<TransactionTag> resolvedTags = query.find();
+      query.close();
+      return resolvedTags;
+    }
+
+    if (tags?.isNotEmpty == true) {
+      final query = ObjectBox()
+          .box<TransactionTag>()
+          .query(TransactionTag_.title.oneOf(tags!))
+          .build();
+
+      final List<TransactionTag> resolvedTags = query.find();
+      query.close();
+      return resolvedTags;
+    }
+
+    return [];
   }
 }
