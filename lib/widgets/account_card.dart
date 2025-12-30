@@ -25,6 +25,8 @@ class AccountCard extends StatelessWidget {
 
   final bool excludeTransfersInTotal;
 
+  final bool primary;
+
   final BorderRadius borderRadius;
 
   const AccountCard({
@@ -32,6 +34,7 @@ class AccountCard extends StatelessWidget {
     required this.account,
     required this.useCupertinoContextMenu,
     this.onTapOverride,
+    this.primary = false,
     this.borderRadius = const .all(Radius.circular(24.0)),
     required this.excludeTransfersInTotal,
   });
@@ -77,13 +80,30 @@ class AccountCard extends StatelessWidget {
                     crossAxisAlignment: .start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        account.name +
-                            (account.archived
-                                ? " (${"account.archived".t(context)})"
-                                : ""),
-                        style: context.textTheme.titleSmall,
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            if (primary)
+                              WidgetSpan(
+                                alignment: .middle,
+                                child: Icon(
+                                  Symbols.star_rounded,
+                                  size: context.textTheme.titleSmall?.fontSize,
+                                  color: context.colorScheme.primary,
+                                ),
+                              ),
+                            TextSpan(
+                              text:
+                                  account.name +
+                                  (account.archived
+                                      ? " (${"account.archived".t(context)})"
+                                      : ""),
+                            ),
+                          ],
+                          style: context.textTheme.titleSmall,
+                        ),
                       ),
+
                       MoneyText(
                         account.balance,
                         style: context.textTheme.displaySmall,

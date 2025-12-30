@@ -1,3 +1,4 @@
+import "package:flow/data/transaction_multi_programmable_object.dart";
 import "package:flow/data/transaction_programmable_object.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/routes/account/account_edit_page.dart";
@@ -47,6 +48,7 @@ import "package:flow/routes/setup/setup_profile_picture_page.dart";
 import "package:flow/routes/setup_page.dart";
 import "package:flow/routes/stats/stats_by_group_page.dart";
 import "package:flow/routes/support_page.dart";
+import "package:flow/routes/transaction_batch_import_page.dart";
 import "package:flow/routes/transaction_page.dart";
 import "package:flow/routes/transaction_tag_page.dart";
 import "package:flow/routes/transaction_tags_page.dart";
@@ -72,12 +74,32 @@ final GoRouter router = GoRouter(
     GoRoute(path: "/", builder: (context, state) => const HomePage()),
     GoRoute(
       path: "/transaction/new",
+      redirect: (context, state) {
+        if (state.uri.queryParameters["json"] case String jason
+            when jason.isNotEmpty) {
+          return "/transaction/batch-import?json=${Uri.encodeComponent(jason)}";
+        }
+
+        return null;
+      },
       pageBuilder: (context, state) {
         final TransactionProgrammableObject? params =
-            TransactionProgrammableObject.tryParse(state.uri.queryParameters);
+            TransactionProgrammableObject.fromUri(state.uri);
 
         return MaterialPage(
           child: TransactionPage.create(params: params),
+          fullscreenDialog: true,
+        );
+      },
+    ),
+    GoRoute(
+      path: "/transaction/batch-import",
+      pageBuilder: (context, state) {
+        final TransactionMultiProgrammableObject? multiParams =
+            TransactionMultiProgrammableObject.fromUri(state.uri);
+
+        return MaterialPage(
+          child: TransactionBatchImportPage(params: multiParams),
           fullscreenDialog: true,
         );
       },

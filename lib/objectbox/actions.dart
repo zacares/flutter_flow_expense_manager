@@ -8,6 +8,7 @@ import "package:flow/data/money.dart";
 import "package:flow/data/multi_currency_flow.dart";
 import "package:flow/data/prefs/frecency_group.dart";
 import "package:flow/data/transaction_filter.dart";
+import "package:flow/data/transaction_programmable_object.dart";
 import "package:flow/data/transactions_filter/time_range.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/backup_entry.dart";
@@ -23,6 +24,8 @@ import "package:flow/l10n/extensions.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/prefs/local_preferences.dart";
+import "package:flow/services/accounts.dart";
+import "package:flow/services/categories.dart";
 import "package:flow/services/exchange_rates.dart";
 import "package:flow/services/file_attachment.dart";
 import "package:flow/services/recurring_transactions.dart";
@@ -970,17 +973,20 @@ extension AccountActions on Account {
     TransactionSubtype? subtype,
     Recurrence? recurrence,
     List<String>? extraTags,
-    List<double>? location,
+    double? latitude,
+    double? longitude,
   }) {
     FileAttachmentService().upsertManySync(attachments ?? []);
 
     final String uuid = uuidOverride ?? const Uuid().v4();
 
-    if (location == null) {
+    if (latitude == null || longitude == null) {
       final Geo? geo =
           extensions?.firstWhereOrNull((ext) => ext is Geo) as Geo?;
 
-      location ??= geo?.toLatLng();
+      final latLng = geo?.toLatLng();
+      latitude ??= latLng?[0];
+      longitude ??= latLng?[1];
     }
 
     final String? recurringTransactionUuid = recurrence == null
@@ -1014,6 +1020,9 @@ extension AccountActions on Account {
             isPending: isPending ?? false,
             subtype: subtype?.value,
             extraTags: extraTags ?? [],
+            location: (latitude != null && longitude != null)
+                ? [latitude, longitude]
+                : null,
           )
           ..setTags(tags ?? [])
           ..setCategory(category)
@@ -1127,5 +1136,144 @@ extension BackupEntryActions on BackupEntry {
     } catch (e) {
       return false;
     }
+  }
+}
+
+extension TransactionProgrammableObjectActions
+    on TransactionProgrammableObject {
+  int save({dynamic fromAccount, dynamic toAccount}) {
+    final Account? resolvedFromAccount =
+        AccountsService().findOneActiveSync(fromAccountUuid) ??
+        AccountsService().findOneActiveSync(fromAccount) ??
+        switch (fromAccount) {
+          Account a => a,
+          dynamic any => AccountsService().findOneActiveSync(any),
+        } ??
+        AccountsService().findOneActiveSync(
+          UserPreferencesService().primaryAccountUuid,
+        );
+
+    Account? resolvedToAccount =
+        AccountsService().findOneActiveSync(toAccountUuid) ??
+        AccountsService().findOneActiveSync(toAccount) ??
+        switch (toAccount) {
+          Account a => a,
+          dynamic any => AccountsService().findOneActiveSync(any),
+        };
+
+    if (resolvedFromAccount == null) {
+      throw Exception(
+        "Failed to find account for TransactionProgrammableObject.save",
+      );
+    }
+
+    if (type == .transfer &&
+        resolvedToAccount == null &&
+        resolvedFromAccount.uuid !=
+            UserPreferencesService().primaryAccountUuid) {
+      resolvedToAccount = AccountsService().findOneActiveSync(
+        UserPreferencesService().primaryAccountUuid,
+      );
+    }
+
+    if (type == .transfer && resolvedToAccount == null) {
+      throw Exception(
+        "Failed to find target account for transfer TransactionProgrammableObject.save",
+      );
+    }
+
+    Category? resolvedCategory;
+
+    if (type != .transfer) {
+      try {
+        resolvedCategory =
+            CategoriesService().findOneSync(categoryUuid) ??
+            CategoriesService().findOneSync(category);
+      } catch (e) {
+        // Ignore errors here
+      }
+    }
+
+    final List<TransactionTag>? resolvedTags = resolveTags();
+
+    if (type == .transfer) {
+      return resolvedFromAccount
+          .transferTo(
+            targetAccount: resolvedToAccount!,
+            amount: amount ?? 0.0,
+            title: title,
+            description: notes,
+            transactionDate: transactionDate,
+            isPending: isPending,
+            tags: resolvedTags,
+            conversionRate: transferConversionRate,
+            // attachments: attachments,
+            // recurrence: recurrence,
+            // extraTags: extraTags,
+            latitude: lat,
+            longitude: lng,
+          )
+          .$1;
+    } else {
+      // required double amount,
+      // DateTime? transactionDate,
+      // DateTime? createdDate,
+      // String? title,
+      // String? description,
+      // Category? category,
+      // List<TransactionExtension>? extensions,
+      // List<TransactionTag>? tags,
+      // List<FileAttachment>? attachments,
+      // String? uuidOverride,
+      // bool? isPending,
+      // TransactionSubtype? subtype,
+      // Recurrence? recurrence,
+      // List<String>? extraTags,
+      // List<double>? location,
+      return resolvedFromAccount.createAndSaveTransaction(
+        amount: amount ?? 0.0,
+        transactionDate: transactionDate,
+        title: title,
+        description: notes,
+        category: resolvedCategory,
+        tags: resolvedTags,
+        isPending: isPending,
+        // attachments: attachments,
+        // subtype: subtype,
+        // extraTags: extraTags,
+        latitude: lat,
+        longitude: lng,
+      );
+    }
+  }
+
+  List<TransactionTag>? resolveTags() {
+    if (tagsUuids == null && tags == null) {
+      return null;
+    }
+
+    if (tagsUuids?.isNotEmpty == true) {
+      final query = ObjectBox()
+          .box<TransactionTag>()
+          .query(TransactionTag_.uuid.oneOf(tagsUuids!))
+          .build();
+
+      final List<TransactionTag> resolvedTags = query.find();
+      query.close();
+      return resolvedTags;
+    }
+
+    if (tags?.isNotEmpty == true) {
+      final query = ObjectBox()
+          .box<TransactionTag>()
+          .query(TransactionTag_.title.oneOf(tags!))
+          .build();
+
+      final List<TransactionTag> resolvedTags = query.find();
+      query.close();
+      return resolvedTags;
+    }
+
+    return [];
   }
 }
