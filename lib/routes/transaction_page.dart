@@ -1513,12 +1513,23 @@ class _TransactionPageState extends State<TransactionPage> {
             await selectTags(true);
           }
         case TransactionEntryAction.selectPrimaryAccount:
-          if (flow.skipSelectedFields && _selectedAccount != null) {
-            //
+          if (isTransfer) {
+            if (flow.skipSelectedFields && _selectedAccount != null) {
+              //
+            } else {
+              await selectAccount(true);
+              if (flow.abandonUponActionCancelled && _selectedAccount == null) {
+                return;
+              }
+            }
           } else {
-            _selectPrimaryAccount();
-            if (flow.abandonUponActionCancelled && _selectedAccount == null) {
-              return;
+            if (flow.skipSelectedFields && _selectedAccount != null) {
+              //
+            } else {
+              _selectPrimaryAccount();
+              if (flow.abandonUponActionCancelled && _selectedAccount == null) {
+                return;
+              }
             }
           }
         case TransactionEntryAction.attachFiles:
