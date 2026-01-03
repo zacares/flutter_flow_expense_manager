@@ -6,6 +6,7 @@ import "package:flow/theme/navbar_theme.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/extensions/directionality.dart";
 import "package:flutter/material.dart" hide Flow;
+import "package:go_router/go_router.dart";
 import "package:material_symbols_icons/symbols.dart";
 import "package:pie_menu/pie_menu.dart";
 
@@ -45,6 +46,17 @@ class _NewTransactionButtonState extends State<NewTransactionButton> {
           ),
           onToggle: onToggle,
           actions: [
+            // PieAction(
+            //   tooltip: Text("Eny"),
+            //   onSelect: () => widget.onActionTap(.expense),
+            //   child: Icon(TransactionType.expense.icon, weight: 800.0),
+            //   buttonTheme: PieButtonTheme(
+            //     backgroundColor: TransactionType.expense.actionBackgroundColor(
+            //       context,
+            //     ),
+            //     iconColor: TransactionType.expense.actionColor(context),
+            //   ),
+            // ),
             for (final transactionType in buttonOrder)
               PieAction(
                 tooltip: Text(transactionType.localizedNameContext(context)),
@@ -57,6 +69,17 @@ class _NewTransactionButtonState extends State<NewTransactionButton> {
                   iconColor: transactionType.actionColor(context),
                 ),
               ),
+            PieAction(
+              tooltip: Text("Eny"),
+              onSelect: () => context.push("/integrations/eny"),
+              child: Icon(TransactionType.expense.icon, weight: 800.0),
+              buttonTheme: PieButtonTheme(
+                backgroundColor: TransactionType.expense.actionBackgroundColor(
+                  context,
+                ),
+                iconColor: TransactionType.expense.actionColor(context),
+              ),
+            ),
           ],
           child: StatefulBuilder(
             builder: (context, setState) => Tooltip(

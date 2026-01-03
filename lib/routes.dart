@@ -24,6 +24,7 @@ import "package:flow/routes/import_wizard/csv.dart";
 import "package:flow/routes/import_wizard/ivy.dart";
 import "package:flow/routes/import_wizard/v1.dart";
 import "package:flow/routes/import_wizard/v2.dart";
+import "package:flow/routes/integrations/eny_page.dart";
 import "package:flow/routes/preferences/button_order_preferences_page.dart";
 import "package:flow/routes/preferences/change_preferences_page.dart";
 import "package:flow/routes/preferences/money_formatting_preferences_page.dart";
@@ -128,6 +129,7 @@ final GoRouter router = GoRouter(
       builder: (context, state) =>
           TransactionsPage.deleted(title: "transaction.deleted".t(context)),
     ),
+    GoRoute(path: "/integrations/eny", builder: (context, state) => EnyPage()),
     GoRoute(
       path: "/account/new",
       builder: (context, state) => const AccountEditPage.create(),
