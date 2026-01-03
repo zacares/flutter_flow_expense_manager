@@ -4,6 +4,8 @@ class CameraService {
   static CameraService? _instance;
   static List<CameraDescription>? cameras;
 
+  static bool initialized = _instance != null;
+
   factory CameraService() {
     if (_instance == null) {
       throw Exception("Failed to create CameraService");

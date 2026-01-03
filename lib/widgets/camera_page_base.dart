@@ -1,14 +1,20 @@
 import "package:camera/camera.dart";
 import "package:flow/services/camera.dart";
+import "package:flow/utils/utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 
 final Logger _log = Logger("CameraPageBase");
 
 class CameraPageBase extends StatefulWidget {
+  final CameraLensDirection? preferredCamera;
   final List<Widget> children;
 
-  const CameraPageBase({super.key, required this.children});
+  const CameraPageBase({
+    super.key,
+    required this.children,
+    this.preferredCamera = .back,
+  });
 
   @override
   State<CameraPageBase> createState() => CameraPageBaseState();
@@ -24,9 +30,14 @@ class CameraPageBaseState extends State<CameraPageBase>
   @override
   void initState() {
     super.initState();
-    CameraService.initialize().then((_) {
-      if (!mounted) return;
-    });
+    if (!CameraService.initialized) {
+      CameraService.initialize().then((_) {
+        if (!mounted) return;
+        _initializeCameraController();
+      });
+    } else {
+      _initializeCameraController();
+    }
   }
 
   @override
@@ -41,7 +52,7 @@ class CameraPageBaseState extends State<CameraPageBase>
     if (state == AppLifecycleState.inactive) {
       cameraController.dispose();
     } else if (state == AppLifecycleState.resumed) {
-      _initializeCameraController(cameraController.description);
+      _initializeCameraController();
     }
   }
 
@@ -65,10 +76,22 @@ class CameraPageBaseState extends State<CameraPageBase>
     );
   }
 
-  void _initializeCameraController(CameraDescription description) async {
+  void _initializeCameraController() async {
+    final CameraDescription? description =
+        CameraService.cameras?.firstWhereOrNull(
+          (camera) => camera.lensDirection == widget.preferredCamera,
+        ) ??
+        CameraService.cameras?.firstOrNull;
+
+    if (description == null) {
+      _log.severe("No camera found");
+      return;
+    }
+
     final CameraController cameraController = CameraController(
       description,
       ResolutionPreset.high,
+      enableAudio: false,
     );
 
     controller = cameraController;
