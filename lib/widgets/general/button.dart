@@ -36,11 +36,8 @@ class Button extends StatelessWidget {
     if (trailing != null || leading != null) {
       child = Row(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          if (leading != null) ...[leading!, const SizedBox(width: 8.0)],
-          this.child,
-          if (trailing != null) ...[const SizedBox(width: 8.0), trailing!],
-        ],
+        spacing: 8.0,
+        children: [?leading, this.child, ?trailing],
       );
       padding = this.padding.copyWith(
         left: this.padding.left - (leading != null ? 4.0 : 0.0),

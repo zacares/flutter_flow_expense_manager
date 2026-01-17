@@ -1,6 +1,8 @@
+import "dart:async";
 import "dart:io";
 
 import "package:camera/camera.dart";
+import "package:flow/prefs/local_preferences.dart";
 import "package:flow/services/camera.dart";
 import "package:flow/services/integrations/eny.dart";
 import "package:flow/utils/extensions/directionality.dart";
@@ -9,7 +11,10 @@ import "package:flow/widgets/camera_page_base.dart";
 import "package:flow/widgets/camera_page_base/overlay_button.dart";
 import "package:flow/widgets/general/rtl_flipper.dart";
 import "package:flow/widgets/general/spinner.dart";
+import "package:flow/widgets/image_drop_zone.dart";
+import "package:flow/widgets/integrations/eny_page/eny_error_sheet.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:go_router/go_router.dart";
 import "package:material_symbols_icons/symbols.dart";
 
@@ -30,6 +35,8 @@ class _EnyPageState extends State<EnyPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isCameraSupported = Platform.isAndroid || Platform.isIOS;
+
     final IconData flashIcon = switch (_cameraPageKey.currentState?.flashMode) {
       FlashMode.auto => Symbols.flash_auto_rounded,
       FlashMode.always => Symbols.flash_on_rounded,
@@ -46,13 +53,14 @@ class _EnyPageState extends State<EnyPage> {
           }
         },
       ),
-      OverlayButton(
-        child: Icon(flashIcon),
-        onTap: () {
-          _cameraPageKey.currentState?.rotateFlashMode();
-          setState(() {});
-        },
-      ),
+      if (isCameraSupported)
+        OverlayButton(
+          child: Icon(flashIcon),
+          onTap: () {
+            _cameraPageKey.currentState?.rotateFlashMode();
+            setState(() {});
+          },
+        ),
     ];
 
     final List<Widget> bottomButtons = [
@@ -72,18 +80,22 @@ class _EnyPageState extends State<EnyPage> {
                 ),
               ),
             ),
-      OverlayButton(
-        onTap: _busy
-            ? null
-            : (_takenPicture == null ? _takePicture : _sendTakenPicture),
-        child: _busy
-            ? const Spinner.center()
-            : Icon(
-                _takenPicture == null
-                    ? Symbols.photo_camera_rounded
-                    : Symbols.send_rounded,
-              ),
-      ),
+      if (_takenPicture != null || isCameraSupported)
+        OverlayButton(
+          onTap: _busy
+              ? null
+              : (_takenPicture == null ? _takePicture : _sendTakenPicture),
+          child: SizedBox.square(
+            dimension: 24.0,
+            child: _busy
+                ? const Spinner.center()
+                : Icon(
+                    _takenPicture == null
+                        ? Symbols.photo_camera_rounded
+                        : Symbols.send_rounded,
+                  ),
+          ),
+        ),
       OverlayButton(
         onTap: _selectMultiImageFromGallery,
         child: Icon(Symbols.photo_library_rounded),
@@ -92,6 +104,19 @@ class _EnyPageState extends State<EnyPage> {
 
     return CameraPageBase(
       key: _cameraPageKey,
+      unsupportedWidget: Positioned.fill(
+        child: SafeArea(
+          child: ImageDropZone(
+            onFileDropped: (file) {
+              if (file?.mimeType?.startsWith("image") == true) {
+                _takenPicture = file;
+                setState(() {});
+              }
+            },
+            onTap: _selectMultiImageFromGallery,
+          ),
+        ),
+      ),
       children: [
         if (_takenPicture != null)
           Positioned.fill(
@@ -190,11 +215,21 @@ class _EnyPageState extends State<EnyPage> {
       _busy = true;
     });
 
+    if (LocalPreferences().enableHapticFeedback.get()) {
+      unawaited(HapticFeedback.lightImpact().catchError((_) {}));
+    }
+
     try {
       await EnyService().processReceipt(_takenPicture!);
     } catch (e) {
       if (e is EnyCredsError) {
-        // TODO show bottom sheet
+        if (mounted) {
+          await showModalBottomSheet(
+            context: context,
+            builder: (context) => EnyErrorSheet(),
+            isScrollControlled: true,
+          );
+        }
       }
     } finally {
       _busy = false;

@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:camera/camera.dart";
 import "package:flow/services/camera.dart";
 import "package:flow/utils/utils.dart";
@@ -10,10 +12,13 @@ class CameraPageBase extends StatefulWidget {
   final CameraLensDirection? preferredCamera;
   final List<Widget> children;
 
+  final Widget? unsupportedWidget;
+
   const CameraPageBase({
     super.key,
     required this.children,
     this.preferredCamera = .back,
+    this.unsupportedWidget,
   });
 
   @override
@@ -64,13 +69,22 @@ class CameraPageBaseState extends State<CameraPageBase>
 
   @override
   Widget build(BuildContext context) {
+    final bool isSupported =
+        (Platform.isAndroid || Platform.isIOS) &&
+        CameraService.cameras?.isNotEmpty == true;
+
     return Stack(
       children: [
-        Positioned.fill(
-          child: controller == null || !controller!.value.isInitialized
-              ? const Center(child: CircularProgressIndicator())
-              : CameraPreview(controller!),
-        ),
+        if (isSupported)
+          Positioned.fill(
+            child: controller == null || !controller!.value.isInitialized
+                ? const Center(child: CircularProgressIndicator())
+                : CameraPreview(controller!),
+          ),
+        if (!isSupported)
+          widget.unsupportedWidget ??
+              Material(child: Center(child: Text("Camera not supported :("))),
+
         ...widget.children,
       ],
     );

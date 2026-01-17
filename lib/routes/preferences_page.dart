@@ -138,6 +138,20 @@ class PreferencesPageState extends State<PreferencesPage> {
               trailing: DirectionalChevron(),
             ),
             const SizedBox(height: 24.0),
+            ListHeader("preferences.integrations".t(context)),
+            const SizedBox(height: 8.0),
+            ListTile(
+              title: Text("Eny"),
+              leading: SizedBox(
+                width: 24.0,
+                height: 24.0,
+                child: Image.network(enyLogoUrl, width: 192.0, height: 192.0),
+              ),
+              onTap: () =>
+                  _pushAndRefreshAfter("/preferences/integrations/eny"),
+              trailing: DirectionalChevron(),
+            ),
+            const SizedBox(height: 24.0),
             ListHeader("preferences.transactions".t(context)),
             const SizedBox(height: 8.0),
             ListTile(

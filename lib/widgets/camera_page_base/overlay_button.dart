@@ -35,17 +35,21 @@ class OverlayButton extends StatelessWidget {
       ),
     );
 
-    return GestureDetector(
-      onTap: onTap,
-      onDoubleTap: onDoubleTap,
-      onLongPress: onLongPress,
-      child: ClipOval(
-        child: isIOS
-            ? BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-                child: content,
-              )
-            : content,
+    return Material(
+      type: .transparency,
+      child: InkWell(
+        borderRadius: .circular(999.9),
+        onTap: onTap,
+        onDoubleTap: onDoubleTap,
+        onLongPress: onLongPress,
+        child: ClipOval(
+          child: isIOS
+              ? BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                  child: content,
+                )
+              : content,
+        ),
       ),
     );
   }
