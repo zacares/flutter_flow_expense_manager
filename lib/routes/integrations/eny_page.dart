@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:camera/camera.dart";
 import "package:flow/services/camera.dart";
 import "package:flow/services/integrations/eny.dart";
@@ -91,6 +93,13 @@ class _EnyPageState extends State<EnyPage> {
     return CameraPageBase(
       key: _cameraPageKey,
       children: [
+        if (_takenPicture != null)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black,
+              child: Image.file(File(_takenPicture!.path), fit: BoxFit.contain),
+            ),
+          ),
         Positioned(
           top: 20.0,
           left: 20.0,
@@ -130,7 +139,13 @@ class _EnyPageState extends State<EnyPage> {
       return;
     }
 
-    await Future.wait(files.map((file) => EnyService().processReceipt(file)));
+    if (files.length == 1) {
+      _takenPicture = files.first;
+      setState(() {});
+    } else {
+      // show popup here
+      await Future.wait(files.map((file) => EnyService().processReceipt(file)));
+    }
   }
 
   Future<void> _takePicture() async {
@@ -177,6 +192,10 @@ class _EnyPageState extends State<EnyPage> {
 
     try {
       await EnyService().processReceipt(_takenPicture!);
+    } catch (e) {
+      if (e is EnyCredsError) {
+        // TODO show bottom sheet
+      }
     } finally {
       _busy = false;
       _takenPicture = null;

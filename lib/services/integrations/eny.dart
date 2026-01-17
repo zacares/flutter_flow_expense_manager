@@ -8,6 +8,13 @@ import "package:logging/logging.dart";
 
 final Logger _log = Logger("EnyService");
 
+class EnyCredsError implements Exception {
+  const EnyCredsError() : super();
+
+  @override
+  String toString() => "EnyError: Invalid credentials";
+}
+
 class EnyService {
   static EnyService? _instance;
 
@@ -56,10 +63,18 @@ class EnyService {
       request.headers["X-API-KEY"] = apiKey;
 
       final response = await request.send().then(http.Response.fromStream);
+
+      if (response.statusCode == 401) {
+        throw EnyCredsError();
+      }
+
       final decoded = jsonDecode(response.body);
 
       return decoded["id"];
     } catch (e, stackTrace) {
+      if (e is EnyCredsError) {
+        rethrow;
+      }
       _log.severe("Failed to process receipt", e, stackTrace);
       return null;
     }
