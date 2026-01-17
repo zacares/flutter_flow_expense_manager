@@ -116,6 +116,7 @@ class _EnyPreferencesPageState extends State<EnyPreferencesPage> {
                           title: Text("integrations.eny.disconnect".t(context)),
                           trailing: const DirectionalChevron(),
                           onTap: () async {
+                            // TODO @sadespresso confirmation sheet
                             await EnyService().disconnect();
                             if (mounted) {
                               setState(() {});
