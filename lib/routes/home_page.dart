@@ -1,9 +1,9 @@
 import "dart:async";
 import "dart:developer";
 
+import "package:flow/data/flow_button_type.dart";
 import "package:flow/data/flow_notification_payload.dart";
 import "package:flow/entity/account.dart";
-import "package:flow/entity/transaction.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/routes.dart";
@@ -193,14 +193,14 @@ class _HomePageState extends State<HomePage>
     _tabController.animateTo(index);
   }
 
-  void _newTransactionPage(TransactionType? type) {
+  void _newTransactionPage(FlowButtonType? type) {
     // Generally, this wouldn't happen in production environment
     if (ObjectBox().box<Account>().count(limit: 1) == 0) {
       context.push("/account/new");
       return;
     }
 
-    type ??= TransactionType.expense;
+    type ??= FlowButtonType.expense;
 
     context.push("/transaction/new?type=${type.value}");
   }

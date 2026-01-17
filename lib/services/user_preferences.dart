@@ -1,10 +1,10 @@
 import "dart:async";
 import "dart:math";
 
+import "package:flow/data/flow_button_type.dart";
 import "package:flow/data/flow_notification_payload.dart";
 import "package:flow/data/prefs/change_visuals.dart";
 import "package:flow/entity/account.dart";
-import "package:flow/entity/transaction/type.dart";
 import "package:flow/entity/transaction_filter_preset.dart";
 import "package:flow/entity/user_preferences.dart";
 import "package:flow/entity/user_preferences/transaction_entry_flow.dart";
@@ -248,9 +248,9 @@ class UserPreferencesService {
     ObjectBox().box<UserPreferences>().put(value);
   }
 
-  List<TransactionType> get transactionButtonOrder =>
+  List<FlowButtonType> get transactionButtonOrder =>
       value.transactionButtonOrder;
-  set transactionButtonOrder(List<TransactionType> order) {
+  set transactionButtonOrder(List<FlowButtonType> order) {
     value.transactionButtonOrder = order;
 
     _updateButtonsWidgets(order);
@@ -301,7 +301,7 @@ class UserPreferencesService {
 
   UserPreferencesService._internal();
 
-  void _updateButtonsWidgets(List<TransactionType> order) async {
+  void _updateButtonsWidgets(List<FlowButtonType> order) async {
     try {
       final String value = order.map((e) => e.value).join(",");
       await HomeWidget.setAppGroupId("group.mn.flow.flow");

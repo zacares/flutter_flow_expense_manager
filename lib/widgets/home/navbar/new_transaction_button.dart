@@ -1,4 +1,4 @@
-import "package:flow/entity/transaction.dart";
+import "package:flow/data/flow_button_type.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/l10n/named_enum.dart";
 import "package:flow/services/user_preferences.dart";
@@ -11,7 +11,7 @@ import "package:material_symbols_icons/symbols.dart";
 import "package:pie_menu/pie_menu.dart";
 
 class NewTransactionButton extends StatefulWidget {
-  final Function(TransactionType type) onActionTap;
+  final Function(FlowButtonType type) onActionTap;
 
   const NewTransactionButton({super.key, required this.onActionTap});
 
@@ -29,7 +29,7 @@ class _NewTransactionButtonState extends State<NewTransactionButton> {
     return ValueListenableBuilder(
       valueListenable: UserPreferencesService().valueNotifier,
       builder: (context, userPreferences, child) {
-        final List<TransactionType> buttonOrder = context.isLtr
+        final List<FlowButtonType> buttonOrder = context.isLtr
             ? userPreferences.transactionButtonOrder
             : userPreferences.transactionButtonOrder.reversed.toList();
 
@@ -72,12 +72,10 @@ class _NewTransactionButtonState extends State<NewTransactionButton> {
             PieAction(
               tooltip: Text("Eny"),
               onSelect: () => context.push("/integrations/eny"),
-              child: Icon(TransactionType.expense.icon, weight: 800.0),
+              child: Icon(Symbols.camera_alt_rounded, weight: 800.0),
               buttonTheme: PieButtonTheme(
-                backgroundColor: TransactionType.expense.actionBackgroundColor(
-                  context,
-                ),
-                iconColor: TransactionType.expense.actionColor(context),
+                backgroundColor: context.colorScheme.secondary,
+                iconColor: context.colorScheme.onSecondary,
               ),
             ),
           ],
