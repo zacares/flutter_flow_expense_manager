@@ -61,7 +61,7 @@ class _EnyPageState extends State<EnyPage> {
           }
         },
       ),
-      if (isCameraSupported)
+      if (isCameraSupported && CameraService.cameras?.isNotEmpty == true)
         OverlayButton(
           child: Icon(flashIcon),
           onTap: () {
@@ -159,7 +159,8 @@ class _EnyPageState extends State<EnyPage> {
                 ),
               ),
             ),
-      if (_takenPicture != null || isCameraSupported)
+      if (_takenPicture != null ||
+          (isCameraSupported && CameraService.cameras?.isNotEmpty == true))
         OverlayButton(
           onTap: _busy ? null : _takePicture,
           child: SizedBox.square(
