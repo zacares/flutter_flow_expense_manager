@@ -3,13 +3,13 @@ import "package:flow/l10n/flow_localizations.dart";
 import "package:flow/services/integrations/eny.dart";
 import "package:flow/theme/helpers.dart";
 import "package:flow/utils/utils.dart";
+import "package:flow/widgets/animated_eny_logo.dart";
 import "package:flow/widgets/general/directional_chevron.dart";
 import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/general/info_text.dart";
 import "package:flow/widgets/general/wavy_divider.dart";
 import "package:flow/widgets/integrations/eny_page/eny_privacy_notice.dart";
 import "package:flutter/material.dart";
-import "package:lottie/lottie.dart";
 import "package:material_symbols_icons/symbols.dart";
 
 class EnyPreferencesPage extends StatefulWidget {
@@ -49,21 +49,15 @@ class _EnyPreferencesPageState extends State<EnyPreferencesPage> {
                     const SizedBox(height: 8.0),
                   ],
                   ListTile(
-                    leading: SizedBox(
+                    leading: const SizedBox(
                       width: 24.0,
                       height: 24.0,
-                      child: LottieBuilder.network(
-                        enyLogoLottieAnimationUrl,
-                        backgroundLoading: true,
-                        errorBuilder: _enyLogoBuilder,
-                        frameBuilder: _enyLogoBuilder,
-                        repeat: false,
-                      ),
+                      child: AnimatedEnyLogo(noAnimation: true),
                     ),
                     title: Text("integrations.eny.dashboard".t(context)),
                     trailing: const DirectionalChevron(),
                     onTap: () {
-                      openUrl(enyDashboardLink);
+                      openUrl(enyDashboardLink, .externalApplication);
                     },
                   ),
                   Column(
@@ -166,9 +160,5 @@ class _EnyPreferencesPageState extends State<EnyPreferencesPage> {
     if (mounted) {
       setState(() {});
     }
-  }
-
-  Widget _enyLogoBuilder(BuildContext context, _, _) {
-    return Image.network(enyLogoUrl, width: 192.0, height: 192.0);
   }
 }
