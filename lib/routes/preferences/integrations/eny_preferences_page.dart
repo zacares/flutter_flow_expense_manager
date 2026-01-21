@@ -9,6 +9,7 @@ import "package:flow/widgets/general/info_text.dart";
 import "package:flow/widgets/general/wavy_divider.dart";
 import "package:flow/widgets/integrations/eny_page/eny_privacy_notice.dart";
 import "package:flutter/material.dart";
+import "package:lottie/lottie.dart";
 import "package:material_symbols_icons/symbols.dart";
 
 class EnyPreferencesPage extends StatefulWidget {
@@ -51,10 +52,12 @@ class _EnyPreferencesPageState extends State<EnyPreferencesPage> {
                     leading: SizedBox(
                       width: 24.0,
                       height: 24.0,
-                      child: Image.network(
-                        enyLogoUrl,
-                        width: 192.0,
-                        height: 192.0,
+                      child: LottieBuilder.network(
+                        enyLogoLottieAnimationUrl,
+                        backgroundLoading: true,
+                        errorBuilder: _enyLogoBuilder,
+                        frameBuilder: _enyLogoBuilder,
+                        repeat: false,
                       ),
                     ),
                     title: Text("integrations.eny.dashboard".t(context)),
@@ -163,5 +166,9 @@ class _EnyPreferencesPageState extends State<EnyPreferencesPage> {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  Widget _enyLogoBuilder(BuildContext context, _, _) {
+    return Image.network(enyLogoUrl, width: 192.0, height: 192.0);
   }
 }
