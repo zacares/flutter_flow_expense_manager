@@ -38,7 +38,7 @@ class _EnyPreferencesPageState extends State<EnyPreferencesPage> {
       body: ValueListenableBuilder(
         valueListenable: EnyService().apiKey,
         builder: (context, apiKey, child) {
-          final bool connected = apiKey != null;
+          final bool connected = apiKey?.startsWith("eny") == true;
 
           return SingleChildScrollView(
             child: SafeArea(
@@ -154,7 +154,6 @@ class _EnyPreferencesPageState extends State<EnyPreferencesPage> {
                             value: createTransactionsPerItemInScans,
                             onChanged: (bool newValue) {
                               UserPreferencesService()
-                                      .value
                                       .createTransactionsPerItemInScans =
                                   newValue;
                               setState(() {});

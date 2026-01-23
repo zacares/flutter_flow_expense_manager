@@ -63,9 +63,19 @@ class EnyService {
 
   Future<void> setApiKey({required String? apiKey, String? email}) async {
     try {
-      await EnyLocalPreferences().apiKey.set(apiKey ?? "");
-      _apiKey.value = apiKey;
-      _log.fine("Eny API key saved");
+      final String? normalized = apiKey?.startsWith("eny") == true
+          ? apiKey
+          : null;
+
+      if (normalized != null) {
+        await EnyLocalPreferences().apiKey.set(normalized);
+        _apiKey.value = normalized;
+        _log.fine("Eny API key saved");
+      } else {
+        await EnyLocalPreferences().apiKey.remove();
+        _apiKey.value = null;
+        _log.fine("Eny API key cleared");
+      }
     } catch (e) {
       _log.warning("Failed to save Eny API key", e);
     }

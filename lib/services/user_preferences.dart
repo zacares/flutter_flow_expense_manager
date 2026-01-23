@@ -268,7 +268,7 @@ class UserPreferencesService {
       value.transactionButtonOrder = FlowButtonType.defaultOrder;
     }
 
-    _updateButtonsWidgets(order);
+    _updateButtonsWidgets(value.transactionButtonOrder);
 
     ObjectBox().box<UserPreferences>().put(value);
   }

@@ -272,7 +272,7 @@
   "integrations.eny.privacyNotice.dataSharing#google": "Google",
   "integrations.eny.privacyNotice.description": "Questo è un servizio esterno che elabora i tuoi dati, quindi presta attenzione a ciò che invii. Flow non invia nulla per tuo conto: vengono inviati solo le immagini/dati che scegli.",
   "integrations.eny.privacyNotice.legal": "Consulta i Termini di servizio e l'Informativa sulla privacy di Eny.",
-  "integrations.eny.requestSuccessful": "Elaborazione della ricevuta, attendere...",
+  "integrations.eny.sent": "Elaborazione della ricevuta, attendere...",
   "logs.delete": "Elimina file di log",
   "logs.delete.confirmation": "Sei sicuro di voler eliminare questo file di log?",
   "logs.deleted": "File di log eliminato con successo",
