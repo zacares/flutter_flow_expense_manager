@@ -5,9 +5,11 @@ import "package:cross_file/cross_file.dart";
 import "package:flow/data/transaction_multi_programmable_object.dart";
 import "package:flow/data/transaction_programmable_object.dart";
 import "package:flow/entity/transaction/extensions/default/eny_receipt.dart";
+import "package:flow/l10n/flow_localizations.dart";
 import "package:flow/objectbox/actions.dart";
 import "package:flow/prefs/eny_preferences.dart";
 import "package:flow/services/categories.dart";
+import "package:flow/services/external_toasts.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flutter/foundation.dart";
 import "package:http/http.dart" as http;
@@ -256,6 +258,7 @@ class EnyService {
     };
 
     bool completed = false;
+    bool succeeded = false;
 
     if (enyJson == null || enyJson["status"] == "processing") {
       _log.fine("Receipt $id is still processing");
@@ -283,6 +286,7 @@ class EnyService {
           );
         }
         completed = parsed != null && parsed.t.isNotEmpty;
+        succeeded = completed;
       } else {
         final parsed = TransactionProgrammableObject.fromEnyJson(
           enySuccessResult,
@@ -297,6 +301,7 @@ class EnyService {
           ],
         );
         completed = parsed != null;
+        succeeded = completed;
       }
     }
 
@@ -304,6 +309,12 @@ class EnyService {
       await EnyLocalPreferences().pendingReceipts
           .removeItem(id)
           .catchError((error) => false);
+      if (succeeded) {
+        ExternalToastsService().addToast(
+          "transaction.external.added".tr(),
+          .success,
+        );
+      }
     }
   }
 

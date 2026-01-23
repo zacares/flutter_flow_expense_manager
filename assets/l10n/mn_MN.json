@@ -694,6 +694,8 @@
   "transaction.transfer.to": "Хүлээн авах данс",
   "transaction.transfer.to.select": "Хүлээн авах данс",
   "transaction.transfer.to.title": "{account}-руу",
+  "transaction.external.added": "Шинэ гүйлгээ нэмэгдлээ",
+  "transaction.external.from": "{name}-с нэмэгдсэн гүйлгээ",
   "transactionFilterPreset": "Шүүлтүүрийн загвар",
   "transactionFilterPreset.default": "Үндсэн загвар",
   "transactionFilterPreset.delete": "Загварыг устгах",

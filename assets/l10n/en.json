@@ -694,6 +694,8 @@
   "transaction.transfer.to": "Receiving account",
   "transaction.transfer.to.select": "Transfer to",
   "transaction.transfer.to.title": "To {account}",
+  "transaction.external.added": "A new transaction was added",
+  "transaction.external.from": "Added from {name}",
   "transactionFilterPreset": "Filter preset",
   "transactionFilterPreset.default": "Default preset",
   "transactionFilterPreset.delete": "Delete preset",
