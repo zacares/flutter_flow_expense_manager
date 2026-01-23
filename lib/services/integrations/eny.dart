@@ -31,6 +31,8 @@ class EnyService {
   final ValueNotifier<String?> _apiKey = ValueNotifier<String?>(null);
   ValueListenable<String?> get apiKey => _apiKey;
 
+  bool get isConnected => _apiKey.value?.startsWith("eny") == true;
+
   final ValueNotifier<int?> _remainingCredits = ValueNotifier<int?>(null);
   ValueListenable<int?> get remainingCredits => _remainingCredits;
 
@@ -63,9 +65,7 @@ class EnyService {
 
   Future<void> setApiKey({required String? apiKey, String? email}) async {
     try {
-      final String? normalized = apiKey?.startsWith("eny") == true
-          ? apiKey
-          : null;
+      final String? normalized = EnyService().isConnected ? apiKey! : null;
 
       if (normalized != null) {
         await EnyLocalPreferences().apiKey.set(normalized);
@@ -74,7 +74,7 @@ class EnyService {
       } else {
         await EnyLocalPreferences().apiKey.remove();
         _apiKey.value = null;
-        _log.fine("Eny API key cleared");
+        _log.fine("Eny API key removed");
       }
     } catch (e) {
       _log.warning("Failed to save Eny API key", e);

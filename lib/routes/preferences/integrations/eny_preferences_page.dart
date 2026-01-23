@@ -38,7 +38,7 @@ class _EnyPreferencesPageState extends State<EnyPreferencesPage> {
       body: ValueListenableBuilder(
         valueListenable: EnyService().apiKey,
         builder: (context, apiKey, child) {
-          final bool connected = apiKey?.startsWith("eny") == true;
+          final bool connected = EnyService().isConnected;
 
           return SingleChildScrollView(
             child: SafeArea(
