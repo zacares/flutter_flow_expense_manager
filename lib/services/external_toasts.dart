@@ -15,9 +15,7 @@ class ExternalToastsService {
   factory ExternalToastsService() =>
       _instance ??= ExternalToastsService._internal();
 
-  ExternalToastsService._internal() {
-    // Constructor
-  }
+  ExternalToastsService._internal();
 
   Stream<(String, ToastificationType)> get toastStream =>
       _toastStreamController.stream;
