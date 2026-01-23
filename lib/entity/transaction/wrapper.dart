@@ -18,6 +18,7 @@ class ExtensionsWrapper {
     Transfer.keyName: (json) => Transfer.fromJson(json),
     Geo.keyName: (json) => Geo.fromJson(json),
     Recurring.keyName: (json) => Recurring.fromJson(json),
+    EnyReceipt.keyName: (json) => EnyReceipt.fromJson(json),
   };
 
   static void register<T extends TransactionExtension>(

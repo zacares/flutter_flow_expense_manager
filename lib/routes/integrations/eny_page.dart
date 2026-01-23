@@ -274,6 +274,14 @@ class _EnyPageState extends State<EnyPage> {
       }
 
       await Future.wait(files.map((file) => EnyService().processReceipt(file)));
+      if (mounted) {
+        context.showToast(
+          text: "integrations.eny.requestSuccessful".t(context),
+        );
+        if (context.canPop()) {
+          context.pop();
+        }
+      }
     }
   }
 
@@ -325,6 +333,14 @@ class _EnyPageState extends State<EnyPage> {
 
     try {
       await EnyService().processReceipt(_takenPicture!);
+      if (mounted) {
+        context.showToast(
+          text: "integrations.eny.requestSuccessful".t(context),
+        );
+        if (context.canPop()) {
+          context.pop();
+        }
+      }
     } catch (e) {
       if (e is EnyCredsError) {
         if (mounted) {

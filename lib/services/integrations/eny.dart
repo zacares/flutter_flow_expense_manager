@@ -272,19 +272,19 @@ class EnyService {
       completed = true;
     } else if (enyJson["result"]["data"] case Map enySuccessResult) {
       if (UserPreferencesService().createTransactionsPerItemInScans) {
-        final parsed = TransactionMultiProgrammableObject.fromEnyJson(
-          enySuccessResult,
-        );
-        for (final tranasction in parsed?.t ?? []) {
-          tranasction.save(
+        final TransactionMultiProgrammableObject? parsed =
+            TransactionMultiProgrammableObject.fromEnyJson(enySuccessResult);
+        parsed?.save(
+          extensions: [
             EnyReceipt(
               uuid: const Uuid().v4(),
               enyImageUrl: enySuccessResult["imageUrl"] as String?,
               enyReceiptId: id,
               partOfMultiTransaction: true,
             ),
-          );
-        }
+          ],
+        );
+
         completed = parsed != null && parsed.t.isNotEmpty;
         succeeded = completed;
       } else {

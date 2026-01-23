@@ -620,7 +620,7 @@ class _TransactionPageState extends State<TransactionPage> {
                                   context,
                                 ),
                               ),
-                              if (!_importedFromEny) ...[
+                              if (_importedFromEny) ...[
                                 const SizedBox(height: 8.0),
                                 GestureDetector(
                                   onTap: () {
