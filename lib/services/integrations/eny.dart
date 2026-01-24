@@ -80,9 +80,15 @@ class EnyService {
       _log.warning("Failed to save Eny API key", e);
     }
     try {
-      await EnyLocalPreferences().email.set(email ?? "");
-      _email = email;
-      _log.fine("Eny email saved");
+      if (email?.contains("@") == true) {
+        await EnyLocalPreferences().email.set(email!);
+        _email = email;
+        _log.fine("Eny email saved");
+      } else {
+        await EnyLocalPreferences().email.remove();
+        _email = null;
+        _log.fine("Eny email cleared");
+      }
     } catch (e) {
       _log.warning("Failed to save Eny email", e);
     }
@@ -109,6 +115,11 @@ class EnyService {
   }
 
   Future<Map?> fetchReceiptDetails(String receiptId) async {
+    if (!isConnected) {
+      _log.warning("Not connected to Eny, skipping receipt resolution");
+      return null;
+    }
+
     final response = await http.get(
       Uri.parse("https://eny.gege.mn/api/v1/receipts/$receiptId"),
       headers: {"X-API-KEY": _apiKey.value!},
@@ -226,6 +237,11 @@ class EnyService {
   }
 
   Future<void> resolveProcessedReceipt() async {
+    if (!isConnected) {
+      _log.warning("Not connected to Eny, skipping receipt resolution");
+      return;
+    }
+
     try {
       final List<String>? items = EnyLocalPreferences().pendingReceipts.get();
       if (items == null || items.isEmpty) {
