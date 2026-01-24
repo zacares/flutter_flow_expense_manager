@@ -24,8 +24,11 @@ import "package:flow/routes/import_wizard/csv.dart";
 import "package:flow/routes/import_wizard/ivy.dart";
 import "package:flow/routes/import_wizard/v1.dart";
 import "package:flow/routes/import_wizard/v2.dart";
+import "package:flow/routes/integrate/integrate_eny_page.dart";
+import "package:flow/routes/integrations/eny_page.dart";
 import "package:flow/routes/preferences/button_order_preferences_page.dart";
 import "package:flow/routes/preferences/change_preferences_page.dart";
+import "package:flow/routes/preferences/integrations/eny_preferences_page.dart";
 import "package:flow/routes/preferences/money_formatting_preferences_page.dart";
 import "package:flow/routes/preferences/numpad_preferences_page.dart";
 import "package:flow/routes/preferences/pending_transactions_preferences_page.dart";
@@ -75,6 +78,10 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: "/transaction/new",
       redirect: (context, state) {
+        if (state.uri.queryParameters["type"]?.toLowerCase() == "eny") {
+          return "/integrations/eny";
+        }
+
         if (state.uri.queryParameters["json"] case String jason
             when jason.isNotEmpty) {
           return "/transaction/batch-import?json=${Uri.encodeComponent(jason)}";
@@ -127,6 +134,23 @@ final GoRouter router = GoRouter(
       path: "/transactions/deleted",
       builder: (context, state) =>
           TransactionsPage.deleted(title: "transaction.deleted".t(context)),
+    ),
+    GoRoute(path: "/integrations/eny", builder: (context, state) => EnyPage()),
+    GoRoute(
+      path: "/integrate/eny",
+      redirect: (context, state) {
+        final String? apiKeyToConnect = state.uri.queryParameters["apiKey"];
+
+        if (apiKeyToConnect != null && apiKeyToConnect.isNotEmpty) {
+          return null;
+        }
+
+        return "/not-found";
+      },
+      builder: (context, state) => IntegrateEnyPage(
+        apiKey: state.uri.queryParameters["apiKey"]!,
+        email: state.uri.queryParameters["email"],
+      ),
     ),
     GoRoute(
       path: "/account/new",
@@ -263,6 +287,10 @@ final GoRouter router = GoRouter(
           path: "transactionListItemAppearance",
           builder: (context, state) =>
               const TransactionListItemAppearancePreferencesPage(),
+        ),
+        GoRoute(
+          path: "integrations/eny",
+          builder: (context, state) => const EnyPreferencesPage(),
         ),
       ],
     ),

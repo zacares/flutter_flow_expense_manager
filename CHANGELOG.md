@@ -1,5 +1,11 @@
 # Changelog
 
+## Next
+
+### 0.18.0
+
+* Now you can scan receipts with Eny (beta)
+
 ## 0.17.0
 
 ### New features

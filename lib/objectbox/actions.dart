@@ -1049,6 +1049,10 @@ extension AccountActions on Account {
             return ext;
           }
 
+          _log.warning(
+            "Skipping extension ${ext.runtimeType}(${ext.uuid}) due to mismatched relatedTransactionUuid (${ext.relatedTransactionUuid} != $uuid)",
+          );
+
           return null;
         })
         .nonNulls
@@ -1141,7 +1145,12 @@ extension BackupEntryActions on BackupEntry {
 
 extension TransactionProgrammableObjectActions
     on TransactionProgrammableObject {
-  int save({dynamic fromAccount, dynamic toAccount}) {
+  int save({
+    dynamic fromAccount,
+    dynamic toAccount,
+    List<String>? extraTags,
+    List<TransactionExtension>? extensions,
+  }) {
     final Account? resolvedFromAccount =
         AccountsService().findOneActiveSync(fromAccountUuid) ??
         AccountsService().findOneActiveSync(fromAccount) ??
@@ -1209,7 +1218,8 @@ extension TransactionProgrammableObjectActions
             conversionRate: transferConversionRate,
             // attachments: attachments,
             // recurrence: recurrence,
-            // extraTags: extraTags,
+            extraTags: extraTags,
+            extensions: extensions,
             latitude: lat,
             longitude: lng,
           )
@@ -1240,7 +1250,8 @@ extension TransactionProgrammableObjectActions
         isPending: isPending,
         // attachments: attachments,
         // subtype: subtype,
-        // extraTags: extraTags,
+        extensions: extensions,
+        extraTags: extraTags,
         latitude: lat,
         longitude: lng,
       );

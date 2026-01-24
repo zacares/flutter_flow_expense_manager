@@ -1,6 +1,7 @@
 <appwidget-provider
   xmlns:android="http://schemas.android.com/apk/res/android"
-  android:minWidth="80dp"
-  android:minHeight="40dp"
+  android:label="Two Buttons"
+  android:minWidth="110dp"
+  android:minHeight="55dp"
   android:initialLayout="@layout/glance_default_loading_layout">
 </appwidget-provider>

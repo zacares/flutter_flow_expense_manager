@@ -172,7 +172,7 @@ class AccountCard extends StatelessWidget {
           onPressed: () {
             context.pop();
             SchedulerBinding.instance.addPostFrameCallback((_) {
-              context.push("/account/${account.id}");
+              context.push("/account/${account.id}/edit");
             });
           },
           isDefaultAction: true,

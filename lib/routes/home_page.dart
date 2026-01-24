@@ -1,9 +1,9 @@
 import "dart:async";
 import "dart:developer";
 
+import "package:flow/data/flow_button_type.dart";
 import "package:flow/data/flow_notification_payload.dart";
 import "package:flow/entity/account.dart";
-import "package:flow/entity/transaction.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/prefs/local_preferences.dart";
 import "package:flow/routes.dart";
@@ -15,6 +15,7 @@ import "package:flow/services/navigation.dart";
 import "package:flow/services/notifications.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/shortcut.dart";
+import "package:flow/widgets/external_toasts_handler.dart";
 import "package:flow/widgets/general/frame.dart";
 import "package:flow/widgets/home/navbar.dart";
 import "package:flow/widgets/home/navbar/new_transaction_button.dart";
@@ -124,54 +125,56 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    return CallbackShortcuts(
-      bindings: {
-        osSingleActivator(LogicalKeyboardKey.keyN): () =>
-            _newTransactionPage(null),
-        osSingleActivator(LogicalKeyboardKey.digit1): () => _navigateTo(0),
-        osSingleActivator(LogicalKeyboardKey.digit2): () => _navigateTo(1),
-        osSingleActivator(LogicalKeyboardKey.digit3): () => _navigateTo(2),
-        osSingleActivator(LogicalKeyboardKey.digit4): () => _navigateTo(3),
-      },
-      child: Focus(
-        autofocus: true,
-        child: PieCanvas(
-          theme: context.pieTheme,
-          child: Stack(
-            children: [
-              Scaffold(
-                body: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    HomeTab(scrollController: _homeTabScrollController),
-                    const StatsTab(),
-                    const SafeArea(child: AccountsTab()),
-                    const SafeArea(child: ProfileTab()),
-                  ],
+    return ExternalToastsHandler(
+      child: CallbackShortcuts(
+        bindings: {
+          osSingleActivator(LogicalKeyboardKey.keyN): () =>
+              _newTransactionPage(null),
+          osSingleActivator(LogicalKeyboardKey.digit1): () => _navigateTo(0),
+          osSingleActivator(LogicalKeyboardKey.digit2): () => _navigateTo(1),
+          osSingleActivator(LogicalKeyboardKey.digit3): () => _navigateTo(2),
+          osSingleActivator(LogicalKeyboardKey.digit4): () => _navigateTo(3),
+        },
+        child: Focus(
+          autofocus: true,
+          child: PieCanvas(
+            theme: context.pieTheme,
+            child: Stack(
+              children: [
+                Scaffold(
+                  body: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      HomeTab(scrollController: _homeTabScrollController),
+                      const StatsTab(),
+                      const SafeArea(child: AccountsTab()),
+                      const SafeArea(child: ProfileTab()),
+                    ],
+                  ),
                 ),
-              ),
-              Positioned(
-                bottom: 16.0,
-                left: 0.0,
-                right: 0.0,
-                child: SafeArea(
-                  child: Frame(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Navbar(
-                          onTap: (i) => _navigateTo(i),
-                          activeIndex: _currentIndex,
-                        ),
-                        NewTransactionButton(
-                          onActionTap: (type) => _newTransactionPage(type),
-                        ),
-                      ],
+                Positioned(
+                  bottom: 16.0,
+                  left: 0.0,
+                  right: 0.0,
+                  child: SafeArea(
+                    child: Frame(
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Navbar(
+                            onTap: (i) => _navigateTo(i),
+                            activeIndex: _currentIndex,
+                          ),
+                          NewTransactionButton(
+                            onActionTap: (type) => _newTransactionPage(type),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -193,16 +196,20 @@ class _HomePageState extends State<HomePage>
     _tabController.animateTo(index);
   }
 
-  void _newTransactionPage(TransactionType? type) {
+  void _newTransactionPage(FlowButtonType? type) {
     // Generally, this wouldn't happen in production environment
     if (ObjectBox().box<Account>().count(limit: 1) == 0) {
       context.push("/account/new");
       return;
     }
 
-    type ??= TransactionType.expense;
+    if (type == FlowButtonType.eny) {
+      context.push("/integrations/eny");
+    } else {
+      type ??= FlowButtonType.expense;
 
-    context.push("/transaction/new?type=${type.value}");
+      context.push("/transaction/new?type=${type.value}");
+    }
   }
 
   void _pushNotificationPath(NotificationResponse response) {

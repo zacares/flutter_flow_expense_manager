@@ -1,4 +1,7 @@
+import "package:flow/data/money.dart";
 import "package:flow/entity/transaction/type.dart";
+import "package:flow/services/user_preferences.dart";
+import "package:flow/utils/loose_parsers.dart";
 import "package:flow/utils/utils.dart";
 
 class TransactionProgrammableObject {
@@ -87,51 +90,15 @@ class TransactionProgrammableObject {
     return tryParse(params);
   }
 
-  static String? _getSingle(dynamic value) {
-    if (value is Iterable) {
-      return value.firstOrNull;
-    }
-
-    if (value is num) {
-      return value.toString();
-    }
-
-    if (value is String) {
-      return value;
-    }
-
-    return null;
-  }
-
-  static double? _getSingleDouble(dynamic value) {
-    final stringValue = _getSingle(value);
-    if (stringValue != null) {
-      return double.tryParse(stringValue);
-    }
-    return null;
-  }
-
-  static List<String>? _getStringList(dynamic value) {
-    if (value is Iterable) {
-      return value.whereType<String>().where((x) => x.isNotEmpty).toList();
-    }
-
-    if (value is String) {
-      return [value];
-    }
-
-    return null;
-  }
-
   static TransactionProgrammableObject parse(Map<String, dynamic> params) {
-    final DateTime? transactionDate = switch (_getSingle(
+    final DateTime? transactionDate = switch (looseString(
       params["transactionDate"],
     )) {
       String dateString => DateTime.tryParse(dateString),
       _ => null,
     };
 
-    final TransactionType? type = switch (_getSingle(params["type"])) {
+    final TransactionType? type = switch (looseString(params["type"])) {
       String typeString => TransactionType.values.firstWhereOrNull(
         (value) => value.value.toLowerCase() == typeString.toLowerCase(),
       ),
@@ -140,30 +107,89 @@ class TransactionProgrammableObject {
 
     return TransactionProgrammableObject(
       transactionDate: transactionDate,
-      categoryUuid: _getSingle(params["categoryUuid"]),
-      category: _getSingle(params["category"]),
-      notes: _getSingle(params["notes"]),
-      title: _getSingle(params["title"]),
-      amount: _getSingleDouble(params["amount"]),
-      fromAccountUuid: _getSingle(params["fromAccountUuid"]),
-      fromAccount: _getSingle(params["fromAccount"]),
-      toAccountUuid: _getSingle(params["toAccountUuid"]),
-      toAccount: _getSingle(params["toAccount"]),
+      categoryUuid: looseString(params["categoryUuid"]),
+      category: looseString(params["category"]),
+      notes: looseString(params["notes"]),
+      title: looseString(params["title"]),
+      amount: looseDouble(params["amount"]),
+      fromAccountUuid: looseString(params["fromAccountUuid"]),
+      fromAccount: looseString(params["fromAccount"]),
+      toAccountUuid: looseString(params["toAccountUuid"]),
+      toAccount: looseString(params["toAccount"]),
       type: type,
-      isPending: _getSingle(params["isPending"])?.toLowerCase() == "true",
-      transferConversionRate: _getSingleDouble(
-        params["transferConversionRate"],
-      ),
-      tagsUuids: _getStringList(params["tagsUuids"]),
-      tags: _getStringList(params["tags"]),
-      lat: _getSingleDouble(params["lat"]),
-      lng: _getSingleDouble(params["lng"]),
+      isPending: looseString(params["isPending"])?.toLowerCase() == "true",
+      transferConversionRate: looseDouble(params["transferConversionRate"]),
+      tagsUuids: looseStringList(params["tagsUuids"]),
+      tags: looseStringList(params["tags"]),
+      lat: looseDouble(params["lat"]),
+      lng: looseDouble(params["lng"]),
     );
   }
 
   static TransactionProgrammableObject? tryParse(Map<String, dynamic> params) {
     try {
       return parse(params);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static TransactionProgrammableObject? fromEnyJson(Map json) {
+    String? itemsToNote(List<Map> items) {
+      return items
+          .map((item) {
+            try {
+              final itemMap = item as Map?;
+
+              if (itemMap == null) {
+                throw Exception("Invalid item format");
+              }
+
+              final String name = looseString(itemMap["name"]) ?? "An item";
+              final int quantity =
+                  looseDouble(itemMap["quantity"])?.toInt() ?? 1;
+              final double itemAmount = looseDouble(itemMap["amount"]) ?? 0.0;
+              final String? currency = looseString(itemMap["currency"]);
+
+              final String amountStr = Money(
+                itemAmount,
+                currency ?? UserPreferencesService().primaryCurrency,
+              ).formatted;
+
+              return "$quantity x $name - **${amountStr.trim()}**";
+            } catch (_) {
+              return null;
+            }
+          })
+          .whereType<String>()
+          .join("\n\n");
+    }
+
+    try {
+      final String title = looseString(json["merchant"]) ?? "Receipt from Eny";
+      final double? amount = looseDouble(json["total"]);
+      final DateTime transactionDate = switch (json["date"]) {
+        String dateString => DateTime.tryParse(dateString) ?? DateTime.now(),
+        _ => DateTime.now(),
+      };
+
+      final List<Map>? items = switch (json["items"]) {
+        Iterable itemList
+            when itemList.isNotEmpty && itemList.every((item) => item is Map) =>
+          itemList.cast<Map>().toList(),
+        _ => null,
+      };
+
+      final String notes = items == null
+          ? "Imported from Eny"
+          : "${itemsToNote(items)}\n\n---\n\nImported from Eny";
+      return TransactionProgrammableObject(
+        title: title,
+        amount: amount == null ? 0.0 : (-amount.abs()),
+        transactionDate: transactionDate,
+        notes: notes,
+        category: looseString(items?.firstOrNull?["category"]),
+      );
     } catch (e) {
       return null;
     }
