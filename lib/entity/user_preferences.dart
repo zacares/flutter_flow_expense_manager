@@ -1,6 +1,6 @@
+import "package:flow/data/flow_button_type.dart";
 import "package:flow/data/prefs/change_visuals.dart";
 import "package:flow/entity/_base.dart";
-import "package:flow/entity/transaction/type.dart";
 import "package:flow/entity/user_preferences/transaction_entry_flow.dart";
 import "package:flow/utils/json/utc_datetime_converter.dart";
 import "package:json_annotation/json_annotation.dart";
@@ -65,6 +65,8 @@ class UserPreferences implements EntityBase {
   bool transactionListTileShowAccountForLeading;
   bool transactionListTileRelaxedDensity;
 
+  bool createTransactionsPerItemInScans;
+
   String? icuCurrencyFormattingPattern;
 
   String? primaryCurrency;
@@ -114,31 +116,36 @@ class UserPreferences implements EntityBase {
 
   @Transient()
   @JsonKey(includeToJson: false, includeFromJson: false)
-  List<TransactionType> get transactionButtonOrder {
+  List<FlowButtonType> get transactionButtonOrder {
     try {
       if (transactionButtonOrderJoined == null ||
           transactionButtonOrderJoined!.isEmpty) {
         throw StateError("transactionButtonOrderJoined is null or empty");
       }
 
-      final List<TransactionType> parsed = transactionButtonOrderJoined!
+      final List<FlowButtonType> parsed = transactionButtonOrderJoined!
           .split(",")
           .map(
-            (e) => TransactionType.values.firstWhere((type) => type.value == e),
+            (e) => FlowButtonType.values.firstWhere((type) => type.value == e),
           )
           .toList();
 
-      if (parsed.length != TransactionType.values.length) {
-        throw StateError("Parsed transactionButtonOrder length mismatch");
+      if (parsed.length < FlowButtonType.values.length) {
+        // Ensure all button types are present
+        for (final type in FlowButtonType.values) {
+          if (!parsed.contains(type)) {
+            parsed.add(type);
+          }
+        }
       }
 
       return parsed;
     } catch (e) {
-      return TransactionType.values.toList();
+      return FlowButtonType.defaultOrder;
     }
   }
 
-  set transactionButtonOrder(List<TransactionType> order) {
+  set transactionButtonOrder(List<FlowButtonType> order) {
     transactionButtonOrderJoined = order.map((e) => e.value).join(",");
   }
 
@@ -151,6 +158,7 @@ class UserPreferences implements EntityBase {
     this.transactionListTileShowCategoryName = false,
     this.transactionListTileShowAccountForLeading = false,
     this.transactionListTileRelaxedDensity = false,
+    this.createTransactionsPerItemInScans = true,
     this.trashBinRetentionDays = 30,
     this.defaultFilterPreset,
     this.enableICloudSync = false,

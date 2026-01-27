@@ -1,6 +1,8 @@
-import "package:flow/entity/transaction.dart";
+import "package:flow/data/flow_button_type.dart";
+import "package:flow/entity/user_preferences.dart";
 import "package:flow/l10n/extensions.dart";
 import "package:flow/l10n/named_enum.dart";
+import "package:flow/services/integrations/eny.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/navbar_theme.dart";
 import "package:flow/theme/theme.dart";
@@ -10,7 +12,7 @@ import "package:material_symbols_icons/symbols.dart";
 import "package:pie_menu/pie_menu.dart";
 
 class NewTransactionButton extends StatefulWidget {
-  final Function(TransactionType type) onActionTap;
+  final Function(FlowButtonType type) onActionTap;
 
   const NewTransactionButton({super.key, required this.onActionTap});
 
@@ -25,12 +27,31 @@ class _NewTransactionButtonState extends State<NewTransactionButton> {
   Widget build(BuildContext context) {
     final NavbarTheme navbarTheme = Theme.of(context).extension<NavbarTheme>()!;
 
-    return ValueListenableBuilder(
-      valueListenable: UserPreferencesService().valueNotifier,
-      builder: (context, userPreferences, child) {
-        final List<TransactionType> buttonOrder = context.isLtr
-            ? userPreferences.transactionButtonOrder
-            : userPreferences.transactionButtonOrder.reversed.toList();
+    return AnimatedBuilder(
+      animation: Listenable.merge([
+        UserPreferencesService().valueNotifier,
+        EnyService().apiKey,
+      ]),
+      builder: (context, _) {
+        final UserPreferences userPreferences = UserPreferencesService().value;
+        final bool enyConnected = EnyService().apiKey.value?.isNotEmpty == true;
+
+        final List<FlowButtonType> buttonOrder = switch ((
+          context.isLtr,
+          enyConnected,
+        )) {
+          (true, true) => userPreferences.transactionButtonOrder,
+          (true, false) =>
+            userPreferences.transactionButtonOrder
+                .where((type) => type != FlowButtonType.eny)
+                .toList(),
+          (false, true) =>
+            userPreferences.transactionButtonOrder.reversed.toList(),
+          (false, false) =>
+            userPreferences.transactionButtonOrder.reversed
+                .where((type) => type != FlowButtonType.eny)
+                .toList(),
+        };
 
         return PieMenu(
           theme: context.pieTheme.copyWith(
@@ -44,20 +65,21 @@ class _NewTransactionButtonState extends State<NewTransactionButton> {
             longPressDuration: Duration.zero,
           ),
           onToggle: onToggle,
-          actions: [
-            for (final transactionType in buttonOrder)
-              PieAction(
-                tooltip: Text(transactionType.localizedNameContext(context)),
-                onSelect: () => widget.onActionTap(transactionType),
-                child: Icon(transactionType.icon, weight: 800.0),
-                buttonTheme: PieButtonTheme(
-                  backgroundColor: transactionType.actionBackgroundColor(
-                    context,
+          actions: buttonOrder
+              .map(
+                (transactionType) => PieAction(
+                  tooltip: Text(transactionType.localizedNameContext(context)),
+                  onSelect: () => widget.onActionTap(transactionType),
+                  child: Icon(transactionType.icon, weight: 800.0),
+                  buttonTheme: PieButtonTheme(
+                    backgroundColor: transactionType.actionBackgroundColor(
+                      context,
+                    ),
+                    iconColor: transactionType.actionColor(context),
                   ),
-                  iconColor: transactionType.actionColor(context),
                 ),
-              ),
-          ],
+              )
+              .toList(),
           child: StatefulBuilder(
             builder: (context, setState) => Tooltip(
               message: "transaction.new".t(context),

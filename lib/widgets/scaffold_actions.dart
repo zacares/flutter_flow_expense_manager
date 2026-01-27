@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:flow/theme/theme.dart";
 import "package:flutter/material.dart";
 
@@ -21,7 +23,10 @@ class ScaffoldActions extends StatelessWidget {
       ),
       padding: .only(top: 20.0),
       child: SafeArea(
-        child: Column(mainAxisSize: .min, spacing: 12.0, children: children),
+        child: Padding(
+          padding: Platform.isIOS ? .zero : .only(bottom: 16.0),
+          child: Column(mainAxisSize: .min, spacing: 12.0, children: children),
+        ),
       ),
     );
   }

@@ -1,16 +1,17 @@
 import "dart:async";
 import "dart:math";
 
+import "package:flow/data/flow_button_type.dart";
 import "package:flow/data/flow_notification_payload.dart";
 import "package:flow/data/prefs/change_visuals.dart";
 import "package:flow/entity/account.dart";
-import "package:flow/entity/transaction/type.dart";
 import "package:flow/entity/transaction_filter_preset.dart";
 import "package:flow/entity/user_preferences.dart";
 import "package:flow/entity/user_preferences/transaction_entry_flow.dart";
 import "package:flow/objectbox.dart";
 import "package:flow/objectbox/objectbox.g.dart";
 import "package:flow/services/currency_registry.dart";
+import "package:flow/services/integrations/eny.dart";
 import "package:flow/services/notifications.dart";
 import "package:flow/services/sync.dart";
 import "package:flow/theme/color_themes/registry.dart";
@@ -159,6 +160,16 @@ class UserPreferencesService {
     ObjectBox().box<UserPreferences>().put(value);
   }
 
+  bool get createTransactionsPerItemInScans =>
+      value.createTransactionsPerItemInScans;
+  set createTransactionsPerItemInScans(
+    bool newCreateTransactionsPerItemInScans,
+  ) {
+    value.createTransactionsPerItemInScans =
+        newCreateTransactionsPerItemInScans;
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
   String? get defaultFilterPresetUuid => value.defaultFilterPreset;
   set defaultFilterPresetUuid(String? uuid) {
     value.defaultFilterPreset = uuid;
@@ -248,12 +259,17 @@ class UserPreferencesService {
     ObjectBox().box<UserPreferences>().put(value);
   }
 
-  List<TransactionType> get transactionButtonOrder =>
+  List<FlowButtonType> get transactionButtonOrder =>
       value.transactionButtonOrder;
-  set transactionButtonOrder(List<TransactionType> order) {
-    value.transactionButtonOrder = order;
 
-    _updateButtonsWidgets(order);
+  set transactionButtonOrder(List<FlowButtonType> order) {
+    final List<FlowButtonType> newOrder =
+        (order.length >= 3 && order.length <= FlowButtonType.values.length)
+        ? order
+        : FlowButtonType.defaultOrder;
+
+    value.transactionButtonOrder = newOrder;
+    _updateButtonsWidgets(newOrder);
 
     ObjectBox().box<UserPreferences>().put(value);
   }
@@ -301,18 +317,35 @@ class UserPreferencesService {
 
   UserPreferencesService._internal();
 
-  void _updateButtonsWidgets(List<TransactionType> order) async {
+  void _updateButtonsWidgets(List<FlowButtonType> order) async {
     try {
-      final String value = order.map((e) => e.value).join(",");
+      final String value = EnyService().isConnected
+          ? order.map((e) => e.value).join(",")
+          : order
+                .where((e) => e != FlowButtonType.eny)
+                .map((e) => e.value)
+                .join(",");
       await HomeWidget.setAppGroupId("group.mn.flow.flow");
       await HomeWidget.saveWidgetData("buttonOrder", value);
-      final bool? succeeded = await HomeWidget.updateWidget(
-        name: "FlowTwoEntryWidget",
-        iOSName: "FlowTwoEntryWidget",
-        androidName: "TwoEntryReceiver",
-        qualifiedAndroidName: "mn.flow.flow.glance.TwoEntryReceiver",
-      );
-      if (succeeded != true) throw Exception("HomeWidget update failed");
+      await Future.wait([
+        HomeWidget.updateWidget(
+          name: "FlowTwoEntryWidget",
+          iOSName: "FlowTwoEntryWidget",
+          androidName: "TwoEntryReceiver",
+          qualifiedAndroidName: "mn.flow.flow.glance.TwoEntryReceiver",
+        ),
+        HomeWidget.updateWidget(
+          name: "FlowTwoEntryLateWidget",
+          androidName: "TwoEntryLateReceiver",
+          qualifiedAndroidName: "mn.flow.flow.glance.TwoEntryLateReceiver",
+        ),
+        HomeWidget.updateWidget(
+          name: "FlowFourEntryWidget",
+          iOSName: "FlowFourEntryWidget",
+          androidName: "FourEntryReceiver",
+          qualifiedAndroidName: "mn.flow.flow.glance.FourEntryReceiver",
+        ),
+      ]);
       _log.finest("Updated widgets button order to: $value");
     } catch (e) {
       _log.warning("Failed to update widgets button order: $e");

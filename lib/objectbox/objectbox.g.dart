@@ -455,7 +455,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(10, 7829328581176695647),
     name: 'UserPreferences',
-    lastPropertyId: const obx_int.IdUid(24, 4516202653950496157),
+    lastPropertyId: const obx_int.IdUid(25, 5365639887585710264),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -589,6 +589,12 @@ final _entities = <obx_int.ModelEntity>[
         id: const obx_int.IdUid(24, 4516202653950496157),
         name: 'primaryAccountUuid',
         type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(25, 5365639887585710264),
+        name: 'createTransactionsPerItemInScans',
+        type: 1,
         flags: 0,
       ),
     ],
@@ -954,6 +960,11 @@ Future<obx.Store> openStore({
 /// [obx.Store.new].
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
+    // If this version is not found, it means that this file was generated
+    // with an older version of the ObjectBox Dart generator.
+    // Please regenerate this file with the current generator version.
+    // Typically, this is done with `dart run build_runner build`.
+    generatorVersion: obx_int.GeneratorVersion.v2025_12_16,
     entities: _entities,
     lastEntityId: const obx_int.IdUid(15, 3741443681678089583),
     lastIndexId: const obx_int.IdUid(27, 5707692371585154920),
@@ -1605,7 +1616,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final primaryAccountUuidOffset = object.primaryAccountUuid == null
             ? null
             : fbb.writeString(object.primaryAccountUuid!);
-        fbb.startTable(25);
+        fbb.startTable(26);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uuidOffset);
         fbb.addBool(2, object.combineTransfers);
@@ -1628,6 +1639,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addBool(21, object.transactionListTileRelaxedDensity);
         fbb.addOffset(22, transactionEntryFlowJsonOffset);
         fbb.addOffset(23, primaryAccountUuidOffset);
+        fbb.addBool(24, object.createTransactionsPerItemInScans);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -1660,6 +1672,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
             const fb.BoolReader().vTableGet(buffer, rootOffset, 26, false);
         final transactionListTileRelaxedDensityParam = const fb.BoolReader()
             .vTableGet(buffer, rootOffset, 46, false);
+        final createTransactionsPerItemInScansParam = const fb.BoolReader()
+            .vTableGet(buffer, rootOffset, 52, false);
         final trashBinRetentionDaysParam = const fb.Int64Reader()
             .vTableGetNullable(buffer, rootOffset, 14);
         final defaultFilterPresetParam = const fb.StringReader(
@@ -1714,6 +1728,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
                     transactionListTileShowAccountForLeadingParam,
                 transactionListTileRelaxedDensity:
                     transactionListTileRelaxedDensityParam,
+                createTransactionsPerItemInScans:
+                    createTransactionsPerItemInScansParam,
                 trashBinRetentionDays: trashBinRetentionDaysParam,
                 defaultFilterPreset: defaultFilterPresetParam,
                 enableICloudSync: enableICloudSyncParam,
@@ -2569,6 +2585,10 @@ class UserPreferences_ {
   static final primaryAccountUuid = obx.QueryStringProperty<UserPreferences>(
     _entities[6].properties[21],
   );
+
+  /// See [UserPreferences.createTransactionsPerItemInScans].
+  static final createTransactionsPerItemInScans =
+      obx.QueryBooleanProperty<UserPreferences>(_entities[6].properties[22]);
 }
 
 /// [Budget] entity fields to define ObjectBox queries.

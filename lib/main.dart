@@ -179,8 +179,6 @@ class FlowState extends State<Flow> {
 
   ThemeMode get themeMode => _themeMode;
 
-  late final StreamSubscription<Uri?> _flowUriSubscription;
-
   late bool _tempLock;
 
   bool get useDarkTheme => (_themeMode == ThemeMode.system
@@ -242,8 +240,6 @@ class FlowState extends State<Flow> {
     LocalPreferences().primaryCurrency.removeListener(_refreshExchangeRates);
 
     TransactionsService().removeListener(_synchronizePlannedNotifications);
-
-    _flowUriSubscription.cancel();
 
     _appLifeCycleListener.dispose();
 
