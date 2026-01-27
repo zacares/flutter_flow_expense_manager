@@ -1,8 +1,10 @@
 # Changelog
 
-## Next
+## 0.18.1
 
-### 0.18.0
+* Fixed you weren't able to connect Eny. Goofed big time :P
+
+## 0.18.0
 
 * Now you can scan receipts with Eny (beta)
 
