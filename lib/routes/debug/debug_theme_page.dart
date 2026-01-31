@@ -3,7 +3,6 @@ import "dart:io";
 import "package:flow/data/flow_icon.dart";
 import "package:flow/entity/account.dart";
 import "package:flow/entity/transaction.dart";
-import "package:flow/theme/helpers.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/widgets/account_card.dart";
 import "package:flow/widgets/action_card.dart";
