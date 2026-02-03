@@ -52,7 +52,7 @@ class _RemindersPreferencesPageState extends State<RemindersPreferencesPage> {
                     ),
                   ],
                   if (NotificationsService.schedulingSupported &&
-                      !permissions.hasNotificationPermission) ...[
+                      !permissions.hasAllPermissions) ...[
                     const SizedBox(height: 16.0),
                     SchdeuledNotificationPermissionMissingReminder(
                       permissions: permissions,
@@ -82,9 +82,11 @@ class _RemindersPreferencesPageState extends State<RemindersPreferencesPage> {
                         ),
                       ),
                       value: enabled,
-                      onChanged: toggleRemindDaily,
+                      onChanged: permissions.hasAllPermissions
+                          ? toggleRemindDaily
+                          : null,
                     ),
-                    if (enabled) ...[
+                    if (permissions.hasAllPermissions && enabled) ...[
                       const SizedBox(height: 16.0),
                       ListHeader(
                         "preferences.reminders.remindDaily.time".t(context),

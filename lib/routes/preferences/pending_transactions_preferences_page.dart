@@ -123,7 +123,7 @@ class _PendingTransactionPreferencesPageState
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: .start,
                       children: [
-                        permissions.hasNotificationPermission
+                        permissions.hasAllPermissions
                             ? CheckboxListTile(
                                 title: Text(
                                   "preferences.transactions.pending.notify".t(

@@ -1,11 +1,15 @@
 import "dart:io";
 
+import "package:flow/services/notifications.dart";
 import "package:flutter/widgets.dart";
+import "package:flutter_local_notifications/flutter_local_notifications.dart";
 import "package:permission_handler/permission_handler.dart";
 
 class SchdeuledNotificationPermission {
   final bool hasNotificationPermission;
   final bool hasAlarmPermission;
+
+  bool get hasAllPermissions => hasNotificationPermission && hasAlarmPermission;
 
   const SchdeuledNotificationPermission({
     required this.hasNotificationPermission,
@@ -87,6 +91,15 @@ class _SchdeuledNotificationPermissionBuilderState
     try {
       if (Platform.isLinux) {
         _hasAlarmPermission = false;
+      } else if (Platform.isAndroid) {
+        final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+            NotificationsService().pluginInstance
+                .resolvePlatformSpecificImplementation<
+                  AndroidFlutterLocalNotificationsPlugin
+                >();
+        _hasAlarmPermission =
+            await androidImplementation?.canScheduleExactNotifications() ??
+            false;
       } else {
         _hasAlarmPermission = await Permission.scheduleExactAlarm.isGranted;
       }
