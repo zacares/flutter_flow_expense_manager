@@ -279,6 +279,8 @@
   "logs.deleted": "Лог файлыг амжилттай устгалаа",
   "notifications.openSettingsToGrantPermission": "Системийн тохиргооны хэсэгт орж мэдэгдэл илгээх зөвшөөрлийг олгоно уу",
   "notifications.permissionNotGranted": "Мэдэгдэл илгээх зөвшөөрөл олгоогүй байна",
+  "notifications.alarm.permissionNotGranted": "Сэрүүлэг тохируулах зөвшөөрөл олгоогүй байна",
+  "notifications.alarm.androidDescription": "Аппын зөвшөөрлийн хамгийн доор байрлах \"Сэрүүлэг ба санамж\" тохиргооны эрхийг өгнө үү.",
   "notifications.reminderText#1": "Та өнөөдөр зардлаа бүртгэсэн үү?",
   "notifications.reminderText#2": "Зардлуудаа бүртгэхээ мартуузай!",
   "notifications.reminderText#3": "Өнөөдрийн зардлаа бүртгэх цаг боллоо.",

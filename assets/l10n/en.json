@@ -279,6 +279,8 @@
   "logs.deleted": "Log file deleted successfully",
   "notifications.openSettingsToGrantPermission": "Grant notification permission from system settings",
   "notifications.permissionNotGranted": "Notifications permission not granted",
+  "notifications.alarm.permissionNotGranted": "Alarm/Reminder permission not granted",
+  "notifications.alarm.androidDescription": "Grant \"Alarms and Reminder\" permission (last in the permissions list) to receive exact-time reminders.",
   "notifications.reminderText#1": "Did you track your expenses today?",
   "notifications.reminderText#2": "Don't forget to record your transactions!",
   "notifications.reminderText#3": "Time to record your expenses for today.",
