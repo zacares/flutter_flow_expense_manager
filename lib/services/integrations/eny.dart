@@ -311,6 +311,7 @@ class EnyService {
               partOfMultiTransaction: true,
             ),
           ],
+          isPendingOverride: true,
         );
 
         completed = parsed != null && parsed.t.isNotEmpty;
@@ -319,15 +320,25 @@ class EnyService {
         final parsed = TransactionProgrammableObject.fromEnyJson(
           enySuccessResult,
         );
-        parsed?.save(
-          extensions: [
-            EnyReceipt(
-              uuid: const Uuid().v4(),
-              enyImageUrl: enySuccessResult["imageUrl"] as String?,
-              enyReceiptId: id,
-            ),
-          ],
-        );
+        bool? pendingOverride;
+        if (parsed != null) {
+          if (parsed.transactionDate case DateTime parsedTransactionDate) {
+            if (parsedTransactionDate.difference(DateTime.now()).inHours < -6) {
+              pendingOverride = true;
+            }
+          }
+          parsed.save(
+            extensions: [
+              EnyReceipt(
+                uuid: const Uuid().v4(),
+                enyImageUrl: enySuccessResult["imageUrl"] as String?,
+                enyReceiptId: id,
+              ),
+            ],
+            isPendingOverride: pendingOverride,
+          );
+        }
+
         completed = parsed != null;
         succeeded = completed;
       }
