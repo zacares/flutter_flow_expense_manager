@@ -5,15 +5,15 @@ import "package:flow/prefs/local_preferences.dart";
 import "package:flow/routes/transaction_page/amount_text.dart";
 import "package:flow/routes/transaction_page/input_amount_sheet/calculator_button.dart";
 import "package:flow/routes/transaction_page/input_amount_sheet/input_value.dart";
-import "package:flow/services/user_preferences.dart";
+import "package:flow/services/currency_registry.dart";
 import "package:flow/theme/theme.dart";
+import "package:flow/utils/money_parsing.dart";
 import "package:flow/utils/utils.dart";
 import "package:flow/widgets/general/modal_sheet.dart";
 import "package:flow/widgets/numpad.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:go_router/go_router.dart";
-import "package:intl/intl.dart";
 import "package:material_symbols_icons/symbols.dart";
 
 enum CalculatorOperation { add, subtract, multiply, divide }
@@ -85,10 +85,10 @@ class _InputAmountSheetState extends State<InputAmountSheet>
     super.initState();
 
     _numberOfDecimals =
+        CurrencyRegistryService().getPreferredDecimalPrecision(
+          widget.currency,
+        ) ??
         widget.overrideDecimalPrecision ??
-        NumberFormat.simpleCurrency(
-          name: widget.currency ?? UserPreferencesService().primaryCurrency,
-        ).decimalDigits ??
         2;
     if (_numberOfDecimals <= 0) {
       // Apparently, even in Japan, there are
@@ -431,7 +431,7 @@ class _InputAmountSheetState extends State<InputAmountSheet>
   }
 
   void handlePaste(String text, [bool reportInvalid = false]) {
-    final num? parsed = NumberFormat().tryParse(text) ?? num.tryParse(text);
+    double? parsed = parseMoneyString(text: text);
 
     if (parsed == null) {
       if (reportInvalid) {

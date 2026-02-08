@@ -114,9 +114,35 @@ class UserPreferencesService {
     SyncService().triggerAutoBackup();
   }
 
+  int? get scansPendingThresholdInHours => value.scansPendingThresholdInHours;
+  set scansPendingThresholdInHours(int? newScansPendingThresholdInHours) {
+    if (newScansPendingThresholdInHours == null) {
+      value.scansPendingThresholdInHours = null;
+    } else {
+      value.scansPendingThresholdInHours = max(
+        0,
+        newScansPendingThresholdInHours,
+      );
+    }
+
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
   bool get excludeTransfersFromFlow => value.excludeTransfersFromFlow;
   set excludeTransfersFromFlow(bool newExcludeTransfersFromFlow) {
     value.excludeTransfersFromFlow = newExcludeTransfersFromFlow;
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
+  bool get privacyModeUponLaunch => value.privacyModeUponLaunch;
+  set privacyModeUponLaunch(bool newPrivacyModeUponLaunch) {
+    value.privacyModeUponLaunch = newPrivacyModeUponLaunch;
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
+  bool get privacyModeUponShaking => value.privacyModeUponShaking;
+  set privacyModeUponShaking(bool newPrivacyModeUponShaking) {
+    value.privacyModeUponShaking = newPrivacyModeUponShaking;
     ObjectBox().box<UserPreferences>().put(value);
   }
 
