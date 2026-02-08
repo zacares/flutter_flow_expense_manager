@@ -669,6 +669,7 @@
   "transaction.edit.selectCategory.multiple": "Ангилаллууд сонгох",
   "transaction.edit.selectTags": "Шошгууд сонгох",
   "transaction.external.added": "Шинэ гүйлгээ нэмэгдлээ",
+  "transaction.external.added.from": "{name}-с шинэ гүйлгээ нэмэгдлээ",
   "transaction.external.from": "{name}-с нэмэгдсэн гүйлгээ",
   "transaction.fallbackTitle": "Гарчиггүй гүйлгээ",
   "transaction.location": "Байршил",
