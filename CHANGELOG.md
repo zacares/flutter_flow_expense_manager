@@ -1,5 +1,11 @@
 # Changelog
 
+## Next
+
+### New features
+
+* Added a Siri integration (intent).
+
 ## 0.18.2
 
 ### Fixes
