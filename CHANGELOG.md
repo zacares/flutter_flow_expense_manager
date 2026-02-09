@@ -1,5 +1,11 @@
 # Changelog
 
+## Next
+
+### New features
+
+* Persian (Iran) support thanks to @arefbhrn[https://github.com/arefbhrn]
+
 ## 0.18.2
 
 ### Fixes
