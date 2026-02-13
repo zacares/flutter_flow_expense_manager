@@ -137,20 +137,22 @@ class TransactionProgrammableObject {
 
   static TransactionProgrammableObject? fromSiriJson(Map json) {
     try {
-      if (json["account"] case String account) {
+      if (json["fromAccount"] case String account) {
         if (Uuid.isValidUUID(fromString: account)) {
           json["fromAccountUuid"] = account;
-        } else {
-          json["fromAccount"] = account;
+          json["fromAccount"] = null;
         }
       }
 
       if (json["category"] case String category) {
         if (Uuid.isValidUUID(fromString: category)) {
           json["categoryUuid"] = category;
-        } else {
-          json["category"] = category;
+          json["category"] = null;
         }
+      }
+
+      if (json["amount"] case num amount) {
+        json["amount"] = -(amount.toDouble().abs());
       }
 
       return parse(json.cast<String, dynamic>());

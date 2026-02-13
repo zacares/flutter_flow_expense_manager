@@ -74,14 +74,12 @@ Future<List<TransactionProgrammableObject>> getSiriTransactions() async {
         .where((line) => line.trim().isNotEmpty)
         .toList();
 
-    print(lines);
-
     final List<TransactionProgrammableObject> transactions = [];
 
     for (final String line in lines) {
       try {
         final TransactionProgrammableObject? transaction =
-            TransactionProgrammableObject.tryParse(jsonDecode(line));
+            TransactionProgrammableObject.fromSiriJson(jsonDecode(line));
         if (transaction != null) {
           transactions.add(transaction);
         }
