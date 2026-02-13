@@ -17,7 +17,7 @@ struct RecordedTransaction: Codable {
         self.id = id
         self.amount = amount
         self.note = note
-        self.createdAt = createdAt
+        self.transactionDate = transactionDate
         self.type = type
     }
 }
