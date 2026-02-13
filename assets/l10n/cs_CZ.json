@@ -669,6 +669,7 @@
   "transaction.edit.selectCategory.multiple": "Vyberte kategorie",
   "transaction.edit.selectTags": "Vybrat štítky",
   "transaction.external.added": "Byla přidána nová transakce",
+  "transaction.external.added.from": "Nová transakce byla přidána uživatelem {name}.",
   "transaction.external.from": "Přidáno z {name}",
   "transaction.fallbackTitle": "Nepojmenovaná transakce",
   "transaction.location": "Místo",

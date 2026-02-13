@@ -42,7 +42,6 @@ import "package:flow/services/transactions.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/theme.dart";
 import "package:flow/utils/utils.dart";
-import "package:flow/widgets/animated_eny_logo.dart";
 import "package:flow/widgets/general/button.dart";
 import "package:flow/widgets/general/directional_chevron.dart";
 import "package:flow/widgets/general/flow_icon.dart";
@@ -52,6 +51,8 @@ import "package:flow/widgets/general/money_text.dart";
 import "package:flow/widgets/location_picker_sheet.dart";
 import "package:flow/widgets/open_street_map.dart";
 import "package:flow/widgets/sheets/select_transaction_tags_sheet.dart";
+import "package:flow/widgets/transaction/imported_from_eny.dart";
+import "package:flow/widgets/transaction/imported_from_siri.dart";
 import "package:flow/widgets/transaction/type_selector.dart";
 import "package:flutter/foundation.dart" hide Category;
 import "package:flutter/material.dart";
@@ -150,6 +151,7 @@ class _TransactionPageState extends State<TransactionPage> {
   bool _isPending = false;
 
   bool _importedFromEny = false;
+  bool _importedFromSiri = false;
 
   @override
   void initState() {
@@ -224,6 +226,9 @@ class _TransactionPageState extends State<TransactionPage> {
         );
         _geo = _currentlyEditing.extensions.geo;
         _importedFromEny = _currentlyEditing.extensions.eny != null;
+        _importedFromSiri = _currentlyEditing.extraTags.contains(
+          Transaction.importedFromSiriTag,
+        );
         _isPending = _currentlyEditing.isPending ?? _isPending;
         if (_currentlyEditing.isTransfer == true) {
           _conversionRate =
@@ -622,35 +627,11 @@ class _TransactionPageState extends State<TransactionPage> {
                               ),
                               if (_importedFromEny) ...[
                                 const SizedBox(height: 8.0),
-                                GestureDetector(
-                                  onTap: () {
-                                    openUrl(enyHomeLink);
-                                  },
-                                  child: RichText(
-                                    text: TextSpan(
-                                      style: context.textTheme.bodyMedium?.semi(
-                                        context,
-                                      ),
-                                      children: [
-                                        WidgetSpan(
-                                          child: SizedBox.square(
-                                            dimension: 16.0,
-                                            child: AnimatedEnyLogo(
-                                              noAnimation: true,
-                                            ),
-                                          ),
-                                        ),
-                                        TextSpan(text: " "),
-                                        TextSpan(
-                                          text: "transaction.external.from".t(
-                                            context,
-                                            "Eny",
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                                ImportedFromEny(),
+                              ],
+                              if (_importedFromSiri) ...[
+                                const SizedBox(height: 8.0),
+                                ImportedFromSiri(),
                               ],
                             ],
                           ),

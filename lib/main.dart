@@ -21,7 +21,9 @@ import "dart:ui";
 
 import "package:flow/constants.dart";
 import "package:flow/data/flow_icon.dart";
+import "package:flow/data/transaction_programmable_object.dart";
 import "package:flow/entity/profile.dart";
+import "package:flow/entity/transaction.dart";
 import "package:flow/graceful_migrations.dart";
 import "package:flow/l10n/flow_localizations.dart";
 import "package:flow/logging.dart";
@@ -44,6 +46,7 @@ import "package:flow/services/user_preferences.dart";
 import "package:flow/theme/color_themes/registry.dart";
 import "package:flow/theme/flow_color_scheme.dart";
 import "package:flow/theme/theme.dart";
+import "package:flow/utils/ios/get_siri_transactions.dart";
 import "package:flow/widgets/flow_themes.dart";
 import "package:flow/widgets/general/flow_icon.dart";
 import "package:flutter/material.dart";
@@ -216,6 +219,8 @@ class FlowState extends State<Flow> {
       migratePrimaryCurrencyToDb();
       migrateThemePrefsToDb();
       migratePrivacyPreferencesToUserPreferences();
+
+      _resolveSiriTransactions();
     });
 
     _tryUnlockTempLock();
@@ -527,5 +532,37 @@ void initializeNotifications() async {
     );
   } else {
     startupLog.fine("No daily reminder set, skipping scheduling");
+  }
+}
+
+void _resolveSiriTransactions() async {
+  try {
+    if (!Platform.isIOS) {
+      mainLogger.fine("Not on iOS, skipping Siri transactions resolution");
+      return;
+    }
+
+    final bool markPendingAllTransactions =
+        UserPreferencesService().scansPendingThresholdInHours == 0;
+
+    final List<TransactionProgrammableObject> transactions =
+        await getSiriTransactions();
+
+    for (final TransactionProgrammableObject transaction in transactions) {
+      try {
+        transaction.save(
+          extraTags: [Transaction.importedFromSiriTag],
+          isPendingOverride: markPendingAllTransactions,
+        );
+      } catch (e, stackTrace) {
+        mainLogger.severe(
+          "Failed to save transaction from Siri: $transaction",
+          e,
+          stackTrace,
+        );
+      }
+    }
+  } catch (e, stackTrace) {
+    mainLogger.severe("Failed to resolve Siri transactions", e, stackTrace);
   }
 }

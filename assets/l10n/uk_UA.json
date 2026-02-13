@@ -669,6 +669,7 @@
   "transaction.edit.selectCategory.multiple": "Виберіть категорії",
   "transaction.edit.selectTags": "Виберіть теги",
   "transaction.external.added": "Додано нову транзакцію",
+  "transaction.external.added.from": "Додано з {name}",
   "transaction.external.from": "Додано з {name}",
   "transaction.fallbackTitle": "Транзакція без назви",
   "transaction.location": "Місцезнаходження",

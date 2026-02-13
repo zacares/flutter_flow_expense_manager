@@ -669,6 +669,7 @@
   "transaction.edit.selectCategory.multiple": "انتخاب دسته‌بندی‌ها",
   "transaction.edit.selectTags": "انتخاب برچسب‌ها",
   "transaction.external.added": "یک تراکنش جدید اضافه شد",
+  "transaction.external.added.from": "تراکنش جدیدی توسط {name} اضافه شد.",
   "transaction.external.from": "اضافه شده از {name}",
   "transaction.fallbackTitle": "تراکنش بدون عنوان",
   "transaction.location": "موقعیت",

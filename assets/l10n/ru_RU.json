@@ -669,6 +669,7 @@
   "transaction.edit.selectCategory.multiple": "Выберите категории",
   "transaction.edit.selectTags": "Выберите теги",
   "transaction.external.added": "Добавлена новая транзакция",
+  "transaction.external.added.from": "Новая транзакция была добавлена пользователем {name}",
   "transaction.external.from": "Добавлено от {name}",
   "transaction.fallbackTitle": "Транзакция без названия",
   "transaction.location": "Местоположение",

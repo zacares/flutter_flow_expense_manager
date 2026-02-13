@@ -669,6 +669,7 @@
   "transaction.edit.selectCategory.multiple": "Seleziona categorie",
   "transaction.edit.selectTags": "Seleziona tag",
   "transaction.external.added": "È stata aggiunta una nuova transazione",
+  "transaction.external.added.from": "Una nuova transazione è stata aggiunta da {name}",
   "transaction.external.from": "Aggiunta da {name}",
   "transaction.fallbackTitle": "Transazione senza titolo",
   "transaction.location": "Posizione",

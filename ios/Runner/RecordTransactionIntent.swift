@@ -1,23 +1,23 @@
 import AppIntents
 
 struct RecordTransactionIntent: AppIntent {
-    static var title: LocalizedStringResource = "Record Transaction"
-    static var description: IntentDescription = "Log transactions from Siri."
+    static var title: LocalizedStringResource = "Record an Expense"
+    static var description: IntentDescription = "Log expenses from Siri."
 
-    @Parameter(title: "Account")
+    @Parameter(title: "Account", description: "Exact name, or UUID of the target account")
     var account: String
 
-    @Parameter(title: "Amount")
+    @Parameter(title: "Amount", description: "Expense amount. Sign doesn't matter.")
     var amount: Double
 
-    @Parameter(title: "Category")
+    @Parameter(title: "Category", description: "Exact name, or UUID of the target account")
     var category: String
 
     static var openAppWhenRun = false
 
-    func perform() async throws -> some IntentResult {
+    func perform() async throws -> some IntentResult & ProvidesDialog {
         let tx = RecordedTransaction(amount: amount, note: category)
         try RecordedTransactionService.append(tx)
-        return .result(value: "Recorded transaction for \(account): $\(amount) in category \(category).")
+        return .result(dialog: "Recorded transaction for \(account): $\(amount) in category \(category).")
     }
 }
