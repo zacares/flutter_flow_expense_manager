@@ -5,6 +5,7 @@
 ### New features
 
 * Added a Siri integration (intent).
+* Persian (Iran) support thanks to @arefbhrn[https://github.com/arefbhrn]
 
 ## 0.18.2
 
