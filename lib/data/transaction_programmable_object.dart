@@ -3,6 +3,7 @@ import "package:flow/entity/transaction/type.dart";
 import "package:flow/services/user_preferences.dart";
 import "package:flow/utils/loose_parsers.dart";
 import "package:flow/utils/utils.dart";
+import "package:uuid/uuid.dart";
 
 class TransactionProgrammableObject {
   final String? title;
@@ -129,6 +130,30 @@ class TransactionProgrammableObject {
   static TransactionProgrammableObject? tryParse(Map<String, dynamic> params) {
     try {
       return parse(params);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static TransactionProgrammableObject? fromSiriJson(Map json) {
+    try {
+      if (json["account"] case String account) {
+        if (Uuid.isValidUUID(fromString: account)) {
+          json["fromAccountUuid"] = account;
+        } else {
+          json["fromAccount"] = account;
+        }
+      }
+
+      if (json["category"] case String category) {
+        if (Uuid.isValidUUID(fromString: category)) {
+          json["categoryUuid"] = category;
+        } else {
+          json["category"] = category;
+        }
+      }
+
+      return parse(json.cast<String, dynamic>());
     } catch (e) {
       return null;
     }

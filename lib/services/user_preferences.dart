@@ -167,6 +167,16 @@ class UserPreferencesService {
     ObjectBox().box<UserPreferences>().put(value);
   }
 
+  bool get transactionListTileShowExternalSource =>
+      value.transactionListTileShowExternalSource;
+  set transactionListTileShowExternalSource(
+    bool newTransactionListTileShowExternalSource,
+  ) {
+    value.transactionListTileShowExternalSource =
+        newTransactionListTileShowExternalSource;
+    ObjectBox().box<UserPreferences>().put(value);
+  }
+
   bool get transactionListTileRelaxedDensity =>
       value.transactionListTileRelaxedDensity;
   set transactionListTileRelaxedDensity(

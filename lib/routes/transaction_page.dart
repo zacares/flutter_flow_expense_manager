@@ -150,9 +150,6 @@ class _TransactionPageState extends State<TransactionPage> {
 
   bool _isPending = false;
 
-  bool _importedFromEny = false;
-  bool _importedFromSiri = false;
-
   @override
   void initState() {
     super.initState();
@@ -225,10 +222,6 @@ class _TransactionPageState extends State<TransactionPage> {
               _currentlyEditing.extensions.transfer?.toAccountUuid,
         );
         _geo = _currentlyEditing.extensions.geo;
-        _importedFromEny = _currentlyEditing.extensions.eny != null;
-        _importedFromSiri = _currentlyEditing.extraTags.contains(
-          Transaction.importedFromSiriTag,
-        );
         _isPending = _currentlyEditing.isPending ?? _isPending;
         if (_currentlyEditing.isTransfer == true) {
           _conversionRate =
@@ -418,7 +411,7 @@ class _TransactionPageState extends State<TransactionPage> {
                               ),
                               onTap: () => inputPostConversionAmount(),
                               trailing: _selectedAccountTransferTo == null
-                                  ? DirectionalChevron()
+                                  ? LeChevron()
                                   : null,
                               focusNode: _selectAccountTransferToFocusNode,
                             ),
@@ -475,7 +468,7 @@ class _TransactionPageState extends State<TransactionPage> {
                                 title: Text(transactionDate.toMoment().LLL),
                                 onTap: () => selectTransactionDate(),
                                 leading: Icon(Symbols.calendar_month_rounded),
-                                trailing: const DirectionalChevron(),
+                                trailing: const LeChevron(),
                               ),
                               SwitchListTile(
                                 title: Text("transaction.pending".t(context)),
@@ -507,7 +500,7 @@ class _TransactionPageState extends State<TransactionPage> {
                                     "transaction.recurring.setup".t(context),
                                   ),
                                   onTap: _setupRecurring,
-                                  trailing: const DirectionalChevron(),
+                                  trailing: const LeChevron(),
                                 ),
                         ),
                       ),
@@ -625,14 +618,25 @@ class _TransactionPageState extends State<TransactionPage> {
                                   context,
                                 ),
                               ),
-                              if (_importedFromEny) ...[
-                                const SizedBox(height: 8.0),
-                                ImportedFromEny(),
-                              ],
-                              if (_importedFromSiri) ...[
-                                const SizedBox(height: 8.0),
-                                ImportedFromSiri(),
-                              ],
+                              if (UserPreferencesService()
+                                  .transactionListTileShowExternalSource)
+                                if (_currentlyEditing.externalProviderName
+                                    case String providerName) ...[
+                                  const SizedBox(height: 8.0),
+                                  switch (providerName.toLowerCase()) {
+                                    "eny" => const ImportedFromEny(),
+                                    "siri" => const ImportedFromSiri(),
+                                    _ => Text(
+                                      "transaction.external.from".t(
+                                        context,
+                                        providerName,
+                                      ),
+                                      style: context.textTheme.bodyMedium?.semi(
+                                        context,
+                                      ),
+                                    ),
+                                  },
+                                ],
                             ],
                           ),
                         ),

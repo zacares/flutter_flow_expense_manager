@@ -74,6 +74,8 @@ Future<List<TransactionProgrammableObject>> getSiriTransactions() async {
         .where((line) => line.trim().isNotEmpty)
         .toList();
 
+    print(lines);
+
     final List<TransactionProgrammableObject> transactions = [];
 
     for (final String line in lines) {

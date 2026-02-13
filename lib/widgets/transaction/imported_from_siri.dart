@@ -16,6 +16,7 @@ class ImportedFromSiri extends StatelessWidget {
               dimension: 16.0,
               child: Image.asset("assets/images/siri.png"),
             ),
+            alignment: .middle,
           ),
           TextSpan(text: " "),
           TextSpan(text: "transaction.external.from".t(context, "Siri")),

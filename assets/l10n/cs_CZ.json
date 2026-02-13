@@ -384,7 +384,7 @@
   "preferences.transactions.listTile.leading.category": "Kategorie",
   "preferences.transactions.listTile.preview": "Náhled",
   "preferences.transactions.listTile.showCategoryInList": "Zobrazit kategorii vedle účtu",
-  "preferences.transactions.listTile.transactionListTileRelaxedDensity": "Volnější rozložení seznamu",
+  "preferences.transactions.listTile.relaxedDensity": "Volnější rozložení seznamu",
   "preferences.transactions.pending": "Čekající transakce",
   "preferences.transactions.pending.homeTimeframe": "Zobrazit na domovské obrazovce",
   "preferences.transactions.pending.notify": "Upozornit",

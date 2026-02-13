@@ -23,6 +23,7 @@ class ImportedFromEny extends StatelessWidget {
                 dimension: 16.0,
                 child: AnimatedEnyLogo(noAnimation: true),
               ),
+              alignment: .middle,
             ),
             TextSpan(text: " "),
             TextSpan(text: "transaction.external.added.from".t(context, "Eny")),
