@@ -13,6 +13,8 @@
 ### Changes
 
 * Added an option to show/hide external source (Eny, Siri) in transactions
+* Enhanced home tab pending transactions timeframe options, closes [#666](https://github.com/flow-mn/flow/issues/666)
+* Home tab pending transaction group now shows sum and count of transactions
 
 ### Fixes
 
