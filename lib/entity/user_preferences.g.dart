@@ -17,6 +17,8 @@ UserPreferences _$UserPreferencesFromJson(Map<String, dynamic> json) =>
             json['transactionListTileShowCategoryName'] as bool? ?? false,
         transactionListTileShowAccountForLeading:
             json['transactionListTileShowAccountForLeading'] as bool? ?? false,
+        transactionListTileShowExternalSource:
+            json['transactionListTileShowExternalSource'] as bool? ?? true,
         transactionListTileRelaxedDensity:
             json['transactionListTileRelaxedDensity'] as bool? ?? false,
         createTransactionsPerItemInScans:
@@ -29,6 +31,8 @@ UserPreferences _$UserPreferencesFromJson(Map<String, dynamic> json) =>
         trashBinRetentionDays:
             (json['trashBinRetentionDays'] as num?)?.toInt() ?? 30,
         defaultFilterPreset: json['defaultFilterPreset'] as String?,
+        homePendingTransactionsTimeRangeSerialized:
+            json['homePendingTransactionsTimeRangeSerialized'] as String?,
         enableICloudSync: json['enableICloudSync'] as bool? ?? false,
         iCloudBackupsToKeep:
             (json['iCloudBackupsToKeep'] as num?)?.toInt() ?? 10,
@@ -57,6 +61,8 @@ Map<String, dynamic> _$UserPreferencesToJson(
   'excludeTransfersFromFlow': instance.excludeTransfersFromFlow,
   'trashBinRetentionDays': instance.trashBinRetentionDays,
   'defaultFilterPreset': instance.defaultFilterPreset,
+  'homePendingTransactionsTimeRangeSerialized':
+      instance.homePendingTransactionsTimeRangeSerialized,
   'remindDailyAtRelativeSeconds': instance.remindDailyAtRelativeSeconds,
   'useCategoryNameForUntitledTransactions':
       instance.useCategoryNameForUntitledTransactions,
@@ -64,6 +70,8 @@ Map<String, dynamic> _$UserPreferencesToJson(
       instance.transactionListTileShowCategoryName,
   'transactionListTileShowAccountForLeading':
       instance.transactionListTileShowAccountForLeading,
+  'transactionListTileShowExternalSource':
+      instance.transactionListTileShowExternalSource,
   'transactionListTileRelaxedDensity':
       instance.transactionListTileRelaxedDensity,
   'createTransactionsPerItemInScans': instance.createTransactionsPerItemInScans,

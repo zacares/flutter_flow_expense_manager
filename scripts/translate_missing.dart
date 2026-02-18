@@ -25,7 +25,7 @@ Future<Map<String, dynamic>?> translate(
         messages: [
           ChatCompletionMessage.developer(
             content: ChatCompletionDeveloperMessageContent.text(
-              "You are a professional translator with expertise in user interface design. You will be provided a JSON localization file in english, and you should translate the file into a localization json in $targetLanguage language.",
+              "You are a professional translator with expertise in user interface design. You will be provided a JSON localization file in english, and you should translate the file into a localization json in $targetLanguage language. If there's no input, just output nothing. The output should be a valid JSON object with the same keys as the input, but with the values translated to $targetLanguage. Do not include any explanations or additional text, just the JSON object.",
             ),
           ),
           ChatCompletionMessage.user(
@@ -53,6 +53,7 @@ final Map<String, String> filenameToTargetLanguageMapping = {
   "en.json": "English (generic)",
   "es_ES.json": "Spanish (Spain)",
   "fr_FR.json": "French (France)",
+  "fa_IR.json": "Persian (Iran)",
   "it_IT.json": "Italian (Italy)",
   "mn_MN.json": "Mongolian (Mongolia)",
   "ru_RU.json": "Russian (Russia)",
