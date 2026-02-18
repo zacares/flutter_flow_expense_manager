@@ -866,7 +866,6 @@ class _TransactionPageState extends State<TransactionPage> {
           await showModalBottomSheet<Optional<Category>>(
             context: context,
             builder: (context) => SelectCategorySheet(
-              categories: categories,
               currentlySelectedCategoryId: _selectedCategory?.id,
               showTrailing: widget.isNewTransaction,
             ),
