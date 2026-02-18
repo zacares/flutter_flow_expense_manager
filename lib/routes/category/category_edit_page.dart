@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flow/data/flow_icon.dart";
+import "package:flow/data/string_multi_filter.dart";
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/entity/category.dart";
 import "package:flow/form_validators.dart";
@@ -246,7 +247,7 @@ class _CategoryEditPageState extends State<CategoryEditPage> {
     if (_currentlyEditing == null) return;
 
     final TransactionFilter filter = TransactionFilter(
-      categories: [_currentlyEditing.uuid],
+      categories: StringMultiFilter.whitelist([_currentlyEditing.uuid]),
     );
 
     final int txnCount = TransactionsService().countMany(filter);

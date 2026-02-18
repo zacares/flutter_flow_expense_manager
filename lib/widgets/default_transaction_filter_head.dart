@@ -14,7 +14,6 @@ import "package:flow/providers/accounts_provider.dart";
 import "package:flow/providers/categories_provider.dart";
 import "package:flow/providers/transaction_tags_provider.dart";
 import "package:flow/services/currency_registry.dart";
-import "package:flow/utils/extensions.dart";
 import "package:flow/utils/optional.dart";
 import "package:flow/widgets/sheets/select_multi_currency_sheet.dart";
 import "package:flow/widgets/sheets/select_multi_transaction_type_sheet.dart";
@@ -173,24 +172,15 @@ class _DefaultTransactionsFilterHeadState
                   avatar: const Icon(Symbols.wallet_rounded),
                   onSelect: onSelectAccounts,
                   defaultValue: widget.defaultFilter.accounts
-                      ?.map(
-                        (uuid) => activeAccounts.firstWhere(
-                          (account) => account.uuid == uuid,
-                        ),
-                      )
+                      ?.mappedFilter(activeAccounts, (account) => account.uuid)
                       .toSet(),
-                  value: _filter.accounts?.isNotEmpty == true
-                      ? _filter.accounts
-                            ?.map(
-                              (uuid) => AccountsProvider.of(context)
-                                  .activeAccounts
-                                  .firstWhereOrNull(
-                                    (account) => account.uuid == uuid,
-                                  ),
-                            )
-                            .nonNulls
-                            .toSet()
-                      : null,
+                  value: _filter.accounts
+                      ?.mappedFilter(
+                        AccountsProvider.of(context).activeAccounts,
+                        (account) => account.uuid,
+                      )
+                      .nonNulls
+                      .toSet(),
                 ),
               if (categories != null)
                 TransactionFilterChip<Set<Category>>(
@@ -198,22 +188,11 @@ class _DefaultTransactionsFilterHeadState
                   avatar: const Icon(Symbols.category_rounded),
                   onSelect: onSelectCategories,
                   defaultValue: widget.defaultFilter.categories
-                      ?.map(
-                        (uuid) => categories.firstWhere(
-                          (category) => category.uuid == uuid,
-                        ),
-                      )
+                      ?.mappedFilter(categories, (category) => category.uuid)
                       .toSet(),
-                  value: _filter.categories?.isNotEmpty == true
-                      ? _filter.categories
-                            ?.map(
-                              (uuid) => categories.firstWhereOrNull(
-                                (category) => category.uuid == uuid,
-                              ),
-                            )
-                            .nonNulls
-                            .toSet()
-                      : null,
+                  value: _filter.categories
+                      ?.mappedFilter(categories, (category) => category.uuid)
+                      .toSet(),
                 ),
               if (tags != null && tags.isNotEmpty == true)
                 TransactionFilterChip<Set<TransactionTag>>(
@@ -221,20 +200,11 @@ class _DefaultTransactionsFilterHeadState
                   avatar: const Icon(Symbols.style_rounded),
                   onSelect: onSelectTags,
                   defaultValue: widget.defaultFilter.tags
-                      ?.map(
-                        (uuid) => tags.firstWhere((tag) => tag.uuid == uuid),
-                      )
+                      ?.mappedFilter(tags, (tag) => tag.uuid)
                       .toSet(),
-                  value: _filter.tags?.isNotEmpty == true
-                      ? _filter.tags
-                            ?.map(
-                              (uuid) => tags.firstWhereOrNull(
-                                (tag) => tag.uuid == uuid,
-                              ),
-                            )
-                            .nonNulls
-                            .toSet()
-                      : null,
+                  value: _filter.tags
+                      ?.mappedFilter(tags, (tag) => tag.uuid)
+                      .toSet(),
                 ),
               TransactionFilterChip<bool?>(
                 translationKey: "transactions.query.filter.hasAttachments",
@@ -300,11 +270,17 @@ class _DefaultTransactionsFilterHeadState
   }
 
   void onSelectAccounts() async {
+    final List<Account>? allActiveAccounts = AccountsProvider.of(context).ready
+        ? AccountsProvider.of(context).activeAccounts
+        : null;
+
     final List<Account>? accounts = await showModalBottomSheet<List<Account>>(
       context: context,
       builder: (context) => SelectMultiAccountSheet(
         accounts: ObjectBox().getAccounts(),
-        selectedUuids: filter.accounts,
+        selectedUuids: filter.accounts?.filter(
+          allActiveAccounts?.map((account) => account.uuid).toList() ?? [],
+        ),
       ),
       isScrollControlled: true,
     );
@@ -312,19 +288,27 @@ class _DefaultTransactionsFilterHeadState
     if (accounts != null) {
       setState(() {
         filter = filter.copyWithOptional(
-          accounts: Optional(accounts.map((account) => account.uuid).toList()),
+          accounts: Optional(
+            .whitelist(accounts.map((account) => account.uuid).toList()),
+          ),
         );
       });
     }
   }
 
   void onSelectCategories() async {
+    final List<Category>? allCategories = CategoriesProvider.of(context).ready
+        ? CategoriesProvider.of(context).categories
+        : null;
+
     final List<Category>? categories =
         await showModalBottomSheet<List<Category>>(
           context: context,
           builder: (context) => SelectMultiCategorySheet(
             categories: ObjectBox().getCategories(),
-            selectedUuids: filter.categories,
+            selectedUuids: filter.categories?.filter(
+              allCategories?.map((category) => category.uuid).toList() ?? [],
+            ),
           ),
           isScrollControlled: true,
         );
@@ -333,7 +317,7 @@ class _DefaultTransactionsFilterHeadState
       setState(() {
         filter = filter.copyWithOptional(
           categories: Optional(
-            categories.map((category) => category.uuid).toList(),
+            .whitelist(categories.map((category) => category.uuid).toList()),
           ),
         );
       });
@@ -350,7 +334,9 @@ class _DefaultTransactionsFilterHeadState
           context: context,
           builder: (context) => SelectTransactionTagsSheet(
             tags: allTags,
-            initialTagUuids: filter.tags,
+            initialTagUuids: filter.tags?.filter(
+              allTags.map((tag) => tag.uuid).toList(),
+            ),
           ),
           isScrollControlled: true,
         );
@@ -358,7 +344,7 @@ class _DefaultTransactionsFilterHeadState
     if (tags != null) {
       setState(() {
         filter = filter.copyWithOptional(
-          tags: Optional(tags.map((tag) => tag.uuid).toList()),
+          tags: Optional(.whitelist(tags.map((tag) => tag.uuid).toList())),
         );
       });
     }
