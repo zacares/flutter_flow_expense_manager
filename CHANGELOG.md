@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 0.19.0
 
 ### New features
 
