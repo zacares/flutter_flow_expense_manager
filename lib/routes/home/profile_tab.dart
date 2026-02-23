@@ -52,6 +52,16 @@ class _ProfileTabState extends State<ProfileTab> {
             onTap: () => context.push("/categories"),
           ),
           ListTile(
+            title: Text("budgets".t(context)),
+            leading: const Icon(Symbols.money_bag_rounded),
+            onTap: () => context.push("/budgets"),
+          ),
+          ListTile(
+            title: Text("goals".t(context)),
+            leading: const Icon(Symbols.savings_rounded),
+            onTap: () => context.push("/goals"),
+          ),
+          ListTile(
             title: Text("transaction.tags".t(context)),
             leading: const Icon(Symbols.style_rounded),
             onTap: () => context.push("/transactionTags"),
