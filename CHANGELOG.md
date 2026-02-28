@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.19.1
+
+### Fixes
+
+* Fixed "Add an expense" Siri Shortcut struggling with non-US formatted numbers
+* Other minor fixes
+
 ## 0.19.0
 
 ### New features

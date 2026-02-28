@@ -2,6 +2,7 @@ import "dart:io";
 
 import "package:flow/constants.dart";
 import "package:flow/data/flow_icon.dart";
+import "package:flow/data/string_multi_filter.dart";
 import "package:flow/data/transaction_filter.dart";
 import "package:flow/entity/transaction/tag_type.dart";
 import "package:flow/entity/transaction_tag.dart";
@@ -478,7 +479,7 @@ class _TransactionTagPageState extends State<TransactionTagPage> {
     if (_currentlyEditing == null) return;
 
     final TransactionFilter filter = TransactionFilter(
-      tags: [_currentlyEditing!.uuid],
+      tags: StringMultiFilter.whitelist([_currentlyEditing!.uuid]),
     );
 
     final int txnCount = TransactionsService().countMany(filter);
