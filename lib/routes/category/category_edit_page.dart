@@ -181,6 +181,8 @@ class _CategoryEditPageState extends State<CategoryEditPage> {
       ObjectBox().box<Category>().putAsync(category, mode: PutMode.insert),
     );
 
+    context.showToast(text: "category.new.success".t(context));
+
     context.pop();
   }
 

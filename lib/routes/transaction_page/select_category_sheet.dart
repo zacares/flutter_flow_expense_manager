@@ -49,7 +49,7 @@ class _SelectCategorySheetState extends State<SelectCategorySheet> {
           TextButton.icon(
             onPressed: () => context.push("/category/new"),
             icon: const Icon(Symbols.add_rounded),
-            label: Text("category.new".t(context)),
+            label: Text("general.new".t(context)),
           ),
           TextButton.icon(
             onPressed: () => context.pop(const Optional<Category>(null)),
