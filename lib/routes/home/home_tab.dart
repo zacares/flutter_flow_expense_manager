@@ -243,7 +243,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             );
 
         final bool shouldCombineTransferIfNeeded =
-            currentFilter.accounts?.isNotEmpty != true;
+            currentFilter.accounts == null;
 
         final String primaryCurrency = UserPreferencesService().primaryCurrency;
 

@@ -24,6 +24,11 @@ class AccountsService {
     return ObjectBox().box<Account>().getAllAsync();
   }
 
+  List<String> getAllUuidsSync() {
+    final List<Account> accounts = ObjectBox().box<Account>().getAll();
+    return accounts.map((account) => account.uuid).toList();
+  }
+
   Future<Account?> findOne(dynamic identifier) async {
     if (identifier is int) {
       return await getOne(identifier);
